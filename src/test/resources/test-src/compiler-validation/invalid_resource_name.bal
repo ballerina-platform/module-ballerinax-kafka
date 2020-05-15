@@ -10,27 +10,26 @@
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
+// KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
 import ballerina/kafka;
 
-string topic = "abort-transaction-topic";
+string topic = "service-invalid-resource-name-test";
 
-kafka:ProducerConfiguration producerConfigs = {
-    bootstrapServers:"localhost:14151",
-    clientId:"abort-transaction-producer",
-    acks: kafka:ACKS_ALL,
-    retryCount:3,
-    transactionalId:"abort-transaction-test-producer-without-idempotence"
+kafka:ConsumerConfiguration consumerConfigs = {
+    bootstrapServers: "localhost:14191",
+    groupId: "service-invalid-resource-name-test-group",
+    clientId: "service-invalid-resource-name-consumer",
+    offsetReset: "earliest",
+    topics: [topic]
 };
 
-function testCreateProducer() returns error? {
-    error? err = trap createKafkaProducer();
-    return err;
-}
+listener kafka:Consumer kafkaConsumer = new (consumerConfigs);
 
-function createKafkaProducer() {
-    kafka:Producer producer = new (producerConfigs);
+service kafkaTestService on kafkaConsumer {
+    resource function onMessageReceived(kafka:Consumer consumer, kafka:ConsumerRecord[] records) {
+        // Nothing
+    }
 }

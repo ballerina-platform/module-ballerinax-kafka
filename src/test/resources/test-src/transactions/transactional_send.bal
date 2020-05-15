@@ -16,6 +16,7 @@
 
 import ballerina/kafka;
 
+
 string topic = "abort-transaction-topic";
 
 kafka:ProducerConfiguration producerConfigs = {
@@ -23,14 +24,28 @@ kafka:ProducerConfiguration producerConfigs = {
     clientId:"abort-transaction-producer",
     acks: kafka:ACKS_ALL,
     retryCount:3,
-    transactionalId:"abort-transaction-test-producer-without-idempotence"
+    transactionalId:"abort-transaction-test-producer",
+    enableIdempotence: true
 };
 
-function testCreateProducer() returns error? {
-    error? err = trap createKafkaProducer();
-    return err;
+function testTransactionSendTest() returns boolean {
+    string msg = "Hello World Transaction";
+    byte[] serializedMsg = msg.toBytes();
+    var result = kafkaAdvancedTransactionalProduce(serializedMsg);
+    return !(result is error);
 }
 
-function createKafkaProducer() {
-    kafka:Producer producer = new (producerConfigs);
+function kafkaAdvancedTransactionalProduce(byte[] msg) returns error? {
+    kafka:Producer kafkaProducer = new (producerConfigs);
+    error? returnValue = ();
+    error err = error("custom error");
+    transaction {
+        var result = kafkaProducer->send(msg, topic, (), 0, ());
+        result = kafkaProducer->send(msg, topic, (), 0, ());
+    } committed {
+        returnValue = ();
+    } aborted {
+        return err;
+    }
+    return returnValue;
 }
