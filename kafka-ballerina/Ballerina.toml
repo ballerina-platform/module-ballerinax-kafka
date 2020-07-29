@@ -17,11 +17,15 @@ target = "java8"
     version = "2.3.1"
     path = "./lib/kafka-clients-2.3.1.jar"
     groupId = "org.apache.kafka"
-    modules = ["kafka"]
 
     [[platform.libraries]]
     artifactId = "kafka_2.12"
     version = "2.3.1"
     path = "./lib/kafka_2.12-2.3.1.jar"
     groupId = "org.apache.kafka"
-    modules = ["kafka"]
+
+    [[platform.libraries]]
+    artifactId = "avro"
+    version = "1.9.2"
+    path = "./lib/avro-1.9.2.jar"
+    groupId = "org.apache.avro"
