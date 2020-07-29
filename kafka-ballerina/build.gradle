@@ -207,7 +207,6 @@ publishing {
 unpackJballerinaTools.dependsOn copyKafkaJarsToLib
 unpackJballerinaTools.dependsOn copyAvroJarsToLib
 ballerinaBuild.dependsOn ":kafka-native:build"
-logger.info("dependencies built")
 ballerinaBuild.dependsOn unpackJballerinaTools
 ballerinaBuild.dependsOn unpackJballerinaTools
 build.dependsOn ballerinaBuild
