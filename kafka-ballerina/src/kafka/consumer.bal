@@ -36,9 +36,9 @@ import ballerina/lang.'object;
 #                       `kafka:Deserializer` object
 # + schemaRegistryUrl - Avro schema registry url. Use this field to specify schema registry url, if Avro serializer
 #                       is used
-# + properties - Additional properties for the property fields not provided by Ballerina Kafka module. Use this with
-#                caution since this can override any of the fields. It is not recomendded to use this field except
-#                in an extreme situation
+# + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
+#                          this with caution since this can override any of the fields. It is not recomendded to use
+#                          this field except in an extreme situation
 # + sessionTimeoutInMillis - Timeout used to detect consumer failures when heartbeat threshold is reached
 # + heartBeatIntervalInMillis - Expected time between heartbeats
 # + metadataMaxAgeInMillis - Maximum time to force a refresh of metadata
@@ -88,7 +88,7 @@ public type ConsumerConfiguration record {|
     Deserializer valueDeserializer?;
     string schemaRegistryUrl?;
 
-    map<string> properties?; // TODO: This should be renamed to additionalProperties in future releases.
+    map<string> additionalProperties?;
 
     int sessionTimeoutInMillis?;
     int heartBeatIntervalInMillis?;

@@ -37,20 +37,20 @@ import ballerina/system;
 #                     `kafka:Serializer` object
 # + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro
 #                       serializer is used
-# + properties - Additional properties for the property fields not provided by Ballerina Kafka module. Use this with
-#                caution since this can override any of the fields. It is not recomendded to use this field except
-#                in an extreme situation
+# + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
+#                          this with caution since this can override any of the fields. It is not recomendded to use
+#                          this field except in an extreme situation
 # + bufferMemory - Total bytes of memory the producer can use to buffer records
 # + retryCount - Number of retries to resend a record
 # + batchSize - Number of records to be batched for a single request. Use 0 for no batching
-# + linger - Delay to allow other records to be batched
+# + lingerInMillis - Delay to allow other records to be batched before sending them to the Kafka server
 # + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
 # + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
 # + maxRequestSize - The maximum size of a request in bytes
 # + reconnectBackoffTimeInMillis - Time to wait before attempting to reconnect
 # + reconnectBackoffMaxTimeInMillis - Maximum amount of time in milliseconds to wait when reconnecting
 # + retryBackoffTimeInMillis - Time to wait before attempting to retry a failed request
-# + maxBlock - Maximum block time during which the sending is blocked when the buffer is full
+# + maxBlockInMillis - Maximum block time during which the sending is blocked when the buffer is full
 # + requestTimeoutInMillis - Wait time for the response of a request
 # + metadataMaxAgeInMillis - Maximum time to force a refresh of metadata
 # + metricsSampleWindowInMillis - Time window for a metrics sample to compute over
@@ -78,19 +78,19 @@ public type ProducerConfiguration record {|
     Serializer keySerializer?;
     string schemaRegistryUrl?;
 
-    map<string> properties?; // TODO: This should be renamed to additionalProperties in future releases.
+    map<string> additionalProperties?;
 
     int bufferMemory?;
     int retryCount?;
     int batchSize?;
-    int linger?;
+    int lingerInMillis?;
     int sendBuffer?;
     int receiveBuffer?;
     int maxRequestSize?;
     int reconnectBackoffTimeInMillis?;
     int reconnectBackoffMaxTimeInMillis?;
     int retryBackoffTimeInMillis?;
-    int maxBlock?;
+    int maxBlockInMillis?;
     int requestTimeoutInMillis?;
     int metadataMaxAgeInMillis?;
     int metricsSampleWindowInMillis?;
