@@ -24,7 +24,6 @@ description = 'Ballerina - Kafka Java Utils'
 dependencies {
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-    compile group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}"
-    compile group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}"
-    compile group: 'org.apache.avro', name: 'avro', version: "${avroVersion}"
+    testCompile group: 'org.awaitility', name:'awaitility', version: "${awaitalityVersion}"
+    compile project(":kafka-native")
 }
