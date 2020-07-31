@@ -23,10 +23,10 @@ plugins {
 }
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.puppycrawlCheckstyleVersion = "8.18"
-ext.testngVersion = "6.14.3"
-ext.slf4jVersion = "1.7.30"
 ext.kafkaVersion = project.kafkaVersion
+ext.awaitalityVersion = "3.1.6"
+ext.avroVersion = "1.9.2"
+ext.puppycrawlCheckstyleVersion = "8.18"
 
 allprojects {
     group = project.group

@@ -13,6 +13,14 @@ target = "java8"
     modules = ["kafka"]
 
     [[platform.libraries]]
+    artifactId = "kafka"
+    version = "1.0.0-SNAPSHOT"
+    path = "../kafka-native/build/libs/kafka-test-utils-1.0.0-SNAPSHOT.jar"
+    groupId = "ballerina"
+    modules = ["kafka"]
+    scope = "test"
+
+    [[platform.libraries]]
     artifactId = "kafka-clients"
     version = "2.3.1"
     path = "./lib/kafka-clients-2.3.1.jar"
