@@ -7,18 +7,18 @@ target = "java8"
 
     [[platform.libraries]]
     artifactId = "kafka"
-    version = "1.0.0-SNAPSHOT"
-    path = "../kafka-native/build/libs/kafka-native-1.0.0-SNAPSHOT.jar"
-    groupId = "ballerina"
+    version = "@project.version@"
+    path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
+    groupId = "org.ballerinalang.messaging.kafka"
     modules = ["kafka"]
 
     [[platform.libraries]]
     artifactId = "kafka"
-    version = "1.0.0-SNAPSHOT"
-    path = "../kafka-native/build/libs/kafka-test-utils-1.0.0-SNAPSHOT.jar"
-    groupId = "ballerina"
+    version = "@project.version@"
+    path = "../kafka-test-utils/build/libs/kafka-test-utils-@project.version@.jar"
+    groupId = "org.ballerinalang.messaging.kafka.utils"
     modules = ["kafka"]
-    scope = "test"
+    scope = "testOnly"
 
     [[platform.libraries]]
     artifactId = "kafka-clients"
