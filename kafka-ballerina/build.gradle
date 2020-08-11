@@ -44,6 +44,9 @@ dependencies {
     otherJars (group: 'org.apache.zookeeper', name: 'zookeeper', version: "${zookeeperVersion}") {
         transitive = false
     }
+    otherJars (group: 'org.apache.zookeeper', name: 'zookeeper-jute', version: "${zookeeperVersion}") {
+        transitive = false
+    }
     otherJars (group: 'io.dropwizard.metrics', name: 'metrics-core', version: "${dropwizardVersion}") {
         transitive = false
     }
