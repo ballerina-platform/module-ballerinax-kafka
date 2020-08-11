@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.ballerinalang.messaging.kafka.utils;
+package org.ballerinalang.messaging.kafka.test.utils;
 
 import org.apache.zookeeper.server.ServerConfig;
 import org.apache.zookeeper.server.ZooKeeperServerMain;

@@ -31,11 +31,11 @@ import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 
 import java.util.Objects;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.utils.TransactionUtils.handleTransactions;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_PRODUCER;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.PRODUCER_ERROR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.UNCHECKED;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.test.utils.TransactionUtils.handleTransactions;
 
 /**
  * Native method to send different types of keys and values to kafka broker from ballerina kafka producer.

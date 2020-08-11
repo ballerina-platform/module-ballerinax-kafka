@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/kafka;
+import ballerina/test;
 
 kafka:ConsumerConfiguration consumerConfig = {
     bootstrapServers: "localhost:14101",
@@ -29,41 +30,48 @@ kafka:ConsumerConfiguration consumerConfig = {
 int retrievedRecordsCount = 0;
 string receivedMessage = "";
 
-function testCreateConsumer() returns kafka:Consumer {
-    kafka:Consumer consumer = new (consumerConfig);
-    return consumer;
+handle? kafkaCluster = ();
+
+@test:BeforeSuite
+function startKafkaServer() returns error? {
+    kafkaCluster = check createKafkaCluster(2181, 9092, "PLAINTEXT");
 }
 
-function testClose() returns kafka:ConsumerError? {
-    kafka:Consumer consumer = new (consumerConfig);
-    return consumer->close();
-}
-
-function testGetSubscription() returns string[]|error {
-    kafka:Consumer consumer = new (consumerConfig);
-    return consumer->getSubscription();
-}
-
-function testPoll() returns int|kafka:ConsumerError {
-    kafka:Consumer consumer = new (consumerConfig);
-    var results = consumer->poll(1000);
-    if (results is error) {
-        return results;
-    } else {
-        if (results.length() > 0) {
-            retrievedRecordsCount += results.length();
-            receivedMessage = <string> results[0].value;
-        }
+@test:AfterSuite
+function stopKafkaServer() {
+    if (kafkaCluster is handle) {
+        stopKafkaCluster(<handle>kafkaCluster);
     }
-    return retrievedRecordsCount;
-}
-
-function getReceivedMessage() returns string {
-    return receivedMessage;
 }
 
 string topic1 = "consumer-unsubscribe-test-1";
 string topic2 = "consumer-unsubscribe-test-2";
+
+@test:Config {}
+function testConsumer() {
+    kafka:ConsumerConfiguration consumerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        topics: [topic1],
+        groupId: "test-group-1",
+        clientId: "test-consumer-1"
+    };
+    kafka:Consumer consumer = new(consumerConfiguration);
+}
+
+function testProducer() returns error? {
+    kafka:ProducerConfiguration producerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        clientId: "basic-producer",
+        acks: kafka:ACKS_ALL,
+        maxBlock: 5000,
+        requestTimeoutInMillis: 1000,
+        valueSerializerType: kafka:SER_STRING,
+        retryCount: 3
+    };
+    kafka:Producer producer = new(producerConfiguration);
+    string message = "Hello, Ballerina";
+    return producer->send(message, topic1);
+}
 
 function testTestUnsubscribe() returns boolean {
     kafka:Consumer kafkaConsumer = new ({

@@ -37,15 +37,15 @@ import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 
 import java.time.Duration;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_TOPIC;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_VALUE;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getConsumerRecord;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateConsumerRecord;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_TOPIC;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_VALUE;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getConsumerRecord;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.populateConsumerRecord;
 
 /**
  * Native function polls the broker to retrieve messages within given timeout.

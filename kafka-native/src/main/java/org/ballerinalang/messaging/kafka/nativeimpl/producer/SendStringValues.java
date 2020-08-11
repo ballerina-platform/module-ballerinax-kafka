@@ -25,9 +25,9 @@ import org.ballerinalang.jvm.values.api.BString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_PARTITION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntValue;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getLongValue;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_PARTITION;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getIntValue;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getLongValue;
 
 /**
  * Native methods to send {@code string} values and with different types of keys to Kafka broker from ballerina kafka

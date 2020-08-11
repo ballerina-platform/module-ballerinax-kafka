@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.ballerinalang.messaging.kafka.utils;
+package org.ballerinalang.messaging.kafka.test.utils;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -27,9 +27,7 @@ import org.ballerinalang.jvm.values.api.BString;
 
 import java.util.List;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.AVRO_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getAvroGenericRecord;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
 
 /**
  * Utility functions to handle kafka avro operations.
@@ -57,11 +55,11 @@ public class AvroUtils {
 
     protected static MapValue<BString, Object> handleAvroConsumer(Object value) {
         if (value instanceof GenericRecord) {
-            MapValue<BString, Object> genericAvroRecord = getAvroGenericRecord();
+            MapValue<BString, Object> genericAvroRecord = KafkaUtils.getAvroGenericRecord();
             populateBallerinaGenericAvroRecord(genericAvroRecord, (GenericRecord) value);
             return genericAvroRecord;
         } else {
-            throw createKafkaError(AVRO_ERROR, "Invalid type - expected: AvroGenericRecord");
+            throw KafkaUtils.createKafkaError(KafkaConstants.AVRO_ERROR, "Invalid type - expected: AvroGenericRecord");
         }
     }
 }

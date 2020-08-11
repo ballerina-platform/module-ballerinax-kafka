@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.ballerinalang.messaging.kafka.utils;
+package org.ballerinalang.messaging.kafka.test.utils;
 
 import kafka.server.KafkaConfig;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -52,7 +52,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static org.ballerinalang.messaging.kafka.utils.TestUtils.getResourcePath;
+import static org.ballerinalang.messaging.kafka.test.utils.TestUtils.getResourcePath;
 
 /**
  * Creates a local Kafka cluster for testing Ballerina Kafka module.

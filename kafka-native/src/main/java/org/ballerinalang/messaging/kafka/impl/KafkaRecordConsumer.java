@@ -24,7 +24,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.ballerinalang.messaging.kafka.api.KafkaListener;
-import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.test.utils.KafkaConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

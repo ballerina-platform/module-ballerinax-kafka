@@ -24,6 +24,11 @@ description = 'Ballerina - Kafka Java Utils'
 dependencies {
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-    testCompile group: 'org.awaitility', name:'awaitility', version: "${awaitalityVersion}"
+    compile group: 'org.awaitility', name:'awaitility', version: "${awaitalityVersion}"
+    compile group: 'org.apache.zookeeper', name: 'zookeeper', version: "${zookeeperVersion}"
+    compile group: 'org.apache.zookeeper', name: 'zookeeper-jute', version: "${zookeeperVersion}"
+    compile group: 'io.dropwizard.metrics', name:'metrics-core', version: "${dropwizardVersion}"
+    compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersion}"
+    compile group: 'com.typesafe.scala-logging', name: 'scala-logging_2.12', version: "${scalaLoggingVersion}"
     compile project(":kafka-native")
 }

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.messaging.kafka.utils;
+package org.ballerinalang.messaging.kafka.test.utils;
 
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
 import org.ballerinalang.compiler.plugins.SupportedResourceParamTypes;
@@ -31,12 +31,6 @@ import org.wso2.ballerinalang.compiler.tree.BLangSimpleVariable;
 
 import java.util.List;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_STRUCT_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_PACKAGE_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_MESSAGE;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PARAMETER_CONSUMER_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PARAMETER_PARTITION_OFFSET_ARRAY_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PARAMETER_RECORD_ARRAY_NAME;
 import static org.ballerinalang.util.diagnostic.Diagnostic.Kind.ERROR;
 
 /**
@@ -46,10 +40,10 @@ import static org.ballerinalang.util.diagnostic.Diagnostic.Kind.ERROR;
 @SupportedResourceParamTypes(
         expectedListenerType = @SupportedResourceParamTypes.Type(
                 packageName = KafkaConstants.FULL_PACKAGE_NAME,
-                name = CONSUMER_STRUCT_NAME
+                name = KafkaConstants.CONSUMER_STRUCT_NAME
         ),
         paramTypes = {
-                @SupportedResourceParamTypes.Type(packageName = KAFKA_PACKAGE_NAME, name = CONSUMER_STRUCT_NAME)
+                @SupportedResourceParamTypes.Type(packageName = KafkaConstants.KAFKA_PACKAGE_NAME, name = KafkaConstants.CONSUMER_STRUCT_NAME)
         }
 )
 public class KafkaServiceCompilerPlugin extends AbstractCompilerPlugin {
@@ -87,9 +81,9 @@ public class KafkaServiceCompilerPlugin extends AbstractCompilerPlugin {
     private void validateResource(FunctionNode resource) {
         String resourceName = resource.getName().getValue();
         Diagnostic.DiagnosticPosition position = resource.getPosition();
-        if (!KAFKA_RESOURCE_ON_MESSAGE.equals(resourceName)) {
+        if (!KafkaConstants.KAFKA_RESOURCE_ON_MESSAGE.equals(resourceName)) {
             String message = "Kafka service has invalid resource: " + resourceName
-                    + ". Valid resource name:" + KAFKA_RESOURCE_ON_MESSAGE;
+                    + ". Valid resource name:" + KafkaConstants.KAFKA_RESOURCE_ON_MESSAGE;
             logError(message, position);
             return;
         }
@@ -106,15 +100,15 @@ public class KafkaServiceCompilerPlugin extends AbstractCompilerPlugin {
 
     private void validateResourceWithTwoInputParameters(
             List<? extends SimpleVariableNode> parameters, Diagnostic.DiagnosticPosition position) {
-        checkParameter(getParameterTypeName(parameters.get(0)), PARAMETER_CONSUMER_NAME, position);
-        checkParameter(getParameterTypeName(parameters.get(1)), PARAMETER_RECORD_ARRAY_NAME, position);
+        checkParameter(getParameterTypeName(parameters.get(0)), KafkaConstants.PARAMETER_CONSUMER_NAME, position);
+        checkParameter(getParameterTypeName(parameters.get(1)), KafkaConstants.PARAMETER_RECORD_ARRAY_NAME, position);
     }
 
     private void validateResourceWithFourInputParameters(
             List<? extends SimpleVariableNode> parameters, Diagnostic.DiagnosticPosition position) {
-        checkParameter(getParameterTypeName(parameters.get(0)), PARAMETER_CONSUMER_NAME, position);
-        checkParameter(getParameterTypeName(parameters.get(1)), PARAMETER_RECORD_ARRAY_NAME, position);
-        checkParameter(getParameterTypeName(parameters.get(2)), PARAMETER_PARTITION_OFFSET_ARRAY_NAME, position);
+        checkParameter(getParameterTypeName(parameters.get(0)), KafkaConstants.PARAMETER_CONSUMER_NAME, position);
+        checkParameter(getParameterTypeName(parameters.get(1)), KafkaConstants.PARAMETER_RECORD_ARRAY_NAME, position);
+        checkParameter(getParameterTypeName(parameters.get(2)), KafkaConstants.PARAMETER_PARTITION_OFFSET_ARRAY_NAME, position);
         checkParameter(getParameterTypeName(parameters.get(3)), BTypes.typeString.getName(), position);
     }
 

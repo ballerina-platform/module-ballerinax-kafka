@@ -23,9 +23,7 @@ import org.apache.kafka.common.KafkaException;
 import org.ballerinalang.messaging.kafka.api.KafkaListener;
 import org.ballerinalang.messaging.kafka.api.KafkaServerConnector;
 import org.ballerinalang.messaging.kafka.exceptions.KafkaConnectorException;
-import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ballerinalang.messaging.kafka.test.utils.KafkaConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +34,6 @@ import java.util.Properties;
  * transport receiver implementation for Kafka.
  */
 public class KafkaServerConnectorImpl implements KafkaServerConnector {
-
-    private static final Logger logger = LoggerFactory.getLogger(KafkaServerConnectorImpl.class);
 
     private String serviceId;
     private KafkaListener kafkaListener;
@@ -74,9 +70,6 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
                                                                        this.serviceId, counter, this.kafkaConsumer);
                 this.messageConsumers.add(consumer);
                 consumer.consume();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Started Kafka consumer " + counter + " on service : " + serviceId + ".");
-                }
             }
         } catch (KafkaException e) {
             throw new KafkaConnectorException(
@@ -93,10 +86,6 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
         for (KafkaRecordConsumer consumer : this.messageConsumers) {
             try {
                 consumer.stopConsume();
-                if (logger.isDebugEnabled()) {
-                    logger.debug(
-                            "Stopped Kafka consumer " + consumer.getConsumerId() + " on service : " + serviceId + ".");
-                }
             } catch (KafkaException e) {
                 if (ex == null) {
                     ex = new KafkaConnectorException("Error closing the Kafka consumers for service " + serviceId, e);

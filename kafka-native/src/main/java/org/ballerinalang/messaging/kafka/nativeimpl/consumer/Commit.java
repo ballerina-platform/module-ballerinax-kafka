@@ -35,15 +35,15 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DURATION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionToMetadataMap;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_DURATION;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getDefaultApiTimeout;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getIntFromLong;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getPartitionToMetadataMap;
 
 /**
  * Native methods to handle ballerina kafka consumer commits.

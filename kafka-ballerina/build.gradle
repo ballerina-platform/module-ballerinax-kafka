@@ -24,7 +24,7 @@ configurations {
     kafkaBallerinaBirDir
     kafkaBallerinaJar
     kafkaJars
-    avroJars
+    otherJars
 }
 
 dependencies {
@@ -32,15 +32,26 @@ dependencies {
         transitive = false
     }
     compile project(':kafka-native')
-    compile project(':kafka-test-utils')
     kafkaJars (group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
         transitive = false
     }
     kafkaJars (group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    avroJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
+    otherJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
         transitive = false
+    }
+    otherJars (group: 'org.apache.zookeeper', name: 'zookeeper', version: "${zookeeperVersion}") {
+        transitive = false
+    }
+    otherJars (group: 'io.dropwizard.metrics', name: 'metrics-core', version: "${dropwizardVersion}") {
+        transitive = false
+    }
+    otherJars (group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersion}") {
+        transitive = true
+    }
+    otherJars (group: 'com.typesafe.scala-logging', name: 'scala-logging_2.12', version: "${scalaLoggingVersion}") {
+        transitive = true
     }
 }
 
@@ -68,9 +79,9 @@ task copyKafkaJarsToLib(type: Copy) {
     from configurations.kafkaJars
 }
 
-task copyAvroJarsToLib(type: Copy) {
+task copyOtherJarsToLib(type: Copy) {
     into "$project.projectDir/lib"
-    from configurations.avroJars
+    from configurations.otherJars
 }
 
 def moduleName = "kafka"
@@ -205,10 +216,9 @@ publishing {
     }
 }
 
-unpackJballerinaTools.dependsOn copyKafkaJarsToLib
-unpackJballerinaTools.dependsOn copyAvroJarsToLib
 ballerinaBuild.dependsOn ":kafka-native:build"
 ballerinaBuild.dependsOn ":kafka-test-utils:build"
-ballerinaBuild.dependsOn unpackJballerinaTools
+unpackJballerinaTools.dependsOn copyKafkaJarsToLib
+unpackJballerinaTools.dependsOn copyOtherJarsToLib
 ballerinaBuild.dependsOn unpackJballerinaTools
 build.dependsOn ballerinaBuild

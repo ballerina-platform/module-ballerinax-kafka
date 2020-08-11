@@ -21,13 +21,13 @@ package org.ballerinalang.messaging.kafka.service;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.messaging.kafka.exceptions.KafkaConnectorException;
 import org.ballerinalang.messaging.kafka.impl.KafkaServerConnectorImpl;
-import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.test.utils.KafkaUtils;
 
 import java.io.PrintStream;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVICE_STARTED;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.SERVER_CONNECTOR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.SERVICE_STARTED;
 
 /**
  * Start server connector.

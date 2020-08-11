@@ -16,15 +16,15 @@
  * under the License.
  */
 
-package org.ballerinalang.messaging.kafka.utils;
+package org.ballerinalang.messaging.kafka.test.utils;
 
 import kafka.server.KafkaConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.ballerinalang.model.values.BError;
-import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.jvm.values.api.BString;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -57,6 +57,18 @@ public class TestUtils {
     public static final String STRING_DESERIALIZER = StringDeserializer.class.getName();
     public static final String ZOOKEEPER_CONNECTION_TIMEOUT_CONFIG = Integer.toString(ZOOKEEPER_CONNECTION_TIMEOUT);
 
+    public static KafkaCluster createKafkaCluster(int zkPort, int brokerPort, BString protocol) throws IOException {
+        String dataDir = "data_" + protocol + "_" + zkPort + "_" + brokerPort;
+        return new KafkaCluster(dataDir)
+                .withZookeeper(zkPort)
+                .withBroker(protocol.getValue(), brokerPort)
+                .start();
+    }
+
+    public static void stopKafkaCluster(KafkaCluster kafkaCluster) {
+        kafkaCluster.stop();
+    }
+
     public static String getResourcePath(Path filePath) {
         return TEST_PATH.resolve(filePath).toAbsolutePath().toString();
     }
@@ -74,9 +86,9 @@ public class TestUtils {
         return properties;
     }
 
-    public static String getErrorMessageFromReturnValue(BValue value) {
+    /*public static String getErrorMessageFromReturnValue(BValue value) {
         return ((BError) value).getMessage();
-    }
+    }*/
 
     public static void finishTest(KafkaCluster kafkaCluster, String dataDir) {
         if (kafkaCluster != null) {

@@ -41,20 +41,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DURATION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_PARTITION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_TOPIC;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionOffsetArrayFromOffsetMap;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionOffsetRecord;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populatePartitionOffsetRecord;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_DURATION;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_PARTITION;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_TOPIC;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getDefaultApiTimeout;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getIntFromLong;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getPartitionOffsetArrayFromOffsetMap;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getPartitionOffsetRecord;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getTopicPartitionList;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.populatePartitionOffsetRecord;
 
 /**
  * Native methods to get different offset values for the ballerina kafka consumer.

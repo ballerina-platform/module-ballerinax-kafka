@@ -34,12 +34,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_OFFSET;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createTopicPartitionFromPartitionOffset;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_OFFSET;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createTopicPartitionFromPartitionOffset;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getTopicPartitionList;
 
 /**
  * Native methods to handle ballerina kafka consumer seek operations.

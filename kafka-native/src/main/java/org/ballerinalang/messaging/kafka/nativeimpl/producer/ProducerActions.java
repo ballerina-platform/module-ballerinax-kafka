@@ -45,21 +45,21 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_GROUP_ID_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.TRANSACTION_CONTEXT;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaProducer;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionToMetadataMap;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionRecord;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateTopicPartitionRecord;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.processKafkaProducerConfig;
-import static org.ballerinalang.messaging.kafka.utils.TransactionUtils.createKafkaTransactionContext;
-import static org.ballerinalang.messaging.kafka.utils.TransactionUtils.handleTransactions;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_GROUP_ID_CONFIG;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_PRODUCER;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.PRODUCER_CONFIG_FIELD_NAME;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.PRODUCER_ERROR;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.TRANSACTION_CONTEXT;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaProducer;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getPartitionToMetadataMap;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getTopicPartitionRecord;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.populateTopicPartitionRecord;
+import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.processKafkaProducerConfig;
+import static org.ballerinalang.messaging.kafka.test.utils.TransactionUtils.createKafkaTransactionContext;
+import static org.ballerinalang.messaging.kafka.test.utils.TransactionUtils.handleTransactions;
 
 /**
  * Native methods to handle ballerina kafka producer.
