@@ -26,10 +26,6 @@ ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.kafkaVersion = project.kafkaVersion
 ext.awaitalityVersion = "3.1.6"
 ext.avroVersion = "1.9.2"
-ext.zookeeperVersion = "3.6.1"
-ext.dropwizardVersion = "4.1.7"
-ext.scalaVersion = "2.12.12"
-ext.scalaLoggingVersion = "3.9.0"
 ext.puppycrawlCheckstyleVersion = "8.18"
 
 allprojects {

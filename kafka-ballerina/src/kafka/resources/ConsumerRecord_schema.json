@@ -1,1 +1,0 @@
-{"ballerinax/kafka:1.0.0:ConsumerRecord":{"key":"anydata","value":"anydata","offset":"int","partition":"int","timestamp":"int","topic":"string"}}
