@@ -16,16 +16,7 @@
 
 import ballerina/kafka;
 import ballerina/test;
-
-kafka:ConsumerConfiguration consumerConfig = {
-    bootstrapServers: "localhost:14101",
-    groupId: "test-group",
-    clientId: "basic-consumer",
-    offsetReset: "earliest",
-    valueDeserializerType: kafka:DES_STRING,
-    autoCommit: true,
-    topics: ["consumer-functions-test-topic"]
-};
+import ballerina/io;
 
 int retrievedRecordsCount = 0;
 string receivedMessage = "";
@@ -34,13 +25,21 @@ handle? kafkaCluster = ();
 
 @test:BeforeSuite
 function startKafkaServer() returns error? {
-    kafkaCluster = check createKafkaCluster(2181, 9092, "PLAINTEXT");
+    var result = createKafkaCluster();
+    if (result is error) {
+        io:println(result);
+    } else {
+        io:println("******* Started Kafka Server");
+    }
 }
 
 @test:AfterSuite
-function stopKafkaServer() {
-    if (kafkaCluster is handle) {
-        stopKafkaCluster(<handle>kafkaCluster);
+function stopKafkaServer() returns error? {
+    var result = stopKafkaCluster();
+    if (result is error) {
+        io:println(result);
+    } else {
+        io:println("******* Stopped Kafka Server");
     }
 }
 
@@ -58,13 +57,14 @@ function testConsumer() {
     kafka:Consumer consumer = new(consumerConfiguration);
 }
 
+@test:Config {}
 function testProducer() returns error? {
     kafka:ProducerConfiguration producerConfiguration = {
         bootstrapServers: "localhost:9092",
         clientId: "basic-producer",
         acks: kafka:ACKS_ALL,
-        maxBlock: 5000,
-        requestTimeoutInMillis: 1000,
+        maxBlock: 6000,
+        requestTimeoutInMillis: 2000,
         valueSerializerType: kafka:SER_STRING,
         retryCount: 3
     };
@@ -73,30 +73,30 @@ function testProducer() returns error? {
     return producer->send(message, topic1);
 }
 
-function testTestUnsubscribe() returns boolean {
-    kafka:Consumer kafkaConsumer = new ({
-        bootstrapServers: "localhost:14101",
-        groupId: "test-group",
-        clientId: "unsubscribe-consumer",
-        topics: [topic1, topic2]
-    });
-    var subscribedTopics = kafkaConsumer->getSubscription();
-    if (subscribedTopics is error) {
-        return false;
-    }
-    else {
-        if (subscribedTopics.length() != 2) {
-            return false;
-        }
-    }
-    var result = kafkaConsumer->unsubscribe();
-    subscribedTopics = kafkaConsumer->getSubscription();
-    if (subscribedTopics is error) {
-        return false;
-    } else {
-        if (subscribedTopics.length() != 0) {
-            return false;
-        }
-        return true;
-    }
-}
+//function testTestUnsubscribe() returns boolean {
+//    kafka:Consumer kafkaConsumer = new ({
+//        bootstrapServers: "localhost:14101",
+//        groupId: "test-group",
+//        clientId: "unsubscribe-consumer",
+//        topics: [topic1, topic2]
+//    });
+//    var subscribedTopics = kafkaConsumer->getSubscription();
+//    if (subscribedTopics is error) {
+//        return false;
+//    }
+//    else {
+//        if (subscribedTopics.length() != 2) {
+//            return false;
+//        }
+//    }
+//    var result = kafkaConsumer->unsubscribe();
+//    subscribedTopics = kafkaConsumer->getSubscription();
+//    if (subscribedTopics is error) {
+//        return false;
+//    } else {
+//        if (subscribedTopics.length() != 0) {
+//            return false;
+//        }
+//        return true;
+//    }
+//}
