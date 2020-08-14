@@ -39,7 +39,9 @@ kafka:ProducerConfiguration producerConfiguration = {
 kafka:ConsumerConfiguration consumerConfiguration = {
     bootstrapServers: "localhost:9092",
     topics: [topic1, topic2],
+    offsetReset: "earliest",
     groupId: "test-group-1",
+    valueDeserializerType: kafka:DES_STRING,
     clientId: "test-consumer-1"
 };
 
@@ -63,7 +65,7 @@ function testConsumer() returns error? {
 
     kafka:Producer producer = new(producerConfiguration);
     var sendResult = check producer->send(TEST_MESSAGE, topic2);
-    runtime:sleep(10000);
+    runtime:sleep(5000);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
 }
 
@@ -101,7 +103,6 @@ function stopKafkaServer() returns error? {
 service consumerService =
 service {
     resource function onMessage(kafka:Consumer consumer, kafka:ConsumerRecord[] records) {
-        io:println("HJGADKJFGK");
         foreach var kafkaRecord in records {
             var value = kafkaRecord.value;
             if (value is string) {

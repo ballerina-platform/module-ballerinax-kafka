@@ -95,7 +95,12 @@ task ballerinaBuild {
         def additionalBuildParams = ""
 
         if (project.hasProperty("skipBallerinaTests")) {
-            additionalBuildParams = "--skip-tests"
+            additionalBuildParams += "--skip-tests"
+        }
+
+        if (project.hasProperty("debugBallerina")) {
+            def port = project.getProperty("debugBallerina").toString();
+            additionalBuildParams += "--debug ${port}"
         }
 
         // Build and populate caches
