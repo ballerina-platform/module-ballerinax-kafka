@@ -1,17 +1,33 @@
 import ballerina/system;
-import ballerina/runtime;
 
-function createKafkaCluster() returns error? {
-    var createResult = system:exec("docker-compose", {}, "/", "up", "-d");
-    if (createResult is error) {
-        return error("Error occurred while cleaning / creating the Kafka server");
+function createKafkaCluster(string directory, string yamlFilePath) returns error? {
+    var result = system:exec("docker-compose", {}, directory, "-f", yamlFilePath, "up", "-d");
+    if (result is error) {
+        return error("Error occurred while creating the Kafka server");
     }
-    runtime:sleep(5000);
+    system:Process dockerProcess = <system:Process>result;
+    var processResult = dockerProcess.waitForExit();
+    if (processResult is error) {
+        return processResult;
+    } else {
+        if (processResult != 0) {
+            return error("Process exited with non-zero value: " + processResult.toString());
+        }
+    }
 }
 
-function stopKafkaCluster() returns error? {
-    var cleanResult = system:exec("docker-compose", {}, "/", "rm", "-svf");
-    if (cleanResult is error) {
-        return cleanResult;
+function stopKafkaCluster(string directory) returns error? {
+    var result = system:exec("docker-compose", {}, directory, "rm", "-svf");
+    if (result is error) {
+        return result;
+    }
+    system:Process dockerProcess = <system:Process>result;
+    var processResult = dockerProcess.waitForExit();
+    if (processResult is error) {
+        return processResult;
+    } else {
+        if (processResult != 0) {
+            return error("Process exited with non-zero value: " + processResult.toString());
+        }
     }
 }
