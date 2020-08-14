@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// Common record types
 # Represents the topic partition position in which the consumed record is stored.
 #
 # + partition - The `kafka:TopicPartition` to which the record is related
@@ -32,6 +33,7 @@ public type TopicPartition record {|
     int partition;
 |};
 
+// Security-related records
 # Configurations for facilitating secure communication with the Kafka server.
 #
 # + keyStore - Configurations associated with the KeyStore
@@ -115,8 +117,231 @@ public type AuthenticationConfiguration record {|
     string password;
 |};
 
-# Represents the supported Kafka SASL authentication mechanisms.
-public type AuthenticationMechanism AUTH_SASL_PLAIN;
+// Consumer-related records
+# Configurations related to consumer endpoint.
+#
+# + bootstrapServers - List of remote server endpoints of kafka brokers
+# + groupId - Unique string that identifies the consumer
+# + topics - Topics to be subscribed by the consumer
+# + offsetReset - Offset reset strategy if no initial offset
+# + partitionAssignmentStrategy - Strategy class for handling the partition assignment among consumers
+# + metricsRecordingLevel - Metrics recording level
+# + metricsReporterClasses - Metrics reporter classes
+# + clientId - Identifier to be used for server side logging
+# + interceptorClasses - Interceptor classes to be used before sending records
+# + isolationLevel - Transactional message reading method
+# + keyDeserializerType - Deserializer used for the Kafka record key. This should be a `kafka:DeserializerType`
+# + valueDeserializerType - Deserializer used for the Kafka record value. This should be a `kafka:DeserializerType`
+# + keyDeserializer - Custom deserializer object to deserialize kafka keys. This should be implement the
+#                     `kafka:Deserializer` object
+# + valueDeserializer - Custom deserializer object to deserialize kafka values. This should implement the
+#                       `kafka:Deserializer` object
+# + schemaRegistryUrl - Avro schema registry url. Use this field to specify schema registry url, if Avro serializer
+#                       is used
+# + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
+#                          this with caution since this can override any of the fields. It is not recomendded to use
+#                          this field except in an extreme situation
+# + sessionTimeoutInMillis - Timeout used to detect consumer failures when heartbeat threshold is reached
+# + heartBeatIntervalInMillis - Expected time between heartbeats
+# + metadataMaxAgeInMillis - Maximum time to force a refresh of metadata
+# + autoCommitIntervalInMillis - Auto committing interval for commit offset, when auto-commit is enabled
+# + maxPartitionFetchBytes - The maximum amount of data per-partition the server returns
+# + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
+# + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
+# + fetchMinBytes - Minimum amount of data the server should return for a fetch request
+# + fetchMaxBytes - Maximum amount of data the server should return for a fetch request
+# + fetchMaxWaitTimeInMillis - Maximum amount of time the server will block before answering the fetch request
+# + reconnectBackoffTimeMaxInMillis - Maximum amount of time in milliseconds to wait when reconnecting
+# + retryBackoffInMillis - Time to wait before attempting to retry a failed request
+# + metricsSampleWindowInMillis - Window of time a metrics sample is computed over
+# + metricsNumSamples - Number of samples maintained to compute metrics
+# + requestTimeoutInMillis - Wait time for response of a request
+# + connectionMaxIdleTimeInMillis - Close idle connections after the number of milliseconds
+# + maxPollRecords - Maximum number of records returned in a single call to poll
+# + maxPollInterval - Maximum delay between invocations of poll
+# + reconnectBackoffTimeInMillis - Time to wait before attempting to reconnect
+# + pollingTimeoutInMillis - Timeout interval for polling
+# + pollingIntervalInMillis - Polling interval for the consumer
+# + concurrentConsumers - Number of concurrent consumers
+# + defaultApiTimeoutInMillis - Default API timeout value for APIs with duration
+# + autoCommit - Enables auto committing offsets
+# + checkCRCS - Check the CRC32 of the records consumed. This ensures that no on-the-wire or on-disk corruption to
+#               the messages occurred. This may add some overhead, and might needed set to `false` if extreme
+#               performance is required
+# + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
+# + decoupleProcessing - Decouples processing
+# + secureSocket - Configurations related to SSL/TLS encryption
+# + authenticationConfiguration - Authentication-related configurations for the Kafka consumer
+public type ConsumerConfiguration record {|
+    string bootstrapServers;
+    string groupId?;
+    string[] topics?;
+    OffsetResetMethod offsetReset?;
+    string partitionAssignmentStrategy?;
+    string metricsRecordingLevel?;
+    string metricsReporterClasses?;
+    string clientId?;
+    string interceptorClasses?;
+    IsolationLevel isolationLevel?;
 
-# Represents the supported security protocols for Kafka clients.
-public type SecurityProtocol PROTOCOL_SASL_PLAINTEXT|PROTOCOL_SASL_SSL;
+    DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
+    DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
+    Deserializer keyDeserializer?;
+    Deserializer valueDeserializer?;
+    string schemaRegistryUrl?;
+
+    map<string> additionalProperties?;
+
+    int sessionTimeoutInMillis?;
+    int heartBeatIntervalInMillis?;
+    int metadataMaxAgeInMillis?;
+    int autoCommitIntervalInMillis?;
+    int maxPartitionFetchBytes?;
+    int sendBuffer?;
+    int receiveBuffer?;
+    int fetchMinBytes?;
+    int fetchMaxBytes?;
+    int fetchMaxWaitTimeInMillis?;
+    int reconnectBackoffTimeMaxInMillis?;
+    int retryBackoffInMillis?;
+    int metricsSampleWindowInMillis?;
+    int metricsNumSamples?;
+    int requestTimeoutInMillis?;
+    int connectionMaxIdleTimeInMillis?;
+    int maxPollRecords?;
+    int maxPollInterval?;
+    int reconnectBackoffTimeInMillis?;
+    int pollingTimeoutInMillis?;
+    int pollingIntervalInMillis?;
+    int concurrentConsumers?;
+    int defaultApiTimeoutInMillis?;
+
+    boolean autoCommit = true;
+    boolean checkCRCS = true;
+    boolean excludeInternalTopics = true;
+    boolean decoupleProcessing = false;
+
+    SecureSocket secureSocket?;
+    AuthenticationConfiguration authenticationConfiguration?;
+|};
+
+# Type related to consumer record.
+#
+# + key - Key that is included in the record
+# + value - Record content
+# + offset - Offset value
+# + partition - Partition in which the record is stored
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + topic - Topic to which the record belongs to
+public type ConsumerRecord record {|
+    anydata key;
+    anydata value;
+    int offset;
+    int partition;
+    int timestamp;
+    string topic;
+|};
+
+# Represents a generic Avro record. This is the type of the value returned from an Avro deserializer consumer.
+public type AvroGenericRecord record {
+    // Left blank intentionally.
+};
+
+// Producer-related records
+# Represents the Kafka Producer configuration.
+#
+# + bootstrapServers - List of remote server endpoints of Kafka brokers
+# + acks - Number of acknowledgments
+# + compressionType - Compression type to be used for messages
+# + clientId - Identifier to be used for server side logging
+# + metricsRecordingLevel - Metrics recording level
+# + metricReporterClasses - Metrics reporter classes
+# + partitionerClass - Partitioner class to be used to select the partition to which the message is sent
+# + interceptorClasses - Interceptor classes to be used before sending records
+# + transactionalId - Transactional ID to be used in transactional delivery
+# + keySerializerType - Serializer used for the Kafka record key. This can be either `kafka:SerializerType` or a
+#                       user-defined serializer
+# + valueSerializerType - Serializer used for the Kafka record value. This can be either `kafka:SerializerType` or a
+#                         user-defined serializer
+# + keySerializer - Custom serializer object to serialize Kafka keys. This should implement the `kafka:Serializer`
+#                   object
+# + valueSerializer - Custom serializer object to serialize Kafka values. This should implement the
+#                     `kafka:Serializer` object
+# + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro
+#                       serializer is used
+# + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
+#                          this with caution since this can override any of the fields. It is not recomendded to use
+#                          this field except in an extreme situation
+# + bufferMemory - Total bytes of memory the producer can use to buffer records
+# + retryCount - Number of retries to resend a record
+# + batchSize - Number of records to be batched for a single request. Use 0 for no batching
+# + lingerInMillis - Delay to allow other records to be batched before sending them to the Kafka server
+# + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
+# + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
+# + maxRequestSize - The maximum size of a request in bytes
+# + reconnectBackoffTimeInMillis - Time to wait before attempting to reconnect
+# + reconnectBackoffMaxTimeInMillis - Maximum amount of time in milliseconds to wait when reconnecting
+# + retryBackoffTimeInMillis - Time to wait before attempting to retry a failed request
+# + maxBlockInMillis - Maximum block time during which the sending is blocked when the buffer is full
+# + requestTimeoutInMillis - Wait time for the response of a request
+# + metadataMaxAgeInMillis - Maximum time to force a refresh of metadata
+# + metricsSampleWindowInMillis - Time window for a metrics sample to compute over
+# + metricsNumSamples - Number of samples maintained to compute the metrics
+# + maxInFlightRequestsPerConnection - Maximum number of unacknowledged requests on a single connection
+# + connectionsMaxIdleTimeInMillis - Close the idle connections after this number of milliseconds
+# + transactionTimeoutInMillis - Timeout for transaction status update from the producer
+# + enableIdempotence - Exactly one copy of each message is written to the stream when enabled
+# + secureSocket - Configurations related to SSL/TLS encryption
+# + authenticationConfiguration - Authentication-related configurations for the Kafka producer
+public type ProducerConfiguration record {|
+    string bootstrapServers;
+    ProducerAcks acks = ACKS_SINGLE;
+    CompressionType compressionType = COMPRESSION_NONE;
+    string clientId?;
+    string metricsRecordingLevel?;
+    string metricReporterClasses?;
+    string partitionerClass?;
+    string interceptorClasses?;
+    string transactionalId?;
+
+    SerializerType valueSerializerType = SER_BYTE_ARRAY;
+    SerializerType keySerializerType = SER_BYTE_ARRAY;
+    Serializer valueSerializer?;
+    Serializer keySerializer?;
+    string schemaRegistryUrl?;
+
+    map<string> additionalProperties?;
+
+    int bufferMemory?;
+    int retryCount?;
+    int batchSize?;
+    int lingerInMillis?;
+    int sendBuffer?;
+    int receiveBuffer?;
+    int maxRequestSize?;
+    int reconnectBackoffTimeInMillis?;
+    int reconnectBackoffMaxTimeInMillis?;
+    int retryBackoffTimeInMillis?;
+    int maxBlockInMillis?;
+    int requestTimeoutInMillis?;
+    int metadataMaxAgeInMillis?;
+    int metricsSampleWindowInMillis?;
+    int metricsNumSamples?;
+    int maxInFlightRequestsPerConnection?;
+    int connectionsMaxIdleTimeInMillis?;
+    int transactionTimeoutInMillis?;
+
+    boolean enableIdempotence = false;
+
+    SecureSocket secureSocket?;
+    AuthenticationConfiguration authenticationConfiguration?;
+|};
+
+# Defines a record to send data using Avro serialization.
+#
+# + schemaString - The string, which defines the Avro schema
+# + dataRecord - Records, which should be serialized using Avro
+public type AvroRecord record {|
+    string schemaString;
+    anydata dataRecord;
+|};
