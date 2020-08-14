@@ -35,7 +35,7 @@ import org.ballerinalang.jvm.values.connector.NonBlockingCallback;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 
 import java.io.PrintStream;
 import java.util.Collection;
@@ -43,15 +43,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ON_PARTITION_ASSIGNED_METADATA;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ON_PARTITION_REVOKED_METADATA;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getStringListFromStringBArray;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getTopicNamesString;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getTopicPartitionRecord;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.populateTopicPartitionRecord;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_PARTITION_ASSIGNED_METADATA;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_PARTITION_REVOKED_METADATA;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getStringListFromStringBArray;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicNamesString;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionRecord;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateTopicPartitionRecord;
 
 /**
  * Native methods to handle subscription of the ballerina kafka consumer.

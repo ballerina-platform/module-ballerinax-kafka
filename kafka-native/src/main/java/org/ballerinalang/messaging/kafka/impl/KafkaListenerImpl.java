@@ -32,15 +32,15 @@ import org.ballerinalang.messaging.kafka.api.KafkaListener;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaObserverContext;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.KAFKA_RESOURCE_ON_MESSAGE;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ON_MESSAGE_METADATA;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getResourceParameters;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_MESSAGE;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_MESSAGE_METADATA;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getResourceParameters;
 
 /**
  * Kafka Connector Consumer for Ballerina.

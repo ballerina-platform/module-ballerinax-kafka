@@ -22,7 +22,7 @@ import org.ballerinalang.jvm.observability.ObserveUtils;
 import org.ballerinalang.jvm.observability.ObserverContext;
 import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.util.Optional;
 

@@ -28,10 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys.createGenericRecord;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_PARTITION;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.UNCHECKED;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getIntValue;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getLongValue;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_PARTITION;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntValue;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getLongValue;
 
 /**
  * Native methods to send `kafka:AvroRecord` values and with different types of keys to Kafka broker from ballerina

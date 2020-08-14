@@ -29,16 +29,16 @@ import org.ballerinalang.messaging.kafka.api.KafkaServerConnector;
 import org.ballerinalang.messaging.kafka.exceptions.KafkaConnectorException;
 import org.ballerinalang.messaging.kafka.impl.KafkaListenerImpl;
 import org.ballerinalang.messaging.kafka.impl.KafkaServerConnectorImpl;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.util.Objects;
 import java.util.Properties;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.SERVER_CONNECTOR;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.UNCHECKED;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
 
 /**
  * This is used to register a listener to the kafka service.

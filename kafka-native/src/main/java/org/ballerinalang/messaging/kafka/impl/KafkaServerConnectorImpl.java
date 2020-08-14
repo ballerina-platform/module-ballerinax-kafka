@@ -23,7 +23,7 @@ import org.apache.kafka.common.KafkaException;
 import org.ballerinalang.messaging.kafka.api.KafkaListener;
 import org.ballerinalang.messaging.kafka.api.KafkaServerConnector;
 import org.ballerinalang.messaging.kafka.exceptions.KafkaConnectorException;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 
 import java.util.ArrayList;
 import java.util.List;

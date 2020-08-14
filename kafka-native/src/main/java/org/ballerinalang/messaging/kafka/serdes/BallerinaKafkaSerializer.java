@@ -23,12 +23,12 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.api.BArray;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 
 import java.util.Map;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ON_CLOSE_METADATA;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ON_SERIALIZE_METADATA;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_CLOSE_METADATA;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_SERIALIZE_METADATA;
 
 /**
  * Represents a serializer class for ballerina kafka module.

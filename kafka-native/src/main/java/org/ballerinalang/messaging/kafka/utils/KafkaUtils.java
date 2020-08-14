@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.messaging.kafka.test.utils;
+package org.ballerinalang.messaging.kafka.utils;
 
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -53,7 +53,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 import static org.ballerinalang.jvm.BallerinaValues.createRecord;
-import static org.ballerinalang.messaging.kafka.test.utils.AvroUtils.handleAvroConsumer;
+import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
 
 /**
  * Utility class for Kafka Connector Implementation.

@@ -34,7 +34,7 @@ import org.ballerinalang.jvm.values.api.BValueCreator;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,18 +44,18 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_DURATION;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.UNCHECKED;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getDefaultApiTimeout;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getIntFromLong;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getTopicPartitionList;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getTopicPartitionRecord;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.populateTopicPartitionRecord;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DURATION;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionRecord;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateTopicPartitionRecord;
 
 /**
  * Native methods to handle ballerina kafka consumer subscriptions.

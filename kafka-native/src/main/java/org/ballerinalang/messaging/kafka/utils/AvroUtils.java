@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.ballerinalang.messaging.kafka.test.utils;
+package org.ballerinalang.messaging.kafka.utils;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -24,10 +24,12 @@ import org.apache.avro.util.Utf8;
 import org.ballerinalang.jvm.StringUtils;
 import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.api.BString;
+import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.util.List;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.createKafkaError;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 
 /**
  * Utility functions to handle kafka avro operations.

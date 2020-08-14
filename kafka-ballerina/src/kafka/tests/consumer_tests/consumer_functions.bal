@@ -15,40 +15,51 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/kafka;
 import ballerina/runtime;
 import ballerina/test;
 
 const TEST_MESSAGE = "Hello, Ballerina";
+const TEST_DIRECTORY = "consumer_tests/";
 
 string topic1 = "test-topic-1";
 string topic2 = "test-topic-2";
+string manualCommitTopic = "manual-commit-test-topic";
 
 string receivedMessage = "";
+
+ProducerConfiguration producerConfiguration = {
+    bootstrapServers: "localhost:9092",
+    clientId: "basic-producer",
+    acks: ACKS_ALL,
+    maxBlockInMillis: 6000,
+    requestTimeoutInMillis: 2000,
+    valueSerializerType: SER_STRING,
+    retryCount: 3
+};
+Producer producer = new(producerConfiguration);
 
 @test:BeforeSuite
 function startKafkaServer() returns error? {
     string yamlFilePath = "docker-compose.yaml";
-    string parentDirectory = check getAbsoluteTestPath("consumer_tests/");
+    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
     var result = createKafkaCluster(parentDirectory, yamlFilePath);
     if (result is error) {
         io:println(result);
     }
 }
 
-@test:Config {
-    dependsOn: ["producerTest"]
-}
+@test:Config {}
 function consumerServiceTest() returns error? {
-    kafka:ConsumerConfiguration consumerConfiguration = {
+    check sendMessage(TEST_MESSAGE, topic1);
+    ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-service-test-group",
-        valueDeserializerType: kafka:DES_STRING,
+        valueDeserializerType: DES_STRING,
         clientId: "test-consumer-1"
     };
-    kafka:Consumer consumer = new(consumerConfiguration);
+    Consumer consumer = new(consumerConfiguration);
     var attachResult = check consumer.__attach(consumerService);
     var startResult = check consumer.__start();
 
@@ -57,19 +68,19 @@ function consumerServiceTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: ["producerTest"]
+    dependsOn: ["consumerServiceTest"]
 }
 function consumerFunctionsTest() returns error? {
-    kafka:ConsumerConfiguration consumerConfiguration = {
+    ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
-        valueDeserializerType: kafka:DES_STRING,
+        valueDeserializerType: DES_STRING,
         clientId: "test-consumer-2"
     };
-    kafka:Consumer consumer = new(consumerConfiguration);
-    kafka:ConsumerRecord[] consumerRecords = check consumer->poll(5000);
+    Consumer consumer = new(consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5000);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     var value = consumerRecords[0].value;
     if (value is string) {
@@ -79,24 +90,9 @@ function consumerFunctionsTest() returns error? {
     }
 }
 
-@test:Config {}
-function producerTest() returns error? {
-    kafka:ProducerConfiguration producerConfiguration = {
-        bootstrapServers: "localhost:9092",
-        clientId: "basic-producer",
-        acks: kafka:ACKS_ALL,
-        maxBlock: 6000,
-        requestTimeoutInMillis: 2000,
-        valueSerializerType: kafka:SER_STRING,
-        retryCount: 3
-    };
-    kafka:Producer producer = new(producerConfiguration);
-    return producer->send(TEST_MESSAGE, topic1);
-}
-
 @test:Config{}
 function consumerSubscribeUnsubscribeTest() returns error? {
-    kafka:Consumer kafkaConsumer = new ({
+    Consumer kafkaConsumer = new ({
         bootstrapServers: "localhost:9092",
         groupId: "consumer-subscriber-unsubscribe-test-group",
         clientId: "test-consumer-3",
@@ -110,18 +106,41 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     test:assertEquals(subscribedTopics.length(), 0);
 }
 
+@test:Config{}
+function manualCommitTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        topics: [manualCommitTopic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-manual-commit-test-group",
+        valueDeserializerType: DES_INT,
+        clientId: "test-consumer-4",
+        autoCommit: false
+    };
+    Consumer consumer = new(consumerConfiguration);
+    int messageCount = 10;
+    int count = 0;
+    while (count < messageCount) {
+        check sendMessage(count, manualCommitTopic);
+    }
+}
+
 @test:AfterSuite
 function stopKafkaServer() returns error? {
-    string parentDirectory = check getAbsoluteTestPath("consumer_tests/");
+    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
     var result = stopKafkaCluster(parentDirectory);
     if (result is error) {
         io:println(result);
     }
 }
 
+function sendMessage(anydata message, string topic) returns error? {
+    return producer->send(message, topic);
+}
+
 service consumerService =
 service {
-    resource function onMessage(kafka:Consumer consumer, kafka:ConsumerRecord[] records) {
+    resource function onMessage(Consumer consumer, ConsumerRecord[] records) {
         foreach var kafkaRecord in records {
             var value = kafkaRecord.value;
             if (value is string) {

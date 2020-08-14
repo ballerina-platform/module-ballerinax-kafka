@@ -25,7 +25,7 @@ import org.ballerinalang.jvm.observability.metrics.DefaultMetricRegistry;
 import org.ballerinalang.jvm.observability.metrics.MetricId;
 import org.ballerinalang.jvm.observability.metrics.MetricRegistry;
 import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;

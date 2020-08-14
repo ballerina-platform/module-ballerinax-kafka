@@ -26,15 +26,15 @@ import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.api.BArray;
 import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaConstants;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.ballerinalang.messaging.kafka.nativeimpl.producer.Send.sendKafkaRecord;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ALIAS_PARTITION;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getIntValue;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaUtils.getLongValue;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_PARTITION;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntValue;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getLongValue;
 
 /**
  * Sends Avro keys with different value types from Ballerina Kafka producers.

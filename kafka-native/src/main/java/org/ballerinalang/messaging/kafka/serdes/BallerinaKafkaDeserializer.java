@@ -24,14 +24,14 @@ import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.api.BArray;
 import org.ballerinalang.jvm.values.api.BValueCreator;
-import org.ballerinalang.messaging.kafka.test.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 
 import java.util.Map;
 import java.util.Objects;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.BALLERINA_STRAND;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ON_CLOSE_METADATA;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.ON_DESERIALIZE_METADATA;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.BALLERINA_STRAND;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_CLOSE_METADATA;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_DESERIALIZE_METADATA;
 
 /**
  * Represents a deserializer class for ballerina kafka module.

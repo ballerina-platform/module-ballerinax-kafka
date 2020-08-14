@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.messaging.kafka.test.utils;
+package org.ballerinalang.messaging.kafka.utils;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.ballerinalang.jvm.scheduling.Strand;
@@ -26,9 +26,9 @@ import org.ballerinalang.messaging.kafka.impl.KafkaTransactionContext;
 
 import java.util.Objects;
 
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.CONNECTOR_ID;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.NATIVE_PRODUCER;
-import static org.ballerinalang.messaging.kafka.test.utils.KafkaConstants.TRANSACTION_CONTEXT;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONNECTOR_ID;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.TRANSACTION_CONTEXT;
 
 /**
  * Utility functions for ballerina kafka transactions.

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.messaging.kafka.test.utils;
+package org.ballerinalang.messaging.kafka.utils;
 
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
 import org.ballerinalang.compiler.plugins.SupportedResourceParamTypes;
@@ -39,11 +39,11 @@ import static org.ballerinalang.util.diagnostic.Diagnostic.Kind.ERROR;
 
 @SupportedResourceParamTypes(
         expectedListenerType = @SupportedResourceParamTypes.Type(
-                packageName = KafkaConstants.FULL_PACKAGE_NAME,
+                packageName = KafkaConstants.PACKAGE_NAME_WITH_VERSION,
                 name = KafkaConstants.CONSUMER_STRUCT_NAME
         ),
         paramTypes = {
-                @SupportedResourceParamTypes.Type(packageName = KafkaConstants.KAFKA_PACKAGE_NAME, name = KafkaConstants.CONSUMER_STRUCT_NAME)
+                @SupportedResourceParamTypes.Type(packageName = KafkaConstants.PACKAGE_NAME, name = KafkaConstants.CONSUMER_STRUCT_NAME)
         }
 )
 public class KafkaServiceCompilerPlugin extends AbstractCompilerPlugin {
