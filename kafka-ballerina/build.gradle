@@ -23,7 +23,7 @@ configurations {
     jbalTools
     kafkaBallerinaBirDir
     kafkaBallerinaJar
-    kafkaJars
+    packingJars
     otherJars
 }
 
@@ -32,10 +32,10 @@ dependencies {
         transitive = false
     }
     compile project(':kafka-native')
-    kafkaJars (group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
+    packingJars (group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
         transitive = false
     }
-    kafkaJars (group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
+    packingJars (group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
     otherJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
@@ -62,9 +62,9 @@ task unpackJballerinaTools(type: Copy) {
     }
 }
 
-task copyKafkaJarsToLib(type: Copy) {
+task copyPackingJarsToLib(type: Copy) {
     into "$project.projectDir/lib"
-    from configurations.kafkaJars
+    from configurations.packingJars
 }
 
 task copyOtherJarsToLib(type: Copy) {
@@ -146,7 +146,7 @@ task ballerinaBuild {
             into file("$artifactLibParent/libs")
         }
         copy {
-            from configurations.kafkaJars
+            from configurations.packingJars
             into file("$artifactLibParent/libs")
         }
 
@@ -210,8 +210,7 @@ publishing {
 }
 
 ballerinaBuild.dependsOn ":kafka-native:build"
-ballerinaBuild.dependsOn ":kafka-test-utils:build"
-unpackJballerinaTools.dependsOn copyKafkaJarsToLib
+unpackJballerinaTools.dependsOn copyPackingJarsToLib
 unpackJballerinaTools.dependsOn copyOtherJarsToLib
 ballerinaBuild.dependsOn unpackJballerinaTools
 build.dependsOn ballerinaBuild

@@ -26,25 +26,6 @@ string topic2 = "test-topic-2";
 
 string receivedMessage = "";
 
-kafka:ProducerConfiguration producerConfiguration = {
-    bootstrapServers: "localhost:9092",
-    clientId: "basic-producer",
-    acks: kafka:ACKS_ALL,
-    maxBlock: 6000,
-    requestTimeoutInMillis: 2000,
-    valueSerializerType: kafka:SER_STRING,
-    retryCount: 3
-};
-
-kafka:ConsumerConfiguration consumerConfiguration = {
-    bootstrapServers: "localhost:9092",
-    topics: [topic1, topic2],
-    offsetReset: "earliest",
-    groupId: "test-group-1",
-    valueDeserializerType: kafka:DES_STRING,
-    clientId: "test-consumer-1"
-};
-
 @test:BeforeSuite
 function startKafkaServer() returns error? {
     string yamlFilePath = "docker-compose.yaml";
@@ -56,31 +37,69 @@ function startKafkaServer() returns error? {
 }
 
 @test:Config {
-    dependsOn: ["testProducer"]
+    dependsOn: ["producerTest"]
 }
-function testConsumer() returns error? {
+function consumerServiceTest() returns error? {
+    kafka:ConsumerConfiguration consumerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        topics: [topic1],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-service-test-group",
+        valueDeserializerType: kafka:DES_STRING,
+        clientId: "test-consumer-1"
+    };
     kafka:Consumer consumer = new(consumerConfiguration);
     var attachResult = check consumer.__attach(consumerService);
     var startResult = check consumer.__start();
 
-    kafka:Producer producer = new(producerConfiguration);
-    var sendResult = check producer->send(TEST_MESSAGE, topic2);
     runtime:sleep(5000);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
 }
 
+@test:Config {
+    dependsOn: ["producerTest"]
+}
+function consumerFunctionsTest() returns error? {
+    kafka:ConsumerConfiguration consumerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        topics: [topic1],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-functions-test-group",
+        valueDeserializerType: kafka:DES_STRING,
+        clientId: "test-consumer-2"
+    };
+    kafka:Consumer consumer = new(consumerConfiguration);
+    kafka:ConsumerRecord[] consumerRecords = check consumer->poll(5000);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    var value = consumerRecords[0].value;
+    if (value is string) {
+        test:assertEquals(value, TEST_MESSAGE);
+    } else {
+        test:assertFail("Invalid message type received. Expected string");
+    }
+}
+
 @test:Config {}
-function testProducer() returns error? {
+function producerTest() returns error? {
+    kafka:ProducerConfiguration producerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        clientId: "basic-producer",
+        acks: kafka:ACKS_ALL,
+        maxBlock: 6000,
+        requestTimeoutInMillis: 2000,
+        valueSerializerType: kafka:SER_STRING,
+        retryCount: 3
+    };
     kafka:Producer producer = new(producerConfiguration);
     return producer->send(TEST_MESSAGE, topic1);
 }
 
 @test:Config{}
-function testTestUnsubscribe() returns error? {
+function consumerSubscribeUnsubscribeTest() returns error? {
     kafka:Consumer kafkaConsumer = new ({
         bootstrapServers: "localhost:9092",
-        groupId: "test-group",
-        clientId: "subscription-consumer",
+        groupId: "consumer-subscriber-unsubscribe-test-group",
+        clientId: "test-consumer-3",
         topics: [topic1, topic2]
     });
     string[] subscribedTopics = check kafkaConsumer->getSubscription();

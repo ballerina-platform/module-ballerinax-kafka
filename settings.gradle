@@ -13,7 +13,7 @@ plugins {
 
 rootProject.name = 'kafka'
 include(':build-config:checkstyle')
-include ':kafka-native', ':kafka-test-utils', ':kafka-ballerina'
+include ':kafka-native', ':kafka-ballerina'
 
 gradleEnterprise {
     buildScan {
