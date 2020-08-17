@@ -1,0 +1,4 @@
+org_name = "ballerina"
+version = "2.0.0"
+lockfile_version = "1.0.0"
+ballerina_version = "slp2"

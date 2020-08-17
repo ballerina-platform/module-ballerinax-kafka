@@ -121,7 +121,7 @@ function manualCommitTest() returns error? {
     int messageCount = 10;
     int count = 0;
     while (count < messageCount) {
-        check sendMessage(count, manualCommitTopic);
+        check sendMessage(count.toString(), manualCommitTopic);
     }
 }
 
@@ -134,7 +134,7 @@ function stopKafkaServer() returns error? {
     }
 }
 
-function sendMessage(anydata message, string topic) returns error? {
+function sendMessage(string message, string topic) returns error? {
     return producer->send(message, topic);
 }
 

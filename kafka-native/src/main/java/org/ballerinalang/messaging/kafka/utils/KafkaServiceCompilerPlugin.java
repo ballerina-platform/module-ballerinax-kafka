@@ -43,7 +43,8 @@ import static org.ballerinalang.util.diagnostic.Diagnostic.Kind.ERROR;
                 name = KafkaConstants.CONSUMER_STRUCT_NAME
         ),
         paramTypes = {
-                @SupportedResourceParamTypes.Type(packageName = KafkaConstants.PACKAGE_NAME, name = KafkaConstants.CONSUMER_STRUCT_NAME)
+                @SupportedResourceParamTypes.Type(packageName = KafkaConstants.PACKAGE_NAME,
+                                                  name = KafkaConstants.CONSUMER_STRUCT_NAME)
         }
 )
 public class KafkaServiceCompilerPlugin extends AbstractCompilerPlugin {
@@ -108,7 +109,8 @@ public class KafkaServiceCompilerPlugin extends AbstractCompilerPlugin {
             List<? extends SimpleVariableNode> parameters, Diagnostic.DiagnosticPosition position) {
         checkParameter(getParameterTypeName(parameters.get(0)), KafkaConstants.PARAMETER_CONSUMER_NAME, position);
         checkParameter(getParameterTypeName(parameters.get(1)), KafkaConstants.PARAMETER_RECORD_ARRAY_NAME, position);
-        checkParameter(getParameterTypeName(parameters.get(2)), KafkaConstants.PARAMETER_PARTITION_OFFSET_ARRAY_NAME, position);
+        checkParameter(getParameterTypeName(parameters.get(2)), KafkaConstants.PARAMETER_PARTITION_OFFSET_ARRAY_NAME,
+                       position);
         checkParameter(getParameterTypeName(parameters.get(3)), BTypes.typeString.getName(), position);
     }
 
