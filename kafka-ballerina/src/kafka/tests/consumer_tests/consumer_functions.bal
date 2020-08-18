@@ -37,7 +37,7 @@ ProducerConfiguration producerConfiguration = {
     valueSerializerType: SER_STRING,
     retryCount: 3
 };
-Producer producer = new(producerConfiguration);
+Producer producer = new (producerConfiguration);
 
 @test:BeforeSuite
 function startKafkaServer() returns error? {
@@ -60,7 +60,7 @@ function consumerServiceTest() returns error? {
         valueDeserializerType: DES_STRING,
         clientId: "test-consumer-1"
     };
-    Consumer consumer = new(consumerConfiguration);
+    Consumer consumer = new (consumerConfiguration);
     var attachResult = check consumer.__attach(consumerService);
     var startResult = check consumer.__start();
 
@@ -79,7 +79,7 @@ function consumerFunctionsTest() returns error? {
         valueDeserializerType: DES_STRING,
         clientId: "test-consumer-2"
     };
-    Consumer consumer = new(consumerConfiguration);
+    Consumer consumer = new (consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5000);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     var value = consumerRecords[0].value;
@@ -146,12 +146,35 @@ function manualCommitTest() returns error? {
     offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, messageCount);
 
+    int positionOffset = check consumer->getPositionOffset(topicPartition);
+    test:assertEquals(positionOffset, messageCount);
+}
+
+@test:Config {}
+function nonExistingTopicPartitionTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        topics: [manualCommitTopic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-manual-commit-test-group",
+        valueDeserializerType: DES_STRING,
+        clientId: "test-consumer-4",
+        autoCommit: false
+    };
+    Consumer consumer = new(consumerConfiguration);
+
     TopicPartition nonExistingTopicPartition = {
         topic: nonExistingTopic,
         partition: 999
     };
-    committedOffset = check consumer->getCommittedOffset(nonExistingTopicPartition);
+    var committedOffset = check consumer->getCommittedOffset(nonExistingTopicPartition);
     test:assertEquals(committedOffset, ());
+
+    var nonExistingPositionOffset = consumer->getPositionOffset(nonExistingTopicPartition);
+    test:assertTrue(nonExistingPositionOffset is ConsumerError);
+    ConsumerError positionOffsetError = <ConsumerError>nonExistingPositionOffset;
+    string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
+    test:assertEquals(expectedError, positionOffsetError.message());
 }
 
 @test:AfterSuite {}
