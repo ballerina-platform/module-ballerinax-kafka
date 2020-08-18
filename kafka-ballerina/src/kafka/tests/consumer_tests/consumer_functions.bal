@@ -48,9 +48,7 @@ function startKafkaServer() returns error? {
     }
 }
 
-@test:Config {
-    enable: false
-}
+@test:Config {}
 function consumerServiceTest() returns error? {
     check sendMessage(TEST_MESSAGE, topic1);
     ConsumerConfiguration consumerConfiguration = {
@@ -91,7 +89,7 @@ function consumerFunctionsTest() returns error? {
     }
 }
 
-@test:Config{}
+@test:Config {}
 function consumerSubscribeUnsubscribeTest() returns error? {
     Consumer kafkaConsumer = new ({
         bootstrapServers: "localhost:9092",
@@ -107,7 +105,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     test:assertEquals(subscribedTopics.length(), 0);
 }
 
-@test:Config{}
+@test:Config {}
 function manualCommitTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
