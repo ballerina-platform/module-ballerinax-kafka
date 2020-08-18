@@ -48,7 +48,9 @@ function startKafkaServer() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {
+    enable: false
+}
 function consumerServiceTest() returns error? {
     check sendMessage(TEST_MESSAGE, topic1);
     ConsumerConfiguration consumerConfiguration = {
@@ -67,13 +69,12 @@ function consumerServiceTest() returns error? {
     test:assertEquals(receivedMessage, TEST_MESSAGE);
 }
 
-@test:Config {
-    dependsOn: ["consumerServiceTest"]
-}
+@test:Config {}
 function consumerFunctionsTest() returns error? {
+    check sendMessage(TEST_MESSAGE, topic2);
     ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
-        topics: [topic1],
+        topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
         valueDeserializerType: DES_STRING,
@@ -113,7 +114,7 @@ function manualCommitTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        valueDeserializerType: DES_INT,
+        valueDeserializerType: DES_STRING,
         clientId: "test-consumer-4",
         autoCommit: false
     };
@@ -122,10 +123,32 @@ function manualCommitTest() returns error? {
     int count = 0;
     while (count < messageCount) {
         check sendMessage(count.toString(), manualCommitTopic);
+        count += 1;
     }
+    var messages = consumer->poll(1000);
+    TopicPartition topicPartition = {
+        topic: manualCommitTopic,
+        partition: 0
+    };
+    PartitionOffset partitionOffset = {
+        partition: topicPartition,
+        offset: 0
+    };
+
+    var commitResult = check consumer->commitOffset([partitionOffset]);
+    var committedOffset = check consumer->getCommittedOffset(topicPartition);
+
+    int offsetValue = committedOffset.offset;
+    test:assertEquals(offsetValue, 0);
+
+    var commitAllResult = check consumer->'commit();
+    committedOffset = check consumer->getCommittedOffset(topicPartition);
+
+    offsetValue = committedOffset.offset;
+    test:assertEquals(offsetValue, messageCount);
 }
 
-@test:AfterSuite
+@test:AfterSuite {}
 function stopKafkaServer() returns error? {
     string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
     var result = stopKafkaCluster(parentDirectory);

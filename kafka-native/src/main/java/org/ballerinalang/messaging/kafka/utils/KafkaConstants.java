@@ -23,7 +23,6 @@ import org.ballerinalang.jvm.scheduling.StrandMetadata;
 import org.ballerinalang.jvm.types.BPackage;
 import org.ballerinalang.jvm.values.api.BString;
 
-import static org.ballerinalang.jvm.util.BLangConstants.BALLERINA_BUILTIN_PKG_PREFIX;
 import static org.ballerinalang.jvm.util.BLangConstants.ORG_NAME_SEPARATOR;
 
 /**
@@ -38,13 +37,13 @@ public class KafkaConstants {
 
     public static final String BLOCK_SEPARATOR = ":";
     public static final String ARRAY_INDICATOR = "[]";
-    public static final String ORGANIZATION_NAME = "ballerina";
-    public static final String PACKAGE_NAME = "kafka";
+    public static final String ORG_NAME = "ballerinax";
+    public static final String MODULE_NAME = "kafka";
     private static final String VERSION = "2.0.0";
 
-    public static final String PACKAGE_NAME_WITH_VERSION = PACKAGE_NAME + BLOCK_SEPARATOR + VERSION;
-    public static final String PACKAGE_FULL_NAME = ORGANIZATION_NAME + ORG_NAME_SEPARATOR + PACKAGE_NAME_WITH_VERSION;
-    public static final BPackage KAFKA_PACKAGE_ID = new BPackage(ORGANIZATION_NAME, PACKAGE_NAME, VERSION);
+    public static final String PACKAGE_NAME_WITH_VERSION = MODULE_NAME + BLOCK_SEPARATOR + VERSION;
+    public static final String PACKAGE_FULL_NAME = ORG_NAME + ORG_NAME_SEPARATOR + PACKAGE_NAME_WITH_VERSION;
+    public static final BPackage KAFKA_PACKAGE_ID = new BPackage(ORG_NAME, MODULE_NAME, VERSION);
 
     // Kafka log messages
     public static final String SERVICE_STARTED = "[ballerinax/kafka] started kafka listener ";
@@ -275,16 +274,16 @@ public class KafkaConstants {
 
     // Strand meta data
     public static final StrandMetadata ON_MESSAGE_METADATA =
-            new StrandMetadata(ORGANIZATION_NAME, PACKAGE_NAME, VERSION, KAFKA_RESOURCE_ON_MESSAGE);
+            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, KAFKA_RESOURCE_ON_MESSAGE);
     public static final StrandMetadata ON_SERIALIZE_METADATA =
-            new StrandMetadata(ORGANIZATION_NAME, PACKAGE_NAME, VERSION, FUNCTION_SERIALIZE);
+            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_SERIALIZE);
     public static final StrandMetadata ON_DESERIALIZE_METADATA =
-            new StrandMetadata(ORGANIZATION_NAME, PACKAGE_NAME, VERSION, FUNCTION_DESERIALIZE);
+            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_DESERIALIZE);
     public static final StrandMetadata ON_CLOSE_METADATA =
-            new StrandMetadata(ORGANIZATION_NAME, PACKAGE_NAME, VERSION, FUNCTION_CLOSE);
+            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_CLOSE);
     public static final StrandMetadata ON_PARTITION_REVOKED_METADATA =
-            new StrandMetadata(ORGANIZATION_NAME, PACKAGE_NAME, VERSION, FUNCTION_ON_PARTITION_REVOKED);
+            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_ON_PARTITION_REVOKED);
     public static final StrandMetadata ON_PARTITION_ASSIGNED_METADATA =
-            new StrandMetadata(ORGANIZATION_NAME, PACKAGE_NAME, VERSION, FUNCTION_ON_PARTITION_ASSIGNED);
+            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_ON_PARTITION_ASSIGNED);
 
 }
