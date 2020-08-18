@@ -92,13 +92,11 @@ public type TrustStore record {|
 
 # Configurations related to the SSL/TLS protocol and the versions to be used.
 #
-# + securityProtocol - The protocol used to communicate with brokers.
 # + sslProtocol - The SSL protocol used to generate the SSLContext. The default setting is TLS, which is fine for most
 #                 cases. Allowed values in recent JVMs are TLS, TLSv1.1, and TLSv1.2. Also, SSL, SSLv2 and SSLv3 may be
 #                 supported in older JVMs but their usage is discouraged due to known security vulnerabilities
 # + sslProtocolVersions - The list of protocols enabled for SSL connections
 public type Protocols record {|
-    string securityProtocol;
     string sslProtocol;
     string sslProtocolVersions;
 |};
@@ -106,13 +104,11 @@ public type Protocols record {|
 # Configurations related to Kafka authentication mechanisms.
 #
 # + mechanism - Type of the authentication mechanism. Currently, SASL_PLAIN and SCRAM are supported. See
-#                             `kafka:AuthennticationType` for more information
-# + securityProtocol - Type of the security protocol to use in the broker connection
+#               `kafka:AuthenticationMechanism` for more information
 # + username - The username to use to authenticate the Kafka producer/consumer
 # + password - The password to use to authenticate the Kafka producer/consumer
 public type AuthenticationConfiguration record {|
     AuthenticationMechanism mechanism = AUTH_SASL_PLAIN;
-    string securityProtocol = PROTOCOL_SASL_PLAINTEXT;
     string username;
     string password;
 |};
@@ -172,6 +168,7 @@ public type AuthenticationConfiguration record {|
 # + decoupleProcessing - Decouples processing
 # + secureSocket - Configurations related to SSL/TLS encryption
 # + authenticationConfiguration - Authentication-related configurations for the Kafka consumer
+# + securityProtocol - Type of the security protocol to use in the broker connection
 public type ConsumerConfiguration record {|
     string bootstrapServers;
     string groupId?;
@@ -223,6 +220,7 @@ public type ConsumerConfiguration record {|
 
     SecureSocket secureSocket?;
     AuthenticationConfiguration authenticationConfiguration?;
+    SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 
 # Type related to consumer record.
@@ -293,6 +291,7 @@ public type AvroGenericRecord record {
 # + enableIdempotence - Exactly one copy of each message is written to the stream when enabled
 # + secureSocket - Configurations related to SSL/TLS encryption
 # + authenticationConfiguration - Authentication-related configurations for the Kafka producer
+# + securityProtocol - Type of the security protocol to use in the broker connection
 public type ProducerConfiguration record {|
     string bootstrapServers;
     ProducerAcks acks = ACKS_SINGLE;
@@ -335,6 +334,7 @@ public type ProducerConfiguration record {|
 
     SecureSocket secureSocket?;
     AuthenticationConfiguration authenticationConfiguration?;
+    SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 
 # Defines a record to send data using Avro serialization.

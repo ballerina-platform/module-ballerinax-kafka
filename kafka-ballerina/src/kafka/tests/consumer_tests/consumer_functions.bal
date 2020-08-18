@@ -23,6 +23,7 @@ const TEST_DIRECTORY = "consumer_tests/";
 
 string topic1 = "test-topic-1";
 string topic2 = "test-topic-2";
+string nonExistingTopic = "non-existing-topic";
 string manualCommitTopic = "manual-commit-test-topic";
 
 string receivedMessage = "";
@@ -135,15 +136,22 @@ function manualCommitTest() returns error? {
 
     var commitResult = check consumer->commitOffset([partitionOffset]);
     var committedOffset = check consumer->getCommittedOffset(topicPartition);
-
-    int offsetValue = committedOffset.offset;
+    PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
+    int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, 0);
 
     var commitAllResult = check consumer->'commit();
     committedOffset = check consumer->getCommittedOffset(topicPartition);
-
-    offsetValue = committedOffset.offset;
+    committedPartitionOffset = <PartitionOffset>committedOffset;
+    offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, messageCount);
+
+    TopicPartition nonExistingTopicPartition = {
+        topic: nonExistingTopic,
+        partition: 999
+    };
+    committedOffset = check consumer->getCommittedOffset(nonExistingTopicPartition);
+    test:assertEquals(committedOffset, ());
 }
 
 @test:AfterSuite {}

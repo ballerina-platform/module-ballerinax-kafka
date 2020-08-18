@@ -23,4 +23,4 @@ public type CompressionType COMPRESSION_NONE|COMPRESSION_GZIP|COMPRESSION_SNAPPY
 public type AuthenticationMechanism AUTH_SASL_PLAIN;
 
 # Represents the supported security protocols for Kafka clients.
-public type SecurityProtocol PROTOCOL_SASL_PLAINTEXT|PROTOCOL_SASL_SSL;
+public type SecurityProtocol PROTOCOL_PLAINTEXT|PROTOCOL_SASL_PLAINTEXT|PROTOCOL_SASL_SSL|PROTOCOL_SSL;

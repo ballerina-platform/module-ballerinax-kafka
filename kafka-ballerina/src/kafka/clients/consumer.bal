@@ -198,10 +198,10 @@ public type Consumer client object {
     #
     # + partition - The `TopicPartition` in which the committed offset is returned for consumer
     # + duration - Timeout duration for the get committed offset operation to execute
-    # + return - Committed offset for the consumer for the given partition if executes successfully or else
-    #            `kafka:ConsumerError`
+    # + return - The last committed offset for the consumer for the given partition if there is a committed offset
+    #            present, `()` if there are no committed offsets or else a `kafka:ConsumerError`
     public remote function getCommittedOffset(TopicPartition partition, public int duration = -1)
-    returns PartitionOffset|ConsumerError {
+    returns PartitionOffset|ConsumerError? {
         return consumerGetCommittedOffset(self, partition, duration);
     }
 

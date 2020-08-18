@@ -123,5 +123,14 @@ public const AUTH_SASL_PLAIN = "PLAIN";
 
 
 // Security Protocols
+# Represents Kafka un-authenticated, non-encrypted channel
+public const PROTOCOL_PLAINTEXT = "PLAINTEXT";
+
+# Represents Kafka authenticated, non-encrypted channel
 public const PROTOCOL_SASL_PLAINTEXT = "SASL_PLAINTEXT";
+
+# Represents Kafka SASL authenticated, SSL channel
 public const PROTOCOL_SASL_SSL = "SASL_SSL";
+
+# Represents Kafka SSL channel
+public const PROTOCOL_SSL = "SSL";

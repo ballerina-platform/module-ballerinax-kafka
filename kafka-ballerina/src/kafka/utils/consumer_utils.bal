@@ -98,7 +98,7 @@ returns PartitionOffset[]|ConsumerError =
 } external;
 
 function consumerGetCommittedOffset(Consumer consumer, TopicPartition partition, int duration)
-returns PartitionOffset|ConsumerError =
+returns PartitionOffset|ConsumerError? =
 @java:Method {
     name: "getCommittedOffset",
     class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.GetOffsets"
