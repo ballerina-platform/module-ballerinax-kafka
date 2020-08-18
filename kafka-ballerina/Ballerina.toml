@@ -8,7 +8,7 @@ target = "java8"
     [[platform.libraries]]
     artifactId = "kafka"
     version = "2.0.0-SNAPSHOT"
-    path = "../kafka-native/build/libs/kafka-native-2.0.0-SNAPSHOT.jar"
+    path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
     groupId = "org.ballerinalang.messaging.kafka"
     modules = ["kafka"]
 
@@ -29,38 +29,3 @@ target = "java8"
     version = "1.9.2"
     path = "./lib/avro-1.9.2.jar"
     groupId = "org.apache.avro"
-
-    [[platform.libraries]]
-    artifactId = "zookeeper"
-    version = "2.3.1"
-    path = "./lib/zookeeper-3.6.1.jar"
-    groupId = "org.apache.zookeeper"
-    scope = "testOnly"
-
-    [[platform.libraries]]
-    artifactId = "zookeeper-jute"
-    version = "3.6.1"
-    path = "./lib/zookeeper-jute-3.6.1.jar"
-    groupId = "org.apache.zookeeper"
-    scope = "testOnly"
-
-    [[platform.libraries]]
-    artifactId = "metrics-core"
-    version = "4.1.7"
-    path = "./lib/metrics-core-4.1.7.jar"
-    groupId = "io.dropwizard.metrics"
-    scope = "testOnly"
-
-    [[platform.libraries]]
-    artifactId = "scala-library"
-    version = "2.12.12"
-    path = "./lib/scala-library-2.12.12.jar"
-    groupId = "org.scala-lang"
-    scope = "testOnly"
-
-    [[platform.libraries]]
-    artifactId = "scala-logging_2.12"
-    version = "3.9.0"
-    path = "./lib/scala-logging_2.12.3.9.0.jar"
-    groupId = "com.typesafe.scala-logging"
-    scope = "testOnly"
