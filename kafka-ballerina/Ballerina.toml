@@ -8,7 +8,7 @@ target = "java8"
     [[platform.libraries]]
     artifactId = "kafka"
     version = "2.0.0-SNAPSHOT"
-    path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
+    path = "../kafka-native/build/libs/kafka-native-2.0.0-SNAPSHOT.jar"
     groupId = "org.ballerinalang.messaging.kafka"
     modules = ["kafka"]
 

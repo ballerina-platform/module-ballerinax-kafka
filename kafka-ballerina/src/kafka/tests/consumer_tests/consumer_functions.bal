@@ -88,22 +88,45 @@ function consumerFunctionsTest() returns error? {
     } else {
         test:assertFail("Invalid message type received. Expected string");
     }
+    var closeResult = consumer->close();
 }
 
 @test:Config {}
 function consumerSubscribeUnsubscribeTest() returns error? {
-    Consumer kafkaConsumer = new ({
+    Consumer consumer = new ({
         bootstrapServers: "localhost:9092",
         groupId: "consumer-subscriber-unsubscribe-test-group",
         clientId: "test-consumer-3",
         topics: [topic1, topic2]
     });
-    string[] subscribedTopics = check kafkaConsumer->getSubscription();
+    string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 2);
 
-    var result = check kafkaConsumer->unsubscribe();
-    subscribedTopics = check kafkaConsumer->getSubscription();
+    var result = check consumer->unsubscribe();
+    subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
+    var closeResult = consumer->close();
+}
+
+@test:Config {
+    dependsOn: ["consumerFunctionsTest", "consumerServiceTest"]
+}
+function consumerSubscribeTest() returns error? {
+    Consumer consumer = new ({
+        bootstrapServers: "localhost:9092",
+        groupId: "consumer-subscriber-test-group",
+        clientId: "test-consumer-4",
+        metadataMaxAgeInMillis: 2000
+    });
+    string[] availableTopics = check consumer->getAvailableTopics();
+    test:assertEquals(availableTopics.length(), 3);
+    string[] subscribedTopics = check consumer->getSubscription();
+    test:assertEquals(subscribedTopics.length(), 0);
+    var result = check consumer->subscribeToPattern("test.*");
+    var pollResult = consumer->poll(1000); // Polling to force-update the metadata
+    string[] newSubscribedTopics = check consumer->getSubscription();
+    test:assertEquals(newSubscribedTopics.length(), 2);
+    var closeResult = consumer->close();
 }
 
 @test:Config {}
@@ -148,6 +171,7 @@ function manualCommitTest() returns error? {
 
     int positionOffset = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(positionOffset, messageCount);
+    var closeResult = consumer->close();
 }
 
 @test:Config {}
@@ -175,6 +199,7 @@ function nonExistingTopicPartitionTest() returns error? {
     ConsumerError positionOffsetError = <ConsumerError>nonExistingPositionOffset;
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
+    var closeResult = consumer->close();
 }
 
 @test:AfterSuite {}
