@@ -227,6 +227,19 @@ function producerSendStringTest() returns error? {
     test:assertEquals(messageValue, message);
 }
 
+@test:Config {}
+function producerCloseTest() returns error? {
+    string message = "Test Message";
+    var result = producer->send(message, topic3);
+    test:assertFalse(result is error, result.toString());
+    result = producer->close();
+    test:assertFalse(result is error, result.toString());
+    result = producer->send(message, topic3);
+    test:assertTrue(result is error);
+    error receivedErr = <error>result;
+    string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
+    test:assertEquals(receivedErr.message(), expectedErr);
+}
 
 @test:AfterSuite {}
 function stopKafkaServerForConsumerTests() returns error? {

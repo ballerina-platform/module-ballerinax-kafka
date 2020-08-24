@@ -1,8 +1,6 @@
 import ballerina/system;
-import ballerina/io;
 
 function createKafkaCluster(string directory, string yamlFilePath) returns error? {
-    io:println("*********: " + directory);
     var result = system:exec("docker-compose", {}, directory, "-f", yamlFilePath, "up", "-d");
     if (result is error) {
         return error("Error occurred while creating the Kafka server");
