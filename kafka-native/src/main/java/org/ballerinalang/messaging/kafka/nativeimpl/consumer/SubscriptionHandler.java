@@ -94,12 +94,13 @@ public class SubscriptionHandler {
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         try {
             kafkaConsumer.subscribe(Pattern.compile(topicRegex.getValue()));
+            // TODO: This sometimes not updating since Kafka not updates the subscription tight away
             Set<String> topicsList = kafkaConsumer.subscription();
             KafkaMetricsUtil.reportBulkSubscription(consumerObject, topicsList);
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PATTERN);
-            return createKafkaError("Failed to unsubscribe from the topics: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to subscribe to the topics: " + e.getMessage(), CONSUMER_ERROR);
         }
         return null;
     }

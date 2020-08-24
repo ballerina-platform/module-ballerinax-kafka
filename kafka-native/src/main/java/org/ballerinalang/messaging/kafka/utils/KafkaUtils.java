@@ -54,39 +54,6 @@ import java.util.Properties;
 
 import static org.ballerinalang.jvm.BallerinaValues.createRecord;
 import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ADDITIONAL_PROPERTIES_MAP_FIELD;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_CONCURRENT_CONSUMERS;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DECOUPLE_PROCESSING;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_OFFSET;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_PARTITION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_POLLING_INTERVAL;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_POLLING_TIMEOUT;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_TOPIC;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_TOPICS;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.AUTHENTICATION_CONFIGURATION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.AUTHENTICATION_MECHANISM;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.BALLERINA_STRAND;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_KEY_DESERIALIZER_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KEYSTORE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PASSWORD;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PROTOCOL_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SASL_PLAIN;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SECURE_SOCKET;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SECURITY_PROTOCOL_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERDES_AVRO;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERDES_CUSTOM;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.TRUSTSTORE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.USERNAME;
 
 /**
  * Utility class for Kafka Connector Implementation.
@@ -100,7 +67,7 @@ public class KafkaUtils {
                                                  ConsumerRecords records, String groupId) {
 
         BArray consumerRecordsArray = BValueCreator.createArrayValue(new BArrayType(getConsumerRecord().getType()));
-        String keyType = listener.getStringValue(CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
+        String keyType = listener.getStringValue(KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
         String valueType = listener.getStringValue(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
 
         if (service.getType().getAttachedFunctions()[0].getParameterType().length == 2) {
@@ -151,18 +118,18 @@ public class KafkaUtils {
                                 KafkaConstants.CONSUMER_ISOLATION_LEVEL_CONFIG);
 
         addDeserializerConfigs(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, configurations, properties,
-                               CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG);
+                               KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG);
         addDeserializerConfigs(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, configurations, properties,
                                KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG);
-        addCustomDeserializer(CONSUMER_KEY_DESERIALIZER_CONFIG, CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG, properties,
+        addCustomDeserializer(KafkaConstants.CONSUMER_KEY_DESERIALIZER_CONFIG, KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG, properties,
                               configurations);
-        addCustomDeserializer(CONSUMER_VALUE_DESERIALIZER_CONFIG, CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG, properties,
+        addCustomDeserializer(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG, KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG, properties,
                               configurations);
         addStringParamIfPresent(KafkaConstants.SCHEMA_REGISTRY_URL, configurations, properties,
                                 KafkaConstants.CONSUMER_SCHEMA_REGISTRY_URL);
 
-        addStringArrayParamIfPresent(ALIAS_TOPICS.getValue(), configurations, properties,
-                                     ALIAS_TOPICS);
+        addStringArrayParamIfPresent(KafkaConstants.ALIAS_TOPICS.getValue(), configurations, properties,
+                                     KafkaConstants.ALIAS_TOPICS);
 
         addIntParamIfPresent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_SESSION_TIMEOUT_MS_CONFIG);
@@ -206,10 +173,10 @@ public class KafkaUtils {
         addIntParamIfPresent(ConsumerConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_DEFAULT_API_TIMEOUT_CONFIG);
 
-        addIntParamIfPresent(ALIAS_POLLING_TIMEOUT.getValue(), configurations, properties, ALIAS_POLLING_TIMEOUT);
-        addIntParamIfPresent(ALIAS_POLLING_INTERVAL.getValue(), configurations, properties, ALIAS_POLLING_INTERVAL);
-        addIntParamIfPresent(ALIAS_CONCURRENT_CONSUMERS.getValue(), configurations, properties,
-                             ALIAS_CONCURRENT_CONSUMERS);
+        addIntParamIfPresent(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue(), configurations, properties, KafkaConstants.ALIAS_POLLING_TIMEOUT);
+        addIntParamIfPresent(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue(), configurations, properties, KafkaConstants.ALIAS_POLLING_INTERVAL);
+        addIntParamIfPresent(KafkaConstants.ALIAS_CONCURRENT_CONSUMERS.getValue(), configurations, properties,
+                             KafkaConstants.ALIAS_CONCURRENT_CONSUMERS);
 
         addBooleanParamIfPresent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, configurations, properties,
                                  KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT_CONFIG, true);
@@ -218,20 +185,20 @@ public class KafkaUtils {
         addBooleanParamIfPresent(ConsumerConfig.EXCLUDE_INTERNAL_TOPICS_CONFIG, configurations, properties,
                                  KafkaConstants.CONSUMER_EXCLUDE_INTERNAL_TOPICS_CONFIG, true);
 
-        addBooleanParamIfPresent(ALIAS_DECOUPLE_PROCESSING.getValue(), configurations, properties,
-                                 ALIAS_DECOUPLE_PROCESSING, false);
-        if (Objects.nonNull(configurations.get(SECURE_SOCKET))) {
+        addBooleanParamIfPresent(KafkaConstants.ALIAS_DECOUPLE_PROCESSING.getValue(), configurations, properties,
+                                 KafkaConstants.ALIAS_DECOUPLE_PROCESSING, false);
+        if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
             processSslProperties(configurations, properties);
         }
-        if (SERDES_AVRO.equals(configurations.get(CONSUMER_VALUE_DESERIALIZER_CONFIG)) ||
-                SERDES_AVRO.equals(configurations.get(CONSUMER_VALUE_DESERIALIZER_CONFIG))) {
+        if (KafkaConstants.SERDES_AVRO.equals(configurations.get(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG)) ||
+                KafkaConstants.SERDES_AVRO.equals(configurations.get(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG))) {
             properties.put(KafkaConstants.SPECIFIC_AVRO_READER, false);
         }
-        if (Objects.nonNull(configurations.get(AUTHENTICATION_CONFIGURATION))) {
+        if (Objects.nonNull(configurations.get(KafkaConstants.AUTHENTICATION_CONFIGURATION))) {
             processSaslProperties(configurations, properties);
         }
-        if (Objects.nonNull(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD))) {
-            processAdditionalProperties(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD), properties);
+        if (Objects.nonNull(configurations.getMapValue(KafkaConstants.ADDITIONAL_PROPERTIES_MAP_FIELD))) {
+            processAdditionalProperties(configurations.getMapValue(KafkaConstants.ADDITIONAL_PROPERTIES_MAP_FIELD), properties);
         }
         return properties;
     }
@@ -260,9 +227,9 @@ public class KafkaUtils {
                                 KafkaConstants.PRODUCER_SCHEMA_REGISTRY_URL);
 
         addSerializerTypeConfigs(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, configurations,
-                                 properties, PRODUCER_KEY_SERIALIZER_TYPE_CONFIG);
+                                 properties, KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG);
         addSerializerTypeConfigs(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, configurations,
-                                 properties, PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG);
+                                 properties, KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG);
         addCustomKeySerializer(properties, configurations);
         addCustomValueSerializer(properties, configurations);
 
@@ -305,53 +272,54 @@ public class KafkaUtils {
 
         addBooleanParamIfPresent(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, configurations,
                                  properties, KafkaConstants.PRODUCER_ENABLE_IDEMPOTENCE_CONFIG);
-        if (Objects.nonNull(configurations.get(SECURE_SOCKET))) {
+        if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
             processSslProperties(configurations, properties);
         }
-        if (Objects.nonNull(configurations.get(AUTHENTICATION_CONFIGURATION))) {
+        if (Objects.nonNull(configurations.get(KafkaConstants.AUTHENTICATION_CONFIGURATION))) {
             processSaslProperties(configurations, properties);
         }
-        if (Objects.nonNull(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD))) {
-            processAdditionalProperties(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD), properties);
+        if (Objects.nonNull(configurations.getMapValue(KafkaConstants.ADDITIONAL_PROPERTIES_MAP_FIELD))) {
+            processAdditionalProperties(configurations.getMapValue(KafkaConstants.ADDITIONAL_PROPERTIES_MAP_FIELD), properties);
         }
         return properties;
     }
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)
     private static void processSslProperties(MapValue<BString, Object> configurations, Properties configParams) {
-        MapValue<BString, Object> secureSocket = (MapValue<BString, Object>) configurations.get(SECURE_SOCKET);
+        MapValue<BString, Object> secureSocket = (MapValue<BString, Object>) configurations.get(
+                KafkaConstants.SECURE_SOCKET);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KEYSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.KEYSTORE_TYPE_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KEYSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KEYSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.PASSWORD_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYMANAGER_ALGORITHM_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KEYSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.KEYMANAGER_ALGORITHM_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(TRUSTSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.TRUSTSTORE_TYPE_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(TRUSTSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(TRUSTSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.PASSWORD_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTMANAGER_ALGORITHM_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(TRUSTSTORE_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.TRUSTMANAGER_ALGORITHM_CONFIG);
         addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(PROTOCOL_CONFIG), configParams,
-                                SECURITY_PROTOCOL_CONFIG);
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
+                                KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(PROTOCOL_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
                                 KafkaConstants.SSL_PROTOCOL_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(PROTOCOL_CONFIG), configParams,
+                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
                                 KafkaConstants.ENABLED_PROTOCOLS_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_PROVIDER_CONFIG, configurations, configParams,
                                 KafkaConstants.SSL_PROVIDER_CONFIG);
@@ -365,21 +333,21 @@ public class KafkaUtils {
                                 KafkaConstants.SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG);
     }
 
-    @SuppressWarnings(UNCHECKED)
+    @SuppressWarnings(KafkaConstants.UNCHECKED)
     private static void processSaslProperties(MapValue<BString, Object> configurations, Properties properties) {
         MapValue<BString, Object> authenticationConfig =
-                (MapValue<BString, Object>) configurations.getMapValue(AUTHENTICATION_CONFIGURATION);
-        String mechanism = authenticationConfig.getStringValue(AUTHENTICATION_MECHANISM).getValue();
-        if (SASL_PLAIN.equals(mechanism)) {
-            String username = authenticationConfig.getStringValue(USERNAME).getValue();
-            String password = authenticationConfig.getStringValue(PASSWORD).getValue();
+                (MapValue<BString, Object>) configurations.getMapValue(KafkaConstants.AUTHENTICATION_CONFIGURATION);
+        String mechanism = authenticationConfig.getStringValue(KafkaConstants.AUTHENTICATION_MECHANISM).getValue();
+        if (KafkaConstants.SASL_PLAIN.equals(mechanism)) {
+            String username = authenticationConfig.getStringValue(KafkaConstants.USERNAME).getValue();
+            String password = authenticationConfig.getStringValue(KafkaConstants.PASSWORD).getValue();
             String jaasConfigValue =
                     "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"" + username +
                             "\" password=\"" + password + "\";";
             addStringParamIfPresent(SaslConfigs.SASL_MECHANISM, authenticationConfig, properties,
-                                    AUTHENTICATION_MECHANISM);
+                                    KafkaConstants.AUTHENTICATION_MECHANISM);
             addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, authenticationConfig, properties,
-                                    SECURITY_PROTOCOL_CONFIG);
+                                    KafkaConstants.SECURITY_PROTOCOL_CONFIG);
             properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfigValue);
         }
     }
@@ -407,20 +375,20 @@ public class KafkaUtils {
     }
 
     private static void addCustomKeySerializer(Properties properties, MapValue<BString, Object> configurations) {
-        Object serializer = configurations.get(PRODUCER_KEY_SERIALIZER_CONFIG);
-        String serializerType = configurations.getStringValue(PRODUCER_KEY_SERIALIZER_TYPE_CONFIG).getValue();
-        if (Objects.nonNull(serializer) && SERDES_CUSTOM.equals(serializerType)) {
-            properties.put(PRODUCER_KEY_SERIALIZER_CONFIG.getValue(),
-                           configurations.get(PRODUCER_KEY_SERIALIZER_CONFIG));
+        Object serializer = configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG);
+        String serializerType = configurations.getStringValue(KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG).getValue();
+        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
+            properties.put(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG.getValue(),
+                           configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG));
         }
     }
 
     private static void addCustomValueSerializer(Properties properties, MapValue<BString, Object> configurations) {
-        Object serializer = configurations.get(PRODUCER_VALUE_SERIALIZER_CONFIG);
-        String serializerType = configurations.getStringValue(PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG).getValue();
-        if (Objects.nonNull(serializer) && SERDES_CUSTOM.equals(serializerType)) {
-            properties.put(PRODUCER_VALUE_SERIALIZER_CONFIG.getValue(),
-                           configurations.get(PRODUCER_VALUE_SERIALIZER_CONFIG));
+        Object serializer = configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG);
+        String serializerType = configurations.getStringValue(KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG).getValue();
+        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
+            properties.put(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG.getValue(),
+                           configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG));
         }
     }
 
@@ -428,9 +396,9 @@ public class KafkaUtils {
                                               MapValue<BString, Object> configurations) {
         Object deserializer = configurations.get(configParam);
         String deserializerType = configurations.getStringValue(typeConfig).getValue();
-        if (Objects.nonNull(deserializer) && SERDES_CUSTOM.equals(deserializerType)) {
+        if (Objects.nonNull(deserializer) && KafkaConstants.SERDES_CUSTOM.equals(deserializerType)) {
             properties.put(configParam.getValue(), configurations.get(configParam));
-            properties.put(BALLERINA_STRAND, BRuntime.getCurrentRuntime());
+            properties.put(KafkaConstants.BALLERINA_STRAND, BRuntime.getCurrentRuntime());
         }
     }
 
@@ -447,7 +415,7 @@ public class KafkaUtils {
                 return KafkaConstants.FLOAT_SERIALIZER;
             case KafkaConstants.SERDES_AVRO:
                 return KafkaConstants.AVRO_SERIALIZER;
-            case SERDES_CUSTOM:
+            case KafkaConstants.SERDES_CUSTOM:
                 return KafkaConstants.CUSTOM_SERIALIZER;
             default:
                 return value;
@@ -465,9 +433,9 @@ public class KafkaUtils {
                 return KafkaConstants.INT_DESERIALIZER;
             case KafkaConstants.SERDES_FLOAT:
                 return KafkaConstants.FLOAT_DESERIALIZER;
-            case SERDES_AVRO:
+            case KafkaConstants.SERDES_AVRO:
                 return KafkaConstants.AVRO_DESERIALIZER;
-            case SERDES_CUSTOM:
+            case KafkaConstants.SERDES_CUSTOM:
                 return KafkaConstants.CUSTOM_DESERIALIZER;
             default:
                 return value;
@@ -529,9 +497,9 @@ public class KafkaUtils {
         if (partitions != null) {
             for (int counter = 0; counter < partitions.size(); counter++) {
                 MapValue<BString, Object> partition = (MapValue<BString, Object>) partitions.get(counter);
-                String topic = partition.get(ALIAS_TOPIC).toString();
-                int partitionValue = getIntFromLong((Long) partition.get(ALIAS_PARTITION), logger,
-                                                    ALIAS_PARTITION.getValue());
+                String topic = partition.get(KafkaConstants.ALIAS_TOPIC).toString();
+                int partitionValue = getIntFromLong((Long) partition.get(KafkaConstants.ALIAS_PARTITION), logger,
+                                                    KafkaConstants.ALIAS_PARTITION.getValue());
                 partitionList.add(new TopicPartition(topic, partitionValue));
             }
         }
@@ -585,32 +553,32 @@ public class KafkaUtils {
             if (value instanceof byte[]) {
                 return BValueCreator.createArrayValue((byte[]) value);
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: byte[]");
+                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: byte[]");
             }
         } else if (KafkaConstants.SERDES_STRING.equals(type)) {
             if (value instanceof String) {
                 return StringUtils.fromString((String) value);
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: string");
+                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: string");
             }
         } else if (KafkaConstants.SERDES_INT.equals(type)) {
             if (value instanceof Long) {
                 return value;
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: int");
+                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: int");
             }
         } else if (KafkaConstants.SERDES_FLOAT.equals(type)) {
             if (value instanceof Double) {
                 return value;
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: float");
+                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: float");
             }
-        } else if (SERDES_AVRO.equals(type)) {
+        } else if (KafkaConstants.SERDES_AVRO.equals(type)) {
             return handleAvroConsumer(value);
-        } else if (SERDES_CUSTOM.equals(type)) {
+        } else if (KafkaConstants.SERDES_CUSTOM.equals(type)) {
             return value;
         }
-        throw createKafkaError("Unexpected type found for consumer record", CONSUMER_ERROR);
+        throw createKafkaError("Unexpected type found for consumer record", KafkaConstants.CONSUMER_ERROR);
     }
 
     public static MapValue<BString, Object> getConsumerRecord() {
@@ -666,7 +634,7 @@ public class KafkaUtils {
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = new HashMap<>();
         for (int i = 0; i < offsets.size(); i++) {
             MapValue offset = (MapValue) offsets.get(i);
-            int offsetValue = offset.getIntValue(ALIAS_OFFSET).intValue();
+            int offsetValue = offset.getIntValue(KafkaConstants.ALIAS_OFFSET).intValue();
             TopicPartition topicPartition = createTopicPartitionFromPartitionOffset(offset);
             partitionToMetadataMap.put(topicPartition, new OffsetAndMetadata(offsetValue));
         }
@@ -680,9 +648,9 @@ public class KafkaUtils {
      * @return TopicPartition Object created
      */
     public static TopicPartition createTopicPartitionFromPartitionOffset(MapValue offset) {
-        MapValue partition = (MapValue) offset.get(ALIAS_PARTITION);
-        String topic = partition.getStringValue(ALIAS_TOPIC).getValue();
-        int partitionValue = partition.getIntValue(ALIAS_PARTITION).intValue();
+        MapValue partition = (MapValue) offset.get(KafkaConstants.ALIAS_PARTITION);
+        String topic = partition.getStringValue(KafkaConstants.ALIAS_TOPIC).getValue();
+        int partitionValue = partition.getIntValue(KafkaConstants.ALIAS_PARTITION).intValue();
 
         return new TopicPartition(topic, partitionValue);
     }
@@ -759,7 +727,8 @@ public class KafkaUtils {
     }
 
     public static String getBrokerNames(ObjectValue listener) {
-        MapValue<BString, Object> listenerConfigurations = listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
+        MapValue<BString, Object> listenerConfigurations = listener.getMapValue(
+                KafkaConstants.CONSUMER_CONFIG_FIELD_NAME);
         return listenerConfigurations.get(KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG).toString();
     }
 

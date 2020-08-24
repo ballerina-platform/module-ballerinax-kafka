@@ -1,24 +1,16 @@
 [project]
 org-name = "ballerinax"
-version = "1.0.0"
+version = "2.0.0"
 
 [platform]
 target = "java8"
 
     [[platform.libraries]]
     artifactId = "kafka"
-    version = "1.0.0-SNAPSHOT"
-    path = "../kafka-native/build/libs/kafka-native-1.0.0-SNAPSHOT.jar"
-    groupId = "ballerina"
+    version = "2.0.0-SNAPSHOT"
+    path = "../kafka-native/build/libs/kafka-native-2.0.0-SNAPSHOT.jar"
+    groupId = "org.ballerinalang.messaging.kafka"
     modules = ["kafka"]
-
-    [[platform.libraries]]
-    artifactId = "kafka"
-    version = "1.0.0-SNAPSHOT"
-    path = "../kafka-native/build/libs/kafka-test-utils-1.0.0-SNAPSHOT.jar"
-    groupId = "ballerina"
-    modules = ["kafka"]
-    scope = "test"
 
     [[platform.libraries]]
     artifactId = "kafka-clients"

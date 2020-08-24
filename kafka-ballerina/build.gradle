@@ -23,8 +23,8 @@ configurations {
     jbalTools
     kafkaBallerinaBirDir
     kafkaBallerinaJar
-    kafkaJars
-    avroJars
+    packingJars
+    otherJars
 }
 
 dependencies {
@@ -32,14 +32,13 @@ dependencies {
         transitive = false
     }
     compile project(':kafka-native')
-    compile project(':kafka-test-utils')
-    kafkaJars (group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
+    packingJars (group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
         transitive = false
     }
-    kafkaJars (group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
+    packingJars (group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    avroJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
+    otherJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
         transitive = false
     }
 }
@@ -63,14 +62,14 @@ task unpackJballerinaTools(type: Copy) {
     }
 }
 
-task copyKafkaJarsToLib(type: Copy) {
+task copyPackingJarsToLib(type: Copy) {
     into "$project.projectDir/lib"
-    from configurations.kafkaJars
+    from configurations.packingJars
 }
 
-task copyAvroJarsToLib(type: Copy) {
+task copyOtherJarsToLib(type: Copy) {
     into "$project.projectDir/lib"
-    from configurations.avroJars
+    from configurations.otherJars
 }
 
 def moduleName = "kafka"
@@ -96,7 +95,12 @@ task ballerinaBuild {
         def additionalBuildParams = ""
 
         if (project.hasProperty("skipBallerinaTests")) {
-            additionalBuildParams = "--skip-tests"
+            additionalBuildParams += "--skip-tests"
+        }
+
+        if (project.hasProperty("debugBallerina")) {
+            def port = project.getProperty("debugBallerina").toString();
+            additionalBuildParams += "--debug ${port}"
         }
 
         // Build and populate caches
@@ -142,7 +146,7 @@ task ballerinaBuild {
             into file("$artifactLibParent/libs")
         }
         copy {
-            from configurations.kafkaJars
+            from configurations.packingJars
             into file("$artifactLibParent/libs")
         }
 
@@ -205,10 +209,8 @@ publishing {
     }
 }
 
-unpackJballerinaTools.dependsOn copyKafkaJarsToLib
-unpackJballerinaTools.dependsOn copyAvroJarsToLib
 ballerinaBuild.dependsOn ":kafka-native:build"
-ballerinaBuild.dependsOn ":kafka-test-utils:build"
-ballerinaBuild.dependsOn unpackJballerinaTools
+unpackJballerinaTools.dependsOn copyPackingJarsToLib
+unpackJballerinaTools.dependsOn copyOtherJarsToLib
 ballerinaBuild.dependsOn unpackJballerinaTools
 build.dependsOn ballerinaBuild

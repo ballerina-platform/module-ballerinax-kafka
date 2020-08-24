@@ -33,8 +33,6 @@ import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaObserverContext;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,8 +46,6 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getResourcePara
  * Kafka Connector Consumer for Ballerina.
  */
 public class KafkaListenerImpl implements KafkaListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(KafkaListenerImpl.class);
 
     private Scheduler scheduler;
     private ObjectValue service;
@@ -89,7 +85,6 @@ public class KafkaListenerImpl implements KafkaListener {
      */
     @Override
     public void onError(Throwable throwable) {
-        logger.error("Kafka Ballerina server connector retrieved exception: " + throwable.getMessage(), throwable);
         KafkaMetricsUtil.reportConsumerError(listener, KafkaObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
     }
 

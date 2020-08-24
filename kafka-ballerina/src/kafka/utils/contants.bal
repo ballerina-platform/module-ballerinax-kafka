@@ -53,6 +53,16 @@ public const ISOLATION_COMMITTED = "read_committed";
 # Configures the consumer to read all the messages including the aborted ones.
 public const ISOLATION_UNCOMMITTED = "read_uncommitted";
 
+# Automatically reset the consumer offset to the earliest offset
+public const OFFSET_RESET_EARLIEST = "earliest";
+
+# Automatically reset the consumer offset to the latest offset
+public const OFFSET_RESET_LATEST = "latest";
+
+# If the `offsetReset` is set to `OFFSET_RESET_NONE`, the consumer will give an error if no previous offset is found
+# for the consumer group
+public const OFFSET_RESET_NONE = "none";
+
 // ********************************************
 //         Producer-Related constants         *
 // ********************************************
@@ -113,5 +123,14 @@ public const AUTH_SASL_PLAIN = "PLAIN";
 
 
 // Security Protocols
+# Represents Kafka un-authenticated, non-encrypted channel
+public const PROTOCOL_PLAINTEXT = "PLAINTEXT";
+
+# Represents Kafka authenticated, non-encrypted channel
 public const PROTOCOL_SASL_PLAINTEXT = "SASL_PLAINTEXT";
+
+# Represents Kafka SASL authenticated, SSL channel
 public const PROTOCOL_SASL_SSL = "SASL_SSL";
+
+# Represents Kafka SSL channel
+public const PROTOCOL_SSL = "SSL";

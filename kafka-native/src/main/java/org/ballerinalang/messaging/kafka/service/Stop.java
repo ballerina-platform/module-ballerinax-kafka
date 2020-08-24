@@ -37,8 +37,7 @@ public class Stop {
     private static final PrintStream console = System.out;
 
     public static Object stop(ObjectValue listener) {
-        KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener
-                .getNativeData(SERVER_CONNECTOR);
+        KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
         boolean isStopped;
         try {
             isStopped = serverConnector.stop();
