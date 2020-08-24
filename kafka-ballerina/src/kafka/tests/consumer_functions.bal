@@ -18,9 +18,9 @@ import ballerina/io;
 import ballerina/runtime;
 import ballerina/test;
 
-const DOCKER_COMPOSE_CONSUMER = "docker-compose-consumer.yaml";
+const DOCKER_COMPOSE_FILE = "docker-compose.yaml";
 const TEST_MESSAGE = "Hello, Ballerina";
-const TEST_DIRECTORY_CONSUMER = "consumer_tests/";
+const TEST_DIRECTORY = "";
 
 string topic1 = "test-topic-1";
 string topic2 = "test-topic-2";
@@ -43,8 +43,8 @@ Producer producer = new (producerConfiguration);
 
 @test:BeforeSuite
 function startKafkaServerForConsumerTests() returns error? {
-    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY_CONSUMER);
-    var result = createKafkaCluster(parentDirectory, DOCKER_COMPOSE_CONSUMER);
+    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
+    var result = createKafkaCluster(parentDirectory, DOCKER_COMPOSE_FILE);
     if (result is error) {
         io:println(result);
         return result;
@@ -230,8 +230,8 @@ function producerSendStringTest() returns error? {
 
 @test:AfterSuite {}
 function stopKafkaServerForConsumerTests() returns error? {
-    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY_CONSUMER);
-    var result = stopKafkaCluster(parentDirectory, DOCKER_COMPOSE_CONSUMER);
+    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
+    var result = stopKafkaCluster(parentDirectory, DOCKER_COMPOSE_FILE);
     if (result is error) {
         io:println(result);
         return result;
