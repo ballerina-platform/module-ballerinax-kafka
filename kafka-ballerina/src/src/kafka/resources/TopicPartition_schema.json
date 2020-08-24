@@ -1,1 +1,0 @@
-{"ballerinax/kafka:2.0.0:TopicPartition":{"topic":"string","partition":"int"}}
