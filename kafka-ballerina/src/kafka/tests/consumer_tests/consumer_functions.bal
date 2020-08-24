@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -18,11 +18,13 @@ import ballerina/io;
 import ballerina/runtime;
 import ballerina/test;
 
+const DOCKER_COMPOSE_CONSUMER = "docker-compose-consumer.yaml";
 const TEST_MESSAGE = "Hello, Ballerina";
-const TEST_DIRECTORY = "consumer_tests/";
+const TEST_DIRECTORY_CONSUMER = "consumer_tests/";
 
 string topic1 = "test-topic-1";
 string topic2 = "test-topic-2";
+string topic3 = "test-topic-3";
 string nonExistingTopic = "non-existing-topic";
 string manualCommitTopic = "manual-commit-test-topic";
 
@@ -40,12 +42,12 @@ ProducerConfiguration producerConfiguration = {
 Producer producer = new (producerConfiguration);
 
 @test:BeforeSuite
-function startKafkaServer() returns error? {
-    string yamlFilePath = "docker-compose.yaml";
-    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
-    var result = createKafkaCluster(parentDirectory, yamlFilePath);
+function startKafkaServerForConsumerTests() returns error? {
+    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY_CONSUMER);
+    var result = createKafkaCluster(parentDirectory, DOCKER_COMPOSE_CONSUMER);
     if (result is error) {
         io:println(result);
+        return result;
     }
 }
 
@@ -137,7 +139,7 @@ function manualCommitTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
         valueDeserializerType: DES_STRING,
-        clientId: "test-consumer-4",
+        clientId: "test-consumer-5",
         autoCommit: false
     };
     Consumer consumer = new(consumerConfiguration);
@@ -182,7 +184,7 @@ function nonExistingTopicPartitionTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
         valueDeserializerType: DES_STRING,
-        clientId: "test-consumer-4",
+        clientId: "test-consumer-6",
         autoCommit: false
     };
     Consumer consumer = new(consumerConfiguration);
@@ -202,12 +204,37 @@ function nonExistingTopicPartitionTest() returns error? {
     var closeResult = consumer->close();
 }
 
+@test:Config {}
+function producerSendStringTest() returns error? {
+    Producer stringProducer = new (producerConfiguration);
+    string message = "Hello, Ballerina";
+    var result = stringProducer->send(message, topic3);
+    test:assertFalse(result is error, result.toString());
+
+    ConsumerConfiguration consumerConfiguration = {
+        bootstrapServers: "localhost:9092",
+        topics: [topic3],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "producer-functions-test-group",
+        valueDeserializerType: DES_STRING,
+        clientId: "test-consumer-7"
+    };
+    Consumer stringConsumer = new (consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check stringConsumer->poll(2000);
+    test:assertEquals(consumerRecords.length(), 1);
+    var messageValue = consumerRecords[0].value;
+    test:assertTrue(messageValue is string);
+    test:assertEquals(messageValue, message);
+}
+
+
 @test:AfterSuite {}
-function stopKafkaServer() returns error? {
-    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
-    var result = stopKafkaCluster(parentDirectory);
+function stopKafkaServerForConsumerTests() returns error? {
+    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY_CONSUMER);
+    var result = stopKafkaCluster(parentDirectory, DOCKER_COMPOSE_CONSUMER);
     if (result is error) {
         io:println(result);
+        return result;
     }
 }
 

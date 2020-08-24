@@ -16,8 +16,8 @@ function createKafkaCluster(string directory, string yamlFilePath) returns error
     }
 }
 
-function stopKafkaCluster(string directory) returns error? {
-    var result = system:exec("docker-compose", {}, directory, "rm", "-svf");
+function stopKafkaCluster(string directory, string yamlFilePath) returns error? {
+    var result = system:exec("docker-compose", {}, directory, "-f", yamlFilePath, "rm", "-svf");
     if (result is error) {
         return result;
     }

@@ -1,1 +1,0 @@
-{"ballerinax/kafka:2.0.0:PartitionOffset":{"partition":"ballerinax/kafka:2.0.0:TopicPartition","offset":"int"}}
