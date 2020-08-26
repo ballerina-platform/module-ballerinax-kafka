@@ -11,6 +11,7 @@
 .mtj.tmp/
 
 # Package Files #
+!gradle/wrapper/gradle-wrapper.jar
 *.jar
 *.war
 *.nar
@@ -33,5 +34,9 @@ hs_err_pid*
 .gradle
 target
 build
+
+# Ballerina
+velocity.log*
+*Ballerina.lock
 
 misc
