@@ -38,5 +38,6 @@ build
 # Ballerina
 velocity.log*
 *Ballerina.lock
+kafka-ballerina/src/src
 
 misc
