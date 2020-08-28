@@ -21,8 +21,6 @@ description = 'Ballerina - Kafka Ballerina'
 
 configurations {
     jbalTools
-    kafkaBallerinaBirDir
-    kafkaBallerinaJar
     packingJars
     otherJars
 }

@@ -1,14 +1,14 @@
 [project]
 org-name = "ballerinax"
-version = "2.0.0"
+version = "@toml.version@"
 
 [platform]
 target = "java8"
 
     [[platform.libraries]]
     artifactId = "kafka"
-    version = "2.0.0-SNAPSHOT"
-    path = "../kafka-native/build/libs/kafka-native-2.0.0-SNAPSHOT.jar"
+    version = "@project.version@"
+    path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
     groupId = "org.ballerinalang.messaging.kafka"
     modules = ["kafka"]
 
