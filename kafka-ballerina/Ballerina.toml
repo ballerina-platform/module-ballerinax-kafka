@@ -2,6 +2,11 @@
 org-name = "ballerinax"
 version = "@toml.version@"
 
+[dependencies]
+"ballerina/filepath" = "@stdlib.filepath.version@"
+"ballerina/io" = "@stdlib.io.version@"
+"ballerina/system" = "@stdlib.system.version@"
+
 [platform]
 target = "java8"
 
@@ -15,13 +20,13 @@ target = "java8"
     [[platform.libraries]]
     artifactId = "kafka-clients"
     version = "2.3.1"
-    path = "./lib/kafka-clients-2.3.1.jar"
+    path = "./lib/kafka-clients-@kafka.version@.jar"
     groupId = "org.apache.kafka"
 
     [[platform.libraries]]
     artifactId = "kafka_2.12"
     version = "2.3.1"
-    path = "./lib/kafka_2.12-2.3.1.jar"
+    path = "./lib/kafka_2.12-@kafka.version@.jar"
     groupId = "org.apache.kafka"
 
     [[platform.libraries]]

@@ -27,6 +27,9 @@ ext.kafkaVersion = project.kafkaVersion
 ext.awaitalityVersion = "3.1.6"
 ext.avroVersion = "1.9.2"
 ext.puppycrawlCheckstyleVersion = "8.18"
+ext.stdlibFilepathVersion = project.stdlibFilepathVersion
+ext.stdlibIoVersion = project.stdlibIoVersion
+ext.stdlibSystemVersion = project.stdlibSystemVersion
 
 allprojects {
     group = project.group
@@ -59,12 +62,51 @@ allprojects {
 
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerinax-kafka'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-filepath'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-io'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-system'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
         }
     }
 }
 
 subprojects {
     apply plugin: 'java'
+
+    configurations {
+        ballerinaStdLibs
+    }
+
+    dependencies {
+        /* Standard libraries */
+        ballerinaStdLibs "org.ballerinalang:filepath-ballerina:${stdlibFilepathVersion}"
+        ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
+        ballerinaStdLibs "org.ballerinalang:system-ballerina:${stdlibSystemVersion}"
+    }
 
     release {
         // Disable check snapshots temporarily

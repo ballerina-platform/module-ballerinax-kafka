@@ -14,8 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/filepath;
-
 const TEST_PATH = "src/kafka/tests/";
 
 function getAbsoluteTestPath(string subdirectoryPath) returns string|error {
@@ -25,4 +23,6 @@ function getAbsoluteTestPath(string subdirectoryPath) returns string|error {
     }
     string relativePath = <string>relativePathResult;
     return filepath:absolute(relativePath);
+
+    //return "/Users/Thisaru/Projects/Ballerina/module-ballerinax-kafka/kafka-ballerina/" + TEST_PATH + subdirectoryPath;
 }
