@@ -27,6 +27,15 @@ ext.kafkaVersion = project.kafkaVersion
 ext.awaitalityVersion = "3.1.6"
 ext.avroVersion = "1.9.2"
 ext.puppycrawlCheckstyleVersion = "8.18"
+ext.stdlibConfigVersion = project.stdlibConfigVersion
+ext.stdlibFileVersion = project.stdlibFileVersion
+ext.stdlibFilepathVersion = project.stdlibFilepathVersion
+ext.stdlibIoVersion = project.stdlibIoVersion
+ext.stdlibLogVersion = project.stdlibLogVersion
+ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
+ext.stdlibStringutilsVersion = project.stdlibStringutilsVersion
+ext.stdlibSystemVersion = project.stdlibSystemVersion
+ext.stdlibTimeVersion = project.stdlibTimeVersion
 
 allprojects {
     group = project.group
@@ -59,12 +68,105 @@ allprojects {
 
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerinax-kafka'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-config'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-file'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-filepath'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-io'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-log'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-runtime'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-stringutils'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-system'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-time'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
         }
     }
 }
 
 subprojects {
     apply plugin: 'java'
+
+    configurations {
+        ballerinaStdLibs
+    }
+
+    dependencies {
+        /* Standard libraries */
+        ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
+        ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
+        ballerinaStdLibs "org.ballerinalang:filepath-ballerina:${stdlibFilepathVersion}"
+        ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
+        ballerinaStdLibs "org.ballerinalang:log-ballerina:${stdlibLogVersion}"
+        ballerinaStdLibs "org.ballerinalang:runtime-ballerina:${stdlibRuntimeVersion}"
+        ballerinaStdLibs "org.ballerinalang:stringutils-ballerina:${stdlibStringutilsVersion}"
+        ballerinaStdLibs "org.ballerinalang:system-ballerina:${stdlibSystemVersion}"
+        ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
+    }
 
     release {
         // Disable check snapshots temporarily
