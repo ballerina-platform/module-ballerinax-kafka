@@ -1,4 +1,4 @@
-name: Publish Ballerina Kafka Module Release
+name: Publish Release
 
 on:
     release:

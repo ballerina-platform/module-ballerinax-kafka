@@ -1,4 +1,4 @@
-name: Ballerina Kafka Module Build
+name: Pull Request Build
 
 on: [push, pull_request]
 

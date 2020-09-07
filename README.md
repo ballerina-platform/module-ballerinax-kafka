@@ -1,8 +1,8 @@
 # Ballerina Kafka Module
 
 
-[![Build Master Branch](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Ballerina%20Kafka%20Module%20Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3A%22Ballerina+Kafka+Module+Build%22)
-[![Daily Build](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Ballerina%20Kafka%20Module%20Daily%20Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3A%22Ballerina+Kafka+Module+Daily+Build%22)
+[![Build Master Branch](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ABuild%22)
+[![Daily Build](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Daily%20Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ADaily+Build%22)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-kafka.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -53,12 +53,10 @@ For more information, go to the [contribution guidelines](https://github.com/bal
 
 ## Code of Conduct
 
-All contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
+All the contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
 
 ## Useful Links
 
-* Discuss about code changes of the Ballerina project in [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).
+* Discuss the code changes of the Ballerina project in [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).
 * Chat live with us via our [Slack channel](https://ballerina.io/community/slack/).
 * Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
-* View the [Ballerina performance test results](performance/benchmarks/summary.md).
-

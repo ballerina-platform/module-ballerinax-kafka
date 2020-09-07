@@ -1,4 +1,4 @@
-name: Build Ballerina Kafka Module Master Branch
+name: Build
 
 on:
     push:
