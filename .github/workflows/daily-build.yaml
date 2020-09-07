@@ -1,4 +1,4 @@
-name: Ballerina Kafka Module Daily Build
+name: Daily Build
 
 on:
     schedule:

@@ -132,8 +132,8 @@ public type Producer client object {
     # + partition - Partition to which the record should be sent
     # + timestamp - Timestamp of the record in milliseconds since epoch
     # + return -  A `kafka:ProducerError` if send action fails to send data or else '()'
-    public remote function send(anydata value, string topic, public anydata? key = (), public int? partition = (),
-        public int? timestamp = ()) returns ProducerError? {
+    public remote function send(anydata value, string topic, anydata? key = (), int? partition = (),
+        int? timestamp = ()) returns ProducerError? {
         // Handle string values
         if (self.valueSerializerType == SER_STRING) {
             if (value is string) {

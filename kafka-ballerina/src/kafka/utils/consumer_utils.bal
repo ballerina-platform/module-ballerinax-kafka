@@ -46,7 +46,7 @@ function consumerCommit(Consumer consumer) returns ConsumerError? =
     class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.Commit"
 } external;
 
-function consumerCommitOffset(Consumer consumer, PartitionOffset[] offsets, public int duration = -1)
+function consumerCommitOffset(Consumer consumer, PartitionOffset[] offsets, int duration = -1)
 returns ConsumerError? =
 @java:Method {
     name: "commitOffset",
@@ -77,7 +77,7 @@ function consumerGetPausedPartitions(Consumer consumer) returns TopicPartition[]
     class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.ConsumerInformationHandler"
 } external;
 
-function consumerGetTopicPartitions(Consumer consumer, string topic, public int duration = -1)
+function consumerGetTopicPartitions(Consumer consumer, string topic, int duration = -1)
 returns TopicPartition[]|ConsumerError =
 @java:Method {
     name: "getTopicPartitions",
@@ -111,7 +111,7 @@ returns PartitionOffset[]|ConsumerError =
     class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.GetOffsets"
 } external;
 
-function consumerGetPositionOffset(Consumer consumer, TopicPartition partition, public int duration = -1)
+function consumerGetPositionOffset(Consumer consumer, TopicPartition partition, int duration = -1)
 returns int|ConsumerError =
 @java:Method {
     name: "getPositionOffset",
