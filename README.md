@@ -1,8 +1,8 @@
 # Ballerina Kafka Module
 
 
-[![Build Master Branch](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ABuild%22)
-[![Daily Build](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Daily%20Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ADaily+Build%22)
+[![Build](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ABuild)
+[![Daily Build](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Daily%20Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ADaily+Build)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-kafka.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
