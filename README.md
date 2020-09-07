@@ -38,7 +38,7 @@ Execute the commands below to build from the source.
 ./gradlew clean build -PskipBallerinaTests
 ```
 
-4. To debug the tests:
+3. To debug the tests:
 ```shell script
 ./gradlew clean test -PdebugBallerina=<port>
 ```
