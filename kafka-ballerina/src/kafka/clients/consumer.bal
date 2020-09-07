@@ -129,7 +129,7 @@ public type Consumer client object {
     #
     # + duration - Timeout duration for the close operation execution
     # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
-    public remote function close(public int duration = -1) returns ConsumerError? {
+    public remote function close(int duration = -1) returns ConsumerError? {
         return consumerClose(self, duration);
     }
 
@@ -148,7 +148,7 @@ public type Consumer client object {
     # + duration - Timeout duration for the commit operation execution
     # + offsets - Offsets to be commited
     # + return - `kafka:ConsumerError` if an error is encountered or else nil
-    public remote function commitOffset(PartitionOffset[] offsets, public int duration = -1) returns ConsumerError? {
+    public remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns ConsumerError? {
         return consumerCommitOffset(self, offsets, duration);
     }
 
@@ -180,7 +180,7 @@ public type Consumer client object {
     # + duration - Timeout duration for the execution of the `get available topics` operation
     # + return - Array of topics currently available (authorized) for the consumer to subscribe or else
     #           a `kafka:ConsumerError`
-    public remote function getAvailableTopics(public int duration = -1) returns string[]|ConsumerError {
+    public remote function getAvailableTopics(int duration = -1) returns string[]|ConsumerError {
         return consumerGetAvailableTopics(self, duration);
     }
 
@@ -189,7 +189,7 @@ public type Consumer client object {
     # + partitions - Array of topic partitions to get the starting offsets
     # + duration - Timeout duration for the get beginning offsets execution
     # + return - Starting offsets for the given partitions if executes successfully or else `kafka:ConsumerError`
-    public remote function getBeginningOffsets(TopicPartition[] partitions, public int duration = -1)
+    public remote function getBeginningOffsets(TopicPartition[] partitions, int duration = -1)
     returns PartitionOffset[]|ConsumerError {
         return consumerGetBeginningOffsets(self, partitions, duration);
     }
@@ -200,7 +200,7 @@ public type Consumer client object {
     # + duration - Timeout duration for the get committed offset operation to execute
     # + return - The last committed offset for the consumer for the given partition if there is a committed offset
     #            present, `()` if there are no committed offsets or else a `kafka:ConsumerError`
-    public remote function getCommittedOffset(TopicPartition partition, public int duration = -1)
+    public remote function getCommittedOffset(TopicPartition partition, int duration = -1)
     returns PartitionOffset|ConsumerError? {
         return consumerGetCommittedOffset(self, partition, duration);
     }
@@ -210,7 +210,7 @@ public type Consumer client object {
     # + partitions - Set of partitions to get the last offsets
     # + duration - Timeout duration for the get end offsets operation to execute
     # + return - End offsets for the given partitions if executes successfully or else `kafka:ConsumerError`
-    public remote function getEndOffsets(TopicPartition[] partitions, public int duration = -1)
+    public remote function getEndOffsets(TopicPartition[] partitions, int duration = -1)
     returns PartitionOffset[]|ConsumerError {
         return consumerGetEndOffsets(self, partitions, duration);
     }
@@ -232,7 +232,7 @@ public type Consumer client object {
     # + duration - Timeout duration for the get position offset operation to execute
     # + return - Offset which will be fetched next (if a records exists in that offset) or else `kafka:ConsumerError` if
     #            the operation fails
-    public remote function getPositionOffset(TopicPartition partition, public int duration = -1)
+    public remote function getPositionOffset(TopicPartition partition, int duration = -1)
     returns int|ConsumerError {
         return consumerGetPositionOffset(self, partition, duration);
     }
@@ -255,7 +255,7 @@ public type Consumer client object {
     # + topic - The topic for which the partition information is needed
     # + duration - Timeout duration for the `get topic partitions` operation to execute
     # + return - Array of partitions for the given topic if executes successfully or else a `kafka:ConsumerError`
-    public remote function getTopicPartitions(string topic, public int duration = -1)
+    public remote function getTopicPartitions(string topic, int duration = -1)
     returns TopicPartition[]|ConsumerError {
         return consumerGetTopicPartitions(self, topic, duration);
     }
