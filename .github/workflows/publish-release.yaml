@@ -3,6 +3,7 @@ name: Publish Release
 on:
     release:
         types: [published]
+    repository_dispatch:
 
 jobs:
     publish-release:
@@ -25,4 +26,4 @@ jobs:
                   NEW_VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3)
                   echo "New version: ${NEW_VERSION}"
                   echo "Github username: ${GITHUB_ACTOR}"
-                  ./gradlew -PpublishToCentral=true -Pversion=${NEW_VERSION} publish
+                  ./gradlew -Pversion=${NEW_VERSION} publish
