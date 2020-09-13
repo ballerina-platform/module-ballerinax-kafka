@@ -20,7 +20,7 @@ import ballerina/system;
 #
 # + connectorId - Unique ID for a particular connector to use in trasactions
 # + producerConfig - Used to store configurations related to a Kafka connection
-public type Producer client object {
+public client class Producer {
 
     public ProducerConfiguration? producerConfig = ();
     private string keySerializerType;
@@ -175,4 +175,4 @@ public type Producer client object {
         }
         panic createProducerError("Invalid value serializer configuration");
     }
-};
+}
