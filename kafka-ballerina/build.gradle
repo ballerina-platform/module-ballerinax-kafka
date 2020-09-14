@@ -22,7 +22,6 @@ description = 'Ballerina - Kafka Ballerina'
 configurations {
     jbalTools
     packingJars
-    otherJars
 }
 
 dependencies {
@@ -36,7 +35,7 @@ dependencies {
     packingJars (group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    otherJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
+    packingJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
         transitive = false
     }
 }
@@ -103,11 +102,6 @@ task copyStdlibs(type: Copy) {
 task copyPackingJarsToLib(type: Copy) {
     into "$project.projectDir/lib"
     from configurations.packingJars
-}
-
-task copyOtherJarsToLib(type: Copy) {
-    into "$project.projectDir/lib"
-    from configurations.otherJars
 }
 
 def moduleName = "kafka"
@@ -280,7 +274,6 @@ publishing {
 
 ballerinaBuild.dependsOn ":kafka-native:build"
 unpackJballerinaTools.dependsOn copyPackingJarsToLib
-unpackJballerinaTools.dependsOn copyOtherJarsToLib
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlVerions.dependsOn copyStdlibs
