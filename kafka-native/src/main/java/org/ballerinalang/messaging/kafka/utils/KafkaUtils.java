@@ -32,6 +32,7 @@ import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.BallerinaErrors;
 import org.ballerinalang.jvm.BallerinaValues;
 import org.ballerinalang.jvm.StringUtils;
+import org.ballerinalang.jvm.scheduling.StrandMetadata;
 import org.ballerinalang.jvm.types.BArrayType;
 import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.jvm.values.ErrorValue;
@@ -41,6 +42,7 @@ import org.ballerinalang.jvm.values.api.BArray;
 import org.ballerinalang.jvm.values.api.BError;
 import org.ballerinalang.jvm.values.api.BString;
 import org.ballerinalang.jvm.values.api.BValueCreator;
+import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.slf4j.Logger;
@@ -51,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import static org.ballerinalang.jvm.BallerinaValues.createRecord;
 import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
@@ -767,5 +771,32 @@ public class KafkaUtils {
             return KafkaObservabilityConstants.UNKNOWN;
         }
         return clientId;
+    }
+
+    public static Object invokeMethodSync(BRuntime runtime, ObjectValue object, String methodName, String strandName,
+                                          StrandMetadata metadata, int timeout, Object... args) {
+        Semaphore semaphore = new Semaphore(0);
+        final ErrorValue[] errorValue = new ErrorValue[1];
+        Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new CallableUnitCallback() {
+            @Override
+            public void notifySuccess() {
+                semaphore.release();
+            }
+
+            @Override
+            public void notifyFailure(ErrorValue error) {
+                errorValue[0] = error;
+                semaphore.release();
+            }
+        }, args);
+        try {
+            semaphore.tryAcquire(timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+        if (errorValue[0] != null) {
+            throw errorValue[0];
+        }
+        return result;
     }
 }
