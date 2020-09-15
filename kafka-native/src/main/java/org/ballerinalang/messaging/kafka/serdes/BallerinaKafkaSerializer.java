@@ -24,6 +24,7 @@ import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.api.BArray;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.util.Map;
 
@@ -51,16 +52,15 @@ public class BallerinaKafkaSerializer implements Serializer {
     @Override
     public byte[] serialize(String topic, Object data) {
         Object[] args = new Object[]{data, false};
-        BArray result = (BArray) BRuntime.getCurrentRuntime()
-                .getSyncMethodInvokeResult(this.serializerObject, KafkaConstants.FUNCTION_SERIALIZE, null,
-                                           ON_SERIALIZE_METADATA, timeout, args);
+        BArray result = (BArray) KafkaUtils.invokeMethodSync(BRuntime.getCurrentRuntime(), this.serializerObject,
+                                                             KafkaConstants.FUNCTION_SERIALIZE, null,
+                                                             ON_SERIALIZE_METADATA, timeout, args);
         return result.getBytes();
     }
 
     @Override
     public void close() {
-        BRuntime.getCurrentRuntime()
-                .getSyncMethodInvokeResult(this.serializerObject, KafkaConstants.FUNCTION_CLOSE, null,
-                                           ON_CLOSE_METADATA, timeout);
+        KafkaUtils.invokeMethodSync(BRuntime.getCurrentRuntime(), this.serializerObject, KafkaConstants.FUNCTION_CLOSE,
+                                    null, ON_CLOSE_METADATA, timeout);
     }
 }

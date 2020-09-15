@@ -25,6 +25,7 @@ import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.api.BArray;
 import org.ballerinalang.jvm.values.api.BValueCreator;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.util.Map;
 import java.util.Objects;
@@ -59,13 +60,14 @@ public class BallerinaKafkaDeserializer implements Deserializer {
     public Object deserialize(String topic, byte[] data) {
         BArray bData = BValueCreator.createArrayValue(data);
         Object[] args = new Object[]{bData, false};
-        return this.runtime.getSyncMethodInvokeResult(this.deserializerObject, KafkaConstants.FUNCTION_DESERIALIZE,
-                                                      null, ON_DESERIALIZE_METADATA, this.timeout, args);
+        return KafkaUtils.invokeMethodSync(runtime, this.deserializerObject, KafkaConstants.FUNCTION_DESERIALIZE,
+                                           null, ON_DESERIALIZE_METADATA, this.timeout, args);
     }
 
     @Override
     public void close() {
-        this.runtime.getSyncMethodInvokeResult(this.deserializerObject, KafkaConstants.FUNCTION_CLOSE,
-                                               null, ON_CLOSE_METADATA, this.timeout);
+        KafkaUtils.invokeMethodSync(runtime, this.deserializerObject, KafkaConstants.FUNCTION_CLOSE,
+                                    null, ON_CLOSE_METADATA, this.timeout);
     }
+
 }
