@@ -20,14 +20,13 @@ package org.ballerinalang.messaging.kafka.impl;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.ballerinalang.jvm.api.BExecutor;
+import org.ballerinalang.jvm.api.connector.CallableUnitCallback;
+import org.ballerinalang.jvm.api.values.BObject;
 import org.ballerinalang.jvm.observability.ObservabilityConstants;
 import org.ballerinalang.jvm.observability.ObserveUtils;
 import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.values.ErrorValue;
-import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
-import org.ballerinalang.jvm.values.connector.Executor;
 import org.ballerinalang.messaging.kafka.api.KafkaListener;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
@@ -48,11 +47,11 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getResourcePara
 public class KafkaListenerImpl implements KafkaListener {
 
     private Scheduler scheduler;
-    private ObjectValue service;
-    private ObjectValue listener;
+    private BObject service;
+    private BObject listener;
     private ResponseCallback callback;
 
-    public KafkaListenerImpl(Strand strand, ObjectValue listener, ObjectValue service) {
+    public KafkaListenerImpl(Strand strand, BObject listener, BObject service) {
         this.scheduler = strand.scheduler;
         this.listener = listener;
         this.service = service;
@@ -88,30 +87,30 @@ public class KafkaListenerImpl implements KafkaListener {
         KafkaMetricsUtil.reportConsumerError(listener, KafkaObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
     }
 
-    private void executeResource(ObjectValue listener, ConsumerRecords records, String groupId) {
+    private void executeResource(BObject listener, ConsumerRecords records, String groupId) {
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            Executor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
+            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
                             properties, getResourceParameters(service, this.listener, records, groupId));
         } else {
-            Executor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
+            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
                             null, getResourceParameters(service, this.listener, records, groupId));
         }
     }
 
-    private void executeResource(ObjectValue listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records,
+    private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records,
                                  String groupId) {
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            Executor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
+            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
                             properties, getResourceParameters(service, this.listener, records, groupId));
         } else {
-            Executor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
+            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
                             null, getResourceParameters(service, this.listener, records, groupId));
         }
     }
 
-    private Map<String, Object> getNewObserverContextInProperties(ObjectValue listener) {
+    private Map<String, Object> getNewObserverContextInProperties(BObject listener) {
         Map<String, Object> properties = new HashMap<>();
         KafkaObserverContext observerContext = new KafkaObserverContext(KafkaObservabilityConstants.CONTEXT_CONSUMER,
                                                                         KafkaUtils.getClientId(listener),
@@ -128,7 +127,7 @@ public class KafkaListenerImpl implements KafkaListener {
         }
 
         @Override
-        public void notifyFailure(ErrorValue error) {
+        public void notifyFailure(org.ballerinalang.jvm.api.values.BError error) {
             // do nothing
         }
     }

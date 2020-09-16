@@ -304,16 +304,16 @@ function sendStringValuesNilKeys(Producer producer, string value, string topic, 
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object"]
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendStringValuesStringKeys(Producer producer, string value, string topic, string key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -321,8 +321,8 @@ function sendStringValuesIntKeys(Producer producer, string value, string topic, 
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "long",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "long",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -330,16 +330,16 @@ function sendStringValuesFloatKeys(Producer producer, string value, string topic
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.api.BString",
-                "org.ballerinalang.jvm.values.api.BString", "double", "java.lang.Object", "java.lang.Object"]
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.api.values.BString",
+                "org.ballerinalang.jvm.api.values.BString", "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendStringValuesByteArrayKeys(Producer producer, string value, string topic, byte[] key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.ArrayValue",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.ArrayValue",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -347,8 +347,8 @@ function sendStringValuesAvroKeys(Producer producer, string value, string topic,
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.MapValue",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.MapValue",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -356,8 +356,8 @@ function sendStringValuesCustomKeys(Producer producer, string value, string topi
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
 } external;
 
 // Send int values with different types of keys
@@ -365,7 +365,7 @@ function sendIntValuesNilKeys(Producer producer, int value, string topic, int? p
 returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -373,15 +373,15 @@ function sendIntValuesStringKeys(Producer producer, int value, string topic, str
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object"]
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendIntValuesIntKeys(Producer producer, int value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.values.api.BString", "long",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.api.values.BString", "long",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -389,7 +389,7 @@ function sendIntValuesFloatKeys(Producer producer, int value, string topic, floa
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.values.api.BString", "double",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.api.values.BString", "double",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -397,7 +397,7 @@ function sendIntValuesByteArrayKeys(Producer producer, int value, string topic, 
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.api.values.BString",
                  "org.ballerinalang.jvm.values.ArrayValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -405,7 +405,7 @@ function sendIntValuesAvroKeys(Producer producer, int value, string topic, AvroR
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.api.values.BString",
                  "org.ballerinalang.jvm.values.MapValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -413,7 +413,7 @@ function sendIntValuesCustomKeys(Producer producer, int value, string topic, any
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "long", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -422,7 +422,7 @@ function sendFloatValuesNilKeys(Producer producer, float value, string topic, in
 returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -430,15 +430,15 @@ function sendFloatValuesStringKeys(Producer producer, float value, string topic,
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.values.api.BString",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object"]
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.api.values.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendFloatValuesIntKeys(Producer producer, float value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.api.values.BString",
                  "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -446,7 +446,7 @@ function sendFloatValuesFloatKeys(Producer producer, float value, string topic, 
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.api.values.BString",
                  "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -454,7 +454,7 @@ function sendFloatValuesByteArrayKeys(Producer producer, float value, string top
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.api.values.BString",
                  "org.ballerinalang.jvm.values.ArrayValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -462,7 +462,7 @@ function sendFloatValuesAvroKeys(Producer producer, float value, string topic, A
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.api.values.BString",
                  "org.ballerinalang.jvm.values.MapValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -470,7 +470,7 @@ function sendFloatValuesCustomKeys(Producer producer, float value, string topic,
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.values.api.BString",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "double", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -480,7 +480,7 @@ function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topi
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.ArrayValue",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendByteArrayValuesStringKeys(Producer producer, byte[] value, string topic, string key, int? partition = (),
@@ -488,7 +488,7 @@ function sendByteArrayValuesStringKeys(Producer producer, byte[] value, string t
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.ArrayValue",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.api.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -497,7 +497,7 @@ function sendByteArrayValuesIntKeys(Producer producer, byte[] value, string topi
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.ArrayValue",
-                 "org.ballerinalang.jvm.values.api.BString", "long", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendByteArrayValuesFloatKeys(Producer producer, byte[] value, string topic, float key, int? partition = (),
@@ -505,7 +505,7 @@ function sendByteArrayValuesFloatKeys(Producer producer, byte[] value, string to
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.ArrayValue",
-                 "org.ballerinalang.jvm.values.api.BString", "double", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendByteArrayValuesByteArrayKeys(Producer producer, byte[] value, string topic, byte[] key,
@@ -513,7 +513,7 @@ function sendByteArrayValuesByteArrayKeys(Producer producer, byte[] value, strin
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.ArrayValue",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.ArrayValue",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.ArrayValue",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -522,7 +522,7 @@ function sendByteArrayValuesAvroKeys(Producer producer, byte[] value, string top
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.ArrayValue",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.MapValue",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.MapValue",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -531,7 +531,7 @@ function sendByteArrayValuesCustomKeys(Producer producer, byte[] value, string t
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.ArrayValue",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
 } external;
 
 // Sends Avro values with different types of keys
@@ -540,7 +540,7 @@ function sendAvroValuesNilKeys(Producer producer, AvroRecord value, string topic
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.MapValue",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendAvroValuesStringKeys(Producer producer, AvroRecord value, string topic, string key, int? partition = (),
@@ -548,7 +548,7 @@ function sendAvroValuesStringKeys(Producer producer, AvroRecord value, string to
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.MapValue",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.api.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -557,7 +557,7 @@ function sendAvroValuesIntKeys(Producer producer, AvroRecord value, string topic
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.MapValue",
-                 "org.ballerinalang.jvm.values.api.BString", "long", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendAvroValuesFloatKeys(Producer producer, AvroRecord value, string topic, float key, int? partition = (),
@@ -565,7 +565,7 @@ function sendAvroValuesFloatKeys(Producer producer, AvroRecord value, string top
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.MapValue",
-                 "org.ballerinalang.jvm.values.api.BString", "double", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendAvroValuesByteArrayKeys(Producer producer, AvroRecord value, string topic, byte[] key, int? partition = (),
@@ -573,7 +573,7 @@ function sendAvroValuesByteArrayKeys(Producer producer, AvroRecord value, string
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.MapValue",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.ArrayValue",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.ArrayValue",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -582,7 +582,7 @@ function sendAvroValuesAvroKeys(Producer producer, AvroRecord value, string topi
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.MapValue",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.MapValue",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.MapValue",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -591,7 +591,7 @@ function sendAvroValuesCustomKeys(Producer producer, AvroRecord value, string to
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "org.ballerinalang.jvm.values.MapValue",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
 } external;
 
 // Send custom type values with different types of keys
@@ -600,7 +600,7 @@ function sendCustomValuesNilKeys(Producer producer, anydata value, string topic,
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendCustomValuesStringKeys(Producer producer, anydata value, string topic, string key, int? partition = (),
@@ -608,7 +608,7 @@ function sendCustomValuesStringKeys(Producer producer, anydata value, string top
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.api.BString",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.api.values.BString",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -617,14 +617,14 @@ function sendCustomValuesIntKeys(Producer producer, anydata value, string topic,
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object",
-                 "org.ballerinalang.jvm.values.api.BString", "long", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
 function sendCustomValuesFloatKeys(Producer producer, anydata value, string topic, float key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
-    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object", "org.ballerinalang.jvm.values.api.BString", "double",
+    paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object", "org.ballerinalang.jvm.api.values.BString", "double",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -633,7 +633,7 @@ function sendCustomValuesByteArrayKeys(Producer producer, anydata value, string 
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.ArrayValue",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.ArrayValue",
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
@@ -642,7 +642,7 @@ function sendCustomValuesAvroKeys(Producer producer, anydata value, string topic
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object",
-                 "org.ballerinalang.jvm.values.api.BString", "org.ballerinalang.jvm.values.MapValue", "java.lang.Object",
+                 "org.ballerinalang.jvm.api.values.BString", "org.ballerinalang.jvm.values.MapValue", "java.lang.Object",
                  "java.lang.Object"]
 } external;
 
@@ -651,5 +651,5 @@ function sendCustomValuesCustomKeys(Producer producer, anydata value, string top
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
     paramTypes: ["org.ballerinalang.jvm.values.ObjectValue", "java.lang.Object",
-                 "org.ballerinalang.jvm.values.api.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
+                 "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object", "java.lang.Object"]
 } external;
