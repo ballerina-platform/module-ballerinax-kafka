@@ -21,15 +21,11 @@ package org.ballerinalang.messaging.kafka.utils;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
-import org.ballerinalang.jvm.StringUtils;
-import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
-import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
+import org.ballerinalang.jvm.api.BStringUtils;
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BString;
 
 import java.util.List;
-
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 
 /**
  * Utility functions to handle kafka avro operations.
@@ -40,24 +36,24 @@ public class AvroUtils {
      */
     private AvroUtils(){}
 
-    protected static void populateBallerinaGenericAvroRecord(MapValue<BString, Object> genericAvroRecord,
+    protected static void populateBallerinaGenericAvroRecord(BMap<BString, Object> genericAvroRecord,
                                                              GenericRecord record) {
         List<Schema.Field> fields = record.getSchema().getFields();
         for (Schema.Field field : fields) {
             if (record.get(field.name()) instanceof Utf8) {
-                genericAvroRecord.put(StringUtils.fromString(field.name()),
-                                      StringUtils.fromString(record.get(field.name()).toString()));
+                genericAvroRecord.put(BStringUtils.fromString(field.name()),
+                                      BStringUtils.fromString(record.get(field.name()).toString()));
             } else if (record.get(field.name()) instanceof GenericRecord) {
                 populateBallerinaGenericAvroRecord(genericAvroRecord, (GenericRecord) record.get(field.name()));
             } else {
-                genericAvroRecord.put(StringUtils.fromString(field.name()), record.get(field.name()));
+                genericAvroRecord.put(BStringUtils.fromString(field.name()), record.get(field.name()));
             }
         }
     }
 
-    protected static MapValue<BString, Object> handleAvroConsumer(Object value) {
+    protected static BMap<BString, Object> handleAvroConsumer(Object value) {
         if (value instanceof GenericRecord) {
-            MapValue<BString, Object> genericAvroRecord = KafkaUtils.getAvroGenericRecord();
+            BMap<BString, Object> genericAvroRecord = KafkaUtils.getAvroGenericRecord();
             populateBallerinaGenericAvroRecord(genericAvroRecord, (GenericRecord) value);
             return genericAvroRecord;
         } else {

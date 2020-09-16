@@ -18,10 +18,10 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
-import org.ballerinalang.jvm.StringUtils;
+import org.ballerinalang.jvm.api.BStringUtils;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.scheduling.StrandMetadata;
 import org.ballerinalang.jvm.types.BPackage;
-import org.ballerinalang.jvm.values.api.BString;
 
 import static org.ballerinalang.jvm.util.BLangConstants.ORG_NAME_SEPARATOR;
 
@@ -55,13 +55,13 @@ public class KafkaConstants {
     public static final String NATIVE_PRODUCER = "KafkaProducer";
     public static final String NATIVE_CONSUMER_CONFIG = "KafkaConsumerConfig";
     public static final String NATIVE_PRODUCER_CONFIG = "KafkaProducerConfig";
-    public static final BString CONNECTOR_ID = StringUtils.fromString("connectorId");
+    public static final BString CONNECTOR_ID = BStringUtils.fromString("connectorId");
 
     public static final String TRANSACTION_CONTEXT = "TransactionInitiated";
 
     public static final String TOPIC_PARTITION_STRUCT_NAME = "TopicPartition";
-    public static final BString AVRO_DATA_RECORD_NAME = StringUtils.fromString("dataRecord");
-    public static final BString AVRO_SCHEMA_STRING_NAME = StringUtils.fromString("schemaString");
+    public static final BString AVRO_DATA_RECORD_NAME = BStringUtils.fromString("dataRecord");
+    public static final BString AVRO_SCHEMA_STRING_NAME = BStringUtils.fromString("schemaString");
     public static final String OFFSET_STRUCT_NAME = "PartitionOffset";
 
     public static final String CONSUMER_ERROR = "ConsumerError";
@@ -74,8 +74,8 @@ public class KafkaConstants {
     public static final String CONSUMER_STRUCT_NAME = "Consumer";
     public static final String SERVER_CONNECTOR = "serverConnector";
 
-    public static final BString CONSUMER_CONFIG_FIELD_NAME = StringUtils.fromString("consumerConfig");
-    public static final BString PRODUCER_CONFIG_FIELD_NAME = StringUtils.fromString("producerConfig");
+    public static final BString CONSUMER_CONFIG_FIELD_NAME = BStringUtils.fromString("consumerConfig");
+    public static final BString PRODUCER_CONFIG_FIELD_NAME = BStringUtils.fromString("producerConfig");
 
     public static final String PARAMETER_CONSUMER_NAME = PACKAGE_FULL_NAME + BLOCK_SEPARATOR + CONSUMER_STRUCT_NAME;
     public static final String PARAMETER_RECORD_ARRAY_NAME = PACKAGE_FULL_NAME + BLOCK_SEPARATOR
@@ -85,143 +85,143 @@ public class KafkaConstants {
 
     public static final String KAFKA_RESOURCE_ON_MESSAGE = "onMessage";
 
-    public static final BString ADDITIONAL_PROPERTIES_MAP_FIELD = StringUtils.fromString("properties");
+    public static final BString ADDITIONAL_PROPERTIES_MAP_FIELD = BStringUtils.fromString("properties");
 
-    public static final BString ALIAS_CONCURRENT_CONSUMERS = StringUtils.fromString("concurrentConsumers");
-    public static final BString ALIAS_TOPICS = StringUtils.fromString("topics");
-    public static final BString ALIAS_POLLING_TIMEOUT = StringUtils.fromString("pollingTimeoutInMillis");
-    public static final BString ALIAS_POLLING_INTERVAL = StringUtils.fromString("pollingIntervalInMillis");
-    public static final BString ALIAS_DECOUPLE_PROCESSING = StringUtils.fromString("decoupleProcessing");
-    public static final BString ALIAS_TOPIC = StringUtils.fromString("topic");
-    public static final BString ALIAS_PARTITION = StringUtils.fromString("partition");
-    public static final BString ALIAS_OFFSET = StringUtils.fromString("offset");
+    public static final BString ALIAS_CONCURRENT_CONSUMERS = BStringUtils.fromString("concurrentConsumers");
+    public static final BString ALIAS_TOPICS = BStringUtils.fromString("topics");
+    public static final BString ALIAS_POLLING_TIMEOUT = BStringUtils.fromString("pollingTimeoutInMillis");
+    public static final BString ALIAS_POLLING_INTERVAL = BStringUtils.fromString("pollingIntervalInMillis");
+    public static final BString ALIAS_DECOUPLE_PROCESSING = BStringUtils.fromString("decoupleProcessing");
+    public static final BString ALIAS_TOPIC = BStringUtils.fromString("topic");
+    public static final BString ALIAS_PARTITION = BStringUtils.fromString("partition");
+    public static final BString ALIAS_OFFSET = BStringUtils.fromString("offset");
     public static final String ALIAS_DURATION = "duration";
-    public static final BString ALIAS_VALUE = StringUtils.fromString("value");
+    public static final BString ALIAS_VALUE = BStringUtils.fromString("value");
 
     // Consumer Configuration.
-    public static final BString CONSUMER_BOOTSTRAP_SERVERS_CONFIG = StringUtils.fromString("bootstrapServers");
-    public static final BString CONSUMER_GROUP_ID_CONFIG = StringUtils.fromString("groupId");
-    public static final BString CONSUMER_AUTO_OFFSET_RESET_CONFIG = StringUtils.fromString("offsetReset");
-    public static final BString CONSUMER_PARTITION_ASSIGNMENT_STRATEGY_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_BOOTSTRAP_SERVERS_CONFIG = BStringUtils.fromString("bootstrapServers");
+    public static final BString CONSUMER_GROUP_ID_CONFIG = BStringUtils.fromString("groupId");
+    public static final BString CONSUMER_AUTO_OFFSET_RESET_CONFIG = BStringUtils.fromString("offsetReset");
+    public static final BString CONSUMER_PARTITION_ASSIGNMENT_STRATEGY_CONFIG = BStringUtils.fromString(
             "partitionAssignmentStrategy");
-    public static final BString CONSUMER_METRICS_RECORDING_LEVEL_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_METRICS_RECORDING_LEVEL_CONFIG = BStringUtils.fromString(
             "metricsRecordingLevel");
-    public static final BString CONSUMER_METRIC_REPORTER_CLASSES_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_METRIC_REPORTER_CLASSES_CONFIG = BStringUtils.fromString(
             "metricsReporterClasses");
-    public static final BString CONSUMER_CLIENT_ID_CONFIG = StringUtils.fromString("clientId");
-    public static final BString CONSUMER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
-    public static final BString CONSUMER_ISOLATION_LEVEL_CONFIG = StringUtils.fromString("isolationLevel");
-    public static final BString CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG = StringUtils.fromString("keyDeserializerType");
-    public static final BString CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_CLIENT_ID_CONFIG = BStringUtils.fromString("clientId");
+    public static final BString CONSUMER_INTERCEPTOR_CLASSES_CONFIG = BStringUtils.fromString("interceptorClasses");
+    public static final BString CONSUMER_ISOLATION_LEVEL_CONFIG = BStringUtils.fromString("isolationLevel");
+    public static final BString CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG = BStringUtils.fromString("keyDeserializerType");
+    public static final BString CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG = BStringUtils.fromString(
             "valueDeserializerType");
-    public static final BString CONSUMER_KEY_DESERIALIZER_CONFIG = StringUtils.fromString("keyDeserializer");
-    public static final BString CONSUMER_VALUE_DESERIALIZER_CONFIG = StringUtils.fromString("valueDeserializer");
+    public static final BString CONSUMER_KEY_DESERIALIZER_CONFIG = BStringUtils.fromString("keyDeserializer");
+    public static final BString CONSUMER_VALUE_DESERIALIZER_CONFIG = BStringUtils.fromString("valueDeserializer");
     public static final String BALLERINA_STRAND = "ballerina.strand";
-    public static final BString CONSUMER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
+    public static final BString CONSUMER_SCHEMA_REGISTRY_URL = BStringUtils.fromString("schemaRegistryUrl");
 
-    public static final BString CONSUMER_SESSION_TIMEOUT_MS_CONFIG = StringUtils.fromString("sessionTimeoutInMillis");
-    public static final BString CONSUMER_HEARTBEAT_INTERVAL_MS_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_SESSION_TIMEOUT_MS_CONFIG = BStringUtils.fromString("sessionTimeoutInMillis");
+    public static final BString CONSUMER_HEARTBEAT_INTERVAL_MS_CONFIG = BStringUtils.fromString(
             "heartBeatIntervalInMillis");
-    public static final BString CONSUMER_METADATA_MAX_AGE_CONFIG = StringUtils.fromString("metadataMaxAgeInMillis");
-    public static final BString CONSUMER_AUTO_COMMIT_INTERVAL_MS_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_METADATA_MAX_AGE_CONFIG = BStringUtils.fromString("metadataMaxAgeInMillis");
+    public static final BString CONSUMER_AUTO_COMMIT_INTERVAL_MS_CONFIG = BStringUtils.fromString(
             "autoCommitIntervalInMillis");
-    public static final BString CONSUMER_MAX_PARTITION_FETCH_BYTES_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_MAX_PARTITION_FETCH_BYTES_CONFIG = BStringUtils.fromString(
             "maxPartitionFetchBytes");
-    public static final BString CONSUMER_SEND_BUFFER_CONFIG = StringUtils.fromString("sendBuffer");
-    public static final BString CONSUMER_RECEIVE_BUFFER_CONFIG = StringUtils.fromString("receiveBuffer");
-    public static final BString CONSUMER_FETCH_MIN_BYTES_CONFIG = StringUtils.fromString("fetchMinBytes");
-    public static final BString CONSUMER_FETCH_MAX_BYTES_CONFIG = StringUtils.fromString("fetchMaxBytes");
-    public static final BString CONSUMER_FETCH_MAX_WAIT_MS_CONFIG = StringUtils.fromString("fetchMaxWaitTimeInMillis");
-    public static final BString CONSUMER_RECONNECT_BACKOFF_MS_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_SEND_BUFFER_CONFIG = BStringUtils.fromString("sendBuffer");
+    public static final BString CONSUMER_RECEIVE_BUFFER_CONFIG = BStringUtils.fromString("receiveBuffer");
+    public static final BString CONSUMER_FETCH_MIN_BYTES_CONFIG = BStringUtils.fromString("fetchMinBytes");
+    public static final BString CONSUMER_FETCH_MAX_BYTES_CONFIG = BStringUtils.fromString("fetchMaxBytes");
+    public static final BString CONSUMER_FETCH_MAX_WAIT_MS_CONFIG = BStringUtils.fromString("fetchMaxWaitTimeInMillis");
+    public static final BString CONSUMER_RECONNECT_BACKOFF_MS_CONFIG = BStringUtils.fromString(
             "reconnectBackoffTimeInMillis");
-    public static final BString CONSUMER_RETRY_BACKOFF_MS_CONFIG = StringUtils.fromString("retryBackoffInMillis");
-    public static final BString CONSUMER_METRICS_SAMPLE_WINDOW_MS_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_RETRY_BACKOFF_MS_CONFIG = BStringUtils.fromString("retryBackoffInMillis");
+    public static final BString CONSUMER_METRICS_SAMPLE_WINDOW_MS_CONFIG = BStringUtils.fromString(
             "metricsSampleWindowInMillis");
-    public static final BString CONSUMER_METRICS_NUM_SAMPLES_CONFIG = StringUtils.fromString("metricsNumSamples");
-    public static final BString CONSUMER_REQUEST_TIMEOUT_MS_CONFIG = StringUtils.fromString("requestTimeoutInMillis");
-    public static final BString CONSUMER_CONNECTIONS_MAX_IDLE_MS_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_METRICS_NUM_SAMPLES_CONFIG = BStringUtils.fromString("metricsNumSamples");
+    public static final BString CONSUMER_REQUEST_TIMEOUT_MS_CONFIG = BStringUtils.fromString("requestTimeoutInMillis");
+    public static final BString CONSUMER_CONNECTIONS_MAX_IDLE_MS_CONFIG = BStringUtils.fromString(
             "connectionMaxIdleTimeInMillis");
-    public static final BString CONSUMER_MAX_POLL_RECORDS_CONFIG = StringUtils.fromString("maxPollRecords");
-    public static final BString CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG = StringUtils.fromString("maxPollInterval");
-    public static final BString CONSUMER_RECONNECT_BACKOFF_MAX_MS_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_MAX_POLL_RECORDS_CONFIG = BStringUtils.fromString("maxPollRecords");
+    public static final BString CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG = BStringUtils.fromString("maxPollInterval");
+    public static final BString CONSUMER_RECONNECT_BACKOFF_MAX_MS_CONFIG = BStringUtils.fromString(
             "reconnectBackoffTimeMaxInMillis");
-    public static final BString CONSUMER_ENABLE_AUTO_COMMIT_CONFIG = StringUtils.fromString("autoCommit");
-    public static final BString CONSUMER_CHECK_CRCS_CONFIG = StringUtils.fromString("checkCRCS");
-    public static final BString CONSUMER_EXCLUDE_INTERNAL_TOPICS_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_ENABLE_AUTO_COMMIT_CONFIG = BStringUtils.fromString("autoCommit");
+    public static final BString CONSUMER_CHECK_CRCS_CONFIG = BStringUtils.fromString("checkCRCS");
+    public static final BString CONSUMER_EXCLUDE_INTERNAL_TOPICS_CONFIG = BStringUtils.fromString(
             "excludeInternalTopics");
-    public static final BString CONSUMER_DEFAULT_API_TIMEOUT_CONFIG = StringUtils.fromString(
+    public static final BString CONSUMER_DEFAULT_API_TIMEOUT_CONFIG = BStringUtils.fromString(
             "defaultApiTimeoutInMillis");
 
     // Producer Configuration.
-    public static final BString PRODUCER_BOOTSTRAP_SERVERS_CONFIG = StringUtils.fromString("bootstrapServers");
-    public static final BString PRODUCER_ACKS_CONFIG = StringUtils.fromString("acks");
-    public static final BString PRODUCER_COMPRESSION_TYPE_CONFIG = StringUtils.fromString("compressionType");
-    public static final BString PRODUCER_CLIENT_ID_CONFIG = StringUtils.fromString("clientId");
-    public static final BString PRODUCER_METRICS_RECORDING_LEVEL_CONFIG = StringUtils.fromString(
+    public static final BString PRODUCER_BOOTSTRAP_SERVERS_CONFIG = BStringUtils.fromString("bootstrapServers");
+    public static final BString PRODUCER_ACKS_CONFIG = BStringUtils.fromString("acks");
+    public static final BString PRODUCER_COMPRESSION_TYPE_CONFIG = BStringUtils.fromString("compressionType");
+    public static final BString PRODUCER_CLIENT_ID_CONFIG = BStringUtils.fromString("clientId");
+    public static final BString PRODUCER_METRICS_RECORDING_LEVEL_CONFIG = BStringUtils.fromString(
             "metricsRecordingLevel");
-    public static final BString PRODUCER_METRIC_REPORTER_CLASSES_CONFIG = StringUtils.fromString(
+    public static final BString PRODUCER_METRIC_REPORTER_CLASSES_CONFIG = BStringUtils.fromString(
             "metricReporterClasses");
-    public static final BString PRODUCER_PARTITIONER_CLASS_CONFIG = StringUtils.fromString("partitionerClass");
-    public static final BString PRODUCER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
-    public static final BString PRODUCER_TRANSACTIONAL_ID_CONFIG = StringUtils.fromString("transactionalId");
-    public static final BString PRODUCER_KEY_SERIALIZER_TYPE_CONFIG = StringUtils.fromString("keySerializerType");
-    public static final BString PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG = StringUtils.fromString("valueSerializerType");
-    public static final BString PRODUCER_KEY_SERIALIZER_CONFIG = StringUtils.fromString("keySerializer");
-    public static final BString PRODUCER_VALUE_SERIALIZER_CONFIG = StringUtils.fromString("valueSerializer");
-    public static final BString PRODUCER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
-    public static final BString PRODUCER_BUFFER_MEMORY_CONFIG = StringUtils.fromString("bufferMemory");
-    public static final BString PRODUCER_RETRIES_CONFIG = StringUtils.fromString("retryCount");
-    public static final BString PRODUCER_BATCH_SIZE_CONFIG = StringUtils.fromString("batchSize");
-    public static final BString PRODUCER_LINGER_MS_CONFIG = StringUtils.fromString("linger");
-    public static final BString PRODUCER_SEND_BUFFER_CONFIG = StringUtils.fromString("sendBuffer");
-    public static final BString PRODUCER_RECEIVE_BUFFER_CONFIG = StringUtils.fromString("receiveBuffer");
-    public static final BString PRODUCER_MAX_REQUEST_SIZE_CONFIG = StringUtils.fromString("maxRequestSize");
-    public static final BString PRODUCER_RECONNECT_BACKOFF_MS_CONFIG = StringUtils.fromString(
+    public static final BString PRODUCER_PARTITIONER_CLASS_CONFIG = BStringUtils.fromString("partitionerClass");
+    public static final BString PRODUCER_INTERCEPTOR_CLASSES_CONFIG = BStringUtils.fromString("interceptorClasses");
+    public static final BString PRODUCER_TRANSACTIONAL_ID_CONFIG = BStringUtils.fromString("transactionalId");
+    public static final BString PRODUCER_KEY_SERIALIZER_TYPE_CONFIG = BStringUtils.fromString("keySerializerType");
+    public static final BString PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG = BStringUtils.fromString("valueSerializerType");
+    public static final BString PRODUCER_KEY_SERIALIZER_CONFIG = BStringUtils.fromString("keySerializer");
+    public static final BString PRODUCER_VALUE_SERIALIZER_CONFIG = BStringUtils.fromString("valueSerializer");
+    public static final BString PRODUCER_SCHEMA_REGISTRY_URL = BStringUtils.fromString("schemaRegistryUrl");
+    public static final BString PRODUCER_BUFFER_MEMORY_CONFIG = BStringUtils.fromString("bufferMemory");
+    public static final BString PRODUCER_RETRIES_CONFIG = BStringUtils.fromString("retryCount");
+    public static final BString PRODUCER_BATCH_SIZE_CONFIG = BStringUtils.fromString("batchSize");
+    public static final BString PRODUCER_LINGER_MS_CONFIG = BStringUtils.fromString("linger");
+    public static final BString PRODUCER_SEND_BUFFER_CONFIG = BStringUtils.fromString("sendBuffer");
+    public static final BString PRODUCER_RECEIVE_BUFFER_CONFIG = BStringUtils.fromString("receiveBuffer");
+    public static final BString PRODUCER_MAX_REQUEST_SIZE_CONFIG = BStringUtils.fromString("maxRequestSize");
+    public static final BString PRODUCER_RECONNECT_BACKOFF_MS_CONFIG = BStringUtils.fromString(
             "reconnectBackoffTimeInMillis");
-    public static final BString PRODUCER_RECONNECT_BACKOFF_MAX_MS_CONFIG = StringUtils.fromString(
+    public static final BString PRODUCER_RECONNECT_BACKOFF_MAX_MS_CONFIG = BStringUtils.fromString(
             "reconnectBackoffMaxTimeInMillis");
-    public static final BString PRODUCER_RETRY_BACKOFF_MS_CONFIG = StringUtils.fromString("retryBackoffTimeInMillis");
-    public static final BString PRODUCER_MAX_BLOCK_MS_CONFIG = StringUtils.fromString("maxBlock");
-    public static final BString PRODUCER_REQUEST_TIMEOUT_MS_CONFIG = StringUtils.fromString("requestTimeoutInMillis");
-    public static final BString PRODUCER_METADATA_MAX_AGE_CONFIG = StringUtils.fromString("metadataMaxAgeInMillis");
-    public static final BString PRODUCER_METRICS_SAMPLE_WINDOW_MS_CONFIG = StringUtils.fromString(
+    public static final BString PRODUCER_RETRY_BACKOFF_MS_CONFIG = BStringUtils.fromString("retryBackoffTimeInMillis");
+    public static final BString PRODUCER_MAX_BLOCK_MS_CONFIG = BStringUtils.fromString("maxBlock");
+    public static final BString PRODUCER_REQUEST_TIMEOUT_MS_CONFIG = BStringUtils.fromString("requestTimeoutInMillis");
+    public static final BString PRODUCER_METADATA_MAX_AGE_CONFIG = BStringUtils.fromString("metadataMaxAgeInMillis");
+    public static final BString PRODUCER_METRICS_SAMPLE_WINDOW_MS_CONFIG = BStringUtils.fromString(
             "metricsSampleWindowInMillis");
-    public static final BString PRODUCER_METRICS_NUM_SAMPLES_CONFIG = StringUtils.fromString("metricsNumSamples");
-    public static final BString PRODUCER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION = StringUtils.fromString(
+    public static final BString PRODUCER_METRICS_NUM_SAMPLES_CONFIG = BStringUtils.fromString("metricsNumSamples");
+    public static final BString PRODUCER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION = BStringUtils.fromString(
             "maxInFlightRequestsPerConnection");
-    public static final BString PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG = StringUtils.fromString(
+    public static final BString PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG = BStringUtils.fromString(
             "connectionsMaxIdleTimeInMillis");
-    public static final BString PRODUCER_TRANSACTION_TIMEOUT_CONFIG = StringUtils.fromString(
+    public static final BString PRODUCER_TRANSACTION_TIMEOUT_CONFIG = BStringUtils.fromString(
             "transactionTimeoutInMillis");
-    public static final BString PRODUCER_ENABLE_IDEMPOTENCE_CONFIG = StringUtils.fromString("enableIdempotence");
+    public static final BString PRODUCER_ENABLE_IDEMPOTENCE_CONFIG = BStringUtils.fromString("enableIdempotence");
 
     // SSL Configuration parameters.
-    public static final BString SECURE_SOCKET = StringUtils.fromString("secureSocket");
-    public static final BString KEYSTORE_CONFIG = StringUtils.fromString("keyStore");
-    public static final BString TRUSTSTORE_CONFIG = StringUtils.fromString("trustStore");
-    public static final BString PROTOCOL_CONFIG = StringUtils.fromString("protocol");
-    public static final BString LOCATION_CONFIG = StringUtils.fromString("location");
-    public static final BString PASSWORD_CONFIG = StringUtils.fromString("password");
-    public static final BString KEYSTORE_TYPE_CONFIG = StringUtils.fromString("keyStoreType");
-    public static final BString KEYMANAGER_ALGORITHM_CONFIG = StringUtils.fromString("keyManagerAlgorithm");
-    public static final BString TRUSTSTORE_TYPE_CONFIG = StringUtils.fromString("trustStoreType");
-    public static final BString TRUSTMANAGER_ALGORITHM_CONFIG = StringUtils.fromString("trustManagerAlgorithm");
-    public static final BString ENABLED_PROTOCOLS_CONFIG = StringUtils.fromString("sslProtocolVersions");
-    public static final BString SECURITY_PROTOCOL_CONFIG = StringUtils.fromString("securityProtocol");
-    public static final BString SSL_PROTOCOL_CONFIG = StringUtils.fromString("sslProtocol");
-    public static final BString SSL_PROVIDER_CONFIG = StringUtils.fromString("sslProvider");
-    public static final BString SSL_KEY_PASSWORD_CONFIG = StringUtils.fromString("sslKeyPassword");
-    public static final BString SSL_CIPHER_SUITES_CONFIG = StringUtils.fromString("sslCipherSuites");
-    public static final BString SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG = StringUtils.fromString(
+    public static final BString SECURE_SOCKET = BStringUtils.fromString("secureSocket");
+    public static final BString KEYSTORE_CONFIG = BStringUtils.fromString("keyStore");
+    public static final BString TRUSTSTORE_CONFIG = BStringUtils.fromString("trustStore");
+    public static final BString PROTOCOL_CONFIG = BStringUtils.fromString("protocol");
+    public static final BString LOCATION_CONFIG = BStringUtils.fromString("location");
+    public static final BString PASSWORD_CONFIG = BStringUtils.fromString("password");
+    public static final BString KEYSTORE_TYPE_CONFIG = BStringUtils.fromString("keyStoreType");
+    public static final BString KEYMANAGER_ALGORITHM_CONFIG = BStringUtils.fromString("keyManagerAlgorithm");
+    public static final BString TRUSTSTORE_TYPE_CONFIG = BStringUtils.fromString("trustStoreType");
+    public static final BString TRUSTMANAGER_ALGORITHM_CONFIG = BStringUtils.fromString("trustManagerAlgorithm");
+    public static final BString ENABLED_PROTOCOLS_CONFIG = BStringUtils.fromString("sslProtocolVersions");
+    public static final BString SECURITY_PROTOCOL_CONFIG = BStringUtils.fromString("securityProtocol");
+    public static final BString SSL_PROTOCOL_CONFIG = BStringUtils.fromString("sslProtocol");
+    public static final BString SSL_PROVIDER_CONFIG = BStringUtils.fromString("sslProvider");
+    public static final BString SSL_KEY_PASSWORD_CONFIG = BStringUtils.fromString("sslKeyPassword");
+    public static final BString SSL_CIPHER_SUITES_CONFIG = BStringUtils.fromString("sslCipherSuites");
+    public static final BString SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG = BStringUtils.fromString(
             "sslEndpointIdentificationAlgorithm");
-    public static final BString SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG = StringUtils.fromString(
+    public static final BString SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG = BStringUtils.fromString(
             "sslSecureRandomImplementation");
 
     // SASL Configuration parameters
-    public static final BString AUTHENTICATION_CONFIGURATION = StringUtils.fromString("authenticationConfiguration");
-    public static final BString AUTHENTICATION_MECHANISM = StringUtils.fromString("mechanism");
-    public static final BString USERNAME = StringUtils.fromString("username");
-    public static final BString PASSWORD = StringUtils.fromString("password");
+    public static final BString AUTHENTICATION_CONFIGURATION = BStringUtils.fromString("authenticationConfiguration");
+    public static final BString AUTHENTICATION_MECHANISM = BStringUtils.fromString("mechanism");
+    public static final BString USERNAME = BStringUtils.fromString("username");
+    public static final BString PASSWORD = BStringUtils.fromString("password");
 
     // Authentication Mechanisms
     public static final String SASL_PLAIN = "PLAIN";

@@ -22,13 +22,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.ballerinalang.jvm.api.values.BArray;
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BObject;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.MapValueImpl;
-import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.jvm.values.api.BArray;
-import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.jvm.values.api.BValueCreator;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -53,7 +51,6 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaErro
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionOffsetArrayFromOffsetMap;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionOffsetRecord;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populatePartitionOffsetRecord;
 
@@ -70,9 +67,9 @@ public class GetOffsets {
      * @param consumerObject  Kafka consumer object from ballerina.
      * @param topicPartitions Topic partition array to get the beginning offsets.
      * @param duration        Duration in milliseconds to try the operation.
-     * @return ballerina {@code PartitionOffset} array or @{ErrorValue} if an error occurred.
+     * @return ballerina {@code PartitionOffset} array or @{BError} if an error occurred.
      */
-    public static Object getBeginningOffsets(ObjectValue consumerObject, BArray topicPartitions, long duration) {
+    public static Object getBeginningOffsets(BObject consumerObject, BArray topicPartitions, long duration) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
@@ -103,9 +100,9 @@ public class GetOffsets {
      * @param consumerObject Kafka consumer object from ballerina.
      * @param topicPartition Topic partition record to get the offsets.
      * @param duration       Duration in milliseconds to try the operation.
-     * @return ballerina {@code PartitionOffset} value or @{ErrorValue} if an error occurred.
+     * @return ballerina {@code PartitionOffset} value or @{BError} if an error occurred.
      */
-    public static Object getCommittedOffset(ObjectValue consumerObject, MapValue<BString, Object> topicPartition,
+    public static Object getCommittedOffset(BObject consumerObject, BMap<BString, Object> topicPartition,
                                             long duration) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
@@ -118,7 +115,7 @@ public class GetOffsets {
 
         try {
             OffsetAndMetadata offsetAndMetadata;
-            MapValue<BString, Object> offset;
+            BMap<BString, Object> offset;
             if (apiTimeout > DURATION_UNDEFINED_VALUE) {
                 offsetAndMetadata = getOffsetAndMetadataWithDuration(kafkaConsumer, tp, apiTimeout);
             } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
@@ -144,9 +141,9 @@ public class GetOffsets {
      * @param consumerObject  Kafka consumer object from ballerina.
      * @param topicPartitions Topic partition array to get the end offsets.
      * @param duration        Duration in milliseconds to try the operation.
-     * @return ballerina {@code PartitionOffset} array or @{ErrorValue} if an error occurred.
+     * @return ballerina {@code PartitionOffset} array or @{BError} if an error occurred.
      */
-    public static Object getEndOffsets(ObjectValue consumerObject, BArray topicPartitions, long duration) {
+    public static Object getEndOffsets(BObject consumerObject, BArray topicPartitions, long duration) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
@@ -179,9 +176,9 @@ public class GetOffsets {
      * @param consumerObject Kafka consumer object from ballerina.
      * @param topicPartition Topic partition of which the position offset needed.
      * @param duration       Duration in milliseconds to try the operation.
-     * @return ballerina {@code PartitionOffset} value or @{ErrorValue} if an error occurred.
+     * @return ballerina {@code PartitionOffset} value or @{BError} if an error occurred.
      */
-    public static Object getPositionOffset(ObjectValue consumerObject, MapValue<BString, Object> topicPartition,
+    public static Object getPositionOffset(BObject consumerObject, BMap<BString, Object> topicPartition,
                                            long duration) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);

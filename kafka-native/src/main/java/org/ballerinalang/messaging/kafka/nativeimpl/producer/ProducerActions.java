@@ -25,14 +25,14 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.ballerinalang.jvm.api.BValueCreator;
+import org.ballerinalang.jvm.api.values.BArray;
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BObject;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.types.BArrayType;
-import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.jvm.values.api.BArray;
-import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.jvm.values.api.BValueCreator;
 import org.ballerinalang.messaging.kafka.impl.KafkaTransactionContext;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
@@ -70,10 +70,10 @@ public class ProducerActions {
      * Initializes the ballerina kafka producer.
      *
      * @param producerObject Kafka producer object from ballerina.
-     * @return {@code ErrorValue}, if there's any error, null otherwise.
+     * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object init(ObjectValue producerObject) {
-        MapValue<BString, Object> configs = producerObject.getMapValue(PRODUCER_CONFIG_FIELD_NAME);
+    public static Object init(BObject producerObject) {
+        BMap<BString, Object> configs = producerObject.getMapValue(PRODUCER_CONFIG_FIELD_NAME);
         Properties producerProperties = processKafkaProducerConfig(configs);
         try {
             if (Objects.nonNull(
@@ -100,9 +100,9 @@ public class ProducerActions {
      * Closes the connection between ballerina kafka producer and the kafka broker.
      *
      * @param producerObject Kafka producer object from ballerina.
-     * @return {@code ErrorValue}, if there's any error, null otherwise.
+     * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object close(ObjectValue producerObject) {
+    public static Object close(BObject producerObject) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), producerObject);
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
@@ -120,9 +120,9 @@ public class ProducerActions {
      *
      * @param producerObject Kafka producer object from ballerina.
      * @param consumer       Kafka consumer object from ballerina.
-     * @return {@code ErrorValue}, if there's any error, null otherwise.
+     * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object commitConsumer(ObjectValue producerObject, ObjectValue consumer) {
+    public static Object commitConsumer(BObject producerObject, BObject consumer) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, producerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumer.getNativeData(NATIVE_CONSUMER);
@@ -135,7 +135,7 @@ public class ProducerActions {
             partitionToMetadataMap.put(new TopicPartition(topicPartition.topic(), topicPartition.partition()),
                                        new OffsetAndMetadata(position));
         }
-        MapValue<BString, Object> consumerConfig = consumer.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
+        BMap<BString, Object> consumerConfig = consumer.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
         String groupId = consumerConfig.getStringValue(CONSUMER_GROUP_ID_CONFIG).getValue();
         try {
             if (strand.isInTransaction()) {
@@ -154,9 +154,9 @@ public class ProducerActions {
      * @param producerObject Kafka producer object from ballerina.
      * @param offsets Ballerina {@code PartitionOffset[]} to commit.
      * @param groupId Group ID of the consumers to commit the messages.
-     * @return {@code ErrorValue}, if there's any error, null otherwise.
+     * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object commitConsumerOffsets(ObjectValue producerObject, BArray offsets, BString groupId) {
+    public static Object commitConsumerOffsets(BObject producerObject, BArray offsets, BString groupId) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, producerObject);
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
@@ -177,9 +177,9 @@ public class ProducerActions {
      * Makes all the records buffered are immediately available.
      *
      * @param producerObject Kafka producer object from ballerina.
-     * @return {@code ErrorValue}, if there's any error, null otherwise.
+     * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object flushRecords(ObjectValue producerObject) {
+    public static Object flushRecords(BObject producerObject) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, producerObject);
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
@@ -202,7 +202,7 @@ public class ProducerActions {
      * @param topic Topic about which the information is needed.
      * @return Ballerina {@code TopicPartition[]} for the given topic.
      */
-    public static Object getTopicPartitions(ObjectValue producerObject, BString topic) {
+    public static Object getTopicPartitions(BObject producerObject, BString topic) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, producerObject, topic.getValue());
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
@@ -214,7 +214,7 @@ public class ProducerActions {
             BArray topicPartitionArray =
                     BValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
             for (PartitionInfo info : partitionInfoList) {
-                MapValue<BString, Object> partition = populateTopicPartitionRecord(info.topic(), info.partition());
+                BMap<BString, Object> partition = populateTopicPartitionRecord(info.topic(), info.partition());
                 topicPartitionArray.append(partition);
             }
             return topicPartitionArray;

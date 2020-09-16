@@ -28,21 +28,20 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
-import org.ballerinalang.jvm.BRuntime;
-import org.ballerinalang.jvm.BallerinaErrors;
-import org.ballerinalang.jvm.BallerinaValues;
-import org.ballerinalang.jvm.StringUtils;
+import org.ballerinalang.jvm.api.BErrorCreator;
+import org.ballerinalang.jvm.api.BRuntime;
+import org.ballerinalang.jvm.api.BStringUtils;
+import org.ballerinalang.jvm.api.BValueCreator;
+import org.ballerinalang.jvm.api.connector.CallableUnitCallback;
+import org.ballerinalang.jvm.api.values.BArray;
+import org.ballerinalang.jvm.api.values.BError;
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BObject;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.scheduling.StrandMetadata;
 import org.ballerinalang.jvm.types.BArrayType;
 import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.jvm.values.ErrorValue;
-import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.jvm.values.api.BArray;
-import org.ballerinalang.jvm.values.api.BError;
-import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.jvm.values.api.BValueCreator;
-import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static org.ballerinalang.jvm.BallerinaValues.createRecord;
+import static org.ballerinalang.jvm.api.BValueCreator.createRecordValue;
 import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
 
 /**
@@ -67,7 +66,7 @@ public class KafkaUtils {
     private KafkaUtils() {
     }
 
-    public static Object[] getResourceParameters(ObjectValue service, ObjectValue listener,
+    public static Object[] getResourceParameters(BObject service, BObject listener,
                                                  ConsumerRecords records, String groupId) {
 
         BArray consumerRecordsArray = BValueCreator.createArrayValue(new BArrayType(getConsumerRecord().getType()));
@@ -76,7 +75,7 @@ public class KafkaUtils {
 
         if (service.getType().getAttachedFunctions()[0].getParameterType().length == 2) {
             for (Object record : records) {
-                MapValue<BString, Object> consumerRecord = populateConsumerRecord(
+                BMap<BString, Object> consumerRecord = populateConsumerRecord(
                         (ConsumerRecord) record, keyType, valueType);
                 consumerRecordsArray.append(consumerRecord);
             }
@@ -86,20 +85,20 @@ public class KafkaUtils {
                     BValueCreator.createArrayValue(new BArrayType(getPartitionOffsetRecord().getType()));
             for (Object record : records) {
                 ConsumerRecord kafkaRecord = (ConsumerRecord) record;
-                MapValue<BString, Object> consumerRecord = populateConsumerRecord(kafkaRecord, keyType, valueType);
-                MapValue<BString, Object> topicPartition = populateTopicPartitionRecord(kafkaRecord.topic(),
+                BMap<BString, Object> consumerRecord = populateConsumerRecord(kafkaRecord, keyType, valueType);
+                BMap<BString, Object> topicPartition = populateTopicPartitionRecord(kafkaRecord.topic(),
                                                                                        kafkaRecord.partition());
-                MapValue<BString, Object> partitionOffset = populatePartitionOffsetRecord(topicPartition,
+                BMap<BString, Object> partitionOffset = populatePartitionOffsetRecord(topicPartition,
                                                                                          kafkaRecord.offset());
                 consumerRecordsArray.append(consumerRecord);
                 partitionOffsetsArray.append(partitionOffset);
             }
             return new Object[]{listener, true, consumerRecordsArray, true, partitionOffsetsArray, true,
-                    StringUtils.fromString(groupId), true};
+                    BStringUtils.fromString(groupId), true};
         }
     }
 
-    public static Properties processKafkaConsumerConfig(MapValue<BString, Object> configurations) {
+    public static Properties processKafkaConsumerConfig(BMap<BString, Object> configurations) {
         Properties properties = new Properties();
 
         addStringParamIfPresent(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, configurations, properties,
@@ -207,7 +206,7 @@ public class KafkaUtils {
         return properties;
     }
 
-    public static Properties processKafkaProducerConfig(MapValue<BString, Object> configurations) {
+    public static Properties processKafkaProducerConfig(BMap<BString, Object> configurations) {
         Properties properties = new Properties();
         addStringParamIfPresent(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, configurations,
                                 properties, KafkaConstants.PRODUCER_BOOTSTRAP_SERVERS_CONFIG);
@@ -289,41 +288,41 @@ public class KafkaUtils {
     }
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)
-    private static void processSslProperties(MapValue<BString, Object> configurations, Properties configParams) {
-        MapValue<BString, Object> secureSocket = (MapValue<BString, Object>) configurations.get(
+    private static void processSslProperties(BMap<BString, Object> configurations, Properties configParams) {
+        BMap<BString, Object> secureSocket = (BMap<BString, Object>) configurations.get(
                 KafkaConstants.SECURE_SOCKET);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.KEYSTORE_TYPE_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.PASSWORD_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYMANAGER_ALGORITHM_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.KEYMANAGER_ALGORITHM_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.TRUSTSTORE_TYPE_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.PASSWORD_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTMANAGER_ALGORITHM_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG), configParams,
                                 KafkaConstants.TRUSTMANAGER_ALGORITHM_CONFIG);
         addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
                                 KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
                                 KafkaConstants.SSL_PROTOCOL_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
-                                (MapValue<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
+                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
                                 KafkaConstants.ENABLED_PROTOCOLS_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_PROVIDER_CONFIG, configurations, configParams,
                                 KafkaConstants.SSL_PROVIDER_CONFIG);
@@ -338,9 +337,9 @@ public class KafkaUtils {
     }
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)
-    private static void processSaslProperties(MapValue<BString, Object> configurations, Properties properties) {
-        MapValue<BString, Object> authenticationConfig =
-                (MapValue<BString, Object>) configurations.getMapValue(KafkaConstants.AUTHENTICATION_CONFIGURATION);
+    private static void processSaslProperties(BMap<BString, Object> configurations, Properties properties) {
+        BMap<BString, Object> authenticationConfig =
+                (BMap<BString, Object>) configurations.getMapValue(KafkaConstants.AUTHENTICATION_CONFIGURATION);
         String mechanism = authenticationConfig.getStringValue(KafkaConstants.AUTHENTICATION_MECHANISM).getValue();
         if (KafkaConstants.SASL_PLAIN.equals(mechanism)) {
             String username = authenticationConfig.getStringValue(KafkaConstants.USERNAME).getValue();
@@ -356,13 +355,13 @@ public class KafkaUtils {
         }
     }
 
-    private static void processAdditionalProperties(MapValue propertiesMap, Properties kafkaProperties) {
+    private static void processAdditionalProperties(BMap propertiesMap, Properties kafkaProperties) {
         for (Object key : propertiesMap.getKeys()) {
             kafkaProperties.setProperty(key.toString(), propertiesMap.getStringValue((BString) key).getValue());
         }
     }
 
-    private static void addSerializerTypeConfigs(String paramName, MapValue<BString, Object> configs,
+    private static void addSerializerTypeConfigs(String paramName, BMap<BString, Object> configs,
                                                  Properties configParams, BString key) {
         if (Objects.nonNull(configs.get(key))) {
             String value = getSerializerType(configs, key);
@@ -370,7 +369,7 @@ public class KafkaUtils {
         }
     }
 
-    private static void addDeserializerConfigs(String paramName, MapValue<BString, Object> configs,
+    private static void addDeserializerConfigs(String paramName, BMap<BString, Object> configs,
                                                Properties configParams, BString key) {
         if (Objects.nonNull(configs.get(key))) {
             String value = getDeserializerValue(configs, key);
@@ -378,7 +377,7 @@ public class KafkaUtils {
         }
     }
 
-    private static void addCustomKeySerializer(Properties properties, MapValue<BString, Object> configurations) {
+    private static void addCustomKeySerializer(Properties properties, BMap<BString, Object> configurations) {
         Object serializer = configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG);
         String serializerType = configurations.getStringValue(KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG).getValue();
         if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
@@ -387,7 +386,7 @@ public class KafkaUtils {
         }
     }
 
-    private static void addCustomValueSerializer(Properties properties, MapValue<BString, Object> configurations) {
+    private static void addCustomValueSerializer(Properties properties, BMap<BString, Object> configurations) {
         Object serializer = configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG);
         String serializerType = configurations.getStringValue(KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG).getValue();
         if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
@@ -397,7 +396,7 @@ public class KafkaUtils {
     }
 
     private static void addCustomDeserializer(BString configParam, BString typeConfig, Properties properties,
-                                              MapValue<BString, Object> configurations) {
+                                              BMap<BString, Object> configurations) {
         Object deserializer = configurations.get(configParam);
         String deserializerType = configurations.getStringValue(typeConfig).getValue();
         if (Objects.nonNull(deserializer) && KafkaConstants.SERDES_CUSTOM.equals(deserializerType)) {
@@ -406,7 +405,7 @@ public class KafkaUtils {
         }
     }
 
-    private static String getSerializerType(MapValue<BString, Object> configs, BString key) {
+    private static String getSerializerType(BMap<BString, Object> configs, BString key) {
         String value = configs.get(key).toString();
         switch (value) {
             case KafkaConstants.SERDES_BYTE_ARRAY:
@@ -426,7 +425,7 @@ public class KafkaUtils {
         }
     }
 
-    private static String getDeserializerValue(MapValue<BString, Object> configs, BString key) {
+    private static String getDeserializerValue(BMap<BString, Object> configs, BString key) {
         String value = configs.get(key).toString();
         switch (value) {
             case KafkaConstants.SERDES_BYTE_ARRAY:
@@ -447,7 +446,7 @@ public class KafkaUtils {
     }
 
     private static void addStringParamIfPresent(String paramName,
-                                                MapValue<BString, Object> configs,
+                                                BMap<BString, Object> configs,
                                                 Properties configParams,
                                                 BString key) {
         if (Objects.nonNull(configs.get(key))) {
@@ -459,7 +458,7 @@ public class KafkaUtils {
     }
 
     private static void addStringArrayParamIfPresent(String paramName,
-                                                     MapValue<BString, Object> configs,
+                                                     BMap<BString, Object> configs,
                                                      Properties configParams,
                                                      BString key) {
         BArray stringArray = (BArray) configs.get(key);
@@ -468,7 +467,7 @@ public class KafkaUtils {
     }
 
     private static void addIntParamIfPresent(String paramName,
-                                             MapValue<BString, Object> configs,
+                                             BMap<BString, Object> configs,
                                              Properties configParams,
                                              BString key) {
         Long value = (Long) configs.get(key);
@@ -478,7 +477,7 @@ public class KafkaUtils {
     }
 
     private static void addBooleanParamIfPresent(String paramName,
-                                                 MapValue<BString, Object> configs,
+                                                 BMap<BString, Object> configs,
                                                  Properties configParams,
                                                  BString key,
                                                  boolean defaultValue) {
@@ -489,7 +488,7 @@ public class KafkaUtils {
     }
 
     private static void addBooleanParamIfPresent(String paramName,
-                                                 MapValue<BString, Object> configs,
+                                                 BMap<BString, Object> configs,
                                                  Properties configParams,
                                                  BString key) {
         boolean value = (boolean) configs.get(key);
@@ -500,7 +499,7 @@ public class KafkaUtils {
         ArrayList<TopicPartition> partitionList = new ArrayList<>();
         if (partitions != null) {
             for (int counter = 0; counter < partitions.size(); counter++) {
-                MapValue<BString, Object> partition = (MapValue<BString, Object>) partitions.get(counter);
+                BMap<BString, Object> partition = (BMap<BString, Object>) partitions.get(counter);
                 String topic = partition.get(KafkaConstants.ALIAS_TOPIC).toString();
                 int partitionValue = getIntFromLong((Long) partition.get(KafkaConstants.ALIAS_PARTITION), logger,
                                                     KafkaConstants.ALIAS_PARTITION.getValue());
@@ -529,18 +528,18 @@ public class KafkaUtils {
      *
      * @param topic     name of the topic
      * @param partition value of the partition offset
-     * @return {@code MapValue} of the record
+     * @return {@code BMap} of the record
      */
-    public static MapValue<BString, Object> populateTopicPartitionRecord(String topic, int partition) {
-        return createRecord(getTopicPartitionRecord(), topic, partition);
+    public static BMap<BString, Object> populateTopicPartitionRecord(String topic, int partition) {
+        return createRecordValue(getTopicPartitionRecord(), topic, partition);
     }
 
-    public static MapValue<BString, Object> populatePartitionOffsetRecord(MapValue<BString, Object> topicPartition,
+    public static BMap<BString, Object> populatePartitionOffsetRecord(BMap<BString, Object> topicPartition,
                                                                           long offset) {
-        return createRecord(getPartitionOffsetRecord(), topicPartition, offset);
+        return createRecordValue(getPartitionOffsetRecord(), topicPartition, offset);
     }
 
-    public static MapValue<BString, Object> populateConsumerRecord(ConsumerRecord record, String keyType,
+    public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, String keyType,
                                                                    String valueType) {
         Object key = null;
         if (Objects.nonNull(record.key())) {
@@ -548,7 +547,8 @@ public class KafkaUtils {
         }
 
         Object value = getBValues(record.value(), valueType);
-        return createRecord(getConsumerRecord(), key, value, record.offset(), record.partition(), record.timestamp(),
+        return createRecordValue(getConsumerRecord(), key, value, record.offset(), record.partition(),
+                                record.timestamp(),
                             record.topic());
     }
 
@@ -561,7 +561,7 @@ public class KafkaUtils {
             }
         } else if (KafkaConstants.SERDES_STRING.equals(type)) {
             if (value instanceof String) {
-                return StringUtils.fromString((String) value);
+                return BStringUtils.fromString((String) value);
             } else {
                 throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: string");
             }
@@ -585,32 +585,34 @@ public class KafkaUtils {
         throw createKafkaError("Unexpected type found for consumer record", KafkaConstants.CONSUMER_ERROR);
     }
 
-    public static MapValue<BString, Object> getConsumerRecord() {
+    public static BMap<BString, Object> getConsumerRecord() {
         return createKafkaRecord(KafkaConstants.CONSUMER_RECORD_STRUCT_NAME);
     }
 
-    public static MapValue<BString, Object> getAvroGenericRecord() {
+    public static BMap<BString, Object> getAvroGenericRecord() {
         return createKafkaRecord(KafkaConstants.AVRO_GENERIC_RECORD_NAME);
     }
 
-    public static MapValue<BString, Object> getPartitionOffsetRecord() {
+    public static BMap<BString, Object> getPartitionOffsetRecord() {
         return createKafkaRecord(KafkaConstants.OFFSET_STRUCT_NAME);
     }
 
-    public static MapValue<BString, Object> getTopicPartitionRecord() {
+    public static BMap<BString, Object> getTopicPartitionRecord() {
         return createKafkaRecord(KafkaConstants.TOPIC_PARTITION_STRUCT_NAME);
     }
 
     public static BError createKafkaError(String message, String typeId) {
-        return BallerinaErrors.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID, message);
+        return BErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+                                                 BStringUtils.fromString(message));
     }
 
-    public static BError createKafkaError(String message, String typeId, ErrorValue cause) {
-        return BallerinaErrors.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID, message, cause);
+    public static BError createKafkaError(String message, String typeId, BError cause) {
+        return BErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+                                                 BStringUtils.fromString(message), cause);
     }
 
-    public static MapValue<BString, Object> createKafkaRecord(String recordName) {
-        return BallerinaValues.createRecordValue(KafkaConstants.KAFKA_PACKAGE_ID, recordName);
+    public static BMap<BString, Object> createKafkaRecord(String recordName) {
+        return createRecordValue(KafkaConstants.KAFKA_PACKAGE_ID, recordName);
     }
 
     public static BArray getPartitionOffsetArrayFromOffsetMap(Map<TopicPartition, Long> offsetMap) {
@@ -620,8 +622,8 @@ public class KafkaUtils {
             for (Map.Entry<TopicPartition, Long> entry : offsetMap.entrySet()) {
                 TopicPartition tp = entry.getKey();
                 Long offset = entry.getValue();
-                MapValue<BString, Object> topicPartition = populateTopicPartitionRecord(tp.topic(), tp.partition());
-                MapValue<BString, Object> partition = populatePartitionOffsetRecord(topicPartition, offset);
+                BMap<BString, Object> topicPartition = populateTopicPartitionRecord(tp.topic(), tp.partition());
+                BMap<BString, Object> partition = populatePartitionOffsetRecord(topicPartition, offset);
                 partitionOffsetArray.append(partition);
             }
         }
@@ -637,7 +639,7 @@ public class KafkaUtils {
     public static Map<TopicPartition, OffsetAndMetadata> getPartitionToMetadataMap(BArray offsets) {
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = new HashMap<>();
         for (int i = 0; i < offsets.size(); i++) {
-            MapValue offset = (MapValue) offsets.get(i);
+            BMap offset = (BMap) offsets.get(i);
             int offsetValue = offset.getIntValue(KafkaConstants.ALIAS_OFFSET).intValue();
             TopicPartition topicPartition = createTopicPartitionFromPartitionOffset(offset);
             partitionToMetadataMap.put(topicPartition, new OffsetAndMetadata(offsetValue));
@@ -646,13 +648,13 @@ public class KafkaUtils {
     }
 
     /**
-     * Get {@code TopicPartition} object from {@code MapValue} of Ballerina {@code PartitionOffset}.
+     * Get {@code TopicPartition} object from {@code BMap} of Ballerina {@code PartitionOffset}.
      *
-     * @param offset MapValue consists of Ballerina PartitionOffset record.
+     * @param offset BMap consists of Ballerina PartitionOffset record.
      * @return TopicPartition Object created
      */
-    public static TopicPartition createTopicPartitionFromPartitionOffset(MapValue offset) {
-        MapValue partition = (MapValue) offset.get(KafkaConstants.ALIAS_PARTITION);
+    public static TopicPartition createTopicPartitionFromPartitionOffset(BMap offset) {
+        BMap partition = (BMap) offset.get(KafkaConstants.ALIAS_PARTITION);
         String topic = partition.getStringValue(KafkaConstants.ALIAS_TOPIC).getValue();
         int partitionValue = partition.getIntValue(KafkaConstants.ALIAS_PARTITION).intValue();
 
@@ -720,7 +722,7 @@ public class KafkaUtils {
         return KafkaConstants.DURATION_UNDEFINED_VALUE;
     }
 
-    public static void createKafkaProducer(Properties producerProperties, ObjectValue producerObject) {
+    public static void createKafkaProducer(Properties producerProperties, BObject producerObject) {
         KafkaProducer kafkaProducer = new KafkaProducer<>(producerProperties);
         producerObject.addNativeData(KafkaConstants.NATIVE_PRODUCER, kafkaProducer);
         producerObject.addNativeData(KafkaConstants.NATIVE_PRODUCER_CONFIG, producerProperties);
@@ -730,8 +732,8 @@ public class KafkaUtils {
         KafkaMetricsUtil.reportNewProducer(producerObject);
     }
 
-    public static String getBrokerNames(ObjectValue listener) {
-        MapValue<BString, Object> listenerConfigurations = listener.getMapValue(
+    public static String getBrokerNames(BObject listener) {
+        BMap<BString, Object> listenerConfigurations = listener.getMapValue(
                 KafkaConstants.CONSUMER_CONFIG_FIELD_NAME);
         return listenerConfigurations.get(KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG).toString();
     }
@@ -751,7 +753,7 @@ public class KafkaUtils {
         return clientId;
     }
 
-    public static String getBootstrapServers(ObjectValue object) {
+    public static String getBootstrapServers(BObject object) {
         if (object == null) {
             return KafkaObservabilityConstants.UNKNOWN;
         }
@@ -762,7 +764,7 @@ public class KafkaUtils {
         return bootstrapServers;
     }
 
-    public static String getClientId(ObjectValue object) {
+    public static String getClientId(BObject object) {
         if (object == null) {
             return KafkaObservabilityConstants.UNKNOWN;
         }
@@ -773,10 +775,10 @@ public class KafkaUtils {
         return clientId;
     }
 
-    public static Object invokeMethodSync(BRuntime runtime, ObjectValue object, String methodName, String strandName,
+    public static Object invokeMethodSync(BRuntime runtime, BObject object, String methodName, String strandName,
                                           StrandMetadata metadata, int timeout, Object... args) {
         Semaphore semaphore = new Semaphore(0);
-        final ErrorValue[] errorValue = new ErrorValue[1];
+        final BError[] errorValue = new ErrorValue[1];
         Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new CallableUnitCallback() {
             @Override
             public void notifySuccess() {
@@ -784,7 +786,7 @@ public class KafkaUtils {
             }
 
             @Override
-            public void notifyFailure(ErrorValue error) {
+            public void notifyFailure(BError error) {
                 errorValue[0] = error;
                 semaphore.release();
             }

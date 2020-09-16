@@ -22,15 +22,15 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
-import org.ballerinalang.jvm.StringUtils;
+import org.ballerinalang.jvm.api.BStringUtils;
+import org.ballerinalang.jvm.api.BValueCreator;
+import org.ballerinalang.jvm.api.values.BArray;
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BObject;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.types.BArrayType;
 import org.ballerinalang.jvm.types.BTypes;
-import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.jvm.values.api.BArray;
-import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.jvm.values.api.BValueCreator;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -70,9 +70,9 @@ public class ConsumerInformationHandler {
      *
      * @param consumerObject  Kafka consumer object from ballerina.
      * @param topicPartitions Topic partition array to which the consumer need to be subscribed.
-     * @return {@code ErrorValue}, if there's an error, null otherwise.
+     * @return {@code BError}, if there's an error, null otherwise.
      */
-    public static Object assign(ObjectValue consumerObject, BArray topicPartitions) {
+    public static Object assign(BObject consumerObject, BArray topicPartitions) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<TopicPartition> partitions = getTopicPartitionList(topicPartitions, logger);
@@ -89,9 +89,9 @@ public class ConsumerInformationHandler {
      * Get the current assignment of the ballerina kafka consumer.
      *
      * @param consumerObject Kafka consumer object from ballerina.
-     * @return Topic partition ballerina array. If there's an error in the process {@code ErrorValue} is returned.
+     * @return Topic partition ballerina array. If there's an error in the process {@code BError} is returned.
      */
-    public static Object getAssignment(ObjectValue consumerObject) {
+    public static Object getAssignment(BObject consumerObject) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         BArray topicPartitionArray =
@@ -99,7 +99,7 @@ public class ConsumerInformationHandler {
         try {
             Set<TopicPartition> topicPartitions = kafkaConsumer.assignment();
             for (TopicPartition partition : topicPartitions) {
-                MapValue<BString, Object> tp = populateTopicPartitionRecord(partition.topic(), partition.partition());
+                BMap<BString, Object> tp = populateTopicPartitionRecord(partition.topic(), partition.partition());
                 topicPartitionArray.append(tp);
             }
             return topicPartitionArray;
@@ -117,7 +117,7 @@ public class ConsumerInformationHandler {
      * @param duration       Duration in milliseconds to try the operation.
      * @return Array of ballerina strings, which consists of the available topics.
      */
-    public static Object getAvailableTopics(ObjectValue consumerObject, long duration) {
+    public static Object getAvailableTopics(BObject consumerObject, long duration) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
@@ -145,7 +145,7 @@ public class ConsumerInformationHandler {
      * @param consumerObject Kafka consumer object from ballerina.
      * @return Array of ballerina strings, which consists of the paused topics.
      */
-    public static Object getPausedPartitions(ObjectValue consumerObject) {
+    public static Object getPausedPartitions(BObject consumerObject) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         BArray topicPartitionArray =
@@ -153,7 +153,7 @@ public class ConsumerInformationHandler {
         try {
             Set<TopicPartition> pausedPartitions = kafkaConsumer.paused();
             for (TopicPartition partition : pausedPartitions) {
-                MapValue<BString, Object> tp = populateTopicPartitionRecord(partition.topic(), partition.partition());
+                BMap<BString, Object> tp = populateTopicPartitionRecord(partition.topic(), partition.partition());
                 topicPartitionArray.append(tp);
             }
             return topicPartitionArray;
@@ -172,7 +172,7 @@ public class ConsumerInformationHandler {
      * @param duration       Duration in milliseconds to try the operation.
      * @return Topic partition array of the given topic.
      */
-    public static Object getTopicPartitions(ObjectValue consumerObject, BString topic, long duration) {
+    public static Object getTopicPartitions(BObject consumerObject, BString topic, long duration) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
@@ -192,7 +192,7 @@ public class ConsumerInformationHandler {
             BArray topicPartitionArray =
                     BValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
             for (PartitionInfo info : partitionInfoList) {
-                MapValue<BString, Object> partition = populateTopicPartitionRecord(info.topic(), info.partition());
+                BMap<BString, Object> partition = populateTopicPartitionRecord(info.topic(), info.partition());
                 topicPartitionArray.append(partition);
             }
             return topicPartitionArray;
@@ -210,7 +210,7 @@ public class ConsumerInformationHandler {
      * @param consumerObject Kafka consumer object from ballerina.
      * @return Array of ballerina strings, which consists of the subscribed topics.
      */
-    public static Object getSubscription(ObjectValue consumerObject) {
+    public static Object getSubscription(BObject consumerObject) {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer<byte[], byte[]> kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
 
@@ -219,7 +219,7 @@ public class ConsumerInformationHandler {
             BArray arrayValue = BValueCreator.createArrayValue(stringArrayType);
             if (!subscriptions.isEmpty()) {
                 for (String subscription : subscriptions) {
-                    arrayValue.append(StringUtils.fromString(subscription));
+                    arrayValue.append(BStringUtils.fromString(subscription));
                 }
             }
             return arrayValue;
@@ -240,7 +240,7 @@ public class ConsumerInformationHandler {
         BArray bArray = BValueCreator.createArrayValue(new BArrayType(BTypes.typeString));
         if (!map.keySet().isEmpty()) {
             for (String topic : map.keySet()) {
-                bArray.append(StringUtils.fromString(topic));
+                bArray.append(BStringUtils.fromString(topic));
             }
         }
         return bArray;
