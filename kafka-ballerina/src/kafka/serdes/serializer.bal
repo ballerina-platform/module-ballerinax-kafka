@@ -18,12 +18,12 @@
 # producers.
 public type Serializer object {
     # Closes the serialization process. This function runs after the serialization process is done.
-    public function close();
+    public isolated function close();
 
     # Serializes the provided data. Implement this to serialize any data type and return the `byte[]` value to use in
     # the Kafka producer.
     #
     # + data - Data, which should be serialized
     # + return - Serialized `byte[]` value
-    public function serialize(any data) returns byte[];
+    public isolated function serialize(any data) returns byte[];
 };

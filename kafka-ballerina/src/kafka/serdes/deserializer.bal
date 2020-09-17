@@ -18,11 +18,11 @@
 # consumers.
 public type Deserializer object {
     # Closes the deserialization process. This function runs after the deserialization process is done.
-    public function close();
+    public isolated function close();
 
     # Deserializes the provided data. Implement this to deserialize a `byte[]` and return any data type.
     #
     # + data - Data, which should be deserialized
     # + return - The deserialized value
-    public function deserialize(byte[] data) returns any;
+    public isolated function deserialize(byte[] data) returns any;
 };

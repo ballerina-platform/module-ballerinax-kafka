@@ -23,20 +23,20 @@ public type ProducerError distinct error;
 # Represents a Kafka Avro related error.
 public type AvroError distinct error;
 
-function getValueTypeMismatchError(string expectedType) returns ProducerError {
+isolated function getValueTypeMismatchError(string expectedType) returns ProducerError {
     string message = "Invalid type found for Kafka value. Expected value type: '" + expectedType + "'.";
     return ProducerError(message);
 }
 
-function getKeyTypeMismatchError(string expectedType) returns ProducerError {
+isolated function getKeyTypeMismatchError(string expectedType) returns ProducerError {
     string message = "Invalid type found for Kafka key. Expected key type: '" + expectedType + "'.";
     return ProducerError(message);
 }
 
-function createProducerError(string message) returns ProducerError {
+isolated function createProducerError(string message) returns ProducerError {
     return ProducerError(message);
 }
 
-function createConsumerError(string message) returns ConsumerError {
+isolated function createConsumerError(string message) returns ConsumerError {
     return ConsumerError(message);
 }
