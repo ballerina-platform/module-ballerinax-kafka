@@ -21,10 +21,11 @@ package org.ballerinalang.messaging.kafka.nativeimpl.producer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
+import org.ballerinalang.jvm.api.BalEnv;
 import org.ballerinalang.jvm.api.values.BObject;
 import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.values.connector.NonBlockingCallback;
+import org.ballerinalang.jvm.api.BalFuture;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -43,10 +44,10 @@ import static org.ballerinalang.messaging.kafka.utils.TransactionUtils.handleTra
 public class Send {
 
     @SuppressWarnings(UNCHECKED)
-    protected static Object sendKafkaRecord(ProducerRecord record, BObject producerObject) {
+    protected static Object sendKafkaRecord(BalEnv env, ProducerRecord record, BObject producerObject) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, producerObject, record.topic());
-        final NonBlockingCallback callback = new NonBlockingCallback(strand);
+        final BalFuture balFuture = env.markAsync();
         KafkaProducer producer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
             if (strand.isInTransaction()) {
@@ -56,20 +57,17 @@ public class Send {
                 if (Objects.nonNull(e)) {
                     KafkaMetricsUtil.reportProducerError(producerObject,
                                                          KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                    callback.setReturnValues(createKafkaError("Failed to send data to Kafka server: " + e.getMessage(),
+                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage(),
                                                               PRODUCER_ERROR));
                 } else {
                     KafkaMetricsUtil.reportPublish(producerObject, record.topic(), record.value());
-                    callback.setReturnValues(null);
+                    balFuture.complete(null);
                 }
-
-                callback.notifySuccess();
             });
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-            callback.setReturnValues(createKafkaError("Failed to send data to Kafka server: " + e.getMessage(),
+            balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage(),
                                                       PRODUCER_ERROR));
-            callback.notifySuccess();
 
         }
         return null;

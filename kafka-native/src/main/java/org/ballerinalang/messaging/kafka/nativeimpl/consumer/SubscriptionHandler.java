@@ -23,6 +23,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
 import org.ballerinalang.jvm.api.BValueCreator;
+import org.ballerinalang.jvm.api.BalEnv;
 import org.ballerinalang.jvm.api.values.BArray;
 import org.ballerinalang.jvm.api.values.BMap;
 import org.ballerinalang.jvm.api.values.BObject;
@@ -31,7 +32,7 @@ import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.types.BArrayType;
 import org.ballerinalang.jvm.values.FPValue;
-import org.ballerinalang.jvm.values.connector.NonBlockingCallback;
+import org.ballerinalang.jvm.api.BalFuture;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -114,11 +115,11 @@ public class SubscriptionHandler {
      * @param onPartitionsAssigned Function pointer to invoke if partitions are assigned.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object subscribeWithPartitionRebalance(BObject consumerObject, BArray topics,
+    public static Object subscribeWithPartitionRebalance(BalEnv env, BObject consumerObject, BArray topics,
                                                          FPValue onPartitionsRevoked, FPValue onPartitionsAssigned) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, consumerObject);
-        NonBlockingCallback callback = new NonBlockingCallback(strand);
+        BalFuture balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<String> topicsList = getStringListFromStringBArray(topics);
         ConsumerRebalanceListener consumer = new SubscriptionHandler.KafkaRebalanceListener(strand, strand.scheduler,
@@ -129,13 +130,13 @@ public class SubscriptionHandler {
             kafkaConsumer.subscribe(topicsList, consumer);
             Set<String> subscribedTopics = kafkaConsumer.subscription();
             KafkaMetricsUtil.reportBulkSubscription(consumerObject, subscribedTopics);
+            balFuture.complete(null);
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PARTITION_REBALANCE);
-            callback.notifyFailure(createKafkaError("Failed to subscribe the consumer: " + e.getMessage(),
+            balFuture.complete(createKafkaError("Failed to subscribe the consumer: " + e.getMessage(),
                                                     CONSUMER_ERROR));
         }
-        callback.notifySuccess();
         return null;
     }
 
