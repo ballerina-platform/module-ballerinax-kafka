@@ -1,6 +1,6 @@
 name: Pull Request Build
 
-on: [push, pull_request]
+on: [push, pull_request_target]
 
 jobs:
     ubuntu-build:

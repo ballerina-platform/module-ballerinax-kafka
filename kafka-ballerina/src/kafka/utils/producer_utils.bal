@@ -16,7 +16,7 @@
 
 import ballerina/java;
 
-function sendStringValues(Producer producer, string value, string topic, anydata? key, int? partition, int? timestamp,
+isolated function sendStringValues(Producer producer, string value, string topic, anydata? key, int? partition, int? timestamp,
     string keySerializerType) returns ProducerError? {
     if (key is ()) {
         return sendStringValuesNilKeys(producer, value, topic, partition, timestamp);
@@ -56,7 +56,7 @@ function sendStringValues(Producer producer, string value, string topic, anydata
     }
 }
 
-function sendIntValues(Producer producer, int value, string topic, anydata? key, int? partition, int? timestamp,
+isolated function sendIntValues(Producer producer, int value, string topic, anydata? key, int? partition, int? timestamp,
     string keySerializerType) returns ProducerError? {
     if (key is ()) {
         return sendIntValuesNilKeys(producer, value, topic, partition, timestamp);
@@ -96,7 +96,7 @@ function sendIntValues(Producer producer, int value, string topic, anydata? key,
     }
 }
 
-function sendFloatValues(Producer producer, float value, string topic, anydata? key, int? partition, int? timestamp,
+isolated function sendFloatValues(Producer producer, float value, string topic, anydata? key, int? partition, int? timestamp,
     string keySerializerType) returns ProducerError? {
     if (key is ()) {
         return sendFloatValuesNilKeys(producer, value, topic, partition, timestamp);
@@ -136,7 +136,7 @@ function sendFloatValues(Producer producer, float value, string topic, anydata? 
     }
 }
 
-function sendByteArrayValues(Producer producer, byte[] value, string topic, anydata? key, int? partition,
+isolated function sendByteArrayValues(Producer producer, byte[] value, string topic, anydata? key, int? partition,
     int? timestamp, string keySerializerType) returns ProducerError? {
     if (key is ()) {
         return sendByteArrayValuesNilKeys(producer, value, topic, partition, timestamp);
@@ -176,7 +176,7 @@ function sendByteArrayValues(Producer producer, byte[] value, string topic, anyd
     }
 }
 
-function sendAvroValues(Producer producer, AvroRecord value, string topic, anydata? key, int? partition, int? timestamp,
+isolated function sendAvroValues(Producer producer, AvroRecord value, string topic, anydata? key, int? partition, int? timestamp,
     string keySerializerType) returns ProducerError? {
     if (key is ()) {
         return sendAvroValuesNilKeys(producer, value, topic, partition, timestamp);
@@ -216,7 +216,7 @@ function sendAvroValues(Producer producer, AvroRecord value, string topic, anyda
     }
 }
 
-function sendCustomValues(Producer producer, anydata value, string topic, anydata? key, int? partition, int? timestamp,
+isolated function sendCustomValues(Producer producer, anydata value, string topic, anydata? key, int? partition, int? timestamp,
     string keySerializerType) returns ProducerError? {
     if (key is ()) {
         return sendCustomValuesNilKeys(producer, value, topic, partition, timestamp);
@@ -256,38 +256,38 @@ function sendCustomValues(Producer producer, anydata value, string topic, anydat
     }
 }
 
-function producerInit(Producer producer) returns error? =
+isolated function producerInit(Producer producer) returns error? =
 @java:Method {
     name: "init",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 
-function producerClose(Producer producer) returns ProducerError? =
+isolated function producerClose(Producer producer) returns ProducerError? =
 @java:Method {
     name: "close",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 
-function producerCommitConsumer(Producer producer, Consumer consumer) returns ProducerError? =
+isolated function producerCommitConsumer(Producer producer, Consumer consumer) returns ProducerError? =
 @java:Method {
     name: "commitConsumer",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 
-function producerCommitConsumerOffsets(Producer producer, PartitionOffset[] offsets, string groupID)
+isolated function producerCommitConsumerOffsets(Producer producer, PartitionOffset[] offsets, string groupID)
 returns ProducerError? =
 @java:Method {
     name: "commitConsumerOffsets",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 
-function producerFlushRecords(Producer producer) returns ProducerError? =
+isolated function producerFlushRecords(Producer producer) returns ProducerError? =
 @java:Method {
     name: "flushRecords",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 
-function producerGetTopicPartitions(Producer producer, string topic) returns TopicPartition[]|ProducerError =
+isolated function producerGetTopicPartitions(Producer producer, string topic) returns TopicPartition[]|ProducerError =
 @java:Method {
     name: "getTopicPartitions",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
@@ -300,7 +300,7 @@ function producerGetTopicPartitions(Producer producer, string topic) returns Top
 //////////////////////////////////////////////////////////////////////////////////////
 
 // Send string values with different types of keys
-function sendStringValuesNilKeys(Producer producer, string value, string topic, int? partition = (),
+isolated function sendStringValuesNilKeys(Producer producer, string value, string topic, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
@@ -308,7 +308,7 @@ function sendStringValuesNilKeys(Producer producer, string value, string topic, 
                  "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendStringValuesStringKeys(Producer producer, string value, string topic, string key, int? partition = (),
+isolated function sendStringValuesStringKeys(Producer producer, string value, string topic, string key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
@@ -317,7 +317,7 @@ function sendStringValuesStringKeys(Producer producer, string value, string topi
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendStringValuesIntKeys(Producer producer, string value, string topic, int key, int? partition = (),
+isolated function sendStringValuesIntKeys(Producer producer, string value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
@@ -326,7 +326,7 @@ function sendStringValuesIntKeys(Producer producer, string value, string topic, 
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendStringValuesFloatKeys(Producer producer, string value, string topic, float key, int? partition = (),
+isolated function sendStringValuesFloatKeys(Producer producer, string value, string topic, float key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
@@ -334,7 +334,7 @@ function sendStringValuesFloatKeys(Producer producer, string value, string topic
                 "org.ballerinalang.jvm.api.values.BString", "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendStringValuesByteArrayKeys(Producer producer, string value, string topic, byte[] key, int? partition = (),
+isolated function sendStringValuesByteArrayKeys(Producer producer, string value, string topic, byte[] key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
@@ -343,7 +343,7 @@ function sendStringValuesByteArrayKeys(Producer producer, string value, string t
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendStringValuesAvroKeys(Producer producer, string value, string topic, AvroRecord key, int? partition = (),
+isolated function sendStringValuesAvroKeys(Producer producer, string value, string topic, AvroRecord key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
@@ -352,7 +352,7 @@ function sendStringValuesAvroKeys(Producer producer, string value, string topic,
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendStringValuesCustomKeys(Producer producer, string value, string topic, anydata key, int? partition = (),
+isolated function sendStringValuesCustomKeys(Producer producer, string value, string topic, anydata key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendStringValues",
@@ -361,7 +361,7 @@ function sendStringValuesCustomKeys(Producer producer, string value, string topi
 } external;
 
 // Send int values with different types of keys
-function sendIntValuesNilKeys(Producer producer, int value, string topic, int? partition = (), int? timestamp = ())
+isolated function sendIntValuesNilKeys(Producer producer, int value, string topic, int? partition = (), int? timestamp = ())
 returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
@@ -369,7 +369,7 @@ returns ProducerError? =
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendIntValuesStringKeys(Producer producer, int value, string topic, string key, int? partition = (),
+isolated function sendIntValuesStringKeys(Producer producer, int value, string topic, string key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
@@ -377,7 +377,7 @@ function sendIntValuesStringKeys(Producer producer, int value, string topic, str
                  "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendIntValuesIntKeys(Producer producer, int value, string topic, int key, int? partition = (),
+isolated function sendIntValuesIntKeys(Producer producer, int value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
@@ -385,7 +385,7 @@ function sendIntValuesIntKeys(Producer producer, int value, string topic, int ke
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendIntValuesFloatKeys(Producer producer, int value, string topic, float key, int? partition = (),
+isolated function sendIntValuesFloatKeys(Producer producer, int value, string topic, float key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
@@ -393,7 +393,7 @@ function sendIntValuesFloatKeys(Producer producer, int value, string topic, floa
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendIntValuesByteArrayKeys(Producer producer, int value, string topic, byte[] key, int? partition = (),
+isolated function sendIntValuesByteArrayKeys(Producer producer, int value, string topic, byte[] key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
@@ -401,7 +401,7 @@ function sendIntValuesByteArrayKeys(Producer producer, int value, string topic, 
                  "org.ballerinalang.jvm.values.ArrayValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendIntValuesAvroKeys(Producer producer, int value, string topic, AvroRecord key, int? partition = (),
+isolated function sendIntValuesAvroKeys(Producer producer, int value, string topic, AvroRecord key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
@@ -409,7 +409,7 @@ function sendIntValuesAvroKeys(Producer producer, int value, string topic, AvroR
                  "org.ballerinalang.jvm.values.MapValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendIntValuesCustomKeys(Producer producer, int value, string topic, anydata key, int? partition = (),
+isolated function sendIntValuesCustomKeys(Producer producer, int value, string topic, anydata key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendIntValues",
@@ -418,7 +418,7 @@ function sendIntValuesCustomKeys(Producer producer, int value, string topic, any
 } external;
 
 // Send float values with different types of keys
-function sendFloatValuesNilKeys(Producer producer, float value, string topic, int? partition = (), int? timestamp = ())
+isolated function sendFloatValuesNilKeys(Producer producer, float value, string topic, int? partition = (), int? timestamp = ())
 returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
@@ -426,7 +426,7 @@ returns ProducerError? =
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendFloatValuesStringKeys(Producer producer, float value, string topic, string key, int? partition = (),
+isolated function sendFloatValuesStringKeys(Producer producer, float value, string topic, string key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
@@ -434,7 +434,7 @@ function sendFloatValuesStringKeys(Producer producer, float value, string topic,
                  "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendFloatValuesIntKeys(Producer producer, float value, string topic, int key, int? partition = (),
+isolated function sendFloatValuesIntKeys(Producer producer, float value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
@@ -442,7 +442,7 @@ function sendFloatValuesIntKeys(Producer producer, float value, string topic, in
                  "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendFloatValuesFloatKeys(Producer producer, float value, string topic, float key, int? partition = (),
+isolated function sendFloatValuesFloatKeys(Producer producer, float value, string topic, float key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
@@ -450,7 +450,7 @@ function sendFloatValuesFloatKeys(Producer producer, float value, string topic, 
                  "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendFloatValuesByteArrayKeys(Producer producer, float value, string topic, byte[] key, int? partition = (),
+isolated function sendFloatValuesByteArrayKeys(Producer producer, float value, string topic, byte[] key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
@@ -458,7 +458,7 @@ function sendFloatValuesByteArrayKeys(Producer producer, float value, string top
                  "org.ballerinalang.jvm.values.ArrayValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendFloatValuesAvroKeys(Producer producer, float value, string topic, AvroRecord key, int? partition = (),
+isolated function sendFloatValuesAvroKeys(Producer producer, float value, string topic, AvroRecord key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
@@ -466,7 +466,7 @@ function sendFloatValuesAvroKeys(Producer producer, float value, string topic, A
                  "org.ballerinalang.jvm.values.MapValue", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendFloatValuesCustomKeys(Producer producer, float value, string topic, anydata key, int? partition = (),
+isolated function sendFloatValuesCustomKeys(Producer producer, float value, string topic, anydata key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendFloatValues",
@@ -475,7 +475,7 @@ function sendFloatValuesCustomKeys(Producer producer, float value, string topic,
 } external;
 
 // Send byte[] values with different types of keys
-function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topic, int? partition = (),
+isolated function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topic, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
@@ -483,7 +483,7 @@ function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topi
                  "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendByteArrayValuesStringKeys(Producer producer, byte[] value, string topic, string key, int? partition = (),
+isolated function sendByteArrayValuesStringKeys(Producer producer, byte[] value, string topic, string key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
@@ -492,7 +492,7 @@ function sendByteArrayValuesStringKeys(Producer producer, byte[] value, string t
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendByteArrayValuesIntKeys(Producer producer, byte[] value, string topic, int key, int? partition = (),
+isolated function sendByteArrayValuesIntKeys(Producer producer, byte[] value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
@@ -500,7 +500,7 @@ function sendByteArrayValuesIntKeys(Producer producer, byte[] value, string topi
                  "org.ballerinalang.jvm.api.values.BString", "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendByteArrayValuesFloatKeys(Producer producer, byte[] value, string topic, float key, int? partition = (),
+isolated function sendByteArrayValuesFloatKeys(Producer producer, byte[] value, string topic, float key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
@@ -508,7 +508,7 @@ function sendByteArrayValuesFloatKeys(Producer producer, byte[] value, string to
                  "org.ballerinalang.jvm.api.values.BString", "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendByteArrayValuesByteArrayKeys(Producer producer, byte[] value, string topic, byte[] key,
+isolated function sendByteArrayValuesByteArrayKeys(Producer producer, byte[] value, string topic, byte[] key,
     int? partition = (), int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
@@ -517,7 +517,7 @@ function sendByteArrayValuesByteArrayKeys(Producer producer, byte[] value, strin
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendByteArrayValuesAvroKeys(Producer producer, byte[] value, string topic, AvroRecord key, int? partition = (),
+isolated function sendByteArrayValuesAvroKeys(Producer producer, byte[] value, string topic, AvroRecord key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
@@ -526,7 +526,7 @@ function sendByteArrayValuesAvroKeys(Producer producer, byte[] value, string top
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendByteArrayValuesCustomKeys(Producer producer, byte[] value, string topic, anydata key, int? partition = (),
+isolated function sendByteArrayValuesCustomKeys(Producer producer, byte[] value, string topic, anydata key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendByteArrayValues",
@@ -535,7 +535,7 @@ function sendByteArrayValuesCustomKeys(Producer producer, byte[] value, string t
 } external;
 
 // Sends Avro values with different types of keys
-function sendAvroValuesNilKeys(Producer producer, AvroRecord value, string topic, int? partition = (),
+isolated function sendAvroValuesNilKeys(Producer producer, AvroRecord value, string topic, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
@@ -543,7 +543,7 @@ function sendAvroValuesNilKeys(Producer producer, AvroRecord value, string topic
                  "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendAvroValuesStringKeys(Producer producer, AvroRecord value, string topic, string key, int? partition = (),
+isolated function sendAvroValuesStringKeys(Producer producer, AvroRecord value, string topic, string key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
@@ -552,7 +552,7 @@ function sendAvroValuesStringKeys(Producer producer, AvroRecord value, string to
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendAvroValuesIntKeys(Producer producer, AvroRecord value, string topic, int key, int? partition = (),
+isolated function sendAvroValuesIntKeys(Producer producer, AvroRecord value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
@@ -560,7 +560,7 @@ function sendAvroValuesIntKeys(Producer producer, AvroRecord value, string topic
                  "org.ballerinalang.jvm.api.values.BString", "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendAvroValuesFloatKeys(Producer producer, AvroRecord value, string topic, float key, int? partition = (),
+isolated function sendAvroValuesFloatKeys(Producer producer, AvroRecord value, string topic, float key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
@@ -568,7 +568,7 @@ function sendAvroValuesFloatKeys(Producer producer, AvroRecord value, string top
                  "org.ballerinalang.jvm.api.values.BString", "double", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendAvroValuesByteArrayKeys(Producer producer, AvroRecord value, string topic, byte[] key, int? partition = (),
+isolated function sendAvroValuesByteArrayKeys(Producer producer, AvroRecord value, string topic, byte[] key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
@@ -577,7 +577,7 @@ function sendAvroValuesByteArrayKeys(Producer producer, AvroRecord value, string
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendAvroValuesAvroKeys(Producer producer, AvroRecord value, string topic, AvroRecord key, int? partition = (),
+isolated function sendAvroValuesAvroKeys(Producer producer, AvroRecord value, string topic, AvroRecord key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
@@ -586,7 +586,7 @@ function sendAvroValuesAvroKeys(Producer producer, AvroRecord value, string topi
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendAvroValuesCustomKeys(Producer producer, AvroRecord value, string topic, any key, int? partition = (),
+isolated function sendAvroValuesCustomKeys(Producer producer, AvroRecord value, string topic, any key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroValues",
@@ -595,7 +595,7 @@ function sendAvroValuesCustomKeys(Producer producer, AvroRecord value, string to
 } external;
 
 // Send custom type values with different types of keys
-function sendCustomValuesNilKeys(Producer producer, anydata value, string topic, int? partition = (),
+isolated function sendCustomValuesNilKeys(Producer producer, anydata value, string topic, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
@@ -603,7 +603,7 @@ function sendCustomValuesNilKeys(Producer producer, anydata value, string topic,
                  "org.ballerinalang.jvm.api.values.BString", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendCustomValuesStringKeys(Producer producer, anydata value, string topic, string key, int? partition = (),
+isolated function sendCustomValuesStringKeys(Producer producer, anydata value, string topic, string key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
@@ -612,7 +612,7 @@ function sendCustomValuesStringKeys(Producer producer, anydata value, string top
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendCustomValuesIntKeys(Producer producer, anydata value, string topic, int key, int? partition = (),
+isolated function sendCustomValuesIntKeys(Producer producer, anydata value, string topic, int key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
@@ -620,7 +620,7 @@ function sendCustomValuesIntKeys(Producer producer, anydata value, string topic,
                  "org.ballerinalang.jvm.api.values.BString", "long", "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendCustomValuesFloatKeys(Producer producer, anydata value, string topic, float key, int? partition = (),
+isolated function sendCustomValuesFloatKeys(Producer producer, anydata value, string topic, float key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
@@ -628,7 +628,7 @@ function sendCustomValuesFloatKeys(Producer producer, anydata value, string topi
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendCustomValuesByteArrayKeys(Producer producer, anydata value, string topic, byte[] key, int? partition = (),
+isolated function sendCustomValuesByteArrayKeys(Producer producer, anydata value, string topic, byte[] key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",
@@ -637,7 +637,7 @@ function sendCustomValuesByteArrayKeys(Producer producer, anydata value, string 
                  "java.lang.Object", "java.lang.Object"]
 } external;
 
-function sendCustomValuesAvroKeys(Producer producer, anydata value, string topic, AvroRecord key, int? partition = (),
+isolated function sendCustomValuesAvroKeys(Producer producer, anydata value, string topic, AvroRecord key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendAvroKeys",
@@ -646,7 +646,7 @@ function sendCustomValuesAvroKeys(Producer producer, anydata value, string topic
                  "java.lang.Object"]
 } external;
 
-function sendCustomValuesCustomKeys(Producer producer, anydata value, string topic, any key, int? partition = (),
+isolated function sendCustomValuesCustomKeys(Producer producer, anydata value, string topic, any key, int? partition = (),
     int? timestamp = ()) returns ProducerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.SendCustomValues",

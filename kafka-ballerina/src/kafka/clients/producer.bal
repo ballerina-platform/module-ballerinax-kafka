@@ -31,7 +31,7 @@ public client class Producer {
     # Creates a new Kafka `Producer`.
     #
     # + config - Configurations related to initializing a Kafka `Producer`
-    public function init(ProducerConfiguration config) {
+    public isolated function init(ProducerConfiguration config) {
         self.producerConfig = config;
         self.keySerializerType = config.keySerializerType;
         self.valueSerializerType = config.valueSerializerType;
@@ -79,7 +79,7 @@ public client class Producer {
     # ```
     #
     # + return - A `kafka:ProducerError` if closing the producer failed or else '()'
-    public remote function close() returns ProducerError? {
+    public isolated remote function close() returns ProducerError? {
         return producerClose(self);
     }
 
@@ -87,7 +87,7 @@ public client class Producer {
     #
     # + consumer - Consumer, which needs offsets to be committed
     # + return - A`kafka:ProducerError` if committing the consumer failed or else ()
-    public remote function commitConsumer(Consumer consumer) returns ProducerError? {
+    public isolated remote function commitConsumer(Consumer consumer) returns ProducerError? {
         return producerCommitConsumer(self, consumer);
     }
 
@@ -96,7 +96,7 @@ public client class Producer {
     # + offsets - Consumer offsets to commit for a given transaction
     # + groupID - Consumer group ID
     # + return - A `kafka:ProducerError` if committing consumer offsets failed or else ()
-    public remote function commitConsumerOffsets(PartitionOffset[] offsets, string groupID) returns ProducerError? {
+    public isolated remote function commitConsumerOffsets(PartitionOffset[] offsets, string groupID) returns ProducerError? {
         return producerCommitConsumerOffsets(self, offsets, groupID);
     }
 
@@ -106,7 +106,7 @@ public client class Producer {
     # ```
     #
     # + return - A `kafka:ProducerError` if records couldn't be flushed or else '()'
-    public remote function flushRecords() returns ProducerError? {
+    public isolated remote function flushRecords() returns ProducerError? {
         return producerFlushRecords(self);
     }
 
@@ -117,7 +117,7 @@ public client class Producer {
     #
     # + topic - Topic of which the partition information is given
     # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:ProducerError` if the operation fails
-    public remote function getTopicPartitions(string topic) returns TopicPartition[]|ProducerError {
+    public isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|ProducerError {
         return producerGetTopicPartitions(self, topic);
     }
 
@@ -132,7 +132,7 @@ public client class Producer {
     # + partition - Partition to which the record should be sent
     # + timestamp - Timestamp of the record in milliseconds since epoch
     # + return -  A `kafka:ProducerError` if send action fails to send data or else '()'
-    public remote function send(anydata value, string topic, anydata? key = (), int? partition = (),
+    public isolated remote function send(anydata value, string topic, anydata? key = (), int? partition = (),
         int? timestamp = ()) returns ProducerError? {
         // Handle string values
         if (self.valueSerializerType == SER_STRING) {
