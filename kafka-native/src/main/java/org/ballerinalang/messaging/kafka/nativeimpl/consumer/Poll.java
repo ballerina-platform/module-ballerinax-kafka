@@ -23,6 +23,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.ballerinalang.jvm.api.BValueCreator;
+import org.ballerinalang.jvm.api.BalEnv;
 import org.ballerinalang.jvm.api.values.BArray;
 import org.ballerinalang.jvm.api.values.BMap;
 import org.ballerinalang.jvm.api.values.BObject;
@@ -30,7 +31,7 @@ import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.types.BArrayType;
-import org.ballerinalang.jvm.values.connector.NonBlockingCallback;
+import org.ballerinalang.jvm.api.BalFuture;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -59,10 +60,10 @@ public class Poll {
      * @param timeout        Duration in milliseconds to try the operation.
      * @return Ballerina {@code ConsumerRecords[]} after the polling.
      */
-    public static Object poll(BObject consumerObject, long timeout) {
+    public static Object poll(BalEnv env, BObject consumerObject, long timeout) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, consumerObject);
-        NonBlockingCallback callback = new NonBlockingCallback(strand);
+        BalFuture balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         String keyType = consumerObject.getStringValue(CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
         String valueType = consumerObject.getStringValue(CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
@@ -79,13 +80,12 @@ public class Poll {
                                                    recordValue.get(ALIAS_VALUE));
                 }
             }
-            callback.setReturnValues(consumerRecordsArray);
+            balFuture.complete(consumerRecordsArray);
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-            callback.notifyFailure(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage(),
+            balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage(),
                                                     CONSUMER_ERROR));
         }
-        callback.notifySuccess();
         return null;
     }
 }
