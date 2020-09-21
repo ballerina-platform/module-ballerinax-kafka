@@ -30,17 +30,17 @@ Execute the commands below to build from the source.
 
 1. To build the library:
 ```shell script
-./gradlew clean build
+  ./gradlew clean build
 ```
 
-2. To build the module without the tests:
+2. To debug the tests
 ```shell script
-./gradlew clean build -PskipBallerinaTests
+  ./gradlew clean build -Pdebug=<port>
 ```
 
-3. To debug the tests:
+3. To build the module without the tests:
 ```shell script
-./gradlew clean test -PdebugBallerina=<port>
+  ./gradlew clean build -x test
 ```
 
 ## Contributing to Ballerina
