@@ -39,7 +39,7 @@ public class KafkaConstants {
     public static final String ARRAY_INDICATOR = "[]";
     public static final String ORG_NAME = "ballerinax";
     public static final String MODULE_NAME = "kafka";
-    private static final String VERSION = "2.0.0";
+    private static final String VERSION = "2.0.1-SNAPSHOT";
 
     public static final String PACKAGE_NAME_WITH_VERSION = MODULE_NAME + BLOCK_SEPARATOR + VERSION;
     public static final String PACKAGE_FULL_NAME = ORG_NAME + ORG_NAME_SEPARATOR + PACKAGE_NAME_WITH_VERSION;
