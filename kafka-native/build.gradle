@@ -28,3 +28,12 @@ dependencies {
     compile group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}"
     compile group: 'org.apache.avro', name: 'avro', version: "${avroVersion}"
 }
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
+}
