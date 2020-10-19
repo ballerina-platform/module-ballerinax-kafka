@@ -22,6 +22,7 @@ module io.ballerina.stdlib.kafka {
     requires slf4j.api;
     requires java.transaction.xa;
     requires org.apache.avro;
+    requires com.fasterxml.jackson.core;
     exports org.ballerinalang.messaging.kafka.impl;
     exports org.ballerinalang.messaging.kafka.nativeimpl.consumer;
     exports org.ballerinalang.messaging.kafka.nativeimpl.producer;
