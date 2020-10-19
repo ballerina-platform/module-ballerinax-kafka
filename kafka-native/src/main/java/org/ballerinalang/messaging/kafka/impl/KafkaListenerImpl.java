@@ -50,7 +50,7 @@ public class KafkaListenerImpl implements KafkaListener {
     private ResponseCallback callback;
     private BRuntime bRuntime;
 
-    public KafkaListenerImpl(Strand strand, BObject listener, BObject service, BRuntime bRuntime) {
+    public KafkaListenerImpl(BObject listener, BObject service, BRuntime bRuntime) {
         this.bRuntime = bRuntime;
         this.listener = listener;
         this.service = service;
