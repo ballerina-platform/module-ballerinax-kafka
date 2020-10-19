@@ -19,6 +19,8 @@
 package org.ballerinalang.messaging.kafka.service;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.ballerinalang.jvm.api.BRuntime;
+import org.ballerinalang.jvm.api.BalEnv;
 import org.ballerinalang.jvm.api.values.BMap;
 import org.ballerinalang.jvm.api.values.BObject;
 import org.ballerinalang.jvm.api.values.BString;
@@ -46,17 +48,18 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
 public class Register {
 
     @SuppressWarnings(UNCHECKED)
-    public static Object register(BObject listener, BObject service, Object name) {
+    public static Object register(BalEnv env, BObject listener, BObject service, Object name) {
         Strand strand = Scheduler.getStrand();
         BMap<BString, Object> listenerConfigurations = listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
         Properties configs = KafkaUtils.processKafkaConsumerConfig(listenerConfigurations);
+        BRuntime runtime = env.getRuntime();
 
         try {
             KafkaConsumer kafkaConsumer = null;
             if (Objects.nonNull(listener.getNativeData(NATIVE_CONSUMER))) {
                 kafkaConsumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
             }
-            KafkaListener kafkaListener = new KafkaListenerImpl(strand, listener, service);
+            KafkaListener kafkaListener = new KafkaListenerImpl(strand, listener, service, runtime);
             String serviceId = service.getType().getQualifiedName();
             KafkaServerConnector serverConnector = new KafkaServerConnectorImpl(serviceId, configs, kafkaListener,
                     kafkaConsumer);

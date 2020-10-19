@@ -20,12 +20,11 @@ package org.ballerinalang.messaging.kafka.impl;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.ballerinalang.jvm.api.BExecutor;
+import org.ballerinalang.jvm.api.BRuntime;
 import org.ballerinalang.jvm.api.connector.CallableUnitCallback;
 import org.ballerinalang.jvm.api.values.BObject;
 import org.ballerinalang.jvm.observability.ObservabilityConstants;
 import org.ballerinalang.jvm.observability.ObserveUtils;
-import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.messaging.kafka.api.KafkaListener;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
@@ -46,13 +45,13 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getResourcePara
  */
 public class KafkaListenerImpl implements KafkaListener {
 
-    private Scheduler scheduler;
     private BObject service;
     private BObject listener;
     private ResponseCallback callback;
+    private BRuntime bRuntime;
 
-    public KafkaListenerImpl(Strand strand, BObject listener, BObject service) {
-        this.scheduler = strand.scheduler;
+    public KafkaListenerImpl(Strand strand, BObject listener, BObject service, BRuntime bRuntime) {
+        this.bRuntime = bRuntime;
         this.listener = listener;
         this.service = service;
         callback = new ResponseCallback();
@@ -90,11 +89,11 @@ public class KafkaListenerImpl implements KafkaListener {
     private void executeResource(BObject listener, ConsumerRecords records, String groupId) {
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
-                            properties, getResourceParameters(service, this.listener, records, groupId));
+            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
+                                      properties, getResourceParameters(service, this.listener, records, groupId));
         } else {
-            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
-                            null, getResourceParameters(service, this.listener, records, groupId));
+            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
+                                      null, getResourceParameters(service, this.listener, records, groupId));
         }
     }
 
@@ -102,11 +101,11 @@ public class KafkaListenerImpl implements KafkaListener {
                                  String groupId) {
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
-                            properties, getResourceParameters(service, this.listener, records, groupId));
+            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
+                                      properties, getResourceParameters(service, this.listener, records, groupId));
         } else {
-            BExecutor.submit(this.scheduler, service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
-                            null, getResourceParameters(service, this.listener, records, groupId));
+            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
+                                      null, getResourceParameters(service, this.listener, records, groupId));
         }
     }
 
