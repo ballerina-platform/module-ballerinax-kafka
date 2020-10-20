@@ -18,11 +18,11 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.producer;
 
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.ballerinalang.jvm.api.BalEnv;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class SendIntValues extends Send {
     private static final Logger logger = LoggerFactory.getLogger(SendIntValues.class);
 
     // ballerina int and ()
-    public static Object sendIntValuesNilKeys(BalEnv env, BObject producer, long value, BString topic, Object partition,
+    public static Object sendIntValuesNilKeys(Environment env, BObject producer, long value, BString topic, Object partition,
                                               Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -53,7 +53,7 @@ public class SendIntValues extends Send {
     }
 
     // ballerina int and String
-    public static Object sendIntValuesStringKeys(BalEnv env, BObject producer, long value, BString topic, BString key,
+    public static Object sendIntValuesStringKeys(Environment env, BObject producer, long value, BString topic, BString key,
                                                  Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -63,7 +63,7 @@ public class SendIntValues extends Send {
     }
 
     // ballerina int and ballerina int
-    public static Object sendIntValuesIntKeys(BalEnv env, BObject producer, long value, BString topic, long key,
+    public static Object sendIntValuesIntKeys(Environment env, BObject producer, long value, BString topic, long key,
                                               Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -73,7 +73,7 @@ public class SendIntValues extends Send {
     }
 
     // ballerina int and ballerina float
-    public static Object sendIntValuesFloatKeys(BalEnv env, BObject producer, long value, BString topic, double key,
+    public static Object sendIntValuesFloatKeys(Environment env, BObject producer, long value, BString topic, double key,
                                                 Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -83,7 +83,7 @@ public class SendIntValues extends Send {
     }
 
     // ballerina int and ballerina byte[]
-    public static Object sendIntValuesByteArrayKeys(BalEnv env, BObject producer, long value, BString topic, BArray key,
+    public static Object sendIntValuesByteArrayKeys(Environment env, BObject producer, long value, BString topic, BArray key,
                                                     Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -93,7 +93,7 @@ public class SendIntValues extends Send {
     }
 
     // ballerina int and ballerina anydata
-    public static Object sendIntValuesCustomKeys(BalEnv env, BObject producer, long value, BString topic, Object key,
+    public static Object sendIntValuesCustomKeys(Environment env, BObject producer, long value, BString topic, Object key,
                                                  Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);

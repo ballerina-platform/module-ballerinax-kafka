@@ -18,7 +18,7 @@
 
 package org.ballerinalang.messaging.kafka.impl;
 
-import org.ballerinalang.jvm.api.connector.CallableUnitCallback;
+import io.ballerina.runtime.api.async.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ import java.util.concurrent.Semaphore;
  * {@code KafkaPollCycleFutureListener} listener provides ability control poll cycle flow by notifications received from
  * Ballerina side.
  */
-public class KafkaPollCycleFutureListener implements CallableUnitCallback {
+public class KafkaPollCycleFutureListener implements Callback {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaPollCycleFutureListener.class);
 
@@ -66,7 +66,7 @@ public class KafkaPollCycleFutureListener implements CallableUnitCallback {
      * {@inheritDoc}
      */
     @Override
-    public void notifyFailure(org.ballerinalang.jvm.api.values.BError error) {
+    public void notifyFailure(io.ballerina.runtime.api.values.BError error) {
         sem.release();
         logger.error("Ballerina engine has completed resource invocation with exception for service " + serviceId +
                              ". Semaphore is released to continue next polling cycle.", error.toString());

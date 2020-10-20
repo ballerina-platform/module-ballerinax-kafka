@@ -18,12 +18,12 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
+import io.ballerina.runtime.api.StringUtils;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BString;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
-import org.ballerinalang.jvm.api.BStringUtils;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BString;
 
 import java.util.List;
 
@@ -41,12 +41,12 @@ public class AvroUtils {
         List<Schema.Field> fields = record.getSchema().getFields();
         for (Schema.Field field : fields) {
             if (record.get(field.name()) instanceof Utf8) {
-                genericAvroRecord.put(BStringUtils.fromString(field.name()),
-                                      BStringUtils.fromString(record.get(field.name()).toString()));
+                genericAvroRecord.put(StringUtils.fromString(field.name()),
+                                      StringUtils.fromString(record.get(field.name()).toString()));
             } else if (record.get(field.name()) instanceof GenericRecord) {
                 populateBallerinaGenericAvroRecord(genericAvroRecord, (GenericRecord) record.get(field.name()));
             } else {
-                genericAvroRecord.put(BStringUtils.fromString(field.name()), record.get(field.name()));
+                genericAvroRecord.put(StringUtils.fromString(field.name()), record.get(field.name()));
             }
         }
     }

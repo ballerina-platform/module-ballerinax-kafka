@@ -18,19 +18,19 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
+import io.ballerina.runtime.api.PredefinedTypes;
+import io.ballerina.runtime.api.StringUtils;
+import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.scheduling.Scheduler;
+import io.ballerina.runtime.types.BArrayType;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
-import org.ballerinalang.jvm.api.BStringUtils;
-import org.ballerinalang.jvm.api.BValueCreator;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.types.BArrayType;
-import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -63,7 +63,7 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateTopicPa
 public class ConsumerInformationHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsumerInformationHandler.class);
-    private static final BArrayType stringArrayType = new BArrayType(BTypes.typeString);
+    private static final BArrayType stringArrayType = new BArrayType(PredefinedTypes.TYPE_STRING);
 
     /**
      * Assign ballerina kafka consumer to the given topic array.
@@ -95,7 +95,7 @@ public class ConsumerInformationHandler {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         BArray topicPartitionArray =
-                BValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
+                ValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
         try {
             Set<TopicPartition> topicPartitions = kafkaConsumer.assignment();
             for (TopicPartition partition : topicPartitions) {
@@ -149,7 +149,7 @@ public class ConsumerInformationHandler {
         KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         BArray topicPartitionArray =
-                BValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
+                ValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
         try {
             Set<TopicPartition> pausedPartitions = kafkaConsumer.paused();
             for (TopicPartition partition : pausedPartitions) {
@@ -190,7 +190,7 @@ public class ConsumerInformationHandler {
                 partitionInfoList = kafkaConsumer.partitionsFor(topic.getValue());
             }
             BArray topicPartitionArray =
-                    BValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
+                    ValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
             for (PartitionInfo info : partitionInfoList) {
                 BMap<BString, Object> partition = populateTopicPartitionRecord(info.topic(), info.partition());
                 topicPartitionArray.append(partition);
@@ -216,10 +216,10 @@ public class ConsumerInformationHandler {
 
         try {
             Set<String> subscriptions = kafkaConsumer.subscription();
-            BArray arrayValue = BValueCreator.createArrayValue(stringArrayType);
+            BArray arrayValue = ValueCreator.createArrayValue(stringArrayType);
             if (!subscriptions.isEmpty()) {
                 for (String subscription : subscriptions) {
-                    arrayValue.append(BStringUtils.fromString(subscription));
+                    arrayValue.append(StringUtils.fromString(subscription));
                 }
             }
             return arrayValue;
@@ -237,10 +237,10 @@ public class ConsumerInformationHandler {
     }
 
     private static BArray getBArrayFromMap(Map<String, List<PartitionInfo>> map) {
-        BArray bArray = BValueCreator.createArrayValue(new BArrayType(BTypes.typeString));
+        BArray bArray = ValueCreator.createArrayValue(new BArrayType(PredefinedTypes.TYPE_STRING));
         if (!map.keySet().isEmpty()) {
             for (String topic : map.keySet()) {
-                bArray.append(BStringUtils.fromString(topic));
+                bArray.append(StringUtils.fromString(topic));
             }
         }
         return bArray;

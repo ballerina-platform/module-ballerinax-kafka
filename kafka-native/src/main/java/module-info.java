@@ -18,7 +18,7 @@
 
 module io.ballerina.stdlib.kafka {
     requires kafka.clients;
-    requires io.ballerina.jvm;
+    requires io.ballerina.runtime;
     requires slf4j.api;
     requires java.transaction.xa;
     requires org.apache.avro;

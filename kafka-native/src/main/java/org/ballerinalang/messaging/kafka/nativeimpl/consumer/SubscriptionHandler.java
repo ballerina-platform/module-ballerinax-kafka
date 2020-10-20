@@ -18,21 +18,21 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.scheduling.Scheduler;
+import io.ballerina.runtime.scheduling.Strand;
+import io.ballerina.runtime.types.BArrayType;
+import io.ballerina.runtime.values.FPValue;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
-import org.ballerinalang.jvm.api.BValueCreator;
-import org.ballerinalang.jvm.api.BalEnv;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.types.BArrayType;
-import org.ballerinalang.jvm.values.FPValue;
-import org.ballerinalang.jvm.api.BalFuture;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -115,11 +115,11 @@ public class SubscriptionHandler {
      * @param onPartitionsAssigned Function pointer to invoke if partitions are assigned.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object subscribeWithPartitionRebalance(BalEnv env, BObject consumerObject, BArray topics,
+    public static Object subscribeWithPartitionRebalance(Environment env, BObject consumerObject, BArray topics,
                                                          FPValue onPartitionsRevoked, FPValue onPartitionsAssigned) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, consumerObject);
-        BalFuture balFuture = env.markAsync();
+        Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<String> topicsList = getStringListFromStringBArray(topics);
         ConsumerRebalanceListener consumer = new SubscriptionHandler.KafkaRebalanceListener(strand, strand.scheduler,
@@ -204,7 +204,7 @@ public class SubscriptionHandler {
         }
 
         private BArray getPartitionsArray(Collection<TopicPartition> partitions) {
-            BArray topicPartitionArray = BValueCreator.createArrayValue(
+            BArray topicPartitionArray = ValueCreator.createArrayValue(
                     new BArrayType(getTopicPartitionRecord().getType()));
             for (TopicPartition partition : partitions) {
                 BMap<BString, Object> topicPartition = populateTopicPartitionRecord(partition.topic(),

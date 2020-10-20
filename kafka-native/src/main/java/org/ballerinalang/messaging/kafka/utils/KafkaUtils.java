@@ -18,6 +18,20 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
+import io.ballerina.runtime.api.ErrorCreator;
+import io.ballerina.runtime.api.PredefinedTypes;
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.StringUtils;
+import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.types.BArrayType;
+import io.ballerina.runtime.values.ErrorValue;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -28,20 +42,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
-import org.ballerinalang.jvm.api.BErrorCreator;
-import org.ballerinalang.jvm.api.BRuntime;
-import org.ballerinalang.jvm.api.BStringUtils;
-import org.ballerinalang.jvm.api.BValueCreator;
-import org.ballerinalang.jvm.api.connector.CallableUnitCallback;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BError;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.scheduling.StrandMetadata;
-import org.ballerinalang.jvm.types.BArrayType;
-import org.ballerinalang.jvm.types.BTypes;
-import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static org.ballerinalang.jvm.api.BValueCreator.createRecordValue;
+import static io.ballerina.runtime.api.ValueCreator.createRecordValue;
 import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
 
 /**
@@ -69,11 +69,11 @@ public class KafkaUtils {
     public static Object[] getResourceParameters(BObject service, BObject listener,
                                                  ConsumerRecords records, String groupId) {
 
-        BArray consumerRecordsArray = BValueCreator.createArrayValue(new BArrayType(getConsumerRecord().getType()));
+        BArray consumerRecordsArray = ValueCreator.createArrayValue(new BArrayType(getConsumerRecord().getType()));
         String keyType = listener.getStringValue(KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
         String valueType = listener.getStringValue(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
 
-        if (service.getType().getAttachedFunctions()[0].getParameterType().length == 2) {
+        if (service.getType().getAttachedFunctions()[0].getParameterTypes().length == 2) {
             for (Object record : records) {
                 BMap<BString, Object> consumerRecord = populateConsumerRecord(
                         (ConsumerRecord) record, keyType, valueType);
@@ -82,7 +82,7 @@ public class KafkaUtils {
             return new Object[]{listener, true, consumerRecordsArray, true, null, false, null, false};
         } else {
             BArray partitionOffsetsArray =
-                    BValueCreator.createArrayValue(new BArrayType(getPartitionOffsetRecord().getType()));
+                    ValueCreator.createArrayValue(new BArrayType(getPartitionOffsetRecord().getType()));
             for (Object record : records) {
                 ConsumerRecord kafkaRecord = (ConsumerRecord) record;
                 BMap<BString, Object> consumerRecord = populateConsumerRecord(kafkaRecord, keyType, valueType);
@@ -94,7 +94,7 @@ public class KafkaUtils {
                 partitionOffsetsArray.append(partitionOffset);
             }
             return new Object[]{listener, true, consumerRecordsArray, true, partitionOffsetsArray, true,
-                    BStringUtils.fromString(groupId), true};
+                    StringUtils.fromString(groupId), true};
         }
     }
 
@@ -401,7 +401,7 @@ public class KafkaUtils {
         String deserializerType = configurations.getStringValue(typeConfig).getValue();
         if (Objects.nonNull(deserializer) && KafkaConstants.SERDES_CUSTOM.equals(deserializerType)) {
             properties.put(configParam.getValue(), configurations.get(configParam));
-            properties.put(KafkaConstants.BALLERINA_STRAND, BRuntime.getCurrentRuntime());
+            properties.put(KafkaConstants.BALLERINA_STRAND, Runtime.getCurrentRuntime());
         }
     }
 
@@ -512,7 +512,7 @@ public class KafkaUtils {
     public static List<String> getStringListFromStringBArray(BArray stringArray) {
         ArrayList<String> values = new ArrayList<>();
         if ((Objects.isNull(stringArray)) ||
-                (!((BArrayType) stringArray.getType()).getElementType().equals(BTypes.typeString))) {
+                (!((BArrayType) stringArray.getType()).getElementType().equals(PredefinedTypes.TYPE_STRING))) {
             return values;
         }
         if (stringArray.size() != 0) {
@@ -555,13 +555,13 @@ public class KafkaUtils {
     private static Object getBValues(Object value, String type) {
         if (KafkaConstants.SERDES_BYTE_ARRAY.equals(type)) {
             if (value instanceof byte[]) {
-                return BValueCreator.createArrayValue((byte[]) value);
+                return ValueCreator.createArrayValue((byte[]) value);
             } else {
                 throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: byte[]");
             }
         } else if (KafkaConstants.SERDES_STRING.equals(type)) {
             if (value instanceof String) {
-                return BStringUtils.fromString((String) value);
+                return StringUtils.fromString((String) value);
             } else {
                 throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: string");
             }
@@ -602,13 +602,13 @@ public class KafkaUtils {
     }
 
     public static BError createKafkaError(String message, String typeId) {
-        return BErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
-                                                 BStringUtils.fromString(message));
+        return ErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+                                                 StringUtils.fromString(message));
     }
 
     public static BError createKafkaError(String message, String typeId, BError cause) {
-        return BErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
-                                                 BStringUtils.fromString(message), cause);
+        return ErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+                                                 StringUtils.fromString(message), cause);
     }
 
     public static BMap<BString, Object> createKafkaRecord(String recordName) {
@@ -616,7 +616,7 @@ public class KafkaUtils {
     }
 
     public static BArray getPartitionOffsetArrayFromOffsetMap(Map<TopicPartition, Long> offsetMap) {
-        BArray partitionOffsetArray = BValueCreator.createArrayValue(new BArrayType(
+        BArray partitionOffsetArray = ValueCreator.createArrayValue(new BArrayType(
                 getPartitionOffsetRecord().getType()));
         if (!offsetMap.entrySet().isEmpty()) {
             for (Map.Entry<TopicPartition, Long> entry : offsetMap.entrySet()) {
@@ -775,11 +775,11 @@ public class KafkaUtils {
         return clientId;
     }
 
-    public static Object invokeMethodSync(BRuntime runtime, BObject object, String methodName, String strandName,
+    public static Object invokeMethodSync(Runtime runtime, BObject object, String methodName, String strandName,
                                           StrandMetadata metadata, int timeout, Object... args) {
         Semaphore semaphore = new Semaphore(0);
         final BError[] errorValue = new ErrorValue[1];
-        Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new CallableUnitCallback() {
+        Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new Callback() {
             @Override
             public void notifySuccess() {
                 semaphore.release();

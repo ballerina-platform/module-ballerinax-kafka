@@ -18,14 +18,14 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.producer;
 
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.scheduling.Scheduler;
+import io.ballerina.runtime.scheduling.Strand;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
-import org.ballerinalang.jvm.api.BalEnv;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.api.BalFuture;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -44,10 +44,10 @@ import static org.ballerinalang.messaging.kafka.utils.TransactionUtils.handleTra
 public class Send {
 
     @SuppressWarnings(UNCHECKED)
-    protected static Object sendKafkaRecord(BalEnv env, ProducerRecord record, BObject producerObject) {
+    protected static Object sendKafkaRecord(Environment env, ProducerRecord record, BObject producerObject) {
         Strand strand = Scheduler.getStrand();
         KafkaTracingUtil.traceResourceInvocation(strand, producerObject, record.topic());
-        final BalFuture balFuture = env.markAsync();
+        final Future balFuture = env.markAsync();
         KafkaProducer producer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
             if (strand.isInTransaction()) {

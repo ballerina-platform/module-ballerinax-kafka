@@ -18,12 +18,12 @@
 
 package org.ballerinalang.messaging.kafka.serdes;
 
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BObject;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Deserializer;
-import org.ballerinalang.jvm.api.BRuntime;
-import org.ballerinalang.jvm.api.BValueCreator;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BObject;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
@@ -40,12 +40,12 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_DESERIAL
 public class BallerinaKafkaDeserializer implements Deserializer {
 
     private BObject deserializerObject = null;
-    private BRuntime runtime = null;
+    private Runtime runtime = null;
     private int timeout = 30000;
 
     @Override
     public void configure(Map configs, boolean isKey) {
-        this.runtime = (BRuntime) configs.get(BALLERINA_STRAND);
+        this.runtime = (Runtime) configs.get(BALLERINA_STRAND);
         if (isKey) {
             this.deserializerObject = (BObject) configs.get(KafkaConstants.CONSUMER_KEY_DESERIALIZER_CONFIG);
         } else {
@@ -58,7 +58,7 @@ public class BallerinaKafkaDeserializer implements Deserializer {
 
     @Override
     public Object deserialize(String topic, byte[] data) {
-        BArray bData = BValueCreator.createArrayValue(data);
+        BArray bData = ValueCreator.createArrayValue(data);
         Object[] args = new Object[]{bData, false};
         return KafkaUtils.invokeMethodSync(runtime, this.deserializerObject, KafkaConstants.FUNCTION_DESERIALIZE,
                                            null, ON_DESERIALIZE_METADATA, this.timeout, args);
