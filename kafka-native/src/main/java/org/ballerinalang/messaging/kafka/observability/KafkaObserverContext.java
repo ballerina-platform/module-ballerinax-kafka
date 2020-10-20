@@ -18,7 +18,7 @@
 
 package org.ballerinalang.messaging.kafka.observability;
 
-import org.ballerinalang.jvm.observability.ObserverContext;
+import io.ballerina.runtime.observability.ObserverContext;
 
 /**
  * Extension of ObserverContext for Kafka.

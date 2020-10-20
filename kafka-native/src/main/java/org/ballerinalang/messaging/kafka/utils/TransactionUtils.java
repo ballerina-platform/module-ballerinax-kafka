@@ -18,10 +18,10 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.scheduling.Strand;
+import io.ballerina.runtime.transactions.TransactionLocalContext;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.transactions.TransactionLocalContext;
 import org.ballerinalang.messaging.kafka.impl.KafkaTransactionContext;
 
 import java.util.Objects;

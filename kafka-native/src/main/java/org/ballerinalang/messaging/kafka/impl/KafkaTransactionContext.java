@@ -18,8 +18,8 @@
 
 package org.ballerinalang.messaging.kafka.impl;
 
+import io.ballerina.runtime.transactions.BallerinaTransactionContext;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.ballerinalang.jvm.transactions.BallerinaTransactionContext;
 
 import javax.transaction.xa.XAResource;
 

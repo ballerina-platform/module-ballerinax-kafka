@@ -18,11 +18,11 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.producer;
 
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.ballerinalang.jvm.api.BalEnv;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class SendStringValues extends Send {
     private static final Logger logger = LoggerFactory.getLogger(SendStringValues.class);
 
     // String and ()
-    public static Object sendStringValuesNilKeys(BalEnv env, BObject producer, BString value, BString topic, Object partition,
+    public static Object sendStringValuesNilKeys(Environment env, BObject producer, BString value, BString topic, Object partition,
                                                  Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -53,7 +53,7 @@ public class SendStringValues extends Send {
     }
 
     // String and String
-    public static Object sendStringValuesStringKeys(BalEnv env, BObject producer, BString value, BString topic, BString key,
+    public static Object sendStringValuesStringKeys(Environment env, BObject producer, BString value, BString topic, BString key,
                                                     Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -64,7 +64,7 @@ public class SendStringValues extends Send {
     }
 
     // String and ballerina int
-    public static Object sendStringValuesIntKeys(BalEnv env, BObject producer, BString value, BString topic, long key,
+    public static Object sendStringValuesIntKeys(Environment env, BObject producer, BString value, BString topic, long key,
                                                  Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -74,7 +74,7 @@ public class SendStringValues extends Send {
     }
 
     // String and ballerina float
-    public static Object sendStringValuesFloatKeys(BalEnv env, BObject producer, BString value, BString topic, double key,
+    public static Object sendStringValuesFloatKeys(Environment env, BObject producer, BString value, BString topic, double key,
                                                    Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -84,7 +84,7 @@ public class SendStringValues extends Send {
     }
 
     // String and ballerina byte[]
-    public static Object sendStringValuesByteArrayKeys(BalEnv env, BObject producer, BString value, BString topic, BArray key,
+    public static Object sendStringValuesByteArrayKeys(Environment env, BObject producer, BString value, BString topic, BArray key,
                                                        Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
@@ -95,7 +95,7 @@ public class SendStringValues extends Send {
     }
 
     // String and ballerina anydata
-    public static Object sendStringValuesCustomKeys(BalEnv env, BObject producer, BString value, BString topic, Object key,
+    public static Object sendStringValuesCustomKeys(Environment env, BObject producer, BString value, BString topic, Object key,
                                                     Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);

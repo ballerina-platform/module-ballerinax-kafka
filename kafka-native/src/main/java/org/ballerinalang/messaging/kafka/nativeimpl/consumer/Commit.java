@@ -18,13 +18,13 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.scheduling.Scheduler;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;

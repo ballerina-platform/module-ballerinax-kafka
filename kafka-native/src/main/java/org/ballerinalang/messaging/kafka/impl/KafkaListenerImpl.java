@@ -18,13 +18,13 @@
 
 package org.ballerinalang.messaging.kafka.impl;
 
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.observability.ObservabilityConstants;
+import io.ballerina.runtime.observability.ObserveUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.ballerinalang.jvm.api.BRuntime;
-import org.ballerinalang.jvm.api.connector.CallableUnitCallback;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.observability.ObservabilityConstants;
-import org.ballerinalang.jvm.observability.ObserveUtils;
 import org.ballerinalang.messaging.kafka.api.KafkaListener;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
@@ -47,9 +47,9 @@ public class KafkaListenerImpl implements KafkaListener {
     private BObject service;
     private BObject listener;
     private ResponseCallback callback;
-    private BRuntime bRuntime;
+    private Runtime bRuntime;
 
-    public KafkaListenerImpl(BObject listener, BObject service, BRuntime bRuntime) {
+    public KafkaListenerImpl(BObject listener, BObject service, Runtime bRuntime) {
         this.bRuntime = bRuntime;
         this.listener = listener;
         this.service = service;
@@ -117,7 +117,7 @@ public class KafkaListenerImpl implements KafkaListener {
         return properties;
     }
 
-    private static class ResponseCallback implements CallableUnitCallback {
+    private static class ResponseCallback implements Callback {
 
         @Override
         public void notifySuccess() {
@@ -125,7 +125,7 @@ public class KafkaListenerImpl implements KafkaListener {
         }
 
         @Override
-        public void notifyFailure(org.ballerinalang.jvm.api.values.BError error) {
+        public void notifyFailure(io.ballerina.runtime.api.values.BError error) {
             // do nothing
         }
     }

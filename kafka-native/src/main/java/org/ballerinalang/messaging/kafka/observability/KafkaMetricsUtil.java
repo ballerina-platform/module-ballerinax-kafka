@@ -18,13 +18,13 @@
 
 package org.ballerinalang.messaging.kafka.observability;
 
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.observability.ObserveUtils;
+import io.ballerina.runtime.observability.metrics.DefaultMetricRegistry;
+import io.ballerina.runtime.observability.metrics.MetricId;
+import io.ballerina.runtime.observability.metrics.MetricRegistry;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.observability.ObserveUtils;
-import org.ballerinalang.jvm.observability.metrics.DefaultMetricRegistry;
-import org.ballerinalang.jvm.observability.metrics.MetricId;
-import org.ballerinalang.jvm.observability.metrics.MetricRegistry;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 import org.slf4j.LoggerFactory;
 

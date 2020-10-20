@@ -18,15 +18,15 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.producer;
 
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.ballerinalang.jvm.api.BalEnv;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class SendAvroKeys {
     private static final Logger logger = LoggerFactory.getLogger(SendAvroKeys.class);
 
     // String and AvroRecord
-    public static Object sendStringValuesAvroKeys(BalEnv env, BObject producer, BString value, BString topic,
+    public static Object sendStringValuesAvroKeys(Environment env, BObject producer, BString value, BString topic,
                                                   BMap<BString, Object> key, Object partition, Object timestamp) {
         GenericRecord genericRecord = createGenericRecord(key);
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
@@ -62,7 +62,7 @@ public class SendAvroKeys {
     }
 
     // ballerina int and AvroRecord
-    public static Object sendIntValuesAvroKeys(BalEnv env, BObject producer, long value, BString topic,
+    public static Object sendIntValuesAvroKeys(Environment env, BObject producer, long value, BString topic,
                                                BMap<BString, Object> key, Object partition, Object timestamp) {
         GenericRecord genericRecord = createGenericRecord(key);
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
@@ -73,7 +73,7 @@ public class SendAvroKeys {
     }
 
     // ballerina float and AvroRecord
-    public static Object sendFloatValuesAvroKeys(BalEnv env, BObject producer, double value, BString topic,
+    public static Object sendFloatValuesAvroKeys(Environment env, BObject producer, double value, BString topic,
                                                  BMap<BString, Object> key, Object partition, Object timestamp) {
         GenericRecord genericRecord = createGenericRecord(key);
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
@@ -84,7 +84,7 @@ public class SendAvroKeys {
     }
 
     // ballerina byte[] and AvroRecord
-    public static Object sendByteArrayValuesAvroKeys(BalEnv env, BObject producer, BArray value, BString topic,
+    public static Object sendByteArrayValuesAvroKeys(Environment env, BObject producer, BArray value, BString topic,
                                                      BMap<BString, Object> key, Object partition,
                                                      Object timestamp) {
         GenericRecord genericRecord = createGenericRecord(key);
@@ -97,7 +97,7 @@ public class SendAvroKeys {
     }
 
     // ballerina AvroRecord and AvroRecord
-    public static Object sendAvroValuesAvroKeys(BalEnv env, BObject producer, BMap<BString, Object> value, BString topic,
+    public static Object sendAvroValuesAvroKeys(Environment env, BObject producer, BMap<BString, Object> value, BString topic,
                                                 BMap<BString, Object> key, Object partition, Object timestamp) {
         GenericRecord valueRecord = createGenericRecord(value);
         GenericRecord keyRecord = createGenericRecord(key);
@@ -110,7 +110,7 @@ public class SendAvroKeys {
     }
 
     // ballerina anydata and AvroRecord
-    public static Object sendCustomValuesAvroKeys(BalEnv env, BObject producer, Object value, BString topic,
+    public static Object sendCustomValuesAvroKeys(Environment env, BObject producer, Object value, BString topic,
                                                   BMap<BString, Object> key, Object partition, Object timestamp) {
         GenericRecord genericRecord = createGenericRecord(key);
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);

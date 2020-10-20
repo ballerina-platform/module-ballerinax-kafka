@@ -18,7 +18,7 @@
 
 package org.ballerinalang.messaging.kafka.service;
 
-import org.ballerinalang.jvm.api.values.BObject;
+import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.messaging.kafka.exceptions.KafkaConnectorException;
 import org.ballerinalang.messaging.kafka.impl.KafkaServerConnectorImpl;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;

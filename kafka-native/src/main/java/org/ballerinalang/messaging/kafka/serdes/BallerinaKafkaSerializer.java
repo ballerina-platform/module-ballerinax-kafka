@@ -18,11 +18,11 @@
 
 package org.ballerinalang.messaging.kafka.serdes;
 
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BObject;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serializer;
-import org.ballerinalang.jvm.api.BRuntime;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BObject;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
@@ -52,7 +52,7 @@ public class BallerinaKafkaSerializer implements Serializer {
     @Override
     public byte[] serialize(String topic, Object data) {
         Object[] args = new Object[]{data, false};
-        BArray result = (BArray) KafkaUtils.invokeMethodSync(BRuntime.getCurrentRuntime(), this.serializerObject,
+        BArray result = (BArray) KafkaUtils.invokeMethodSync(Runtime.getCurrentRuntime(), this.serializerObject,
                                                              KafkaConstants.FUNCTION_SERIALIZE, null,
                                                              ON_SERIALIZE_METADATA, timeout, args);
         return result.getBytes();
@@ -60,7 +60,7 @@ public class BallerinaKafkaSerializer implements Serializer {
 
     @Override
     public void close() {
-        KafkaUtils.invokeMethodSync(BRuntime.getCurrentRuntime(), this.serializerObject, KafkaConstants.FUNCTION_CLOSE,
+        KafkaUtils.invokeMethodSync(Runtime.getCurrentRuntime(), this.serializerObject, KafkaConstants.FUNCTION_CLOSE,
                                     null, ON_CLOSE_METADATA, timeout);
     }
 }
