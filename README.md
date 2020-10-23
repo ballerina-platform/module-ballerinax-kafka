@@ -2,7 +2,6 @@
 
 
 [![Build](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ABuild)
-[![Daily Build](https://github.com/ballerina-platform/module-ballerinax-kafka/workflows/Daily%20Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions?query=workflow%3ADaily+Build)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-kafka.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -10,7 +9,7 @@ Ballerina Kafka module is one of the Ballerina language standard library modules
 
 This module helps to communicate with Kafka brokers as Producers and Consumers.
 
-## `Issues` and `Projects` 
+## Issues and Projects Tabs
 
 `Issues` and `Project` tabs are disabled for this repository as this is one of the Ballerina Standard Libraries. To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library). 
 
