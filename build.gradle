@@ -36,6 +36,7 @@ ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 ext.stdlibStringutilsVersion = project.stdlibStringutilsVersion
 ext.stdlibSystemVersion = project.stdlibSystemVersion
 ext.stdlibTimeVersion = project.stdlibTimeVersion
+ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 
 allprojects {
     group = project.group

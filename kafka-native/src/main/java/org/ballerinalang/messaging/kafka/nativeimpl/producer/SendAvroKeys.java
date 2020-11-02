@@ -58,7 +58,7 @@ public class SendAvroKeys {
         ProducerRecord<GenericRecord, String> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
                                                                                  timestampValue, genericRecord,
                                                                                  value.getValue());
-        return sendKafkaRecord(env ,kafkaRecord, producer);
+        return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
     // ballerina int and AvroRecord
@@ -69,7 +69,7 @@ public class SendAvroKeys {
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<GenericRecord, Long> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
                                                                                timestampValue, genericRecord, value);
-        return sendKafkaRecord(env ,kafkaRecord, producer);
+        return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
     // ballerina float and AvroRecord
@@ -80,7 +80,7 @@ public class SendAvroKeys {
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<GenericRecord, Double> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
                                                                                  timestampValue, genericRecord, value);
-        return sendKafkaRecord(env ,kafkaRecord, producer);
+        return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
     // ballerina byte[] and AvroRecord
@@ -93,12 +93,13 @@ public class SendAvroKeys {
         ProducerRecord<GenericRecord, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
                                                                                  timestampValue, genericRecord,
                                                                                  value.getBytes());
-        return sendKafkaRecord(env ,kafkaRecord, producer);
+        return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
     // ballerina AvroRecord and AvroRecord
-    public static Object sendAvroValuesAvroKeys(Environment env, BObject producer, BMap<BString, Object> value, BString topic,
-                                                BMap<BString, Object> key, Object partition, Object timestamp) {
+    public static Object sendAvroValuesAvroKeys(Environment env, BObject producer, BMap<BString, Object> value,
+                                                BString topic, BMap<BString, Object> key, Object partition,
+                                                Object timestamp) {
         GenericRecord valueRecord = createGenericRecord(value);
         GenericRecord keyRecord = createGenericRecord(key);
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
@@ -106,7 +107,7 @@ public class SendAvroKeys {
         ProducerRecord<GenericRecord, GenericRecord> kafkaRecord = new ProducerRecord<>(topic.getValue(),
                                                                                         partitionValue, timestampValue,
                                                                                         keyRecord, valueRecord);
-        return sendKafkaRecord(env ,kafkaRecord, producer);
+        return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
     // ballerina anydata and AvroRecord
@@ -117,7 +118,7 @@ public class SendAvroKeys {
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<GenericRecord, Object> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
                                                                                  timestampValue, genericRecord, value);
-        return sendKafkaRecord(env ,kafkaRecord, producer);
+        return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
     protected static GenericRecord createGenericRecord(BMap<BString, Object> value) {
