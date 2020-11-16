@@ -18,11 +18,11 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.scheduling.Scheduler;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.KafkaException;
@@ -69,8 +69,9 @@ public class GetOffsets {
      * @param duration        Duration in milliseconds to try the operation.
      * @return ballerina {@code PartitionOffset} array or @{BError} if an error occurred.
      */
-    public static Object getBeginningOffsets(BObject consumerObject, BArray topicPartitions, long duration) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object getBeginningOffsets(Environment environment, BObject consumerObject,
+                                             BArray topicPartitions, long duration) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
@@ -102,9 +103,9 @@ public class GetOffsets {
      * @param duration       Duration in milliseconds to try the operation.
      * @return ballerina {@code PartitionOffset} value or @{BError} if an error occurred.
      */
-    public static Object getCommittedOffset(BObject consumerObject, BMap<BString, Object> topicPartition,
-                                            long duration) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object getCommittedOffset(Environment environment, BObject consumerObject, BMap<BString,
+            Object> topicPartition, long duration) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
@@ -143,8 +144,9 @@ public class GetOffsets {
      * @param duration        Duration in milliseconds to try the operation.
      * @return ballerina {@code PartitionOffset} array or @{BError} if an error occurred.
      */
-    public static Object getEndOffsets(BObject consumerObject, BArray topicPartitions, long duration) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object getEndOffsets(Environment environment, BObject consumerObject, BArray topicPartitions,
+                                       long duration) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
@@ -178,9 +180,9 @@ public class GetOffsets {
      * @param duration       Duration in milliseconds to try the operation.
      * @return ballerina {@code PartitionOffset} value or @{BError} if an error occurred.
      */
-    public static Object getPositionOffset(BObject consumerObject, BMap<BString, Object> topicPartition,
-                                           long duration) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object getPositionOffset(Environment environment, BObject consumerObject, BMap<BString,
+            Object> topicPartition, long duration) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);

@@ -18,9 +18,10 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.scheduling.Strand;
 import io.ballerina.runtime.transactions.TransactionLocalContext;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.ballerinalang.messaging.kafka.impl.KafkaTransactionContext;
 
@@ -38,12 +39,12 @@ public class TransactionUtils {
     private TransactionUtils() {
     }
 
-    public static void handleTransactions(Strand strand, BObject producer) {
+    public static void handleTransactions(Environment environment, BObject producer) {
         if (Objects.nonNull(producer.getNativeData(TRANSACTION_CONTEXT))) {
             KafkaTransactionContext transactionContext = (KafkaTransactionContext) producer
                     .getNativeData(TRANSACTION_CONTEXT);
             transactionContext.beginTransaction();
-            registerKafkaTransactionContext(strand, producer, transactionContext);
+            registerKafkaTransactionContext(environment, producer, transactionContext);
         }
         // Do nothing if this is non-transactional producer.
     }
@@ -53,12 +54,13 @@ public class TransactionUtils {
         return new KafkaTransactionContext(kafkaProducer);
     }
 
-    public static void registerKafkaTransactionContext(Strand strand,
+    public static void registerKafkaTransactionContext(Environment environment,
                                                        BObject producer,
                                                        KafkaTransactionContext transactionContext) {
         String connectorId = producer.getStringValue(CONNECTOR_ID).getValue();
-        if (Objects.isNull(strand.currentTrxContext.getTransactionContext(connectorId))) {
-            TransactionLocalContext transactionLocalContext = strand.currentTrxContext;
+        TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
+        if (Objects.isNull(trxResourceManager.getCurrentTransactionContext().getTransactionContext(connectorId))) {
+            TransactionLocalContext transactionLocalContext = trxResourceManager.getCurrentTransactionContext();
             transactionLocalContext.registerTransactionContext(connectorId, transactionContext);
         }
     }

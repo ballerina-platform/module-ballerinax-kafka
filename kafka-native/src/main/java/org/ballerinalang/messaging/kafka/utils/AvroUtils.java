@@ -18,7 +18,7 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
-import io.ballerina.runtime.api.StringUtils;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import org.apache.avro.Schema;

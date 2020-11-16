@@ -18,13 +18,11 @@
 
 package org.ballerinalang.messaging.kafka.observability;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.ballerina.runtime.observability.ObserverContext;
-import io.ballerina.runtime.scheduling.Strand;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
-
-import java.util.Optional;
 
 /**
  * Providing tracing functionality to Kafka.
@@ -33,34 +31,27 @@ import java.util.Optional;
  */
 public class KafkaTracingUtil {
 
-    public static void traceResourceInvocation(Strand strand, BObject object, String topic) {
+    public static void traceResourceInvocation(Environment environment, BObject object, String topic) {
         if (!ObserveUtils.isTracingEnabled()) {
             return;
         }
-        ObserverContext observerContext;
-        Optional<ObserverContext> observerContextOptional = ObserveUtils.getObserverContextOfCurrentFrame(strand);
-        if (observerContextOptional.isPresent()) {
-            observerContext = observerContextOptional.get();
-        } else {
-            observerContext = new ObserverContext();
-            ObserveUtils.setObserverContextToCurrentFrame(strand, observerContext);
+        ObserverContext observerContext = ObserveUtils.getObserverContextOfCurrentFrame(environment);
+        if (observerContext != null) {
+            ObserveUtils.setObserverContextToCurrentFrame(environment, observerContext);
+            setTags(observerContext, object, topic);
+
         }
-        setTags(observerContext, object, topic);
     }
 
-    public static void traceResourceInvocation(Strand strand, BObject object) {
+    public static void traceResourceInvocation(Environment environment, BObject object) {
         if (!ObserveUtils.isTracingEnabled()) {
             return;
         }
-        ObserverContext observerContext;
-        Optional<ObserverContext> observerContextOptional = ObserveUtils.getObserverContextOfCurrentFrame(strand);
-        if (observerContextOptional.isPresent()) {
-            observerContext = observerContextOptional.get();
-        } else {
-            observerContext = new ObserverContext();
-            ObserveUtils.setObserverContextToCurrentFrame(strand, observerContext);
+        ObserverContext observerContext = ObserveUtils.getObserverContextOfCurrentFrame(environment);
+        if (observerContext != null) {
+            ObserveUtils.setObserverContextToCurrentFrame(environment, observerContext);
+            setTags(observerContext, object);
         }
-        setTags(observerContext, object);
     }
 
     private static void setTags(ObserverContext observerContext, BObject object, String topic) {

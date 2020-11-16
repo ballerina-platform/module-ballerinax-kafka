@@ -18,9 +18,9 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.scheduling.Scheduler;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.KafkaException;
@@ -58,8 +58,8 @@ public class Commit {
      * @param consumerObject Kafka consumer object from ballerina.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object commit(BObject consumerObject) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object commit(Environment environment, BObject consumerObject) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         try {
             kafkaConsumer.commitSync();
@@ -78,8 +78,8 @@ public class Commit {
      * @param duration       Duration in milliseconds to try the operation.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object commitOffset(BObject consumerObject, BArray offsets, long duration) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object commitOffset(Environment environment, BObject consumerObject, BArray offsets, long duration) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
 
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
