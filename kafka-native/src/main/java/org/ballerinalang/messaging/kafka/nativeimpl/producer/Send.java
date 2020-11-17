@@ -49,7 +49,7 @@ public class Send {
         KafkaProducer producer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
             if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(env, producerObject);
+                handleTransactions(producerObject);
             }
             producer.send(record, (metadata, e) -> {
                 if (Objects.nonNull(e)) {

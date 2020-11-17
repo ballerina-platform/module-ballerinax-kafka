@@ -36,11 +36,11 @@ public class KafkaTracingUtil {
             return;
         }
         ObserverContext observerContext = ObserveUtils.getObserverContextOfCurrentFrame(environment);
-        if (observerContext != null) {
+        if (observerContext == null) {
+            observerContext = new ObserverContext();
             ObserveUtils.setObserverContextToCurrentFrame(environment, observerContext);
-            setTags(observerContext, object, topic);
-
         }
+        setTags(observerContext, object, topic);
     }
 
     public static void traceResourceInvocation(Environment environment, BObject object) {
@@ -48,7 +48,8 @@ public class KafkaTracingUtil {
             return;
         }
         ObserverContext observerContext = ObserveUtils.getObserverContextOfCurrentFrame(environment);
-        if (observerContext != null) {
+        if (observerContext == null) {
+            observerContext = new ObserverContext();
             ObserveUtils.setObserverContextToCurrentFrame(environment, observerContext);
             setTags(observerContext, object);
         }

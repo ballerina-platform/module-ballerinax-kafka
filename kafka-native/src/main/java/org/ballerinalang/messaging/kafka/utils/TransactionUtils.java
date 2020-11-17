@@ -39,12 +39,12 @@ public class TransactionUtils {
     private TransactionUtils() {
     }
 
-    public static void handleTransactions(Environment environment, BObject producer) {
+    public static void handleTransactions(BObject producer) {
         if (Objects.nonNull(producer.getNativeData(TRANSACTION_CONTEXT))) {
             KafkaTransactionContext transactionContext = (KafkaTransactionContext) producer
                     .getNativeData(TRANSACTION_CONTEXT);
             transactionContext.beginTransaction();
-            registerKafkaTransactionContext(environment, producer, transactionContext);
+            registerKafkaTransactionContext(producer, transactionContext);
         }
         // Do nothing if this is non-transactional producer.
     }
@@ -54,8 +54,7 @@ public class TransactionUtils {
         return new KafkaTransactionContext(kafkaProducer);
     }
 
-    public static void registerKafkaTransactionContext(Environment environment,
-                                                       BObject producer,
+    public static void registerKafkaTransactionContext(BObject producer,
                                                        KafkaTransactionContext transactionContext) {
         String connectorId = producer.getStringValue(CONNECTOR_ID).getValue();
         TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();

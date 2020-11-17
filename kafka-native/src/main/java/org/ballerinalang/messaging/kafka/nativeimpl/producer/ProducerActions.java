@@ -138,7 +138,7 @@ public class ProducerActions {
         String groupId = consumerConfig.getStringValue(CONSUMER_GROUP_ID_CONFIG).getValue();
         try {
             if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(environment, producerObject);
+                handleTransactions(producerObject);
             }
             kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId);
         } catch (IllegalStateException | KafkaException e) {
@@ -162,7 +162,7 @@ public class ProducerActions {
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = getPartitionToMetadataMap(offsets);
         try {
             if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(environment, producerObject);
+                handleTransactions(producerObject);
             }
             kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId.getValue());
         } catch (IllegalStateException | KafkaException e) {
@@ -183,7 +183,7 @@ public class ProducerActions {
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
             if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(environment, producerObject);
+                handleTransactions(producerObject);
             }
             kafkaProducer.flush();
         } catch (KafkaException e) {
@@ -205,7 +205,7 @@ public class ProducerActions {
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
             if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(environment, producerObject);
+                handleTransactions(producerObject);
             }
             List<PartitionInfo> partitionInfoList = kafkaProducer.partitionsFor(topic.getValue());
             BArray topicPartitionArray =
