@@ -18,20 +18,20 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
-import io.ballerina.runtime.api.ErrorCreator;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.StringUtils;
-import io.ballerina.runtime.api.ValueCreator;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.creators.TypeCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.types.BArrayType;
-import io.ballerina.runtime.values.ErrorValue;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -55,7 +55,6 @@ import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static io.ballerina.runtime.api.ValueCreator.createRecordValue;
 import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
 
 /**
@@ -69,7 +68,8 @@ public class KafkaUtils {
     public static Object[] getResourceParameters(BObject service, BObject listener,
                                                  ConsumerRecords records, String groupId) {
 
-        BArray consumerRecordsArray = ValueCreator.createArrayValue(new BArrayType(getConsumerRecord().getType()));
+        BArray consumerRecordsArray = ValueCreator.createArrayValue(
+                TypeCreator.createArrayType(getConsumerRecord().getType()));
         String keyType = listener.getStringValue(KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
         String valueType = listener.getStringValue(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
 
@@ -82,7 +82,7 @@ public class KafkaUtils {
             return new Object[]{listener, true, consumerRecordsArray, true, null, false, null, false};
         } else {
             BArray partitionOffsetsArray =
-                    ValueCreator.createArrayValue(new BArrayType(getPartitionOffsetRecord().getType()));
+                    ValueCreator.createArrayValue(TypeCreator.createArrayType(getPartitionOffsetRecord().getType()));
             for (Object record : records) {
                 ConsumerRecord kafkaRecord = (ConsumerRecord) record;
                 BMap<BString, Object> consumerRecord = populateConsumerRecord(kafkaRecord, keyType, valueType);
@@ -521,7 +521,7 @@ public class KafkaUtils {
     public static List<String> getStringListFromStringBArray(BArray stringArray) {
         ArrayList<String> values = new ArrayList<>();
         if ((Objects.isNull(stringArray)) ||
-                (!((BArrayType) stringArray.getType()).getElementType().equals(PredefinedTypes.TYPE_STRING))) {
+                (!((ArrayType) stringArray.getType()).getElementType().equals(PredefinedTypes.TYPE_STRING))) {
             return values;
         }
         if (stringArray.size() != 0) {
@@ -540,12 +540,12 @@ public class KafkaUtils {
      * @return {@code BMap} of the record
      */
     public static BMap<BString, Object> populateTopicPartitionRecord(String topic, int partition) {
-        return createRecordValue(getTopicPartitionRecord(), topic, partition);
+        return ValueCreator.createRecordValue(getTopicPartitionRecord(), topic, partition);
     }
 
     public static BMap<BString, Object> populatePartitionOffsetRecord(BMap<BString, Object> topicPartition,
                                                                           long offset) {
-        return createRecordValue(getPartitionOffsetRecord(), topicPartition, offset);
+        return ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, offset);
     }
 
     public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, String keyType,
@@ -556,7 +556,7 @@ public class KafkaUtils {
         }
 
         Object value = getBValues(record.value(), valueType);
-        return createRecordValue(getConsumerRecord(), key, value, record.offset(), record.partition(),
+        return ValueCreator.createRecordValue(getConsumerRecord(), key, value, record.offset(), record.partition(),
                                 record.timestamp(),
                             record.topic());
     }
@@ -612,7 +612,7 @@ public class KafkaUtils {
 
     public static BError createKafkaError(String message, String typeId) {
         return ErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
-                                                 StringUtils.fromString(message));
+                                                StringUtils.fromString(message));
     }
 
     public static BError createKafkaError(String message, String typeId, BError cause) {
@@ -621,11 +621,11 @@ public class KafkaUtils {
     }
 
     public static BMap<BString, Object> createKafkaRecord(String recordName) {
-        return createRecordValue(KafkaConstants.KAFKA_PACKAGE_ID, recordName);
+        return ValueCreator.createRecordValue(KafkaConstants.KAFKA_PACKAGE_ID, recordName);
     }
 
     public static BArray getPartitionOffsetArrayFromOffsetMap(Map<TopicPartition, Long> offsetMap) {
-        BArray partitionOffsetArray = ValueCreator.createArrayValue(new BArrayType(
+        BArray partitionOffsetArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(
                 getPartitionOffsetRecord().getType()));
         if (!offsetMap.entrySet().isEmpty()) {
             for (Map.Entry<TopicPartition, Long> entry : offsetMap.entrySet()) {
@@ -787,7 +787,7 @@ public class KafkaUtils {
     public static Object invokeMethodSync(Runtime runtime, BObject object, String methodName, String strandName,
                                           StrandMetadata metadata, int timeout, Object... args) {
         Semaphore semaphore = new Semaphore(0);
-        final BError[] errorValue = new ErrorValue[1];
+        final BError[] errorValue = new BError[1];
         Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new Callback() {
             @Override
             public void notifySuccess() {

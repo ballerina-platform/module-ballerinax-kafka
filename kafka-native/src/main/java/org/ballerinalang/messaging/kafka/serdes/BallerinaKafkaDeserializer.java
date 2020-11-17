@@ -19,7 +19,7 @@
 package org.ballerinalang.messaging.kafka.serdes;
 
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

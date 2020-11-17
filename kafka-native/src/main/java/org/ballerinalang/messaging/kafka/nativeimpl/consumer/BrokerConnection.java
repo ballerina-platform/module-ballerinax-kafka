@@ -18,11 +18,11 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.scheduling.Scheduler;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
@@ -71,8 +71,8 @@ public class BrokerConnection {
      * @param duration       Duration in milliseconds to try the operation.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object close(BObject consumerObject, long duration) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object close(Environment environment, BObject consumerObject, long duration) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
@@ -134,8 +134,8 @@ public class BrokerConnection {
      * @param topicPartitions Topic Partitions which needed to be paused.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object pause(BObject consumerObject, BArray topicPartitions) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object pause(Environment environment, BObject consumerObject, BArray topicPartitions) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
 
@@ -156,8 +156,8 @@ public class BrokerConnection {
      * @param topicPartitions Topic Partitions which are currently paused and needed to be resumed.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object resume(BObject consumerObject, BArray topicPartitions) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object resume(Environment environment, BObject consumerObject, BArray topicPartitions) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
 

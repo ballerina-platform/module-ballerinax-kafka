@@ -18,14 +18,14 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.producer;
 
-import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.creators.TypeCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.scheduling.Scheduler;
-import io.ballerina.runtime.scheduling.Strand;
-import io.ballerina.runtime.types.BArrayType;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -102,8 +102,8 @@ public class ProducerActions {
      * @param producerObject Kafka producer object from ballerina.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object close(BObject producerObject) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), producerObject);
+    public static Object close(Environment environment, BObject producerObject) {
+        KafkaTracingUtil.traceResourceInvocation(environment, producerObject);
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
             kafkaProducer.close();
@@ -122,9 +122,8 @@ public class ProducerActions {
      * @param consumer       Kafka consumer object from ballerina.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object commitConsumer(BObject producerObject, BObject consumer) {
-        Strand strand = Scheduler.getStrand();
-        KafkaTracingUtil.traceResourceInvocation(strand, producerObject);
+    public static Object commitConsumer(Environment environment, BObject producerObject, BObject consumer) {
+        KafkaTracingUtil.traceResourceInvocation(environment, producerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumer.getNativeData(NATIVE_CONSUMER);
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = new HashMap<>();
@@ -138,8 +137,8 @@ public class ProducerActions {
         BMap<BString, Object> consumerConfig = consumer.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
         String groupId = consumerConfig.getStringValue(CONSUMER_GROUP_ID_CONFIG).getValue();
         try {
-            if (strand.isInTransaction()) {
-                handleTransactions(strand, producerObject);
+            if (TransactionResourceManager.getInstance().isInTransaction()) {
+                handleTransactions(producerObject);
             }
             kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId);
         } catch (IllegalStateException | KafkaException e) {
@@ -156,14 +155,14 @@ public class ProducerActions {
      * @param groupId Group ID of the consumers to commit the messages.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object commitConsumerOffsets(BObject producerObject, BArray offsets, BString groupId) {
-        Strand strand = Scheduler.getStrand();
-        KafkaTracingUtil.traceResourceInvocation(strand, producerObject);
+    public static Object commitConsumerOffsets(Environment environment, BObject producerObject, BArray offsets,
+                                               BString groupId) {
+        KafkaTracingUtil.traceResourceInvocation(environment, producerObject);
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = getPartitionToMetadataMap(offsets);
         try {
-            if (strand.isInTransaction()) {
-                handleTransactions(strand, producerObject);
+            if (TransactionResourceManager.getInstance().isInTransaction()) {
+                handleTransactions(producerObject);
             }
             kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId.getValue());
         } catch (IllegalStateException | KafkaException e) {
@@ -179,13 +178,12 @@ public class ProducerActions {
      * @param producerObject Kafka producer object from ballerina.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object flushRecords(BObject producerObject) {
-        Strand strand = Scheduler.getStrand();
-        KafkaTracingUtil.traceResourceInvocation(strand, producerObject);
+    public static Object flushRecords(Environment environment, BObject producerObject) {
+        KafkaTracingUtil.traceResourceInvocation(environment, producerObject);
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
-            if (strand.isInTransaction()) {
-                handleTransactions(strand, producerObject);
+            if (TransactionResourceManager.getInstance().isInTransaction()) {
+                handleTransactions(producerObject);
             }
             kafkaProducer.flush();
         } catch (KafkaException e) {
@@ -202,17 +200,16 @@ public class ProducerActions {
      * @param topic Topic about which the information is needed.
      * @return Ballerina {@code TopicPartition[]} for the given topic.
      */
-    public static Object getTopicPartitions(BObject producerObject, BString topic) {
-        Strand strand = Scheduler.getStrand();
-        KafkaTracingUtil.traceResourceInvocation(strand, producerObject, topic.getValue());
+    public static Object getTopicPartitions(Environment environment, BObject producerObject, BString topic) {
+        KafkaTracingUtil.traceResourceInvocation(environment, producerObject, topic.getValue());
         KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         try {
-            if (strand.isInTransaction()) {
-                handleTransactions(strand, producerObject);
+            if (TransactionResourceManager.getInstance().isInTransaction()) {
+                handleTransactions(producerObject);
             }
             List<PartitionInfo> partitionInfoList = kafkaProducer.partitionsFor(topic.getValue());
             BArray topicPartitionArray =
-                    ValueCreator.createArrayValue(new BArrayType(getTopicPartitionRecord().getType()));
+                    ValueCreator.createArrayValue(TypeCreator.createArrayType(getTopicPartitionRecord().getType()));
             for (PartitionInfo info : partitionInfoList) {
                 BMap<BString, Object> partition = populateTopicPartitionRecord(info.topic(), info.partition());
                 topicPartitionArray.append(partition);

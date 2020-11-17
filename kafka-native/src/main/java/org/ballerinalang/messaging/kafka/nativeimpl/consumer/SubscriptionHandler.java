@@ -20,15 +20,14 @@ package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
-import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.creators.TypeCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BFunctionPointer;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.scheduling.Scheduler;
-import io.ballerina.runtime.scheduling.Strand;
-import io.ballerina.runtime.types.BArrayType;
-import io.ballerina.runtime.values.FPValue;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
@@ -45,6 +44,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_ASSIGNED;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_REVOKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_PARTITION_ASSIGNED_METADATA;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_PARTITION_REVOKED_METADATA;
@@ -67,8 +68,8 @@ public class SubscriptionHandler {
      * @param topics         Ballerina {@code string[]} of topics.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object subscribe(BObject consumerObject, BArray topics) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object subscribe(Environment environment, BObject consumerObject, BArray topics) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<String> topicsList = getStringListFromStringBArray(topics);
         try {
@@ -90,8 +91,8 @@ public class SubscriptionHandler {
      * @param topicRegex     Regex to match topics to subscribe.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object subscribeToPattern(BObject consumerObject, BString topicRegex) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object subscribeToPattern(Environment environment, BObject consumerObject, BString topicRegex) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         try {
             kafkaConsumer.subscribe(Pattern.compile(topicRegex.getValue()));
@@ -111,20 +112,16 @@ public class SubscriptionHandler {
      *
      * @param consumerObject       Kafka consumer object from ballerina.
      * @param topics               Ballerina {@code string[]} of topics.
-     * @param onPartitionsRevoked  Function pointer to invoke if partitions are revoked.
-     * @param onPartitionsAssigned Function pointer to invoke if partitions are assigned.
      * @return {@code BError}, if there's any error, null otherwise.
      */
     public static Object subscribeWithPartitionRebalance(Environment env, BObject consumerObject, BArray topics,
-                                                         FPValue onPartitionsRevoked, FPValue onPartitionsAssigned) {
-        Strand strand = Scheduler.getStrand();
-        KafkaTracingUtil.traceResourceInvocation(strand, consumerObject);
+                                                         BFunctionPointer onPartitionsRevoked,
+                                                         BFunctionPointer onPartitionsAssigned) {
+        KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<String> topicsList = getStringListFromStringBArray(topics);
-        ConsumerRebalanceListener consumer = new SubscriptionHandler.KafkaRebalanceListener(strand, strand.scheduler,
-                                                                                            onPartitionsRevoked,
-                                                                                            onPartitionsAssigned,
+        ConsumerRebalanceListener consumer = new SubscriptionHandler.KafkaRebalanceListener(env,
                                                                                             consumerObject);
         try {
             kafkaConsumer.subscribe(topicsList, consumer);
@@ -146,8 +143,8 @@ public class SubscriptionHandler {
      * @param consumerObject Kafka consumer object from ballerina.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object unsubscribe(BObject consumerObject) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object unsubscribe(Environment environment, BObject consumerObject) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         try {
             Set<String> topics = kafkaConsumer.subscription();
@@ -168,19 +165,13 @@ public class SubscriptionHandler {
      */
     static class KafkaRebalanceListener implements ConsumerRebalanceListener {
 
-        private Strand strand;
-        private Scheduler scheduler;
-        private FPValue onPartitionsRevoked;
-        private FPValue onPartitionsAssigned;
         private BObject consumer;
+        private Runtime runtime;
 
-        KafkaRebalanceListener(Strand strand, Scheduler scheduler, FPValue onPartitionsRevoked,
-                               FPValue onPartitionsAssigned, BObject consumer) {
-            this.strand = strand;
-            this.scheduler = scheduler;
-            this.onPartitionsRevoked = onPartitionsRevoked;
-            this.onPartitionsAssigned = onPartitionsAssigned;
+        KafkaRebalanceListener(Environment environment, BObject consumer) {
             this.consumer = consumer;
+            this.runtime = environment.getRuntime();
+
         }
 
         /**
@@ -188,9 +179,9 @@ public class SubscriptionHandler {
          */
         @Override
         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-            Object[] inputArgs = {null, consumer, true, getPartitionsArray(partitions), true};
-            this.scheduler.schedule(inputArgs, onPartitionsRevoked.getConsumer(), strand, null, null,
-                                    ON_PARTITION_REVOKED_METADATA);
+            Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
+            this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_REVOKED, null,
+                                           ON_PARTITION_REVOKED_METADATA, null, inputArgs);
         }
 
         /**
@@ -198,14 +189,14 @@ public class SubscriptionHandler {
          */
         @Override
         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            Object[] inputArgs = {null, consumer, true, getPartitionsArray(partitions), true};
-            this.scheduler.schedule(inputArgs, onPartitionsAssigned.getConsumer(), strand, null, null,
-                                    ON_PARTITION_ASSIGNED_METADATA);
+            Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
+            this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_ASSIGNED, null,
+                                           ON_PARTITION_ASSIGNED_METADATA, null, inputArgs);
         }
 
         private BArray getPartitionsArray(Collection<TopicPartition> partitions) {
             BArray topicPartitionArray = ValueCreator.createArrayValue(
-                    new BArrayType(getTopicPartitionRecord().getType()));
+                    TypeCreator.createArrayType(getTopicPartitionRecord().getType()));
             for (TopicPartition partition : partitions) {
                 BMap<BString, Object> topicPartition = populateTopicPartitionRecord(partition.topic(),
                                                                                         partition.partition());
