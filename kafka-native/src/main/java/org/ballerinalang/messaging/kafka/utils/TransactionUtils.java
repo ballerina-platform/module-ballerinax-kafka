@@ -18,7 +18,6 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
-import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.transactions.TransactionLocalContext;
 import io.ballerina.runtime.transactions.TransactionResourceManager;
