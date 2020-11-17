@@ -51,8 +51,8 @@ public class KafkaTracingUtil {
         if (observerContext == null) {
             observerContext = new ObserverContext();
             ObserveUtils.setObserverContextToCurrentFrame(environment, observerContext);
-            setTags(observerContext, object);
         }
+        setTags(observerContext, object);
     }
 
     private static void setTags(ObserverContext observerContext, BObject object, String topic) {
