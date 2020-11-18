@@ -29,7 +29,6 @@ ext.avroVersion = "1.9.2"
 ext.puppycrawlCheckstyleVersion = "8.18"
 ext.stdlibConfigVersion = project.stdlibConfigVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
-ext.stdlibFilepathVersion = project.stdlibFilepathVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
 ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
@@ -77,14 +76,6 @@ allprojects {
 
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-file'
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
-
-        maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-filepath'
             credentials {
                 username System.getenv("packageUser")
                 password System.getenv("packagePAT")
@@ -152,7 +143,6 @@ subprojects {
         /* Standard libraries */
         ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
-        ballerinaStdLibs "org.ballerinalang:filepath-ballerina:${stdlibFilepathVersion}"
         ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "org.ballerinalang:log-ballerina:${stdlibLogVersion}"
         ballerinaStdLibs "org.ballerinalang:runtime-ballerina:${stdlibRuntimeVersion}"
