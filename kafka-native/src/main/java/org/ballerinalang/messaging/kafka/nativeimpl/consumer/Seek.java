@@ -18,14 +18,14 @@
 
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
-import org.ballerinalang.jvm.api.values.BArray;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
@@ -55,8 +55,8 @@ public class Seek {
      * @param partitionOffset Partition offset record to seek.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object seek(BObject consumerObject, BMap<BString, Object> partitionOffset) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object seek(Environment environment, BObject consumerObject, BMap<BString, Object> partitionOffset) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         TopicPartition topicPartition = createTopicPartitionFromPartitionOffset(partitionOffset);
         Long offset = partitionOffset.getIntValue(ALIAS_OFFSET);
@@ -77,8 +77,8 @@ public class Seek {
      * @param topicPartitions Topic partitions to seek to the beginning.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object seekToBeginning(BObject consumerObject, BArray topicPartitions) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object seekToBeginning(Environment environment, BObject consumerObject, BArray topicPartitions) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
         try {
@@ -97,8 +97,8 @@ public class Seek {
      * @param topicPartitions Topic partitions to seek to the end.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object seekToEnd(BObject consumerObject, BArray topicPartitions) {
-        KafkaTracingUtil.traceResourceInvocation(Scheduler.getStrand(), consumerObject);
+    public static Object seekToEnd(Environment environment, BObject consumerObject, BArray topicPartitions) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
         try {

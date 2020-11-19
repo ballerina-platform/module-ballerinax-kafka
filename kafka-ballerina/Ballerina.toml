@@ -5,7 +5,6 @@ version = "@toml.version@"
 [dependencies]
 "ballerina/config" = "@stdlib.config.version@"
 "ballerina/file" = "@stdlib.file.version@"
-"ballerina/filepath" = "@stdlib.filepath.version@"
 "ballerina/io" = "@stdlib.io.version@"
 "ballerina/log" = "@stdlib.log.version@"
 "ballerina/runtime" = "@stdlib.runtime.version@"

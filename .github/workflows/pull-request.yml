@@ -1,8 +1,6 @@
-name: Daily Build
+name: Pull Request Build
 
-on:
-    schedule:
-        - cron:  '0 */12 * * *'
+on: [push, pull_request]
 
 jobs:
     ubuntu-build:
@@ -16,8 +14,8 @@ jobs:
                   java-version: 11
             - name: Build with Gradle
               env:
-                  packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
-                  packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
+                  packageUser: ${{ github.actor }}
+                  packagePAT: ${{ secrets.GITHUB_TOKEN }}
               run: ./gradlew build
 
     windows-build:
@@ -32,6 +30,6 @@ jobs:
                   java-version: 11
             - name: Build with Gradle
               env:
-                  packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
-                  packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
+                  packageUser: ${{ github.actor }}
+                  packagePAT: ${{ secrets.GITHUB_TOKEN }}
               run: ./gradlew.bat build -x test
