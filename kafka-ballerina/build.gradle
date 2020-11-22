@@ -147,6 +147,52 @@ task deleteCache(type: Delete) {
     delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/stringutils"
 }
 
+task startKafkaServer() {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=tests_kafka_1"
+                standardOutput = stdOut
+            }
+            if (!stdOut.toString().contains("tests_kafka_1")) {
+                println "Starting Kafka server."
+                exec {
+                    commandLine 'sh', '-c', "docker-compose -f tests/docker-compose.yaml up -d"
+                    standardOutput = stdOut
+                }
+                println stdOut.toString()
+                sleep(5 * 1000)
+            } else {
+                println "Kafka server is already running."
+            }
+        }
+    }
+}
+
+task stopKafkaServer() {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=tests_kafka_1"
+                standardOutput = stdOut
+            }
+            if (stdOut.toString().contains("tests_kafka_1")) {
+                println "Stopping Kafka server."
+                exec {
+                    commandLine 'sh', '-c', "docker-compose -f tests/docker-compose.yaml rm -svf"
+                    standardOutput = stdOut
+                }
+                println stdOut.toString()
+                sleep(5 * 1000)
+            } else {
+                println "Kafka server is not started."
+            }
+        }
+    }
+}
+
 task ballerinaTest {
     dependsOn(copyStdlibs)
     dependsOn(":kafka-native:build")
@@ -266,5 +312,7 @@ unpackJballerinaTools.dependsOn copyPackingJarsToLib
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlVersions.dependsOn copyStdlibs
+ballerinaBuild.dependsOn startKafkaServer
 ballerinaBuild.dependsOn updateTomlVersions
+build.finalizedBy stopKafkaServer
 build.dependsOn ballerinaBuild
