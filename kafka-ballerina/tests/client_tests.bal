@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/runtime;
 import ballerina/test;
 
@@ -40,16 +39,6 @@ ProducerConfiguration producerConfiguration = {
     retryCount: 3
 };
 Producer producer = new (producerConfiguration);
-
-@test:BeforeSuite
-function startKafkaServerForConsumerTests() returns error? {
-    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
-    var result = createKafkaCluster(parentDirectory, DOCKER_COMPOSE_FILE);
-    if (result is error) {
-        io:println(result);
-        return result;
-    }
-}
 
 @test:Config {}
 function consumerServiceTest() returns error? {
@@ -239,16 +228,6 @@ function producerCloseTest() returns error? {
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
     test:assertEquals(receivedErr.message(), expectedErr);
-}
-
-@test:AfterSuite {}
-function stopKafkaServerForConsumerTests() returns error? {
-    string parentDirectory = check getAbsoluteTestPath(TEST_DIRECTORY);
-    var result = stopKafkaCluster(parentDirectory, DOCKER_COMPOSE_FILE);
-    if (result is error) {
-        io:println(result);
-        return result;
-    }
 }
 
 function sendMessage(string message, string topic) returns error? {

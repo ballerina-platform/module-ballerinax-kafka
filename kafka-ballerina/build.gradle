@@ -42,7 +42,6 @@ dependencies {
 
 clean {
     delete "$project.projectDir/target"
-    delete "$project.projectDir/Ballerina.lock"
 }
 
 jar {
@@ -80,22 +79,12 @@ task copyStdlibs(type: Copy) {
         into("bir-cache/") {
             from "${artifactExtractedPath}/caches/bir"
         }
-        into("bre/lib/") {
-            from "${artifactExtractedPath}/libs"
+        into("repo/balo") {
+            from "${artifactExtractedPath}/balo/"
         }
-        into("docs/") {
-            from "${artifactExtractedPath}/docs"
-        }
-        // pack to new cache
-        into("cache/bir/") {
-            from "${artifactExtractedPath}/caches/bir"
-        }
-        into("cache/balo/") {
-            from "${artifactExtractedPath}/caches/balo"
-        }
-        into("cache/jar/") {
-            from "${artifactExtractedPath}/caches/jar"
-        }
+//        into("repo/cache") {
+//            from "${artifactExtractedPath}/cache"
+//        }
     }
 }
 
@@ -104,39 +93,25 @@ task copyPackingJarsToLib(type: Copy) {
     from configurations.packingJars
 }
 
-def moduleName = "kafka"
-def moduleOrg = "ballerinax"
+def packageName = "kafka"
+def packageOrg = "ballerinax"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def tomlVersion = project.version.split("-")[0]
 def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
-def targetBallerinaJar = file("$project.projectDir/target/caches/jar_cache/${moduleOrg}/${moduleName}/${tomlVersion}/${moduleOrg}-${moduleName}-${tomlVersion}.jar")
-def targetNativeJar = file("$project.rootDir/${moduleName}-native/build/libs/${moduleName}-native-${project.version}.jar")
 def originalConfig = ballerinaConfigFile.text
 def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
 
 task updateTomlVersions {
     doLast {
-        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
-        def stdlibDependentFileVersion = project.stdlibFileVersion.split("-")[0]
-        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
-        def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
         def stdlibDependentRuntimeVersion = project.stdlibRuntimeVersion.split("-")[0]
-        def stdlibDependentStringutilsVersion = project.stdlibStringutilsVersion.split("-")[0]
         def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
-        def stdlibDependentTimeVersion = project.stdlibTimeVersion.split("-")[0]
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
-        newConfig = newConfig.replace("@stdlib.file.version@", stdlibDependentFileVersion)
-        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
         newConfig = newConfig.replace("@stdlib.runtime.version@", stdlibDependentRuntimeVersion)
-        newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
         newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
-        newConfig = newConfig.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
         newConfig = newConfig.replace("@kafka.version@", kafkaVersion)
         ballerinaConfigFile.text = newConfig
     }
@@ -148,11 +123,70 @@ task revertTomlFile {
     }
 }
 
+//TODO: remove this once loading dependencies from bir cache is fixed
+task deleteCache(type: Delete) {
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/config"
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/io"
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/file"
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/time"
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/runtime"
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/system"
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/log"
+    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/stringutils"
+}
+
+task startKafkaServer() {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=tests_kafka_1"
+                standardOutput = stdOut
+            }
+            if (!stdOut.toString().contains("tests_kafka_1")) {
+                println "Starting Kafka server."
+                exec {
+                    commandLine 'sh', '-c', "docker-compose -f tests/docker-compose.yaml up -d"
+                    standardOutput = stdOut
+                }
+                println stdOut.toString()
+                sleep(5 * 1000)
+            } else {
+                println "Kafka server is already running."
+            }
+        }
+    }
+}
+
+task stopKafkaServer() {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=tests_kafka_1"
+                standardOutput = stdOut
+            }
+            if (stdOut.toString().contains("tests_kafka_1")) {
+                println "Stopping Kafka server."
+                exec {
+                    commandLine 'sh', '-c', "docker-compose -f tests/docker-compose.yaml rm -svf"
+                    standardOutput = stdOut
+                }
+                println stdOut.toString()
+                sleep(5 * 1000)
+            } else {
+                println "Kafka server is not started."
+            }
+        }
+    }
+}
+
 task ballerinaTest {
     dependsOn(copyStdlibs)
     dependsOn(":kafka-native:build")
     dependsOn(updateTomlVersions)
     finalizedBy(revertTomlFile)
+    finalizedBy(deleteCache)
 
     def debugParams = ""
     if (project.hasProperty("debug")) {
@@ -164,9 +198,9 @@ task ballerinaTest {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test --code-coverage --all ${debugParams} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${debugParams} && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina test --code-coverage --all ${debugParams}"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${debugParams}"
             }
         }
     }
@@ -177,6 +211,7 @@ test {
 }
 
 task ballerinaBuild {
+    mustRunAfter(test)
     inputs.dir file(project.projectDir)
     finalizedBy(revertTomlFile)
 
@@ -187,46 +222,20 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build --skip-tests -c ${moduleName} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build --skip-tests -c && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina build --skip-tests -c ${moduleName}"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina build --skip-tests -c"
             }
         }
         copy {
-            from file("$project.projectDir/Ballerina.toml")
-            into file("$artifactCacheParent/caches/bir/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/Ballerina.toml")
-            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/Ballerina.toml")
-            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/target/caches/bir_cache")
-            into file("$artifactCacheParent/caches/bir")
-        }
-        copy {
             from file("$project.projectDir/target/balo")
-            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
+            into file("$artifactCacheParent/balo/${packageOrg}/${packageName}/${tomlVersion}")
         }
         copy {
-            from targetBallerinaJar
-            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from targetBallerinaJar
-            into file("$artifactLibParent/libs")
-        }
-        copy {
-            from targetNativeJar
-            into file("$artifactLibParent/libs")
-        }
-        copy {
-            from configurations.packingJars
-            into file("$artifactLibParent/libs")
+            from file("$project.projectDir/target/cache")
+            exclude '**/*-testable.jar'
+            exclude '**/tests_cache/'
+            into file("$artifactCacheParent/cache/")
         }
 
         // Publish to central
@@ -236,27 +245,26 @@ task ballerinaBuild {
                 workingDir project.projectDir
                 environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat push ${moduleName} && exit %%ERRORLEVEL%%"
+                    commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat push && exit %%ERRORLEVEL%%"
                 } else {
-                    commandLine 'sh', '-c', "$distributionBinPath/ballerina push ${moduleName}"
+                    commandLine 'sh', '-c', "$distributionBinPath/ballerina push"
                 }
             }
-
         }
-        // Doc creation and packing
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc ${moduleName} && exit %%ERRORLEVEL%%"
-            } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc ${moduleName}"
-            }
-        }
-        copy {
-            from file("$project.projectDir/target/apidocs/${moduleName}")
-            into file("$project.projectDir/build/docs_parent/docs/${moduleName}")
-        }
+//        // Doc creation and packing
+//        exec {
+//            workingDir project.projectDir
+//            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc ${moduleName} && exit %%ERRORLEVEL%%"
+//            } else {
+//                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc ${moduleName}"
+//            }
+//        }
+//        copy {
+//            from file("$project.projectDir/target/apidocs/${moduleName}")
+//            into file("$project.projectDir/build/docs_parent/docs/${moduleName}")
+//        }
     }
 
     outputs.dir artifactCacheParent
@@ -292,5 +300,7 @@ unpackJballerinaTools.dependsOn copyPackingJarsToLib
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlVersions.dependsOn copyStdlibs
+ballerinaBuild.dependsOn startKafkaServer
 ballerinaBuild.dependsOn updateTomlVersions
+build.finalizedBy stopKafkaServer
 build.dependsOn ballerinaBuild
