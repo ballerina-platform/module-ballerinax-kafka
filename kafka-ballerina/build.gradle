@@ -82,9 +82,9 @@ task copyStdlibs(type: Copy) {
         into("repo/balo") {
             from "${artifactExtractedPath}/balo/"
         }
-//        into("repo/cache") {
-//            from "${artifactExtractedPath}/cache"
-//        }
+        into("repo/cache") {
+            from "${artifactExtractedPath}/cache"
+        }
     }
 }
 
@@ -123,17 +123,6 @@ task revertTomlFile {
     }
 }
 
-//TODO: remove this once loading dependencies from bir cache is fixed
-task deleteCache(type: Delete) {
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/config"
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/io"
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/file"
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/time"
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/runtime"
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/system"
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/log"
-    delete "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/repo/cache/ballerina/stringutils"
-}
 
 task startKafkaServer() {
     doLast {
@@ -186,7 +175,6 @@ task ballerinaTest {
     dependsOn(":kafka-native:build")
     dependsOn(updateTomlVersions)
     finalizedBy(revertTomlFile)
-    finalizedBy(deleteCache)
 
     def debugParams = ""
     if (project.hasProperty("debug")) {
@@ -251,20 +239,20 @@ task ballerinaBuild {
                 }
             }
         }
-//        // Doc creation and packing
-//        exec {
-//            workingDir project.projectDir
-//            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc ${moduleName} && exit %%ERRORLEVEL%%"
-//            } else {
-//                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc ${moduleName}"
-//            }
-//        }
-//        copy {
-//            from file("$project.projectDir/target/apidocs/${moduleName}")
-//            into file("$project.projectDir/build/docs_parent/docs/${moduleName}")
-//        }
+        // Doc creation and packing
+        exec {
+            workingDir project.projectDir
+            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc && exit %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc"
+            }
+        }
+        copy {
+            from file("$project.projectDir/target/apidocs/${packageName}")
+            into file("$project.projectDir/build/docs_parent/docs/${packageName}")
+        }
     }
 
     outputs.dir artifactCacheParent
