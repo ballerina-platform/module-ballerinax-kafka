@@ -244,14 +244,14 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc ${moduleName} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc ${moduleName}"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc"
             }
         }
         copy {
-            from file("$project.projectDir/target/apidocs/${moduleName}")
-            into file("$project.projectDir/build/docs_parent/docs/${moduleName}")
+            from file("$project.projectDir/target/apidocs/${packageName}")
+            into file("$project.projectDir/build/docs_parent/docs/${packageName}")
         }
     }
 
