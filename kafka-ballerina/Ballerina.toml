@@ -37,6 +37,5 @@ version = "@kafka.version@"
 [[platform.java11.dependency]]
 path = "./lib/avro-1.9.2.jar"
 groupId = "org.apache.avro"
-scope = "compile"
 artifactId = "avro"
 version = "1.9.2"
