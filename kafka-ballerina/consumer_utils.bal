@@ -22,7 +22,7 @@ isolated function consumerClose(Consumer consumer, int duration) returns Consume
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.BrokerConnection"
 } external;
 
-isolated function consumerConnect(Consumer consumer) returns ConsumerError? =
+isolated function consumerConnect(Consumer|Listener consumer) returns ConsumerError? =
 @java:Method {
     name: "connect",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.BrokerConnection"
@@ -40,13 +40,13 @@ isolated function consumerResume(Consumer consumer, TopicPartition[] partitions)
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.BrokerConnection"
 } external;
 
-isolated function consumerCommit(Consumer consumer) returns ConsumerError? =
+isolated function consumerCommit(Consumer|Caller consumer) returns ConsumerError? =
 @java:Method {
     name: "commit",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.Commit"
 } external;
 
-isolated function consumerCommitOffset(Consumer consumer, PartitionOffset[] offsets, int duration = -1)
+isolated function consumerCommitOffset(Consumer|Caller consumer, PartitionOffset[] offsets, int duration = -1)
 returns ConsumerError? =
 @java:Method {
     name: "commitOffset",
@@ -142,7 +142,7 @@ isolated function consumerSeekToEnd(Consumer consumer, TopicPartition[] partitio
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.Seek"
 } external;
 
-isolated function consumerSubscribe(Consumer consumer, string[] topics) returns ConsumerError? =
+isolated function consumerSubscribe(Consumer|Listener consumer, string[] topics) returns ConsumerError? =
 @java:Method {
     name: "subscribe",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
@@ -154,32 +154,23 @@ isolated function consumerSubscribeToPattern(Consumer consumer, string regex) re
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
 } external;
 
-isolated function consumerSubscribeWithPartitionRebalance(Consumer consumer, string[] topics,
-    function(Consumer consumer, TopicPartition[] partitions) onPartitionsRevoked,
-    function(Consumer consumer, TopicPartition[] partitions) onPartitionsAssigned)
-returns ConsumerError? =
-@java:Method {
-    name: "subscribeWithPartitionRebalance",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
-} external;
-
 isolated function consumerUnsubscribe(Consumer consumer) returns ConsumerError? =
 @java:Method {
     name: "unsubscribe",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
 } external;
 
-isolated function register(Consumer consumer, service serviceType, string? name) returns ConsumerError? =
+isolated function register(Listener lis, service serviceType, string? name) returns ConsumerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.service.Register"
 } external;
 
-isolated function 'start(Consumer consumer) returns ConsumerError? =
+isolated function 'start(Listener lis) returns ConsumerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.service.Start"
 } external;
 
-isolated function stop(Consumer consumer) returns ConsumerError? =
+isolated function stop(Listener lis) returns ConsumerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.service.Stop"
 } external;

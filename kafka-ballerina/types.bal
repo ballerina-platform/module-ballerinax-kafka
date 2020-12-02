@@ -3,7 +3,7 @@
 public type OffsetResetMethod OFFSET_RESET_EARLIEST|OFFSET_RESET_LATEST|OFFSET_RESET_NONE;
 
 # Kafka in-built deserializer type.
-public type DeserializerType DES_BYTE_ARRAY|DES_STRING|DES_INT|DES_FLOAT|DES_AVRO|DES_CUSTOM;
+public type DeserializerType DES_BYTE_ARRAY;
 
 # Kafka consumer isolation level type.
 public type IsolationLevel ISOLATION_COMMITTED|ISOLATION_UNCOMMITTED;
@@ -13,7 +13,7 @@ public type IsolationLevel ISOLATION_COMMITTED|ISOLATION_UNCOMMITTED;
 public type ProducerAcks ACKS_ALL|ACKS_NONE|ACKS_SINGLE;
 
 # Kafka in-built serializer types.
-public type SerializerType SER_BYTE_ARRAY|SER_STRING|SER_INT|SER_FLOAT|SER_AVRO|SER_CUSTOM;
+public type SerializerType SER_BYTE_ARRAY;
 
 # Kafka compression types to compress the messages.
 public type CompressionType COMPRESSION_NONE|COMPRESSION_GZIP|COMPRESSION_SNAPPY|COMPRESSION_LZ4|COMPRESSION_ZSTD;

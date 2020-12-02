@@ -25,8 +25,6 @@ public client class Producer {
     public ProducerConfiguration? producerConfig = ();
     private string keySerializerType;
     private string valueSerializerType;
-    private Serializer? keySerializer = ();
-    private Serializer? valueSerializer = ();
 
     # Creates a new Kafka `Producer`.
     #
@@ -35,39 +33,6 @@ public client class Producer {
         self.producerConfig = config;
         self.keySerializerType = config.keySerializerType;
         self.valueSerializerType = config.valueSerializerType;
-
-        if (self.keySerializerType == SER_CUSTOM) {
-            var keySerializerObject = config?.keySerializer;
-            if (keySerializerObject is ()) {
-                panic createProducerError("Invalid keySerializer config: Please Provide a " +
-                            "valid custom serializer for the keySerializer");
-            } else {
-                self.keySerializer = keySerializerObject;
-            }
-        }
-        if (self.keySerializerType == SER_AVRO) {
-            var schemaRegistryUrl = config?.schemaRegistryUrl;
-            if (schemaRegistryUrl is ()) {
-                panic createProducerError("Missing schema registry URL for the Avro serializer. Please " +
-                            "provide 'schemaRegistryUrl' configuration in 'kafka:ProducerConfiguration'.");
-            }
-        }
-        if (self.valueSerializerType == SER_CUSTOM) {
-            var valueSerializerObject = config?.valueSerializer;
-            if (valueSerializerObject is ()) {
-                panic createProducerError("Invalid valueSerializer config: Please Provide a " +
-                            "valid custom serializer for the valueSerializer");
-            } else {
-                self.valueSerializer = valueSerializerObject;
-            }
-        }
-        if (self.valueSerializerType == SER_AVRO) {
-            var schemaRegistryUrl = config?.schemaRegistryUrl;
-            if (schemaRegistryUrl is ()) {
-                panic createProducerError("Missing schema registry URL for the Avro serializer. Please " +
-                            "provide 'schemaRegistryUrl' configuration in 'kafka:ProducerConfiguration'.");
-            }
-        }
         checkpanic producerInit(self);
     }
 
@@ -81,23 +46,6 @@ public client class Producer {
     # + return - A `kafka:ProducerError` if closing the producer failed or else '()'
     public isolated remote function close() returns ProducerError? {
         return producerClose(self);
-    }
-
-    # Commits the offsets consumed by the provided consumer.
-    #
-    # + consumer - Consumer, which needs offsets to be committed
-    # + return - A`kafka:ProducerError` if committing the consumer failed or else ()
-    public isolated remote function commitConsumer(Consumer consumer) returns ProducerError? {
-        return producerCommitConsumer(self, consumer);
-    }
-
-    # Commits the consumer offsets in a given transaction.
-    #
-    # + offsets - Consumer offsets to commit for a given transaction
-    # + groupID - Consumer group ID
-    # + return - A `kafka:ProducerError` if committing consumer offsets failed or else ()
-    public isolated remote function commitConsumerOffsets(PartitionOffset[] offsets, string groupID) returns ProducerError? {
-        return producerCommitConsumerOffsets(self, offsets, groupID);
     }
 
     # Flushes the batch of records already sent to the broker by the producer.
@@ -132,46 +80,10 @@ public client class Producer {
     # + partition - Partition to which the record should be sent
     # + timestamp - Timestamp of the record in milliseconds since epoch
     # + return -  A `kafka:ProducerError` if send action fails to send data or else '()'
-    public isolated remote function send(anydata value, string topic, anydata? key = (), int? partition = (),
+    public isolated remote function send(byte[] value, string topic, byte[]? key = (), int? partition = (),
         int? timestamp = ()) returns ProducerError? {
-        // Handle string values
-        if (self.valueSerializerType == SER_STRING) {
-            if (value is string) {
-                return sendStringValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(STRING);
-        }
-        // Handle int values
-        if (self.valueSerializerType == SER_INT) {
-            if (value is int) {
-                return sendIntValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(INT);
-        }
-        // Handle float values
-        if (self.valueSerializerType == SER_FLOAT) {
-            if (value is float) {
-                return sendFloatValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(FLOAT);
-        }
-        // Handle byte[] values
         if (self.valueSerializerType == SER_BYTE_ARRAY) {
-            if (value is byte[]) {
-                return sendByteArrayValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(BYTE_ARRAY);
-        }
-        // Handle Avro serializer.
-        if (self.valueSerializerType == SER_AVRO) {
-            if (value is AvroRecord) {
-                return sendAvroValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(AVRO_RECORD);
-        }
-        // Handle custom values
-        if (self.valueSerializerType == SER_CUSTOM) {
-            return sendCustomValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
+            return sendByteArrayValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
         }
         panic createProducerError("Invalid value serializer configuration");
     }

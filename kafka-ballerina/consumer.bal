@@ -14,19 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'object;
-
 # Represents a Kafka consumer endpoint.
 #
 # + consumerConfig - Used to store configurations related to a Kafka connection
 public client class Consumer {
-    *'object:Listener;
 
     public ConsumerConfiguration consumerConfig;
     private string keyDeserializerType;
     private string valueDeserializerType;
-    private Deserializer? keyDeserializer = ();
-    private Deserializer? valueDeserializer = ();
 
     # Creates a new Kafka `Consumer`.
     #
@@ -35,83 +30,12 @@ public client class Consumer {
         self.consumerConfig = config;
         self.keyDeserializerType = config.keyDeserializerType;
         self.valueDeserializerType = config.valueDeserializerType;
-
-        if (self.keyDeserializerType == DES_CUSTOM) {
-            var keyDeserializerObject = config?.keyDeserializer;
-            if (keyDeserializerObject is ()) {
-                panic createConsumerError("Invalid keyDeserializer config: Please Provide a " +
-                                        "valid custom deserializer for the keyDeserializer");
-            } else {
-                self.keyDeserializer = keyDeserializerObject;
-            }
-        }
-        if (self.keyDeserializerType == DES_AVRO) {
-            var schemaRegistryUrl = config?.schemaRegistryUrl;
-            if (schemaRegistryUrl is ()) {
-                panic createConsumerError("Missing schema registry URL for the Avro serializer. Please " +
-                            "provide 'schemaRegistryUrl' configuration in 'kafka:ProducerConfiguration'.");
-            }
-        }
-
-        if (self.valueDeserializerType == DES_CUSTOM) {
-            var valueDeserializerObject = config?.valueDeserializer;
-            if (valueDeserializerObject is ()) {
-                panic createConsumerError("Invalid valueDeserializer config: Please Provide a" +
-                                        " valid custom deserializer for the valueDeserializer");
-            } else {
-                self.valueDeserializer = valueDeserializerObject;
-            }
-        }
-        if (self.valueDeserializerType == DES_AVRO) {
-            var schemaRegistryUrl = config?.schemaRegistryUrl;
-            if (schemaRegistryUrl is ()) {
-                panic createConsumerError("Missing schema registry URL for the Avro deserializer. Please " +
-                            "provide 'schemaRegistryUrl' configuration in 'kafka:ConsumerConfiguration'.");
-            }
-        }
-        checkpanic self->connect();
+        checkpanic connect(self);
 
         string[]? topics = config?.topics;
         if (topics is string[]){
             checkpanic self->subscribe(topics);
         }
-    }
-
-    # Starts the registered services.
-    #
-    # + return - An `kafka:ConsumerError` if an error is encountered while starting the server or else nil
-    public isolated function __start() returns error? {
-        return 'start(self);
-    }
-
-    # Stops the kafka listener.
-    #
-    # + return - An `kafka:ConsumerError` if an error is encountered during the listener stopping process or else nil
-    public isolated function __gracefulStop() returns error? {
-        return stop(self);
-    }
-
-    # Stops the kafka listener.
-    #
-    # + return - An `kafka:ConsumerError` if an error is encountered during the listener stopping process or else nil
-    public isolated function __immediateStop() returns error? {
-        return stop(self);
-    }
-
-    # Gets called every time a service attaches itself to the listener.
-    #
-    # + s - The service to be attached
-    # + name - Name of the service
-    # + return - An `kafka:ConsumerError` if an error is encountered while attaching the service or else nil
-    public isolated function __attach(service s, string? name = ()) returns error? {
-        return register(self, s, name);
-    }
-
-    # Detaches a consumer service from the listener.
-    #
-    # + s - The service to be detached
-    # + return - An `kafka:ConsumerError` if an error is encountered while detaching a service or else nil
-    public isolated function __detach(service s) returns error? {
     }
 
     # Assigns consumer to a set of topic partitions.
@@ -150,16 +74,6 @@ public client class Consumer {
     # + return - `kafka:ConsumerError` if an error is encountered or else nil
     public isolated remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns ConsumerError? {
         return consumerCommitOffset(self, offsets, duration);
-    }
-
-    # Connects the consumer to the provided host in the consumer configs.
-    # ```ballerina
-    # kafka:ConsumerError? result = consumer->connect();
-    # ```
-    #
-    # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
-    public isolated remote function connect() returns ConsumerError? {
-        return consumerConnect(self);
     }
 
     # Retrieves the currently-assigned partitions for the consumer.
@@ -337,21 +251,6 @@ public client class Consumer {
         return consumerSubscribeToPattern(self, regex);
     }
 
-    # Subscribes to the provided set of topics with rebalance listening enabled.
-    # This function can be used inside a service, to subscribe to a set of topics, while rebalancing the patition
-    # assignment of the consumers.
-    #
-    # + topics - Array of topics to be subscribed to
-    # + onPartitionsRevoked - Function which will be executed if partitions are revoked from this consumer
-    # + onPartitionsAssigned - Function which will be executed if partitions are assigned this consumer
-    # + return - `kafka:ConsumerError` if an error is encountered or else ()
-    public isolated remote function subscribeWithPartitionRebalance(string[] topics,
-        function(Consumer consumer, TopicPartition[] partitions) onPartitionsRevoked,
-        function(Consumer consumer, TopicPartition[] partitions) onPartitionsAssigned)
-    returns ConsumerError? {
-        return consumerSubscribeWithPartitionRebalance(self, topics, onPartitionsRevoked, onPartitionsAssigned);
-    }
-
     # Unsubscribes from all the topic subscriptions.
     # ```ballerina
     # kafka:ConsumerError? result = consumer->unsubscribe();
@@ -361,4 +260,8 @@ public client class Consumer {
     public isolated remote function unsubscribe() returns ConsumerError? {
         return consumerUnsubscribe(self);
     }
+}
+
+isolated function connect(Consumer|Listener consumer) returns ConsumerError? {
+    return consumerConnect(consumer);
 }
