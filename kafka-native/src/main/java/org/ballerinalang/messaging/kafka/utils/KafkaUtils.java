@@ -553,9 +553,14 @@ public class KafkaUtils {
         }
 
         Object value = getBValues(record.value(), valueType);
-        return ValueCreator.createRecordValue(getConsumerRecord(), key, value, record.offset(), record.partition(),
-                                record.timestamp(),
-                            record.topic());
+        Object[] fields = new Object[4];
+        fields[0] = key;
+        fields[1] = value;
+        fields[2] = record.timestamp();
+        BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
+                                                                              record.partition());
+        fields[3] = ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, record.offset());
+        return ValueCreator.createRecordValue(getConsumerRecord(), fields);
     }
 
     private static Object getBValues(Object value, String type) {
