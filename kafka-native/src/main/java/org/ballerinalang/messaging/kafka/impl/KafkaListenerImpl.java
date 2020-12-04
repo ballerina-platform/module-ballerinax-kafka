@@ -120,7 +120,7 @@ public class KafkaListenerImpl implements KafkaListener {
     private static class ResponseCallback implements Callback {
 
         @Override
-        public void notifySuccess() {
+        public void notifySuccess(Object obj) {
             // do nothing
         }
 

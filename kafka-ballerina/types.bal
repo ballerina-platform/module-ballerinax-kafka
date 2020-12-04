@@ -24,3 +24,8 @@ public type AuthenticationMechanism AUTH_SASL_PLAIN;
 
 # Represents the supported security protocols for Kafka clients.
 public type SecurityProtocol PROTOCOL_PLAINTEXT|PROTOCOL_SASL_PLAINTEXT|PROTOCOL_SASL_SSL|PROTOCOL_SSL;
+
+# The Kafka service type
+public type KafkaService service object {
+    // TBD when support for optional params in remote functions is available in lang
+};

@@ -787,7 +787,7 @@ public class KafkaUtils {
         final BError[] errorValue = new BError[1];
         Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new Callback() {
             @Override
-            public void notifySuccess() {
+            public void notifySuccess(Object obj) {
                 semaphore.release();
             }
 

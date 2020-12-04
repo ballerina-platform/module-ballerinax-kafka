@@ -160,7 +160,7 @@ isolated function consumerUnsubscribe(Consumer consumer) returns ConsumerError? 
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
 } external;
 
-isolated function register(Listener lis, service serviceType, string? name) returns ConsumerError? =
+isolated function register(Listener lis, KafkaService serviceType, string[]|string? name) returns ConsumerError? =
 @java:Method {
     'class: "org.ballerinalang.messaging.kafka.service.Register"
 } external;

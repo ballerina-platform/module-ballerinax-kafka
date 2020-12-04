@@ -15,14 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'object;
-
 # Represents a Kafka consumer endpoint.
 #
 # + consumerConfig - Used to store configurations related to a Kafka connection
 public client class Listener {
-
-    *'object:Listener;
 
     public ConsumerConfiguration consumerConfig;
     private string keyDeserializerType;
@@ -46,21 +42,21 @@ public client class Listener {
     # Starts the registered services.
     #
     # + return - An `kafka:ConsumerError` if an error is encountered while starting the server or else nil
-    public isolated function __start() returns error? {
+    public isolated function 'start() returns error? {
         return 'start(self);
     }
 
     # Stops the kafka listener.
     #
     # + return - An `kafka:ConsumerError` if an error is encountered during the listener stopping process or else nil
-    public isolated function __gracefulStop() returns error? {
+    public isolated function gracefulStop() returns error? {
         return stop(self);
     }
 
     # Stops the kafka listener.
     #
     # + return - An `kafka:ConsumerError` if an error is encountered during the listener stopping process or else nil
-    public isolated function __immediateStop() returns error? {
+    public isolated function immediateStop() returns error? {
         return stop(self);
     }
 
@@ -69,7 +65,7 @@ public client class Listener {
     # + s - The service to be attached
     # + name - Name of the service
     # + return - An `kafka:ConsumerError` if an error is encountered while attaching the service or else nil
-    public isolated function __attach(service s, string? name = ()) returns error? {
+    public isolated function attach(KafkaService s, string[]|string? name = ()) returns error? {
         return register(self, s, name);
     }
 
@@ -77,18 +73,11 @@ public client class Listener {
     #
     # + s - The service to be detached
     # + return - An `kafka:ConsumerError` if an error is encountered while detaching a service or else nil
-    public isolated function __detach(service s) returns error? {
+    public isolated function detach(KafkaService s) returns error? {
         // not implemented
     }
 
-    # Subscribes the consumer to the provided set of topics.
-    # ```ballerina
-    # kafka:ConsumerError? result = consumer->subscribe(["kafka-topic-1", "kafka-topic-2"]);
-    # ```
-    #
-    # + topics - Array of topics to be subscribed to
-    # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
-    private isolated remote function subscribe(string[] topics) returns ConsumerError? {
+    private isolated function subscribe(string[] topics) returns ConsumerError? {
         if (self.consumerConfig?.groupId is string) {
             return consumerSubscribe(self, topics);
         } else {
@@ -96,3 +85,5 @@ public client class Listener {
         }
     }
 }
+
+

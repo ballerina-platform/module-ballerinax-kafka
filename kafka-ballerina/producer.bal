@@ -44,7 +44,7 @@ public client class Producer {
     # ```
     #
     # + return - A `kafka:ProducerError` if closing the producer failed or else '()'
-    public isolated remote function close() returns ProducerError? {
+    isolated remote function close() returns ProducerError? {
         return producerClose(self);
     }
 
@@ -54,7 +54,7 @@ public client class Producer {
     # ```
     #
     # + return - A `kafka:ProducerError` if records couldn't be flushed or else '()'
-    public isolated remote function flushRecords() returns ProducerError? {
+    isolated remote function flushRecords() returns ProducerError? {
         return producerFlushRecords(self);
     }
 
@@ -65,7 +65,7 @@ public client class Producer {
     #
     # + topic - Topic of which the partition information is given
     # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:ProducerError` if the operation fails
-    public isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|ProducerError {
+    isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|ProducerError {
         return producerGetTopicPartitions(self, topic);
     }
 
@@ -80,7 +80,7 @@ public client class Producer {
     # + partition - Partition to which the record should be sent
     # + timestamp - Timestamp of the record in milliseconds since epoch
     # + return -  A `kafka:ProducerError` if send action fails to send data or else '()'
-    public isolated remote function send(byte[] value, string topic, byte[]? key = (), int? partition = (),
+    isolated remote function send(byte[] value, string topic, byte[]? key = (), int? partition = (),
         int? timestamp = ()) returns ProducerError? {
         if (self.valueSerializerType == SER_BYTE_ARRAY) {
             return sendByteArrayValues(self, value, topic, key, partition, timestamp, self.keySerializerType);

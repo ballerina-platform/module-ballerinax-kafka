@@ -23,7 +23,7 @@ public client class Caller {
     # ```
     #
     # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
-    public isolated remote function 'commit() returns ConsumerError? {
+    isolated remote function 'commit() returns ConsumerError? {
         return consumerCommit(self);
     }
 
@@ -32,7 +32,7 @@ public client class Caller {
     # + duration - Timeout duration for the commit operation execution
     # + offsets - Offsets to be commited
     # + return - `kafka:ConsumerError` if an error is encountered or else nil
-    public isolated remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns ConsumerError? {
+    isolated remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns ConsumerError? {
         return consumerCommitOffset(self, offsets, duration);
     }
 }
