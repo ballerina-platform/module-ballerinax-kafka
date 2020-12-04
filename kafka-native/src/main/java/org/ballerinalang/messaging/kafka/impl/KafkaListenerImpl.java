@@ -92,7 +92,7 @@ public class KafkaListenerImpl implements KafkaListener {
                                       properties, getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
-                                      null, getResourceParameters(service, this.listener, records));
+                                      getResourceParameters(service, this.listener, records));
         }
     }
 
@@ -104,7 +104,7 @@ public class KafkaListenerImpl implements KafkaListener {
                                       properties, getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
-                                      null, getResourceParameters(service, this.listener, records));
+                                       getResourceParameters(service, this.listener, records));
         }
     }
 

@@ -36,8 +36,6 @@ import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 
 import java.time.Duration;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_TOPIC;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_VALUE;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG;
@@ -74,8 +72,6 @@ public class Poll {
                     BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record, keyType,
                                                                                    valueType);
                     consumerRecordsArray.append(recordValue);
-                    KafkaMetricsUtil.reportConsume(consumerObject, recordValue.getStringValue(ALIAS_TOPIC).getValue(),
-                                                   recordValue.get(ALIAS_VALUE));
                 }
             }
             balFuture.complete(consumerRecordsArray);
