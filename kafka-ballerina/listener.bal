@@ -65,7 +65,7 @@ public client class Listener {
     # + s - The service to be attached
     # + name - Name of the service
     # + return - An `kafka:ConsumerError` if an error is encountered while attaching the service or else nil
-    public isolated function attach(KafkaService s, string[]|string? name = ()) returns error? {
+    public isolated function attach(Service s, string[]|string? name = ()) returns error? {
         return register(self, s, name);
     }
 
@@ -73,7 +73,7 @@ public client class Listener {
     #
     # + s - The service to be detached
     # + return - An `kafka:ConsumerError` if an error is encountered while detaching a service or else nil
-    public isolated function detach(KafkaService s) returns error? {
+    public isolated function detach(Service s) returns error? {
         // not implemented
     }
 

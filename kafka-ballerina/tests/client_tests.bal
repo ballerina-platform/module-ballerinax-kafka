@@ -243,7 +243,7 @@ function sendMessage(byte[] message, string topic) returns error? {
     return producer->send(message, topic);
 }
 
-KafkaService consumerService =
+Service consumerService =
 service object {
     remote function onMessage(Caller caller, ConsumerRecord[] records) {
         foreach var kafkaRecord in records {
