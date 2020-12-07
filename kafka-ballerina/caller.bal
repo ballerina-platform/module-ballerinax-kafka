@@ -14,7 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents a Kafka caller.
+# Represents a Kafka caller, which can be used to commit the
+# offsets consumed by the service.
 public client class Caller {
 
     # Commits the current consumed offsets for the service.
