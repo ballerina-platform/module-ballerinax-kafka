@@ -89,10 +89,10 @@ public class KafkaListenerImpl implements KafkaListener {
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
-                                      properties, getResourceParameters(service, this.listener, records, groupId));
+                                      properties, getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, callback,
-                                      null, getResourceParameters(service, this.listener, records, groupId));
+                                      getResourceParameters(service, this.listener, records));
         }
     }
 
@@ -101,10 +101,10 @@ public class KafkaListenerImpl implements KafkaListener {
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
-                                      properties, getResourceParameters(service, this.listener, records, groupId));
+                                      properties, getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_MESSAGE, null, ON_MESSAGE_METADATA, consumer,
-                                      null, getResourceParameters(service, this.listener, records, groupId));
+                                       getResourceParameters(service, this.listener, records));
         }
     }
 
@@ -120,7 +120,7 @@ public class KafkaListenerImpl implements KafkaListener {
     private static class ResponseCallback implements Callback {
 
         @Override
-        public void notifySuccess() {
+        public void notifySuccess(Object obj) {
             // do nothing
         }
 

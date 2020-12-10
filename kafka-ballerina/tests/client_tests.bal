@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/lang.'string;
+import ballerina/log;
 import ballerina/runtime;
 import ballerina/test;
 
@@ -35,25 +37,25 @@ ProducerConfiguration producerConfiguration = {
     acks: ACKS_ALL,
     maxBlockInMillis: 6000,
     requestTimeoutInMillis: 2000,
-    valueSerializerType: SER_STRING,
+    valueSerializerType: SER_BYTE_ARRAY,
     retryCount: 3
 };
 Producer producer = new (producerConfiguration);
 
 @test:Config {}
 function consumerServiceTest() returns error? {
-    check sendMessage(TEST_MESSAGE, topic1);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic1);
     ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-service-test-group",
-        valueDeserializerType: DES_STRING,
+        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-1"
     };
-    Consumer consumer = new (consumerConfiguration);
-    var attachResult = check consumer.__attach(consumerService);
-    var startResult = check consumer.__start();
+    Listener consumer = new (consumerConfiguration);
+    var attachResult = check consumer.attach(consumerService);
+    var startResult = check consumer.'start();
 
     runtime:sleep(5000);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
@@ -61,28 +63,31 @@ function consumerServiceTest() returns error? {
 
 @test:Config {}
 function consumerFunctionsTest() returns error? {
-    check sendMessage(TEST_MESSAGE, topic2);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic2);
     ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
-        valueDeserializerType: DES_STRING,
+        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-2"
     };
     Consumer consumer = new (consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5000);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
-    var value = consumerRecords[0].value;
-    if (value is string) {
-        test:assertEquals(value, TEST_MESSAGE);
+    byte[] value = consumerRecords[0].value;
+    string|error message = 'string:fromBytes(value);
+    if (message is string) {
+        test:assertEquals(message, TEST_MESSAGE);
     } else {
         test:assertFail("Invalid message type received. Expected string");
     }
     var closeResult = consumer->close();
 }
 
-@test:Config {}
+@test:Config {
+    dependsOn: ["consumerFunctionsTest"]
+}
 function consumerSubscribeUnsubscribeTest() returns error? {
     Consumer consumer = new ({
         bootstrapServers: "localhost:9092",
@@ -127,7 +132,7 @@ function manualCommitTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        valueDeserializerType: DES_STRING,
+        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-5",
         autoCommit: false
     };
@@ -135,7 +140,7 @@ function manualCommitTest() returns error? {
     int messageCount = 10;
     int count = 0;
     while (count < messageCount) {
-        check sendMessage(count.toString(), manualCommitTopic);
+        check sendMessage(count.toString().toBytes(), manualCommitTopic);
         count += 1;
     }
     var messages = consumer->poll(1000);
@@ -172,7 +177,7 @@ function nonExistingTopicPartitionTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        valueDeserializerType: DES_STRING,
+        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-6",
         autoCommit: false
     };
@@ -197,7 +202,7 @@ function nonExistingTopicPartitionTest() returns error? {
 function producerSendStringTest() returns error? {
     Producer stringProducer = new (producerConfiguration);
     string message = "Hello, Ballerina";
-    var result = stringProducer->send(message, topic3);
+    var result = stringProducer->send(message.toBytes(), topic3);
     test:assertFalse(result is error, result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
@@ -205,42 +210,48 @@ function producerSendStringTest() returns error? {
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
-        valueDeserializerType: DES_STRING,
+        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-7"
     };
     Consumer stringConsumer = new (consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(2000);
     test:assertEquals(consumerRecords.length(), 1);
-    var messageValue = consumerRecords[0].value;
-    test:assertTrue(messageValue is string);
-    test:assertEquals(messageValue, message);
+    byte[] messageValue = consumerRecords[0].value;
+    string|error messageConverted = 'string:fromBytes(messageValue);
+    if (messageConverted is string) {
+        test:assertEquals(messageConverted, TEST_MESSAGE);
+    } else {
+        test:assertFail("Invalid message type received. Expected string");
+    }
 }
 
 @test:Config {}
 function producerCloseTest() returns error? {
     string message = "Test Message";
-    var result = producer->send(message, topic3);
+    var result = producer->send(message.toBytes(), topic3);
     test:assertFalse(result is error, result.toString());
     result = producer->close();
     test:assertFalse(result is error, result.toString());
-    result = producer->send(message, topic3);
+    result = producer->send(message.toBytes(), topic3);
     test:assertTrue(result is error);
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
     test:assertEquals(receivedErr.message(), expectedErr);
 }
 
-function sendMessage(string message, string topic) returns error? {
+function sendMessage(byte[] message, string topic) returns error? {
     return producer->send(message, topic);
 }
 
-service consumerService =
-service {
-    resource function onMessage(Consumer consumer, ConsumerRecord[] records) {
+Service consumerService =
+service object {
+    remote function onMessage(Caller caller, ConsumerRecord[] records) {
         foreach var kafkaRecord in records {
-            var value = kafkaRecord.value;
-            if (value is string) {
-                receivedMessage = <@untainted>value;
+            byte[] value = kafkaRecord.value;
+            string|error message = 'string:fromBytes(value);
+            if (message is string) {
+                log:printInfo("Message received: " + message);
+                receivedMessage = <@untainted>message;
             }
         }
     }

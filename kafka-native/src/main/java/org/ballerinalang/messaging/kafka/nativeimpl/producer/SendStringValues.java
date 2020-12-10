@@ -84,8 +84,8 @@ public class SendStringValues extends Send {
     }
 
     // String and ballerina byte[]
-    public static Object sendStringValuesByteArrayKeys(Environment env, BObject producer, BString value, BString topic,
-                                                       BArray key, Object partition, Object timestamp) {
+    public static Object sendStringValuesByteArrayKeys(Environment env, BObject producer, BString value,
+    BString topic, BArray key, Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<byte[], String> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,

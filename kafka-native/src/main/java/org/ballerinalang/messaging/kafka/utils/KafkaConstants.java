@@ -72,6 +72,7 @@ public class KafkaConstants {
     public static final String AVRO_GENERIC_RECORD_NAME = "AvroGenericRecord";
     public static final String CONSUMER_RECORD_STRUCT_NAME = "ConsumerRecord";
     public static final String CONSUMER_STRUCT_NAME = "Consumer";
+    public static final String CALLER_STRUCT_NAME = "Caller";
     public static final String SERVER_CONNECTOR = "serverConnector";
 
     public static final BString CONSUMER_CONFIG_FIELD_NAME = StringUtils.fromString("consumerConfig");

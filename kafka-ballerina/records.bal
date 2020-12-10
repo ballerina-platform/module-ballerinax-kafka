@@ -128,10 +128,6 @@ public type AuthenticationConfiguration record {|
 # + isolationLevel - Transactional message reading method
 # + keyDeserializerType - Deserializer used for the Kafka record key. This should be a `kafka:DeserializerType`
 # + valueDeserializerType - Deserializer used for the Kafka record value. This should be a `kafka:DeserializerType`
-# + keyDeserializer - Custom deserializer object to deserialize kafka keys. This should be implement the
-#                     `kafka:Deserializer` object
-# + valueDeserializer - Custom deserializer object to deserialize kafka values. This should implement the
-#                       `kafka:Deserializer` object
 # + schemaRegistryUrl - Avro schema registry url. Use this field to specify schema registry url, if Avro serializer
 #                       is used
 # + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
@@ -183,8 +179,6 @@ public type ConsumerConfiguration record {|
 
     DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
     DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
-    Deserializer keyDeserializer?;
-    Deserializer valueDeserializer?;
     string schemaRegistryUrl?;
 
     map<string> additionalProperties?;
@@ -227,17 +221,13 @@ public type ConsumerConfiguration record {|
 #
 # + key - Key that is included in the record
 # + value - Record content
-# + offset - Offset value
-# + partition - Partition in which the record is stored
 # + timestamp - Timestamp of the record, in milliseconds since epoch
-# + topic - Topic to which the record belongs to
+# + offset - Topic partition position in which the consumed record is stored
 public type ConsumerRecord record {|
-    anydata key;
-    anydata value;
-    int offset;
-    int partition;
+    byte[] key?;
+    byte[] value;
     int timestamp;
-    string topic;
+    PartitionOffset offset;
 |};
 
 # Represents a generic Avro record. This is the type of the value returned from an Avro deserializer consumer.
@@ -261,10 +251,6 @@ public type AvroGenericRecord record {
 #                       user-defined serializer
 # + valueSerializerType - Serializer used for the Kafka record value. This can be either `kafka:SerializerType` or a
 #                         user-defined serializer
-# + keySerializer - Custom serializer object to serialize Kafka keys. This should implement the `kafka:Serializer`
-#                   object
-# + valueSerializer - Custom serializer object to serialize Kafka values. This should implement the
-#                     `kafka:Serializer` object
 # + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro
 #                       serializer is used
 # + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
@@ -305,8 +291,6 @@ public type ProducerConfiguration record {|
 
     SerializerType valueSerializerType = SER_BYTE_ARRAY;
     SerializerType keySerializerType = SER_BYTE_ARRAY;
-    Serializer valueSerializer?;
-    Serializer keySerializer?;
     string schemaRegistryUrl?;
 
     map<string> additionalProperties?;
