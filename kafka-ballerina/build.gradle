@@ -199,7 +199,7 @@ test {
 }
 
 task ballerinaBuild {
-    mustRunAfter(test)
+    dependsOn(test)
     inputs.dir file(project.projectDir)
     finalizedBy(revertTomlFile)
 
@@ -288,7 +288,7 @@ unpackJballerinaTools.dependsOn copyPackingJarsToLib
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlVersions.dependsOn copyStdlibs
-ballerinaBuild.dependsOn startKafkaServer
+ballerinaTest.dependsOn startKafkaServer
 ballerinaBuild.dependsOn updateTomlVersions
-build.finalizedBy stopKafkaServer
+ballerinaTest.finalizedBy stopKafkaServer
 build.dependsOn ballerinaBuild
