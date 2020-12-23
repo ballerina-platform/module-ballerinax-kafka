@@ -18,12 +18,8 @@
 
 package org.ballerinalang.messaging.kafka.utils;
 
-import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
-
-import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
 
 /**
  * Constants related to for Kafka API.
@@ -37,13 +33,6 @@ public class KafkaConstants {
 
     public static final String BLOCK_SEPARATOR = ":";
     public static final String ARRAY_INDICATOR = "[]";
-    public static final String ORG_NAME = "ballerinax";
-    public static final String MODULE_NAME = "kafka";
-    private static final String VERSION = "2.0.4";
-
-    public static final String PACKAGE_NAME_WITH_VERSION = MODULE_NAME + BLOCK_SEPARATOR + VERSION;
-    public static final String PACKAGE_FULL_NAME = ORG_NAME + ORG_NAME_SEPARATOR + PACKAGE_NAME_WITH_VERSION;
-    public static final Module KAFKA_PACKAGE_ID = new Module(ORG_NAME, MODULE_NAME, VERSION);
 
     // Kafka log messages
     public static final String SERVICE_STARTED = "[ballerinax/kafka] started kafka listener ";
@@ -77,12 +66,6 @@ public class KafkaConstants {
 
     public static final BString CONSUMER_CONFIG_FIELD_NAME = StringUtils.fromString("consumerConfig");
     public static final BString PRODUCER_CONFIG_FIELD_NAME = StringUtils.fromString("producerConfig");
-
-    public static final String PARAMETER_CONSUMER_NAME = PACKAGE_FULL_NAME + BLOCK_SEPARATOR + CONSUMER_STRUCT_NAME;
-    public static final String PARAMETER_RECORD_ARRAY_NAME = PACKAGE_FULL_NAME + BLOCK_SEPARATOR
-            + CONSUMER_RECORD_STRUCT_NAME + ARRAY_INDICATOR;
-    public static final String PARAMETER_PARTITION_OFFSET_ARRAY_NAME = PACKAGE_FULL_NAME + BLOCK_SEPARATOR
-            + OFFSET_STRUCT_NAME + ARRAY_INDICATOR;
 
     public static final String KAFKA_RESOURCE_ON_MESSAGE = "onMessage";
 
@@ -271,20 +254,4 @@ public class KafkaConstants {
     public static final String CLIENT_ID = "client.id";
     public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
     public static final String SPECIFIC_AVRO_READER = "specific.avro.reader";
-
-
-    // Strand meta data
-    public static final StrandMetadata ON_MESSAGE_METADATA =
-            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, KAFKA_RESOURCE_ON_MESSAGE);
-    public static final StrandMetadata ON_SERIALIZE_METADATA =
-            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_SERIALIZE);
-    public static final StrandMetadata ON_DESERIALIZE_METADATA =
-            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_DESERIALIZE);
-    public static final StrandMetadata ON_CLOSE_METADATA =
-            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_CLOSE);
-    public static final StrandMetadata ON_PARTITION_REVOKED_METADATA =
-            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_ON_PARTITION_REVOKED);
-    public static final StrandMetadata ON_PARTITION_ASSIGNED_METADATA =
-            new StrandMetadata(ORG_NAME, MODULE_NAME, VERSION, FUNCTION_ON_PARTITION_ASSIGNED);
-
 }

@@ -21,6 +21,7 @@ package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BArray;
@@ -36,6 +37,7 @@ import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
+import org.ballerinalang.messaging.kafka.utils.ModuleUtils;
 
 import java.io.PrintStream;
 import java.util.Collection;
@@ -47,8 +49,6 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ER
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_ASSIGNED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_REVOKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_PARTITION_ASSIGNED_METADATA;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_PARTITION_REVOKED_METADATA;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getStringListFromStringBArray;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicNamesString;
@@ -180,8 +180,13 @@ public class SubscriptionHandler {
         @Override
         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
             Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
+            StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                                                         ModuleUtils.getModule().getName(),
+                                                         ModuleUtils.getModule().getVersion(),
+                                                         FUNCTION_ON_PARTITION_REVOKED);
+
             this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_REVOKED, null,
-                                           ON_PARTITION_REVOKED_METADATA, null, inputArgs);
+                                           metadata, null, inputArgs);
         }
 
         /**
@@ -190,8 +195,12 @@ public class SubscriptionHandler {
         @Override
         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
             Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
+            StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                                                         ModuleUtils.getModule().getName(),
+                                                         ModuleUtils.getModule().getVersion(),
+                                                         FUNCTION_ON_PARTITION_ASSIGNED);
             this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_ASSIGNED, null,
-                                           ON_PARTITION_ASSIGNED_METADATA, null, inputArgs);
+                                           metadata, null, inputArgs);
         }
 
         private BArray getPartitionsArray(Collection<TopicPartition> partitions) {

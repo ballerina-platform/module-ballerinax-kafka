@@ -19,17 +19,16 @@
 package org.ballerinalang.messaging.kafka.serdes;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serializer;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.ModuleUtils;
 
 import java.util.Map;
-
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_CLOSE_METADATA;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_SERIALIZE_METADATA;
 
 /**
  * Represents a serializer class for ballerina kafka module.
@@ -52,15 +51,23 @@ public class BallerinaKafkaSerializer implements Serializer {
     @Override
     public byte[] serialize(String topic, Object data) {
         Object[] args = new Object[]{data, false};
+        StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                                                                  ModuleUtils.getModule().getName(),
+                                                                  ModuleUtils.getModule().getVersion(),
+                                                                  KafkaConstants.FUNCTION_SERIALIZE);
         BArray result = (BArray) KafkaUtils.invokeMethodSync(Runtime.getCurrentRuntime(), this.serializerObject,
                                                              KafkaConstants.FUNCTION_SERIALIZE, null,
-                                                             ON_SERIALIZE_METADATA, timeout, args);
+                                                             metadata, timeout, args);
         return result.getBytes();
     }
 
     @Override
     public void close() {
+    StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                                                          ModuleUtils.getModule().getName(),
+                                                          ModuleUtils.getModule().getVersion(),
+                                                          KafkaConstants.FUNCTION_CLOSE);
         KafkaUtils.invokeMethodSync(Runtime.getCurrentRuntime(), this.serializerObject, KafkaConstants.FUNCTION_CLOSE,
-                                    null, ON_CLOSE_METADATA, timeout);
+                                    null, metadata, timeout);
     }
 }
