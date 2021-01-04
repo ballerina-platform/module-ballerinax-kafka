@@ -57,7 +57,7 @@ function consumerServiceTest() returns error? {
     var attachResult = check consumer.attach(consumerService);
     var startResult = check consumer.'start();
 
-    runtime:sleep(5000);
+    runtime:sleep(7000);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
 }
 
