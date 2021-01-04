@@ -10,8 +10,8 @@ version = "@stdlib.runtime.version@"
 
 [[dependency]]
 org = "ballerina"
-name = "system"
-version = "@stdlib.system.version@"
+name = "uuid"
+version = "@stdlib.uuid.version@"
 
 [[platform.java11.dependency]]
 path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
