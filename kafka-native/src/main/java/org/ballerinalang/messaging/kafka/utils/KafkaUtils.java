@@ -84,7 +84,7 @@ public class KafkaUtils {
                 consumerRecordsArray.append(consumerRecord);
             }
             BObject caller =
-                    ValueCreator.createObjectValue(KafkaConstants.KAFKA_PACKAGE_ID, KafkaConstants.CALLER_STRUCT_NAME);
+                    ValueCreator.createObjectValue(ModuleUtils.getModule(), KafkaConstants.CALLER_STRUCT_NAME);
             KafkaConsumer consumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
             Properties consumerProperties = (Properties) listener.getNativeData(NATIVE_CONSUMER_CONFIG);
             caller.addNativeData(NATIVE_CONSUMER, consumer);
@@ -613,17 +613,17 @@ public class KafkaUtils {
     }
 
     public static BError createKafkaError(String message, String typeId) {
-        return ErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+        return ErrorCreator.createDistinctError(typeId, ModuleUtils.getModule(),
                                                 StringUtils.fromString(message));
     }
 
     public static BError createKafkaError(String message, String typeId, BError cause) {
-        return ErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+        return ErrorCreator.createDistinctError(typeId, ModuleUtils.getModule(),
                                                  StringUtils.fromString(message), cause);
     }
 
     public static BMap<BString, Object> createKafkaRecord(String recordName) {
-        return ValueCreator.createRecordValue(KafkaConstants.KAFKA_PACKAGE_ID, recordName);
+        return ValueCreator.createRecordValue(ModuleUtils.getModule(), recordName);
     }
 
     public static BArray getPartitionOffsetArrayFromOffsetMap(Map<TopicPartition, Long> offsetMap) {

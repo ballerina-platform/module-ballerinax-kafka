@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/system;
+import ballerina/uuid;
 
 # Represents a Kafka producer endpoint.
 #
@@ -37,7 +37,7 @@ public client class Producer {
         checkpanic producerInit(self);
     }
 
-    public string connectorId = system:uuid();
+    string connectorId = uuid:createType4AsString();
 
     # Closes the producer connection to the external Kafka broker.
     # ```ballerina
