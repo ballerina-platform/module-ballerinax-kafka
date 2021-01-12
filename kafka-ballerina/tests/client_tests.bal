@@ -203,7 +203,7 @@ function producerSendStringTest() returns error? {
     Producer stringProducer = new (producerConfiguration);
     string message = "Hello, Ballerina";
     var result = stringProducer->send(message.toBytes(), topic3);
-    test:assertFalse(result is error, result.toString());
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
@@ -229,9 +229,9 @@ function producerSendStringTest() returns error? {
 function producerCloseTest() returns error? {
     string message = "Test Message";
     var result = producer->send(message.toBytes(), topic3);
-    test:assertFalse(result is error, result.toString());
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = producer->close();
-    test:assertFalse(result is error, result.toString());
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = producer->send(message.toBytes(), topic3);
     test:assertTrue(result is error);
     error receivedErr = <error>result;
