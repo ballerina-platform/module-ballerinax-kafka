@@ -77,7 +77,7 @@ public class KafkaUtils {
         String keyType = listener.getStringValue(KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
         String valueType = listener.getStringValue(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
 
-        if (service.getType().getAttachedFunctions()[0].getParameterTypes().length == 2) {
+        if (service.getType().getMethods()[0].getParameterTypes().length == 2) {
             for (Object record : records) {
                 BMap<BString, Object> consumerRecord = populateConsumerRecord(
                         (ConsumerRecord) record, keyType, valueType);

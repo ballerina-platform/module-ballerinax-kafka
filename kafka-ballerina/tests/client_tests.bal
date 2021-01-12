@@ -115,13 +115,13 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAgeInMillis: 2000
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 3);
+    test:assertEquals(availableTopics.length(), 5);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     var result = check consumer->subscribeToPattern("test.*");
     var pollResult = consumer->poll(1000); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
-    test:assertEquals(newSubscribedTopics.length(), 2);
+    test:assertEquals(newSubscribedTopics.length(), 3);
     var closeResult = consumer->close();
 }
 
@@ -203,7 +203,7 @@ function producerSendStringTest() returns error? {
     Producer stringProducer = new (producerConfiguration);
     string message = "Hello, Ballerina";
     var result = stringProducer->send(message.toBytes(), topic3);
-    test:assertFalse(result is error, result.toString());
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
         bootstrapServers: "localhost:9092",
@@ -214,7 +214,7 @@ function producerSendStringTest() returns error? {
         clientId: "test-consumer-7"
     };
     Consumer stringConsumer = new (consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check stringConsumer->poll(2000);
+    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3000);
     test:assertEquals(consumerRecords.length(), 1);
     byte[] messageValue = consumerRecords[0].value;
     string|error messageConverted = 'string:fromBytes(messageValue);
@@ -225,14 +225,17 @@ function producerSendStringTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {
+    dependsOn: ["producerSendStringTest"]
+}
 function producerCloseTest() returns error? {
+    Producer closeTestProducer = new (producerConfiguration);
     string message = "Test Message";
-    var result = producer->send(message.toBytes(), topic3);
-    test:assertFalse(result is error, result.toString());
-    result = producer->close();
-    test:assertFalse(result is error, result.toString());
-    result = producer->send(message.toBytes(), topic3);
+    var result = closeTestProducer->send(message.toBytes(), topic3);
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    result = closeTestProducer->close();
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    result = closeTestProducer->send(message.toBytes(), topic3);
     test:assertTrue(result is error);
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
