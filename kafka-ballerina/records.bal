@@ -230,6 +230,21 @@ public type ConsumerRecord record {|
     PartitionOffset offset;
 |};
 
+# Details related to the producer record.
+#
+# + topic - Topic to which the record will be appended
+# + key - Key that is included in the record
+# + value - Record content
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + partition - Partition to which the record should be sent
+public type ProducerRecord record {|
+    string topic;
+    byte[] key?;
+    byte[] value;
+    int timestamp?;
+    int partition?;
+|};
+
 # Represents a generic Avro record. This is the type of the value returned from an Avro deserializer consumer.
 public type AvroGenericRecord record {
     // Left blank intentionally.

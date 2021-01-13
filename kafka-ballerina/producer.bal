@@ -75,52 +75,53 @@ public client class Producer {
     # kafka:ProducerError? result = producer->send("Hello World, Ballerina", "kafka-topic");
     # ```
     #
-    # + value - Record contents
-    # + topic - Topic to which the record will be appended
-    # + key - Key, which will be included in the record
-    # + partition - Partition to which the record should be sent
-    # + timestamp - Timestamp of the record in milliseconds since epoch
+    # + producerRecord - Record to be produced
     # + return -  A `kafka:ProducerError` if send action fails to send data or else '()'
-    isolated remote function send(anydata value, string topic, anydata? key = (), int? partition = (),
-        int? timestamp = ()) returns ProducerError? {
+    isolated remote function sendProducerRecord(ProducerRecord producerRecord) returns ProducerError? {
         // Handle string values
         if (self.valueSerializerType == SER_STRING) {
             if (value is string) {
-                return sendStringValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
+                return sendStringValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+                    producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
             }
             panic getValueTypeMismatchError(STRING);
         }
         // Handle int values
         if (self.valueSerializerType == SER_INT) {
             if (value is int) {
-                return sendIntValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
+                return sendIntValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
             }
             panic getValueTypeMismatchError(INT);
         }
         // Handle float values
         if (self.valueSerializerType == SER_FLOAT) {
             if (value is float) {
-                return sendFloatValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
+                return sendFloatValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
             }
             panic getValueTypeMismatchError(FLOAT);
         }
         // Handle byte[] values
         if (self.valueSerializerType == SER_BYTE_ARRAY) {
             if (value is byte[]) {
-                return sendByteArrayValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
+                return sendByteArrayValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
             }
             panic getValueTypeMismatchError(BYTE_ARRAY);
         }
         // Handle Avro serializer.
         if (self.valueSerializerType == SER_AVRO) {
             if (value is AvroRecord) {
-                return sendAvroValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
+                return sendAvroValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
             }
             panic getValueTypeMismatchError(AVRO_RECORD);
         }
         // Handle custom values
         if (self.valueSerializerType == SER_CUSTOM) {
-            return sendCustomValues(self, value, topic, key, partition, timestamp, self.keySerializerType);
+            return sendCustomValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+            producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
         }
         panic createProducerError("Invalid value serializer configuration");
     }
