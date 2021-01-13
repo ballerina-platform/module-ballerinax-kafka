@@ -59,7 +59,7 @@ listener kafka:Listener lis = new (consumerConfiguration);
 service kafkaService on lis {
     // This resource will be executed when a message is published to the
     // subscribed topic/topics.
-    remote function onMessage(kafka:Caler caller,
+    remote function onConsumerRecord(kafka:Caler caller,
             kafka:ConsumerRecord[] records) {
     }
 }

@@ -248,7 +248,7 @@ function sendMessage(byte[] message, string topic) returns error? {
 
 Service consumerService =
 service object {
-    remote function onMessage(Caller caller, ConsumerRecord[] records) {
+    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string|error message = 'string:fromBytes(value);
