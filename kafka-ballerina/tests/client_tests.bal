@@ -118,7 +118,7 @@ function consumerSubscribeTest() returns error? {
     test:assertEquals(availableTopics.length(), 5);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
-    var result = check consumer->subscribeToPattern("test.*");
+    var result = check consumer->subscribeWithPattern("test.*");
     var pollResult = consumer->poll(1000); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.length(), 3);

@@ -242,13 +242,13 @@ public client class Consumer {
 
     # Subscribes the consumer to the topics, which match the provided pattern.
     # ```ballerina
-    # kafka:ConsumerError? result = consumer->subscribeToPattern("kafka.*");
+    # kafka:ConsumerError? result = consumer->subscribeWithPattern("kafka.*");
     # ```
     #
     # + regex - Pattern, which should be matched with the topics to be subscribed to
     # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
-    isolated remote function subscribeToPattern(string regex) returns ConsumerError? {
-        return consumerSubscribeToPattern(self, regex);
+    isolated remote function subscribeWithPattern(string regex) returns ConsumerError? {
+        return consumerSubscribeWithPattern(self, regex);
     }
 
     # Unsubscribes from all the topic subscriptions.
