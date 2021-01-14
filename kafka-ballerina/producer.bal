@@ -29,12 +29,13 @@ public client class Producer {
     # Creates a new Kafka `Producer`.
     #
     # + config - Configurations related to initializing a Kafka `Producer`
-    public isolated function init(ProducerConfiguration config) {
+    # + return - A `kafka:ProducerError` if closing the producer failed or else '()'
+    public isolated function init(ProducerConfiguration config) returns ProducerError? {
         self.producerConfig = config;
         self.keySerializerType = config.keySerializerType;
         self.valueSerializerType = config.valueSerializerType;
 
-        checkpanic producerInit(self);
+        check producerInit(self);
     }
 
     string connectorId = uuid:createType4AsString();
