@@ -16,7 +16,7 @@
 
 import ballerina/lang.'string;
 import ballerina/log;
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 const DOCKER_COMPOSE_FILE = "docker-compose.yaml";
@@ -57,7 +57,7 @@ function consumerServiceTest() returns error? {
     var attachResult = check consumer.attach(consumerService);
     var startResult = check consumer.'start();
 
-    runtime:sleep(7000);
+    runtime:sleep(7);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
 }
 
