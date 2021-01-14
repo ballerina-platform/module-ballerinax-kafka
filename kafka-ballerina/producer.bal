@@ -78,49 +78,9 @@ public client class Producer {
     # + producerRecord - Record to be produced
     # + return -  A `kafka:ProducerError` if send action fails to send data or else '()'
     isolated remote function sendProducerRecord(ProducerRecord producerRecord) returns ProducerError? {
-        // Handle string values
-        if (self.valueSerializerType == SER_STRING) {
-            if (value is string) {
-                return sendStringValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
-                    producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(STRING);
-        }
-        // Handle int values
-        if (self.valueSerializerType == SER_INT) {
-            if (value is int) {
-                return sendIntValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
-                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(INT);
-        }
-        // Handle float values
-        if (self.valueSerializerType == SER_FLOAT) {
-            if (value is float) {
-                return sendFloatValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
-                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(FLOAT);
-        }
-        // Handle byte[] values
+        // Only producing byte[] values is handled at the moment
         if (self.valueSerializerType == SER_BYTE_ARRAY) {
-            if (value is byte[]) {
-                return sendByteArrayValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
-                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(BYTE_ARRAY);
-        }
-        // Handle Avro serializer.
-        if (self.valueSerializerType == SER_AVRO) {
-            if (value is AvroRecord) {
-                return sendAvroValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
-                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
-            }
-            panic getValueTypeMismatchError(AVRO_RECORD);
-        }
-        // Handle custom values
-        if (self.valueSerializerType == SER_CUSTOM) {
-            return sendCustomValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+            return sendByteArrayValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
             producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
         }
         panic createProducerError("Invalid value serializer configuration");

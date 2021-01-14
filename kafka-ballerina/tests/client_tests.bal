@@ -202,7 +202,7 @@ function nonExistingTopicPartitionTest() returns error? {
 function producerSendStringTest() returns error? {
     Producer stringProducer = new (producerConfiguration);
     string message = "Hello, Ballerina";
-    var result = stringProducer->send(message.toBytes(), topic3);
+    var result = stringProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
@@ -231,11 +231,11 @@ function producerSendStringTest() returns error? {
 function producerCloseTest() returns error? {
     Producer closeTestProducer = new (producerConfiguration);
     string message = "Test Message";
-    var result = closeTestProducer->send(message.toBytes(), topic3);
+    var result = closeTestProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = closeTestProducer->close();
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->send(message.toBytes(), topic3);
+    result = closeTestProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
     test:assertTrue(result is error);
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
@@ -243,7 +243,7 @@ function producerCloseTest() returns error? {
 }
 
 function sendMessage(byte[] message, string topic) returns error? {
-    return producer->send(message, topic);
+    return producer->sendProducerRecord({ topic: topic, value: message });
 }
 
 Service consumerService =
