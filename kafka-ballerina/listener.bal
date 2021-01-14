@@ -27,15 +27,16 @@ public client class Listener {
     # Creates a new Kafka `Listener`.
     #
     # + config - Configurations related to consumer endpoint
-    public isolated function init (ConsumerConfiguration config) {
+    # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
+    public isolated function init (ConsumerConfiguration config) returns ConsumerError? {
         self.consumerConfig = config;
         self.keyDeserializerType = config.keyDeserializerType;
         self.valueDeserializerType = config.valueDeserializerType;
-        checkpanic connect(self);
+        check connect(self);
 
         string[]? topics = config?.topics;
         if (topics is string[]){
-            checkpanic self->subscribe(topics);
+            check self->subscribe(topics);
         }
     }
 
