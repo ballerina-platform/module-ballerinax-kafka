@@ -40,7 +40,7 @@ ProducerConfiguration producerConfiguration = {
     valueSerializerType: SER_BYTE_ARRAY,
     retryCount: 3
 };
-Producer producer = new (producerConfiguration);
+Producer producer = checkpanic new (producerConfiguration);
 
 @test:Config {}
 function consumerServiceTest() returns error? {
@@ -53,7 +53,7 @@ function consumerServiceTest() returns error? {
         valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-1"
     };
-    Listener consumer = new (consumerConfiguration);
+    Listener consumer = check new (consumerConfiguration);
     var attachResult = check consumer.attach(consumerService);
     var startResult = check consumer.'start();
 
@@ -72,7 +72,7 @@ function consumerFunctionsTest() returns error? {
         valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-2"
     };
-    Consumer consumer = new (consumerConfiguration);
+    Consumer consumer = check new (consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5000);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     byte[] value = consumerRecords[0].value;
@@ -89,7 +89,7 @@ function consumerFunctionsTest() returns error? {
     dependsOn: ["consumerFunctionsTest"]
 }
 function consumerSubscribeUnsubscribeTest() returns error? {
-    Consumer consumer = new ({
+    Consumer consumer = check new ({
         bootstrapServers: "localhost:9092",
         groupId: "consumer-subscriber-unsubscribe-test-group",
         clientId: "test-consumer-3",
@@ -108,7 +108,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     dependsOn: ["consumerFunctionsTest", "consumerServiceTest"]
 }
 function consumerSubscribeTest() returns error? {
-    Consumer consumer = new ({
+    Consumer consumer = check new ({
         bootstrapServers: "localhost:9092",
         groupId: "consumer-subscriber-test-group",
         clientId: "test-consumer-4",
@@ -136,7 +136,7 @@ function manualCommitTest() returns error? {
         clientId: "test-consumer-5",
         autoCommit: false
     };
-    Consumer consumer = new(consumerConfiguration);
+    Consumer consumer = check new(consumerConfiguration);
     int messageCount = 10;
     int count = 0;
     while (count < messageCount) {
@@ -181,7 +181,7 @@ function nonExistingTopicPartitionTest() returns error? {
         clientId: "test-consumer-6",
         autoCommit: false
     };
-    Consumer consumer = new(consumerConfiguration);
+    Consumer consumer = check new(consumerConfiguration);
 
     TopicPartition nonExistingTopicPartition = {
         topic: nonExistingTopic,
@@ -200,7 +200,7 @@ function nonExistingTopicPartitionTest() returns error? {
 
 @test:Config {}
 function producerSendStringTest() returns error? {
-    Producer stringProducer = new (producerConfiguration);
+    Producer stringProducer = check new (producerConfiguration);
     string message = "Hello, Ballerina";
     var result = stringProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
@@ -213,7 +213,7 @@ function producerSendStringTest() returns error? {
         valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-7"
     };
-    Consumer stringConsumer = new (consumerConfiguration);
+    Consumer stringConsumer = check new (consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3000);
     test:assertEquals(consumerRecords.length(), 1);
     byte[] messageValue = consumerRecords[0].value;
@@ -229,7 +229,7 @@ function producerSendStringTest() returns error? {
     dependsOn: ["producerSendStringTest"]
 }
 function producerCloseTest() returns error? {
-    Producer closeTestProducer = new (producerConfiguration);
+    Producer closeTestProducer = check new (producerConfiguration);
     string message = "Test Message";
     var result = closeTestProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
