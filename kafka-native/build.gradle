@@ -29,8 +29,8 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}"
-    compile group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}"
     compile group: 'org.apache.avro', name: 'avro', version: "${avroVersion}"
+    compile group: 'org.slf4j', name: 'slf4j-api', version:{slf4jVersion}
 }
 
 checkstyle {
