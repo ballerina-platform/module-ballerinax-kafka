@@ -67,7 +67,7 @@ public class KafkaConstants {
     public static final BString CONSUMER_CONFIG_FIELD_NAME = StringUtils.fromString("consumerConfig");
     public static final BString PRODUCER_CONFIG_FIELD_NAME = StringUtils.fromString("producerConfig");
 
-    public static final String KAFKA_RESOURCE_ON_MESSAGE = "onMessage";
+    public static final String KAFKA_RESOURCE_ON_RECORD = "onConsumerRecord";
 
     public static final BString ADDITIONAL_PROPERTIES_MAP_FIELD = StringUtils.fromString("properties");
 

@@ -27,6 +27,6 @@ public type SecurityProtocol PROTOCOL_PLAINTEXT|PROTOCOL_SASL_PLAINTEXT|PROTOCOL
 
 # The Kafka service type
 public type Service service object {
-    remote function onMessage(Caller caller, ConsumerRecord[] records);
+    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records);
     // To be completed when support for optional params in remote functions is available in lang
 };

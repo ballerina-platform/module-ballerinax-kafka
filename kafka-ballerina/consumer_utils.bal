@@ -148,7 +148,7 @@ isolated function consumerSubscribe(Consumer|Listener consumer, string[] topics)
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
 } external;
 
-isolated function consumerSubscribeToPattern(Consumer consumer, string regex) returns ConsumerError? =
+isolated function consumerSubscribeWithPattern(Consumer consumer, string regex) returns ConsumerError? =
 @java:Method {
     name: "subscribeToPattern",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
