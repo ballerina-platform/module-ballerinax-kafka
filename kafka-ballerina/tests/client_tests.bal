@@ -86,7 +86,7 @@ function consumerFunctionsTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: ["consumerFunctionsTest"]
+    dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeUnsubscribeTest() returns error? {
     Consumer consumer = check new ({
@@ -105,7 +105,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: ["consumerFunctionsTest", "consumerServiceTest"]
+    dependsOn: [consumerFunctionsTest, consumerServiceTest]
 }
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new ({
@@ -226,7 +226,7 @@ function producerSendStringTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: ["producerSendStringTest"]
+    dependsOn: [producerSendStringTest]
 }
 function producerCloseTest() returns error? {
     Producer closeTestProducer = check new (producerConfiguration);
