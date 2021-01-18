@@ -31,9 +31,8 @@ ext.stdlibConfigVersion = project.stdlibConfigVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibStringutilsVersion = project.stdlibStringutilsVersion
 ext.stdlibUuidVersion = project.stdlibUuidVersion
-ext.stdlibStringUtilsVersion = project.stdlibStringUtilsVersion
+ext.stdlibRegexVersion = project.stdlibRegexVersion
 ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibTimeVersion = project.stdlibTimeVersion
 ext.stdlibTransactionVersion = project.stdlibTransactionVersion
@@ -101,7 +100,7 @@ allprojects {
         }
 
         maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-stringutils'
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-regex'
             credentials {
                 username System.getenv("packageUser")
                 password System.getenv("packagePAT")
@@ -118,14 +117,6 @@ allprojects {
 
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-uuid'
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
-
-        maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-stringutils'
             credentials {
                 username System.getenv("packageUser")
                 password System.getenv("packagePAT")
@@ -163,9 +154,8 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "org.ballerinalang:log-ballerina:${stdlibLogVersion}"
-        ballerinaStdLibs "org.ballerinalang:stringutils-ballerina:${stdlibStringutilsVersion}"
         ballerinaStdLibs "org.ballerinalang:uuid-ballerina:${stdlibUuidVersion}"
-        ballerinaStdLibs "org.ballerinalang:stringutils-ballerina:${stdlibStringUtilsVersion}"
+        ballerinaStdLibs "org.ballerinalang:regex-ballerina:${stdlibRegexVersion}"
         ballerinaStdLibs "org.ballerinalang:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
         ballerinaStdLibs "org.ballerinalang:transaction-ballerina:${stdlibTransactionVersion}"
