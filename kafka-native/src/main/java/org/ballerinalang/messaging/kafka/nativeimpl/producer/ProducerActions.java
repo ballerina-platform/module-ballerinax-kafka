@@ -79,8 +79,8 @@ public class ProducerActions {
             if (Objects.nonNull(
                     producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {
                 if (!((boolean) producerProperties.get(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG))) {
-                    throw new IllegalStateException("configuration enableIdempotence must be set to true to enable " +
-                                                            "transactional producer");
+                    return createKafkaError("configuration enableIdempotence must be set to true to enable " +
+                                                            "transactional producer", PRODUCER_ERROR);
                 }
                 createKafkaProducer(producerProperties, producerObject);
                 KafkaTransactionContext transactionContext = createKafkaTransactionContext(producerObject);

@@ -256,7 +256,7 @@ isolated function sendCustomValues(Producer producer, anydata value, string topi
     }
 }
 
-isolated function producerInit(Producer producer) returns error? =
+isolated function producerInit(Producer producer) returns ProducerError? =
 @java:Method {
     name: "init",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"

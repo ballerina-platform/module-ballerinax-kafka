@@ -25,18 +25,18 @@ public type AvroError distinct error;
 
 isolated function getValueTypeMismatchError(string expectedType) returns ProducerError {
     string message = "Invalid type found for Kafka value. Expected value type: '" + expectedType + "'.";
-    return ProducerError(message);
+    return error ProducerError(message);
 }
 
 isolated function getKeyTypeMismatchError(string expectedType) returns ProducerError {
     string message = "Invalid type found for Kafka key. Expected key type: '" + expectedType + "'.";
-    return ProducerError(message);
+    return error ProducerError(message);
 }
 
 isolated function createProducerError(string message) returns ProducerError {
-    return ProducerError(message);
+    return error ProducerError(message);
 }
 
 isolated function createConsumerError(string message) returns ConsumerError {
-    return ConsumerError(message);
+    return error ConsumerError(message);
 }

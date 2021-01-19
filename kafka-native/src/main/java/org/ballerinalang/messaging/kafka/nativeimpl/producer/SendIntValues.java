@@ -67,8 +67,8 @@ public class SendIntValues extends Send {
                                               Object partition, Object timestamp) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
-        ProducerRecord<Long, Long> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue, timestampValue,
-                                                                      key, value);
+        ProducerRecord<Long, Long> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
+                  timestampValue, key, value);
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 

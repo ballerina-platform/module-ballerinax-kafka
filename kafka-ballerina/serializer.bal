@@ -14,15 +14,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/file;
-
-const TEST_PATH = "src/kafka/tests/";
-
-function getAbsoluteTestPath(string subdirectoryPath) returns string|error {
-    var relativePathResult = file:joinPath(TEST_PATH, subdirectoryPath);
-    if (relativePathResult is error) {
-        return relativePathResult;
-    }
-    string relativePath = <string>relativePathResult;
-    return file:getAbsolutePath(relativePath);
-}
+//# Represents a Kafka serializer object. This object can be used to create custom serializers for the Ballerina Kafka
+//# producers.
+//public type Serializer object {
+//    # Closes the serialization process. This function runs after the serialization process is done.
+//    public isolated function close();
+//
+//    # Serializes the provided data. Implement this to serialize any data type and return the `byte[]` value to use in
+//    # the Kafka producer.
+//    #
+//    # + data - Data, which should be serialized
+//    # + return - Serialized `byte[]` value
+//    public isolated function serialize(any data) returns byte[];
+//};

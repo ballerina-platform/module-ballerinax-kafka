@@ -54,7 +54,7 @@ public class KafkaPollCycleFutureListener implements Callback {
      * {@inheritDoc}
      */
     @Override
-    public void notifySuccess() {
+    public void notifySuccess(Object obj) {
         sem.release();
         if (logger.isDebugEnabled()) {
             logger.debug("Ballerina engine has completed resource invocation successfully for service " + serviceId +

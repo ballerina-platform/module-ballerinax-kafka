@@ -14,15 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents a Kafka deserializer object. This object can be used to create custom deserializers for Ballerina Kafka
-# consumers.
-public type Deserializer object {
-    # Closes the deserialization process. This function runs after the deserialization process is done.
-    public isolated function close();
+import ballerina/java;
 
-    # Deserializes the provided data. Implement this to deserialize a `byte[]` and return any data type.
-    #
-    # + data - Data, which should be deserialized
-    # + return - The deserialized value
-    public isolated function deserialize(byte[] data) returns any;
-};
+function init() {
+    setModule();
+}
+
+function setModule() = @java:Method {
+    'class: "org.ballerinalang.messaging.kafka.utils.ModuleUtils"
+} external;

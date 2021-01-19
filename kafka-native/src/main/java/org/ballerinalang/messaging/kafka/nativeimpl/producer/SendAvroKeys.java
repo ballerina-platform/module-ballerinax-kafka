@@ -79,7 +79,7 @@ public class SendAvroKeys {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<GenericRecord, Double> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                                                                                 timestampValue, genericRecord, value);
+                                                                              timestampValue, genericRecord, value);
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
@@ -105,8 +105,8 @@ public class SendAvroKeys {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<GenericRecord, GenericRecord> kafkaRecord = new ProducerRecord<>(topic.getValue(),
-                                                                                        partitionValue, timestampValue,
-                                                                                        keyRecord, valueRecord);
+                                                                                    partitionValue, timestampValue,
+                                                                                    keyRecord, valueRecord);
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
@@ -117,7 +117,7 @@ public class SendAvroKeys {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<GenericRecord, Object> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                                                                                 timestampValue, genericRecord, value);
+                                                                              timestampValue, genericRecord, value);
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 

@@ -36,6 +36,7 @@ import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -56,6 +57,9 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 
 /**
  * Utility class for Kafka Connector Implementation.
@@ -66,35 +70,28 @@ public class KafkaUtils {
     }
 
     public static Object[] getResourceParameters(BObject service, BObject listener,
-                                                 ConsumerRecords records, String groupId) {
+                                                 ConsumerRecords records) {
 
         BArray consumerRecordsArray = ValueCreator.createArrayValue(
                 TypeCreator.createArrayType(getConsumerRecord().getType()));
         String keyType = listener.getStringValue(KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
         String valueType = listener.getStringValue(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
 
-        if (service.getType().getAttachedFunctions()[0].getParameterTypes().length == 2) {
+        if (service.getType().getMethods()[0].getParameterTypes().length == 2) {
             for (Object record : records) {
                 BMap<BString, Object> consumerRecord = populateConsumerRecord(
                         (ConsumerRecord) record, keyType, valueType);
                 consumerRecordsArray.append(consumerRecord);
             }
-            return new Object[]{listener, true, consumerRecordsArray, true, null, false, null, false};
+            BObject caller =
+                    ValueCreator.createObjectValue(ModuleUtils.getModule(), KafkaConstants.CALLER_STRUCT_NAME);
+            KafkaConsumer consumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
+            Properties consumerProperties = (Properties) listener.getNativeData(NATIVE_CONSUMER_CONFIG);
+            caller.addNativeData(NATIVE_CONSUMER, consumer);
+            caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
+            return new Object[]{caller, true, consumerRecordsArray, true};
         } else {
-            BArray partitionOffsetsArray =
-                    ValueCreator.createArrayValue(TypeCreator.createArrayType(getPartitionOffsetRecord().getType()));
-            for (Object record : records) {
-                ConsumerRecord kafkaRecord = (ConsumerRecord) record;
-                BMap<BString, Object> consumerRecord = populateConsumerRecord(kafkaRecord, keyType, valueType);
-                BMap<BString, Object> topicPartition = populateTopicPartitionRecord(kafkaRecord.topic(),
-                                                                                       kafkaRecord.partition());
-                BMap<BString, Object> partitionOffset = populatePartitionOffsetRecord(topicPartition,
-                                                                                         kafkaRecord.offset());
-                consumerRecordsArray.append(consumerRecord);
-                partitionOffsetsArray.append(partitionOffset);
-            }
-            return new Object[]{listener, true, consumerRecordsArray, true, partitionOffsetsArray, true,
-                    StringUtils.fromString(groupId), true};
+            throw KafkaUtils.createKafkaError("Invalid remote function signature", CONSUMER_ERROR);
         }
     }
 
@@ -556,9 +553,14 @@ public class KafkaUtils {
         }
 
         Object value = getBValues(record.value(), valueType);
-        return ValueCreator.createRecordValue(getConsumerRecord(), key, value, record.offset(), record.partition(),
-                                record.timestamp(),
-                            record.topic());
+        Object[] fields = new Object[4];
+        fields[0] = key;
+        fields[1] = value;
+        fields[2] = record.timestamp();
+        BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
+                                                                              record.partition());
+        fields[3] = ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, record.offset());
+        return ValueCreator.createRecordValue(getConsumerRecord(), fields);
     }
 
     private static Object getBValues(Object value, String type) {
@@ -566,32 +568,32 @@ public class KafkaUtils {
             if (value instanceof byte[]) {
                 return ValueCreator.createArrayValue((byte[]) value);
             } else {
-                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: byte[]");
+                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: byte[]");
             }
         } else if (KafkaConstants.SERDES_STRING.equals(type)) {
             if (value instanceof String) {
                 return StringUtils.fromString((String) value);
             } else {
-                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: string");
+                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: string");
             }
         } else if (KafkaConstants.SERDES_INT.equals(type)) {
             if (value instanceof Long) {
                 return value;
             } else {
-                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: int");
+                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: int");
             }
         } else if (KafkaConstants.SERDES_FLOAT.equals(type)) {
             if (value instanceof Double) {
                 return value;
             } else {
-                throw createKafkaError(KafkaConstants.CONSUMER_ERROR, "Invalid type - expected: float");
+                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: float");
             }
         } else if (KafkaConstants.SERDES_AVRO.equals(type)) {
             return handleAvroConsumer(value);
         } else if (KafkaConstants.SERDES_CUSTOM.equals(type)) {
             return value;
         }
-        throw createKafkaError("Unexpected type found for consumer record", KafkaConstants.CONSUMER_ERROR);
+        throw createKafkaError("Unexpected type found for consumer record", CONSUMER_ERROR);
     }
 
     public static BMap<BString, Object> getConsumerRecord() {
@@ -611,17 +613,17 @@ public class KafkaUtils {
     }
 
     public static BError createKafkaError(String message, String typeId) {
-        return ErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+        return ErrorCreator.createDistinctError(typeId, ModuleUtils.getModule(),
                                                 StringUtils.fromString(message));
     }
 
     public static BError createKafkaError(String message, String typeId, BError cause) {
-        return ErrorCreator.createDistinctError(typeId, KafkaConstants.KAFKA_PACKAGE_ID,
+        return ErrorCreator.createDistinctError(typeId, ModuleUtils.getModule(),
                                                  StringUtils.fromString(message), cause);
     }
 
     public static BMap<BString, Object> createKafkaRecord(String recordName) {
-        return ValueCreator.createRecordValue(KafkaConstants.KAFKA_PACKAGE_ID, recordName);
+        return ValueCreator.createRecordValue(ModuleUtils.getModule(), recordName);
     }
 
     public static BArray getPartitionOffsetArrayFromOffsetMap(Map<TopicPartition, Long> offsetMap) {
@@ -790,7 +792,7 @@ public class KafkaUtils {
         final BError[] errorValue = new BError[1];
         Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new Callback() {
             @Override
-            public void notifySuccess() {
+            public void notifySuccess(Object obj) {
                 semaphore.release();
             }
 

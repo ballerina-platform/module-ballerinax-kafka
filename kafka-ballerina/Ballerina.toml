@@ -1,42 +1,36 @@
-[project]
-org-name = "ballerinax"
+[package]
+org = "ballerinax"
+name = "kafka"
 version = "@toml.version@"
 
-[dependencies]
-"ballerina/config" = "@stdlib.config.version@"
-"ballerina/file" = "@stdlib.file.version@"
-"ballerina/io" = "@stdlib.io.version@"
-"ballerina/log" = "@stdlib.log.version@"
-"ballerina/runtime" = "@stdlib.runtime.version@"
-"ballerina/stringutils" = "@stdlib.stringutils.version@"
-"ballerina/system" = "@stdlib.system.version@"
-"ballerina/time" = "@stdlib.time.version@"
+[[dependency]]
+org = "ballerina"
+name = "uuid"
+version = "@stdlib.uuid.version@"
 
-[platform]
-target = "java11"
+[[platform.java11.dependency]]
+path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
+groupId = "org.ballerinalang.messaging.kafka"
+artifactId = "kafka"
+version = "@project.version@"
 
-    [[platform.libraries]]
-    artifactId = "kafka"
-    version = "@project.version@"
-    path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
-    groupId = "org.ballerinalang.messaging.kafka"
-    modules = ["kafka"]
 
-    [[platform.libraries]]
-    artifactId = "kafka-clients"
-    version = "@kafka.version@"
-    path = "./lib/kafka-clients-@kafka.version@.jar"
-    groupId = "org.apache.kafka"
+[[platform.java11.dependency]]
+path = "./lib/kafka-clients-@kafka.version@.jar"
+groupId = "org.apache.kafka"
+artifactId = "kafka-clients"
+version = "@kafka.version@"
 
-    [[platform.libraries]]
-    artifactId = "kafka_2.12"
-    version = "@kafka.version@"
-    path = "./lib/kafka_2.12-@kafka.version@.jar"
-    groupId = "org.apache.kafka"
 
-    [[platform.libraries]]
-    artifactId = "avro"
-    version = "1.9.2"
-    path = "./lib/avro-1.9.2.jar"
-    groupId = "org.apache.avro"
-    scope = "compile"
+[[platform.java11.dependency]]
+path = "./lib/kafka_2.12-@kafka.version@.jar"
+groupId = "org.apache.kafka"
+artifactId = "kafka_2.12"
+version = "@kafka.version@"
+
+
+[[platform.java11.dependency]]
+path = "./lib/avro-1.9.2.jar"
+groupId = "org.apache.avro"
+artifactId = "avro"
+version = "1.9.2"

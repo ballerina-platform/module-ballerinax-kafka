@@ -19,6 +19,7 @@
 package org.ballerinalang.messaging.kafka.serdes;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
@@ -26,13 +27,12 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
+import org.ballerinalang.messaging.kafka.utils.ModuleUtils;
 
 import java.util.Map;
 import java.util.Objects;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.BALLERINA_STRAND;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_CLOSE_METADATA;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ON_DESERIALIZE_METADATA;
 
 /**
  * Represents a deserializer class for ballerina kafka module.
@@ -60,14 +60,22 @@ public class BallerinaKafkaDeserializer implements Deserializer {
     public Object deserialize(String topic, byte[] data) {
         BArray bData = ValueCreator.createArrayValue(data);
         Object[] args = new Object[]{bData, false};
+        StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                                                                    ModuleUtils.getModule().getName(),
+                                                                    ModuleUtils.getModule().getVersion(),
+                                                                    KafkaConstants.FUNCTION_DESERIALIZE);
         return KafkaUtils.invokeMethodSync(runtime, this.deserializerObject, KafkaConstants.FUNCTION_DESERIALIZE,
-                                           null, ON_DESERIALIZE_METADATA, this.timeout, args);
+                                           null, metadata, this.timeout, args);
     }
 
     @Override
     public void close() {
+    StrandMetadata metadata =
+            new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                               ModuleUtils.getModule().getName(),
+                               ModuleUtils.getModule().getVersion(), KafkaConstants.FUNCTION_CLOSE);
         KafkaUtils.invokeMethodSync(runtime, this.deserializerObject, KafkaConstants.FUNCTION_CLOSE,
-                                    null, ON_CLOSE_METADATA, this.timeout);
+                                    null, metadata, this.timeout);
     }
 
 }
