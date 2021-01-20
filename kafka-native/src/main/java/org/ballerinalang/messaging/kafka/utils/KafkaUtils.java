@@ -119,6 +119,8 @@ public class KafkaUtils {
 
         addDeserializerConfigs(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, properties);
         addDeserializerConfigs(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, properties);
+        // TODO: Disabled as the custom SerDes support is to be revisited and improved.
+        //  Fix once the design for that is completed.
 //        addCustomDeserializer(KafkaConstants.CONSUMER_KEY_DESERIALIZER_CONFIG,
 //                              KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG, properties,
 //                              configurations);
@@ -228,6 +230,8 @@ public class KafkaUtils {
 
         addSerializerTypeConfigs(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, properties);
         addSerializerTypeConfigs(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, properties);
+        // TODO: Disabled as the custom SerDes support is to be revisited and improved.
+        //  Fix once the design for that is completed.
 //        addCustomKeySerializer(properties, configurations);
 //        addCustomValueSerializer(properties, configurations);
 
