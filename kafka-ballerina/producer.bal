@@ -32,8 +32,8 @@ public client class Producer {
     # + return - A `kafka:ProducerError` if closing the producer failed or else '()'
     public isolated function init(ProducerConfiguration config) returns ProducerError? {
         self.producerConfig = config;
-        self.keySerializerType = config.keySerializerType;
-        self.valueSerializerType = config.valueSerializerType;
+        self.keySerializerType = SER_BYTE_ARRAY;
+        self.valueSerializerType = SER_BYTE_ARRAY;
 
         check producerInit(self);
     }

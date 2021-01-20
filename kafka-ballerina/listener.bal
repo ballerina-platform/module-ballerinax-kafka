@@ -30,8 +30,8 @@ public client class Listener {
     # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
     public isolated function init (ConsumerConfiguration config) returns ConsumerError? {
         self.consumerConfig = config;
-        self.keyDeserializerType = config.keyDeserializerType;
-        self.valueDeserializerType = config.valueDeserializerType;
+        self.keyDeserializerType = DES_BYTE_ARRAY;
+        self.valueDeserializerType = DES_BYTE_ARRAY;
         check connect(self);
 
         string[]? topics = config?.topics;

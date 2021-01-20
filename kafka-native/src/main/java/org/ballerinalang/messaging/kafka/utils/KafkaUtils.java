@@ -74,8 +74,8 @@ public class KafkaUtils {
 
         BArray consumerRecordsArray = ValueCreator.createArrayValue(
                 TypeCreator.createArrayType(getConsumerRecord().getType()));
-        String keyType = listener.getStringValue(KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
-        String valueType = listener.getStringValue(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
+        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
+        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
 
         if (service.getType().getMethods()[0].getParameterTypes().length == 2) {
             for (Object record : records) {
@@ -117,16 +117,16 @@ public class KafkaUtils {
         addStringParamIfPresent(ConsumerConfig.ISOLATION_LEVEL_CONFIG, configurations, properties,
                                 KafkaConstants.CONSUMER_ISOLATION_LEVEL_CONFIG);
 
-        addDeserializerConfigs(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, configurations, properties,
-                               KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG);
-        addDeserializerConfigs(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, configurations, properties,
-                               KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG);
-        addCustomDeserializer(KafkaConstants.CONSUMER_KEY_DESERIALIZER_CONFIG,
-                              KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG, properties,
-                              configurations);
-        addCustomDeserializer(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG,
-                              KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG, properties,
-                              configurations);
+        addDeserializerConfigs(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, properties);
+        addDeserializerConfigs(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, properties);
+        // TODO: Disabled as the custom SerDes support is to be revisited and improved.
+        //  Fix once the design for that is completed.
+//        addCustomDeserializer(KafkaConstants.CONSUMER_KEY_DESERIALIZER_CONFIG,
+//                              KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG, properties,
+//                              configurations);
+//        addCustomDeserializer(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG,
+//                              KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG, properties,
+//                              configurations);
         addStringParamIfPresent(KafkaConstants.SCHEMA_REGISTRY_URL, configurations, properties,
                                 KafkaConstants.CONSUMER_SCHEMA_REGISTRY_URL);
 
@@ -194,11 +194,7 @@ public class KafkaUtils {
         if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
             processSslProperties(configurations, properties);
         }
-        if (KafkaConstants.SERDES_AVRO.equals(configurations.get(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG)) ||
-                KafkaConstants.SERDES_AVRO.equals(
-                        configurations.get(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG))) {
-            properties.put(KafkaConstants.SPECIFIC_AVRO_READER, false);
-        }
+
         if (Objects.nonNull(configurations.get(KafkaConstants.AUTHENTICATION_CONFIGURATION))) {
             processSaslProperties(configurations, properties);
         }
@@ -232,12 +228,12 @@ public class KafkaUtils {
         addStringParamIfPresent(KafkaConstants.SCHEMA_REGISTRY_URL, configurations, properties,
                                 KafkaConstants.PRODUCER_SCHEMA_REGISTRY_URL);
 
-        addSerializerTypeConfigs(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, configurations,
-                                 properties, KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG);
-        addSerializerTypeConfigs(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, configurations,
-                                 properties, KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG);
-        addCustomKeySerializer(properties, configurations);
-        addCustomValueSerializer(properties, configurations);
+        addSerializerTypeConfigs(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, properties);
+        addSerializerTypeConfigs(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, properties);
+        // TODO: Disabled as the custom SerDes support is to be revisited and improved.
+        //  Fix once the design for that is completed.
+//        addCustomKeySerializer(properties, configurations);
+//        addCustomValueSerializer(properties, configurations);
 
         addIntParamIfPresent(ProducerConfig.BUFFER_MEMORY_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_BUFFER_MEMORY_CONFIG);
@@ -365,91 +361,82 @@ public class KafkaUtils {
         }
     }
 
-    private static void addSerializerTypeConfigs(String paramName, BMap<BString, Object> configs,
-                                                 Properties configParams, BString key) {
-        if (Objects.nonNull(configs.get(key))) {
-            String value = getSerializerType(configs, key);
-            configParams.put(paramName, value);
-        }
+    private static void addSerializerTypeConfigs(String paramName, Properties configParams) {
+        configParams.put(paramName, KafkaConstants.BYTE_ARRAY_SERIALIZER);
     }
 
-    private static void addDeserializerConfigs(String paramName, BMap<BString, Object> configs,
-                                               Properties configParams, BString key) {
-        if (Objects.nonNull(configs.get(key))) {
-            String value = getDeserializerValue(configs, key);
-            configParams.put(paramName, value);
-        }
+    private static void addDeserializerConfigs(String paramName, Properties configParams) {
+            configParams.put(paramName, KafkaConstants.BYTE_ARRAY_DESERIALIZER);
     }
 
-    private static void addCustomKeySerializer(Properties properties, BMap<BString, Object> configurations) {
-        Object serializer = configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG);
-        String serializerType =
-                configurations.getStringValue(KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG).getValue();
-        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
-            properties.put(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG.getValue(),
-                           configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG));
-        }
-    }
+    // TODO: Disabled as the SerDes support is to be revisited and improved. Fix once the design for that is completed.
+//    private static void addCustomKeySerializer(Properties properties, BMap<BString, Object> configurations) {
+//        Object serializer = configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG);
+//        String serializerType =
+//                configurations.getStringValue(KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG).getValue();
+//        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
+//            properties.put(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG.getValue(),
+//                           configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG));
+//        }
+//    }
+//
+//    private static void addCustomValueSerializer(Properties properties, BMap<BString, Object> configurations) {
+//        Object serializer = configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG);
+//        String serializerType =
+//                configurations.getStringValue(KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG).getValue();
+//        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
+//            properties.put(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG.getValue(),
+//                           configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG));
+//        }
+//    }
 
-    private static void addCustomValueSerializer(Properties properties, BMap<BString, Object> configurations) {
-        Object serializer = configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG);
-        String serializerType =
-                configurations.getStringValue(KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG).getValue();
-        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
-            properties.put(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG.getValue(),
-                           configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG));
-        }
-    }
+//    private static void addCustomDeserializer(BString configParam, BString typeConfig, Properties properties,
+//                                              BMap<BString, Object> configurations) {
+//        Object deserializer = configurations.get(configParam);
+//        String deserializerType = configurations.getStringValue(typeConfig).getValue();
+//        if (Objects.nonNull(deserializer) && KafkaConstants.SERDES_CUSTOM.equals(deserializerType)) {
+//            properties.put(configParam.getValue(), configurations.get(configParam));
+//            properties.put(KafkaConstants.BALLERINA_STRAND, Runtime.getCurrentRuntime());
+//        }
+//    }
 
-    private static void addCustomDeserializer(BString configParam, BString typeConfig, Properties properties,
-                                              BMap<BString, Object> configurations) {
-        Object deserializer = configurations.get(configParam);
-        String deserializerType = configurations.getStringValue(typeConfig).getValue();
-        if (Objects.nonNull(deserializer) && KafkaConstants.SERDES_CUSTOM.equals(deserializerType)) {
-            properties.put(configParam.getValue(), configurations.get(configParam));
-            properties.put(KafkaConstants.BALLERINA_STRAND, Runtime.getCurrentRuntime());
-        }
-    }
-
-    private static String getSerializerType(BMap<BString, Object> configs, BString key) {
-        String value = configs.get(key).toString();
-        switch (value) {
-            case KafkaConstants.SERDES_BYTE_ARRAY:
-                return KafkaConstants.BYTE_ARRAY_SERIALIZER;
-            case KafkaConstants.SERDES_STRING:
-                return KafkaConstants.STRING_SERIALIZER;
-            case KafkaConstants.SERDES_INT:
-                return KafkaConstants.INT_SERIALIZER;
-            case KafkaConstants.SERDES_FLOAT:
-                return KafkaConstants.FLOAT_SERIALIZER;
-            case KafkaConstants.SERDES_AVRO:
-                return KafkaConstants.AVRO_SERIALIZER;
-            case KafkaConstants.SERDES_CUSTOM:
-                return KafkaConstants.CUSTOM_SERIALIZER;
-            default:
-                return value;
-        }
-    }
-
-    private static String getDeserializerValue(BMap<BString, Object> configs, BString key) {
-        String value = configs.get(key).toString();
-        switch (value) {
-            case KafkaConstants.SERDES_BYTE_ARRAY:
-                return KafkaConstants.BYTE_ARRAY_DESERIALIZER;
-            case KafkaConstants.SERDES_STRING:
-                return KafkaConstants.STRING_DESERIALIZER;
-            case KafkaConstants.SERDES_INT:
-                return KafkaConstants.INT_DESERIALIZER;
-            case KafkaConstants.SERDES_FLOAT:
-                return KafkaConstants.FLOAT_DESERIALIZER;
-            case KafkaConstants.SERDES_AVRO:
-                return KafkaConstants.AVRO_DESERIALIZER;
-            case KafkaConstants.SERDES_CUSTOM:
-                return KafkaConstants.CUSTOM_DESERIALIZER;
-            default:
-                return value;
-        }
-    }
+//    private static String getSerializerType(String value) {
+//        switch (value) {
+//            case KafkaConstants.SERDES_BYTE_ARRAY:
+//                return KafkaConstants.BYTE_ARRAY_SERIALIZER;
+//            case KafkaConstants.SERDES_STRING:
+//                return KafkaConstants.STRING_SERIALIZER;
+//            case KafkaConstants.SERDES_INT:
+//                return KafkaConstants.INT_SERIALIZER;
+//            case KafkaConstants.SERDES_FLOAT:
+//                return KafkaConstants.FLOAT_SERIALIZER;
+//            case KafkaConstants.SERDES_AVRO:
+//                return KafkaConstants.AVRO_SERIALIZER;
+//            case KafkaConstants.SERDES_CUSTOM:
+//                return KafkaConstants.CUSTOM_SERIALIZER;
+//            default:
+//                return value;
+//        }
+//    }
+//
+//    private static String getDeserializerValue(String value) {
+//        switch (value) {
+//            case KafkaConstants.SERDES_BYTE_ARRAY:
+//                return KafkaConstants.BYTE_ARRAY_DESERIALIZER;
+//            case KafkaConstants.SERDES_STRING:
+//                return KafkaConstants.STRING_DESERIALIZER;
+//            case KafkaConstants.SERDES_INT:
+//                return KafkaConstants.INT_DESERIALIZER;
+//            case KafkaConstants.SERDES_FLOAT:
+//                return KafkaConstants.FLOAT_DESERIALIZER;
+//            case KafkaConstants.SERDES_AVRO:
+//                return KafkaConstants.AVRO_DESERIALIZER;
+//            case KafkaConstants.SERDES_CUSTOM:
+//                return KafkaConstants.CUSTOM_DESERIALIZER;
+//            default:
+//                return value;
+//        }
+//    }
 
     private static void addStringParamIfPresent(String paramName,
                                                 BMap<BString, Object> configs,
