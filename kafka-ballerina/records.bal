@@ -126,8 +126,6 @@ public type AuthenticationConfiguration record {|
 # + clientId - Identifier to be used for server side logging
 # + interceptorClasses - Interceptor classes to be used before sending records
 # + isolationLevel - Transactional message reading method
-# + keyDeserializerType - Deserializer used for the Kafka record key. This should be a `kafka:DeserializerType`
-# + valueDeserializerType - Deserializer used for the Kafka record value. This should be a `kafka:DeserializerType`
 # + schemaRegistryUrl - Avro schema registry url. Use this field to specify schema registry url, if Avro serializer
 #                       is used
 # + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
@@ -177,8 +175,6 @@ public type ConsumerConfiguration record {|
     string interceptorClasses?;
     IsolationLevel isolationLevel?;
 
-    DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
-    DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
     string schemaRegistryUrl?;
 
     map<string> additionalProperties?;
@@ -262,10 +258,6 @@ public type AvroGenericRecord record {
 # + partitionerClass - Partitioner class to be used to select the partition to which the message is sent
 # + interceptorClasses - Interceptor classes to be used before sending records
 # + transactionalId - Transactional ID to be used in transactional delivery
-# + keySerializerType - Serializer used for the Kafka record key. This can be either `kafka:SerializerType` or a
-#                       user-defined serializer
-# + valueSerializerType - Serializer used for the Kafka record value. This can be either `kafka:SerializerType` or a
-#                         user-defined serializer
 # + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro
 #                       serializer is used
 # + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
@@ -304,8 +296,6 @@ public type ProducerConfiguration record {|
     string interceptorClasses?;
     string transactionalId?;
 
-    SerializerType valueSerializerType = SER_BYTE_ARRAY;
-    SerializerType keySerializerType = SER_BYTE_ARRAY;
     string schemaRegistryUrl?;
 
     map<string> additionalProperties?;

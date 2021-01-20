@@ -37,7 +37,6 @@ ProducerConfiguration producerConfiguration = {
     acks: ACKS_ALL,
     maxBlockInMillis: 6000,
     requestTimeoutInMillis: 2000,
-    valueSerializerType: SER_BYTE_ARRAY,
     retryCount: 3
 };
 Producer producer = checkpanic new (producerConfiguration);
@@ -50,7 +49,6 @@ function consumerServiceTest() returns error? {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-service-test-group",
-        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-1"
     };
     Listener consumer = check new (consumerConfiguration);
@@ -69,7 +67,6 @@ function consumerFunctionsTest() returns error? {
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
-        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-2"
     };
     Consumer consumer = check new (consumerConfiguration);
@@ -132,7 +129,6 @@ function manualCommitTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-5",
         autoCommit: false
     };
@@ -177,7 +173,6 @@ function nonExistingTopicPartitionTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-6",
         autoCommit: false
     };
@@ -210,7 +205,6 @@ function producerSendStringTest() returns error? {
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
-        valueDeserializerType: DES_BYTE_ARRAY,
         clientId: "test-consumer-7"
     };
     Consumer stringConsumer = check new (consumerConfiguration);

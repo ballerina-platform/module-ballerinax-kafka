@@ -33,12 +33,11 @@ import org.apache.kafka.common.KafkaException;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
+import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 
 import java.time.Duration;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getConsumerRecord;
@@ -60,8 +59,8 @@ public class Poll {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
-        String keyType = consumerObject.getStringValue(CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG).getValue();
-        String valueType = consumerObject.getStringValue(CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG).getValue();
+        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
+        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
         Duration duration = Duration.ofMillis(timeout);
         BArray consumerRecordsArray = ValueCreator.createArrayValue(
                 TypeCreator.createArrayType(getConsumerRecord().getType()));

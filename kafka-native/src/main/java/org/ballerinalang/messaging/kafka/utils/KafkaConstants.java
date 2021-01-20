@@ -95,9 +95,6 @@ public class KafkaConstants {
     public static final BString CONSUMER_CLIENT_ID_CONFIG = StringUtils.fromString("clientId");
     public static final BString CONSUMER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
     public static final BString CONSUMER_ISOLATION_LEVEL_CONFIG = StringUtils.fromString("isolationLevel");
-    public static final BString CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG = StringUtils.fromString("keyDeserializerType");
-    public static final BString CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG = StringUtils.fromString(
-            "valueDeserializerType");
     public static final BString CONSUMER_KEY_DESERIALIZER_CONFIG = StringUtils.fromString("keyDeserializer");
     public static final BString CONSUMER_VALUE_DESERIALIZER_CONFIG = StringUtils.fromString("valueDeserializer");
     public static final String BALLERINA_STRAND = "ballerina.strand";
@@ -148,8 +145,6 @@ public class KafkaConstants {
     public static final BString PRODUCER_PARTITIONER_CLASS_CONFIG = StringUtils.fromString("partitionerClass");
     public static final BString PRODUCER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
     public static final BString PRODUCER_TRANSACTIONAL_ID_CONFIG = StringUtils.fromString("transactionalId");
-    public static final BString PRODUCER_KEY_SERIALIZER_TYPE_CONFIG = StringUtils.fromString("keySerializerType");
-    public static final BString PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG = StringUtils.fromString("valueSerializerType");
     public static final BString PRODUCER_KEY_SERIALIZER_CONFIG = StringUtils.fromString("keySerializer");
     public static final BString PRODUCER_VALUE_SERIALIZER_CONFIG = StringUtils.fromString("valueSerializer");
     public static final BString PRODUCER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
@@ -254,4 +249,5 @@ public class KafkaConstants {
     public static final String CLIENT_ID = "client.id";
     public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
     public static final String SPECIFIC_AVRO_READER = "specific.avro.reader";
+    public static final String DEFAULT_SER_DES_TYPE = "BYTE_ARRAY";
 }
