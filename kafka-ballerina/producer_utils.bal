@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/java;
+import ballerina/jballerina.java;
 
 isolated function sendStringValues(Producer producer, string value, string topic, anydata? key, int? partition, int? timestamp,
     string keySerializerType) returns ProducerError? {
