@@ -27,7 +27,6 @@ ext.kafkaVersion = project.kafkaVersion
 ext.awaitalityVersion = "3.1.6"
 ext.avroVersion = "1.9.2"
 ext.puppycrawlCheckstyleVersion = "8.18"
-ext.stdlibConfigVersion = project.stdlibConfigVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
@@ -61,14 +60,6 @@ allprojects {
 
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/ballerina-lang'
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
-
-        maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-config'
             credentials {
                 username System.getenv("packageUser")
                 password System.getenv("packagePAT")
@@ -150,7 +141,6 @@ subprojects {
 
     dependencies {
         /* Standard libraries */
-        ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "org.ballerinalang:log-ballerina:${stdlibLogVersion}"
