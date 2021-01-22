@@ -1,0 +1,4 @@
+[[dependency]]
+org = "ballerina"
+name = "uuid"
+version = "@stdlib.uuid.version@"

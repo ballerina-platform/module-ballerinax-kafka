@@ -3,11 +3,6 @@ org = "ballerinax"
 name = "kafka"
 version = "@toml.version@"
 
-[[dependency]]
-org = "ballerina"
-name = "uuid"
-version = "@stdlib.uuid.version@"
-
 [[platform.java11.dependency]]
 path = "../kafka-native/build/libs/kafka-native-@project.version@.jar"
 groupId = "org.ballerinalang.messaging.kafka"
