@@ -229,7 +229,7 @@ task ballerinaBuild {
 
     def testParams = "--skip-tests"
     gradle.taskGraph.whenReady { graph ->
-        if (graph.hasTask(':kafka-ballerina:build')) {
+        if (graph.hasTask(':kafka-ballerina:build') || graph.hasTask(':kafka-ballerina:publish')) {
             ballerinaTest.enabled = false
         }
         if (graph.hasTask(':kafka-ballerina:test')) {
