@@ -101,6 +101,7 @@ def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def tomlVersion = project.version.split("-")[0]
+def artifactCodeCoverageReport = file("$project.projectDir/target/cache/tests_cache/coverage/ballerina.exec")
 def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
 def originalConfig = ballerinaConfigFile.text
 def originalDependencies = ballerinaDependencyFile.text
@@ -174,25 +175,43 @@ task stopKafkaServer() {
     }
 }
 
+def groupParams = ""
+def disableGroups = ""
+def debugParams = ""
+def balJavaDebugParam = ""
+
+task initializeVariables {
+    if (project.hasProperty("groups")) {
+        groupParams = "--groups ${project.findProperty("groups")}"
+    }
+    if (project.hasProperty("disable")) {
+        disableGroups = "--disable-groups ${project.findProperty("disable")}"
+    }
+    if (project.hasProperty("debug")) {
+        debugParams = "--debug ${project.findProperty("debug")}"
+    }
+    if (project.hasProperty("balJavaDebug")) {
+        balJavaDebugParam = "BAL_JAVA_DEBUG=${project.findProperty("balJavaDebug")}"
+    }
+}
+
 task ballerinaTest {
     dependsOn(copyStdlibs)
     dependsOn(":kafka-native:build")
     dependsOn(updateTomlVersions)
     finalizedBy(revertTomlFile)
 
-    def debugParams = ""
-    if (project.hasProperty("debug")) {
-        debugParams = "--debug ${project.findProperty("debug")}"
-    }
-
     doLast {
         exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test ${debugParams} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$balJavaDebugParam $distributionBinPath/bal.bat test " +
+                        "--code-coverage --includes=* ${groupParams} ${disableGroups} ${debugParams} && " +
+                        "exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal test ${debugParams}"
+                commandLine 'sh', '-c', "$balJavaDebugParam $distributionBinPath/bal test " +
+                        "--code-coverage --includes=* ${groupParams} ${disableGroups} ${debugParams}"
             }
         }
     }
@@ -203,9 +222,20 @@ test {
 }
 
 task ballerinaBuild {
-    dependsOn(test)
+    dependsOn(":kafka-native:build")
+    dependsOn(initializeVariables)
     inputs.dir file(project.projectDir)
     finalizedBy(revertTomlFile)
+
+    def testParams = "--skip-tests"
+    gradle.taskGraph.whenReady { graph ->
+        if (graph.hasTask(':kafka-ballerina:build')) {
+            ballerinaTest.enabled = false
+        }
+        if (graph.hasTask(':kafka-ballerina:test')) {
+            testParams = "--code-coverage --includes=*"
+        }
+    }
 
     doLast {
 
@@ -214,9 +244,10 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build --skip-tests -c && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$balJavaDebugParam $distributionBinPath/bal.bat build " +
+                        "$testParams ${debugParams} && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal build --skip-tests -c"
+                commandLine 'sh', '-c', "$balJavaDebugParam $distributionBinPath/bal build $testParams ${debugParams}"
             }
         }
         copy {
@@ -271,10 +302,12 @@ task createArtifactZip(type: Zip) {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             artifact source: createArtifactZip, extension: 'zip'
+            artifact source: artifactCodeCoverageReport, classifier: 'jacoco'
         }
     }
+
     repositories {
         maven {
             name = "GitHubPackages"
@@ -287,12 +320,14 @@ publishing {
     }
 }
 
-ballerinaBuild.dependsOn ":kafka-native:build"
 unpackJballerinaTools.dependsOn copyPackingJarsToLib
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlVersions.dependsOn copyStdlibs
-ballerinaTest.dependsOn startKafkaServer
 ballerinaBuild.dependsOn updateTomlVersions
+ballerinaBuild.dependsOn test
+ballerinaBuild.dependsOn startKafkaServer
+ballerinaBuild.finalizedBy stopKafkaServer
+ballerinaTest.dependsOn startKafkaServer
 ballerinaTest.finalizedBy stopKafkaServer
 build.dependsOn ballerinaBuild
