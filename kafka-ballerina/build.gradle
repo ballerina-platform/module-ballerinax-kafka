@@ -196,8 +196,10 @@ task initializeVariables {
     }
 
     gradle.taskGraph.whenReady { graph ->
-        if (graph.hasTask(":${packageName}-ballerina:build") || graph.hasTask(":${packageName}-ballerina:publish")) {
+        if (graph.hasTask(":${packageName}-ballerina:build")) {
             ballerinaTest.enabled = false
+        } else {
+            ballerinaTest.enabled = true
         }
 
         if (graph.hasTask(":${packageName}-ballerina:test")) {
@@ -206,8 +208,9 @@ task initializeVariables {
             testParams = "--skip-tests"
         }
 
-        if (graph.hasTask(":${packageName}-ballerina:publish")) {
+        if (graph.hasTask(":${packageName}-ballerina:publish") || graph.hasTask(":${packageName}-ballerina:publishToMavenLocal")) {
             ballerinaPublish.enabled = true
+            ballerinaTest.enabled = false
         } else {
             ballerinaPublish.enabled = false
         }
@@ -306,7 +309,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/module-${packageOrg}-${packageName}")
+            url = uri("https://maven.pkg.github.com/aashikam/kafka-learning")
             credentials {
                 username = System.getenv("packageUser")
                 password = System.getenv("packagePAT")
@@ -329,6 +332,8 @@ task ballerinaPublish {
                     commandLine 'sh', '-c', "$distributionBinPath/bal push"
                 }
             }
+        } else {
+            println("Central Access Token is Not Present")
         }
     }
 }
@@ -344,5 +349,8 @@ ballerinaBuild.finalizedBy stopKafkaServer
 ballerinaTest.dependsOn startKafkaServer
 ballerinaTest.finalizedBy stopKafkaServer
 build.dependsOn ballerinaBuild
+ballerinaPublish.dependsOn updateTomlVersions
+ballerinaPublish.dependsOn initializeVariables
 ballerinaPublish.dependsOn ballerinaBuild
+ballerinaPublish.finalizedBy revertTomlFile
 publish.dependsOn ballerinaPublish
