@@ -308,6 +308,9 @@ publishing {
 }
 
 task ballerinaPublish {
+    if (project.version.endsWith('-SNAPSHOT')) {
+        return
+    }
     // Pushing module to Ballerina central
     doLast {
         if (ballerinaCentralAccessToken != null) {
