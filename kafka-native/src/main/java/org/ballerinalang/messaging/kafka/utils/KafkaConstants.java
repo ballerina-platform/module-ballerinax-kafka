@@ -53,8 +53,7 @@ public class KafkaConstants {
     public static final BString AVRO_SCHEMA_STRING_NAME = StringUtils.fromString("schemaString");
     public static final String OFFSET_STRUCT_NAME = "PartitionOffset";
 
-    public static final String CONSUMER_ERROR = "ConsumerError";
-    public static final String PRODUCER_ERROR = "ProducerError";
+    public static final String KAFKA_ERROR = "Error";
     public static final String AVRO_ERROR = "AvroError";
     public static final String DETAIL_RECORD_NAME = "Detail";
 

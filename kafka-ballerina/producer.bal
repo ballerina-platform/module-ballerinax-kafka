@@ -29,8 +29,8 @@ public client class Producer {
     # Creates a new Kafka `Producer`.
     #
     # + config - Configurations related to initializing a Kafka `Producer`
-    # + return - A `kafka:ProducerError` if closing the producer failed or else '()'
-    public isolated function init(ProducerConfiguration config) returns ProducerError? {
+    # + return - A `kafka:Error` if closing the producer failed or else '()'
+    public isolated function init(ProducerConfiguration config) returns Error? {
         self.producerConfig = config;
         self.keySerializerType = SER_BYTE_ARRAY;
         self.valueSerializerType = SER_BYTE_ARRAY;
@@ -42,48 +42,48 @@ public client class Producer {
 
     # Closes the producer connection to the external Kafka broker.
     # ```ballerina
-    # kafka:ProducerError? result = producer->close();
+    # kafka:Error? result = producer->close();
     # ```
     #
-    # + return - A `kafka:ProducerError` if closing the producer failed or else '()'
-    isolated remote function close() returns ProducerError? {
+    # + return - A `kafka:Error` if closing the producer failed or else '()'
+    isolated remote function close() returns Error? {
         return producerClose(self);
     }
 
     # Flushes the batch of records already sent to the broker by the producer.
     # ```ballerina
-    # kafka:ProducerError? result = producer->flushRecords();
+    # kafka:Error? result = producer->flushRecords();
     # ```
     #
-    # + return - A `kafka:ProducerError` if records couldn't be flushed or else '()'
-    isolated remote function flushRecords() returns ProducerError? {
+    # + return - A `kafka:Error` if records couldn't be flushed or else '()'
+    isolated remote function flushRecords() returns Error? {
         return producerFlushRecords(self);
     }
 
     # Retrieves the topic partition information for the provided topic.
     # ```ballerina
-    # kafka:TopicPartition[]|kafka:ProducerError result = producer->getTopicPartitions("kafka-topic");
+    # kafka:TopicPartition[]|kafka:Error result = producer->getTopicPartitions("kafka-topic");
     # ```
     #
     # + topic - Topic of which the partition information is given
-    # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:ProducerError` if the operation fails
-    isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|ProducerError {
+    # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:Error` if the operation fails
+    isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error {
         return producerGetTopicPartitions(self, topic);
     }
 
     # Produces records to the Kafka server.
     # ```ballerina
-    # kafka:ProducerError? result = producer->send("Hello World, Ballerina", "kafka-topic");
+    # kafka:Error? result = producer->send("Hello World, Ballerina", "kafka-topic");
     # ```
     #
     # + producerRecord - Record to be produced
-    # + return -  A `kafka:ProducerError` if send action fails to send data or else '()'
-    isolated remote function sendProducerRecord(ProducerRecord producerRecord) returns ProducerError? {
+    # + return -  A `kafka:Error` if send action fails to send data or else '()'
+    isolated remote function sendProducerRecord(ProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
         if (self.valueSerializerType == SER_BYTE_ARRAY) {
             return sendByteArrayValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
             producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
         }
-        panic createProducerError("Invalid value serializer configuration");
+        panic createError("Invalid value serializer configuration");
     }
 }

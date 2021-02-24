@@ -148,8 +148,7 @@ public class SendAvroKeys {
                 populateAvroRecordArray(subRecord, (BArray) value);
                 record.put(key, subRecord);
             } else {
-                throw KafkaUtils.createKafkaError("Invalid data type received for avro data",
-                                                  KafkaConstants.AVRO_ERROR);
+                throw KafkaUtils.createKafkaError("Invalid data type received for avro data");
             }
         }
     }

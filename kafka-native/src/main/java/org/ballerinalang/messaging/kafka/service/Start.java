@@ -25,7 +25,6 @@ import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.io.PrintStream;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVICE_STARTED;
 
@@ -41,7 +40,7 @@ public class Start {
             serverConnector.start();
             console.println(SERVICE_STARTED);
         } catch (KafkaConnectorException e) {
-            return KafkaUtils.createKafkaError(e.getMessage(), CONSUMER_ERROR);
+            return KafkaUtils.createKafkaError(e.getMessage());
         }
         return null;
     }

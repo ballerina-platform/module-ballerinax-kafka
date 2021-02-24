@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DURATION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
@@ -65,7 +64,7 @@ public class Commit {
             kafkaConsumer.commitSync();
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);
-            return createKafkaError("Failed to commit offsets: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to commit offsets: " + e.getMessage());
         }
         return null;
     }
@@ -96,7 +95,7 @@ public class Commit {
             }
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);
-            return createKafkaError("Failed to commit the offset: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to commit the offset: " + e.getMessage());
         }
         return null;
     }
