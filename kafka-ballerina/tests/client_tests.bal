@@ -102,7 +102,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerFunctionsTest, consumerServiceTest]
+    dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
 }
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new ({
