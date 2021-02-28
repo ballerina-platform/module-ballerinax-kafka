@@ -31,9 +31,6 @@ public class KafkaConstants {
 
     public static final int DURATION_UNDEFINED_VALUE = -1;
 
-    public static final String BLOCK_SEPARATOR = ":";
-    public static final String ARRAY_INDICATOR = "[]";
-
     // Kafka log messages
     public static final String SERVICE_STARTED = "[ballerinax/kafka] started kafka listener ";
     public static final String SERVICE_STOPPED = "[ballerinax/kafka] stopped kafka listener ";
@@ -53,14 +50,10 @@ public class KafkaConstants {
     public static final BString AVRO_SCHEMA_STRING_NAME = StringUtils.fromString("schemaString");
     public static final String OFFSET_STRUCT_NAME = "PartitionOffset";
 
-    public static final String CONSUMER_ERROR = "ConsumerError";
-    public static final String PRODUCER_ERROR = "ProducerError";
-    public static final String AVRO_ERROR = "AvroError";
-    public static final String DETAIL_RECORD_NAME = "Detail";
+    public static final String KAFKA_ERROR = "Error";
 
     public static final String AVRO_GENERIC_RECORD_NAME = "AvroGenericRecord";
     public static final String CONSUMER_RECORD_STRUCT_NAME = "ConsumerRecord";
-    public static final String CONSUMER_STRUCT_NAME = "Consumer";
     public static final String CALLER_STRUCT_NAME = "Caller";
     public static final String SERVER_CONNECTOR = "serverConnector";
 
@@ -217,20 +210,9 @@ public class KafkaConstants {
     // Default class names
     // Serializers
     public static final String BYTE_ARRAY_SERIALIZER = "org.apache.kafka.common.serialization.ByteArraySerializer";
-    public static final String STRING_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
-    public static final String INT_SERIALIZER = "org.apache.kafka.common.serialization.LongSerializer";
-    public static final String FLOAT_SERIALIZER = "org.apache.kafka.common.serialization.DoubleSerializer";
-    public static final String AVRO_SERIALIZER = "io.confluent.kafka.serializers.KafkaAvroSerializer";
-    public static final String CUSTOM_SERIALIZER = "org.ballerinalang.messaging.kafka.serdes.BallerinaKafkaSerializer";
 
     // Deserializers
     public static final String BYTE_ARRAY_DESERIALIZER = "org.apache.kafka.common.serialization.ByteArrayDeserializer";
-    public static final String STRING_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
-    public static final String INT_DESERIALIZER = "org.apache.kafka.common.serialization.LongDeserializer";
-    public static final String FLOAT_DESERIALIZER = "org.apache.kafka.common.serialization.DoubleDeserializer";
-    public static final String AVRO_DESERIALIZER = "io.confluent.kafka.serializers.KafkaAvroDeserializer";
-    public static final String CUSTOM_DESERIALIZER =
-            "org.ballerinalang.messaging.kafka.serdes.BallerinaKafkaDeserializer";
 
     // Serializer / Deserializer function names
     public static final String FUNCTION_SERIALIZE = "serialize";
@@ -248,6 +230,5 @@ public class KafkaConstants {
     public static final String BOOTSTRAP_SERVERS = "bootstrap.servers";
     public static final String CLIENT_ID = "client.id";
     public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
-    public static final String SPECIFIC_AVRO_READER = "specific.avro.reader";
     public static final String DEFAULT_SER_DES_TYPE = "BYTE_ARRAY";
 }

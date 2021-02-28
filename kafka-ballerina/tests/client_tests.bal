@@ -102,7 +102,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerFunctionsTest, consumerServiceTest]
+    dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
 }
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new ({
@@ -186,8 +186,8 @@ function nonExistingTopicPartitionTest() returns error? {
     test:assertEquals(committedOffset, ());
 
     var nonExistingPositionOffset = consumer->getPositionOffset(nonExistingTopicPartition);
-    test:assertTrue(nonExistingPositionOffset is ConsumerError);
-    ConsumerError positionOffsetError = <ConsumerError>nonExistingPositionOffset;
+    test:assertTrue(nonExistingPositionOffset is Error);
+    Error positionOffsetError = <Error>nonExistingPositionOffset;
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
     var closeResult = consumer->close();

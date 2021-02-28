@@ -37,7 +37,6 @@ import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 
 import java.time.Duration;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getConsumerRecord;
@@ -76,8 +75,7 @@ public class Poll {
             balFuture.complete(consumerRecordsArray);
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-            balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage(),
-                                                    CONSUMER_ERROR));
+            balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
         }
         return null;
     }

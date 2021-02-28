@@ -57,7 +57,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 
@@ -91,7 +91,7 @@ public class KafkaUtils {
             caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
             return new Object[]{caller, true, consumerRecordsArray, true};
         } else {
-            throw KafkaUtils.createKafkaError("Invalid remote function signature", CONSUMER_ERROR);
+            throw KafkaUtils.createKafkaError("Invalid remote function signature");
         }
     }
 
@@ -555,32 +555,32 @@ public class KafkaUtils {
             if (value instanceof byte[]) {
                 return ValueCreator.createArrayValue((byte[]) value);
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: byte[]");
+                throw createKafkaError("Invalid type - expected: byte[]");
             }
         } else if (KafkaConstants.SERDES_STRING.equals(type)) {
             if (value instanceof String) {
                 return StringUtils.fromString((String) value);
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: string");
+                throw createKafkaError("Invalid type - expected: string");
             }
         } else if (KafkaConstants.SERDES_INT.equals(type)) {
             if (value instanceof Long) {
                 return value;
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: int");
+                throw createKafkaError("Invalid type - expected: int");
             }
         } else if (KafkaConstants.SERDES_FLOAT.equals(type)) {
             if (value instanceof Double) {
                 return value;
             } else {
-                throw createKafkaError(CONSUMER_ERROR, "Invalid type - expected: float");
+                throw createKafkaError("Invalid type - expected: float");
             }
         } else if (KafkaConstants.SERDES_AVRO.equals(type)) {
             return handleAvroConsumer(value);
         } else if (KafkaConstants.SERDES_CUSTOM.equals(type)) {
             return value;
         }
-        throw createKafkaError("Unexpected type found for consumer record", CONSUMER_ERROR);
+        throw createKafkaError("Unexpected type found for consumer record");
     }
 
     public static BMap<BString, Object> getConsumerRecord() {
@@ -599,13 +599,13 @@ public class KafkaUtils {
         return createKafkaRecord(KafkaConstants.TOPIC_PARTITION_STRUCT_NAME);
     }
 
-    public static BError createKafkaError(String message, String typeId) {
-        return ErrorCreator.createDistinctError(typeId, ModuleUtils.getModule(),
+    public static BError createKafkaError(String message) {
+        return ErrorCreator.createDistinctError(KAFKA_ERROR, ModuleUtils.getModule(),
                                                 StringUtils.fromString(message));
     }
 
-    public static BError createKafkaError(String message, String typeId, BError cause) {
-        return ErrorCreator.createDistinctError(typeId, ModuleUtils.getModule(),
+    public static BError createKafkaError(String message, BError cause) {
+        return ErrorCreator.createDistinctError(KAFKA_ERROR, ModuleUtils.getModule(),
                                                  StringUtils.fromString(message), cause);
     }
 
