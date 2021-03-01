@@ -265,7 +265,8 @@ public type AvroGenericRecord record {
 #                          this field except in an extreme situation
 # + bufferMemory - Total bytes of memory the producer can use to buffer records
 # + retryCount - Number of retries to resend a record
-# + batchSize - Number of records to be batched for a single request. Use 0 for no batching
+# + batchSize - Maximum number of bytes to be batched together when sending records.
+#               Records exceeding this limit will not be batched. Setting this to 0 will disable batching.
 # + lingerInMillis - Delay to allow other records to be batched before sending them to the Kafka server
 # + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
 # + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
