@@ -20,11 +20,11 @@ public client class Caller {
 
     # Commits the current consumed offsets for the service.
     # ```ballerina
-    # kafka:ConsumerError? result = caller->commit();
+    # kafka:Error? result = caller->commit();
     # ```
     #
-    # + return - A `kafka:ConsumerError` if an error is encountered or else '()'
-    isolated remote function 'commit() returns ConsumerError? {
+    # + return - A `kafka:Error` if an error is encountered or else '()'
+    isolated remote function 'commit() returns Error? {
         return consumerCommit(self);
     }
 
@@ -32,8 +32,8 @@ public client class Caller {
     #
     # + offsets - Offsets to be commited
     # + duration - Timeout duration for the commit operation execution
-    # + return - `kafka:ConsumerError` if an error is encountered or else nil
-    isolated remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns ConsumerError? {
+    # + return - `kafka:Error` if an error is encountered or else nil
+    isolated remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns Error? {
         return consumerCommitOffset(self, offsets, duration);
     }
 }

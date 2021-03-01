@@ -57,7 +57,7 @@ public class AvroUtils {
             populateBallerinaGenericAvroRecord(genericAvroRecord, (GenericRecord) value);
             return genericAvroRecord;
         } else {
-            throw KafkaUtils.createKafkaError(KafkaConstants.AVRO_ERROR, "Invalid type - expected: AvroGenericRecord");
+            throw KafkaUtils.createKafkaError("Invalid type - expected: AvroGenericRecord");
         }
     }
 }

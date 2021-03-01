@@ -32,7 +32,6 @@ import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 import java.util.Objects;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.TransactionUtils.handleTransactions;
@@ -55,8 +54,7 @@ public class Send {
                 if (Objects.nonNull(e)) {
                     KafkaMetricsUtil.reportProducerError(producerObject,
                                                          KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage(),
-                                                              PRODUCER_ERROR));
+                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
                 } else {
                     KafkaMetricsUtil.reportPublish(producerObject, record.topic(), record.value());
                     balFuture.complete(null);
@@ -64,8 +62,7 @@ public class Send {
             });
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-            balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage(),
-                                                      PRODUCER_ERROR));
+            balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
 
         }
         return null;

@@ -46,7 +46,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DURATION;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
@@ -81,7 +80,7 @@ public class ConsumerInformationHandler {
             kafkaConsumer.assign(partitions);
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_ASSIGN);
-            return createKafkaError("Failed to assign topics for the consumer: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to assign topics for the consumer: " + e.getMessage());
         }
         return null;
     }
@@ -106,8 +105,7 @@ public class ConsumerInformationHandler {
             return topicPartitionArray;
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_GET_ASSIGNMENT);
-            return createKafkaError("Failed to retrieve assignment for the consumer: " + e.getMessage(),
-                                    CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve assignment for the consumer: " + e.getMessage());
         }
     }
 
@@ -136,7 +134,7 @@ public class ConsumerInformationHandler {
             return getBArrayFromMap(topics);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_GET_TOPICS);
-            return createKafkaError("Failed to retrieve available topics: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve available topics: " + e.getMessage());
         }
     }
 
@@ -161,7 +159,7 @@ public class ConsumerInformationHandler {
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_GET_PAUSED_PARTITIONS);
-            return createKafkaError("Failed to retrieve paused partitions: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve paused partitions: " + e.getMessage());
         }
     }
 
@@ -202,7 +200,7 @@ public class ConsumerInformationHandler {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_GET_TOPIC_PARTITIONS);
             return KafkaUtils.createKafkaError("Failed to retrieve topic partitions for the consumer: "
-                                                       + e.getMessage(), CONSUMER_ERROR);
+                                                       + e.getMessage());
         }
     }
 
@@ -228,7 +226,7 @@ public class ConsumerInformationHandler {
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_GET_SUBSCRIPTION);
-            return createKafkaError("Failed to retrieve subscribed topics: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve subscribed topics: " + e.getMessage());
         }
     }
 

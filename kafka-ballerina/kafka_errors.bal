@@ -14,29 +14,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Error type specific to the `kafka:Consumer` object functions.
-public type ConsumerError distinct error;
+public type Error distinct error;
 
-# Error type specific to the `kafka:Producer` object functions.
-public type ProducerError distinct error;
-
-# Represents a Kafka Avro related error.
-public type AvroError distinct error;
-
-isolated function getValueTypeMismatchError(string expectedType) returns ProducerError {
+isolated function getValueTypeMismatchError(string expectedType) returns Error {
     string message = "Invalid type found for Kafka value. Expected value type: '" + expectedType + "'.";
-    return error ProducerError(message);
+    return error Error(message);
 }
 
-isolated function getKeyTypeMismatchError(string expectedType) returns ProducerError {
+isolated function getKeyTypeMismatchError(string expectedType) returns Error {
     string message = "Invalid type found for Kafka key. Expected key type: '" + expectedType + "'.";
-    return error ProducerError(message);
+    return error Error(message);
 }
 
-isolated function createProducerError(string message) returns ProducerError {
-    return error ProducerError(message);
+isolated function createError(string message) returns Error {
+    return error Error(message);
 }
 
-isolated function createConsumerError(string message) returns ConsumerError {
-    return error ConsumerError(message);
-}

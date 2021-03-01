@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_ASSIGNED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_REVOKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
@@ -78,7 +77,7 @@ public class SubscriptionHandler {
             KafkaMetricsUtil.reportBulkSubscription(consumerObject, subscribedTopics);
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE);
-            return createKafkaError("Failed to subscribe to the provided topics: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to subscribe to the provided topics: " + e.getMessage());
         }
         console.println(KafkaConstants.SUBSCRIBED_TOPICS + getTopicNamesString(topicsList));
         return null;
@@ -102,7 +101,7 @@ public class SubscriptionHandler {
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PATTERN);
-            return createKafkaError("Failed to subscribe to the topics: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to subscribe to the topics: " + e.getMessage());
         }
         return null;
     }
@@ -131,8 +130,7 @@ public class SubscriptionHandler {
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PARTITION_REBALANCE);
-            balFuture.complete(createKafkaError("Failed to subscribe the consumer: " + e.getMessage(),
-                                                    CONSUMER_ERROR));
+            balFuture.complete(createKafkaError("Failed to subscribe the consumer: " + e.getMessage()));
         }
         return null;
     }
@@ -152,7 +150,7 @@ public class SubscriptionHandler {
             KafkaMetricsUtil.reportBulkUnsubscription(consumerObject, topics);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_UNSUBSCRIBE);
-            return createKafkaError("Failed to unsubscribe the consumer: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to unsubscribe the consumer: " + e.getMessage());
         }
         return null;
     }

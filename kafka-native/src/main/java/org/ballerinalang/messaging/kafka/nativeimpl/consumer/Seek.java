@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_OFFSET;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createTopicPartitionFromPartitionOffset;
@@ -65,7 +64,7 @@ public class Seek {
             kafkaConsumer.seek(topicPartition, offset);
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SEEK);
-            return createKafkaError("Failed to seek the consumer: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to seek the consumer: " + e.getMessage());
         }
         return null;
     }
@@ -85,7 +84,7 @@ public class Seek {
             kafkaConsumer.seekToBeginning(partitionList);
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SEEK_BEG);
-            return createKafkaError("Failed to seek the consumer to the beginning: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to seek the consumer to the beginning: " + e.getMessage());
         }
         return null;
     }
@@ -105,7 +104,7 @@ public class Seek {
             kafkaConsumer.seekToEnd(partitionList);
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SEEK_END);
-            return createKafkaError("Failed to seek the consumer to the end: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to seek the consumer to the end: " + e.getMessage());
         }
         return null;
     }

@@ -31,7 +31,7 @@ jobs:
               if: failure()
               with:
                   name: Ballerina Internal Log
-                  path: graphql-ballerina/ballerina-internal.log
+                  path: kafka-ballerina/ballerina-internal.log
                   if-no-files-found: ignore
             - name: Generate Codecov Report
               uses: codecov/codecov-action@v1
@@ -39,7 +39,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                   name: Code Coverage JSON
-                  path: graphql-ballerina/target/report/test_results.json
+                  path: kafka-ballerina/target/report/test_results.json
                   if-no-files-found: ignore
             - name: Dispatch Dependent Module Builds
               if: github.event.action != 'stdlib-publish-snapshot'
