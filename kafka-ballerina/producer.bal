@@ -52,11 +52,11 @@ public client class Producer {
 
     # Flushes the batch of records already sent to the broker by the producer.
     # ```ballerina
-    # kafka:Error? result = producer->flushRecords();
+    # kafka:Error? result = producer->'flush();
     # ```
     #
     # + return - A `kafka:Error` if records couldn't be flushed or else '()'
-    isolated remote function flushRecords() returns Error? {
+    isolated remote function 'flush() returns Error? {
         return producerFlushRecords(self);
     }
 
@@ -78,7 +78,7 @@ public client class Producer {
     #
     # + producerRecord - Record to be produced
     # + return -  A `kafka:Error` if send action fails to send data or else '()'
-    isolated remote function sendProducerRecord(ProducerRecord producerRecord) returns Error? {
+    isolated remote function send(ProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
         if (self.valueSerializerType == SER_BYTE_ARRAY) {
             return sendByteArrayValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
