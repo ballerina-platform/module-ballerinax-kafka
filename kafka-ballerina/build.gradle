@@ -181,7 +181,7 @@ def disableGroups = ""
 def debugParams = ""
 def balJavaDebugParam = ""
 def testParams = ""
-def testCoverageParam = "--code-coverage --includes=org.ballerinalang.messaging.kafka*"
+def testCoverageParam = "--code-coverage --includes=org.ballerinalang.messaging.kafka.*:ballerinax.*"
 
 task initializeVariables {
     if (project.hasProperty("groups")) {
