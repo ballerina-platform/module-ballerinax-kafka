@@ -102,7 +102,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerFunctionsTest, consumerServiceTest]
+    dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
 }
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new ({
@@ -186,8 +186,8 @@ function nonExistingTopicPartitionTest() returns error? {
     test:assertEquals(committedOffset, ());
 
     var nonExistingPositionOffset = consumer->getPositionOffset(nonExistingTopicPartition);
-    test:assertTrue(nonExistingPositionOffset is ConsumerError);
-    ConsumerError positionOffsetError = <ConsumerError>nonExistingPositionOffset;
+    test:assertTrue(nonExistingPositionOffset is Error);
+    Error positionOffsetError = <Error>nonExistingPositionOffset;
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
     var closeResult = consumer->close();
@@ -197,7 +197,7 @@ function nonExistingTopicPartitionTest() returns error? {
 function producerSendStringTest() returns error? {
     Producer stringProducer = check new (producerConfiguration);
     string message = "Hello, Ballerina";
-    var result = stringProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
+    var result = stringProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
@@ -225,11 +225,11 @@ function producerSendStringTest() returns error? {
 function producerCloseTest() returns error? {
     Producer closeTestProducer = check new (producerConfiguration);
     string message = "Test Message";
-    var result = closeTestProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
+    var result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = closeTestProducer->close();
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->sendProducerRecord({ topic: topic3, value: message.toBytes() });
+    result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertTrue(result is error);
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
@@ -237,7 +237,7 @@ function producerCloseTest() returns error? {
 }
 
 function sendMessage(byte[] message, string topic) returns error? {
-    return producer->sendProducerRecord({ topic: topic, value: message });
+    return producer->send({ topic: topic, value: message });
 }
 
 Service consumerService =

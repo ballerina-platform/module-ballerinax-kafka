@@ -43,7 +43,6 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DURAT
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.BOOTSTRAP_SERVERS;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_SERVERS;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
@@ -88,8 +87,7 @@ public class BrokerConnection {
             KafkaMetricsUtil.reportConsumerClose(consumerObject);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CLOSE);
-            return createKafkaError("Failed to close the connection from Kafka server: " + e.getMessage(),
-                                    CONSUMER_ERROR);
+            return createKafkaError("Failed to close the connection from Kafka server: " + e.getMessage());
         }
         return null;
     }
@@ -108,7 +106,7 @@ public class BrokerConnection {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
             return createKafkaError(
                     "Kafka consumer is already connected to external broker. Please close it before re-connecting " +
-                            "the external broker again.", CONSUMER_ERROR);
+                            "the external broker again.");
         }
         BMap<BString, Object> configs = consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
         Properties consumerProperties = processKafkaConsumerConfig(configs);
@@ -121,7 +119,7 @@ public class BrokerConnection {
             KafkaMetricsUtil.reportNewConsumer(consumerObject);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
-            return createKafkaError("Cannot connect to the kafka server: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Cannot connect to the kafka server: " + e.getMessage());
         }
         console.println(KAFKA_SERVERS + configs.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG));
         return null;
@@ -143,8 +141,7 @@ public class BrokerConnection {
             kafkaConsumer.pause(partitionList);
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_PAUSE);
-            return createKafkaError("Failed to pause topic partitions for the consumer: " + e.getMessage(),
-                                    CONSUMER_ERROR);
+            return createKafkaError("Failed to pause topic partitions for the consumer: " + e.getMessage());
         }
         return null;
     }
@@ -165,8 +162,7 @@ public class BrokerConnection {
             kafkaConsumer.resume(partitionList);
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_RESUME);
-            return createKafkaError("Failed to resume topic partitions for the consumer: " + e.getMessage(),
-                                    CONSUMER_ERROR);
+            return createKafkaError("Failed to resume topic partitions for the consumer: " + e.getMessage());
         }
         return null;
     }

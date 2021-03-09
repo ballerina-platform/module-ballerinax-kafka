@@ -50,7 +50,6 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_GR
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.TRANSACTION_CONTEXT;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaProducer;
@@ -80,7 +79,7 @@ public class ProducerActions {
                     producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {
                 if (!((boolean) producerProperties.get(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG))) {
                     return createKafkaError("configuration enableIdempotence must be set to true to enable " +
-                                                            "transactional producer", PRODUCER_ERROR);
+                                                            "transactional producer");
                 }
                 createKafkaProducer(producerProperties, producerObject);
                 KafkaTransactionContext transactionContext = createKafkaTransactionContext(producerObject);
@@ -91,7 +90,7 @@ public class ProducerActions {
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
-            return createKafkaError("Failed to initialize the producer: " + e.getMessage(), PRODUCER_ERROR);
+            return createKafkaError("Failed to initialize the producer: " + e.getMessage());
         }
         return null;
     }
@@ -110,7 +109,7 @@ public class ProducerActions {
             KafkaMetricsUtil.reportProducerClose(producerObject);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_CLOSE);
-            return createKafkaError("Failed to close the Kafka producer: " + e.getMessage(), PRODUCER_ERROR);
+            return createKafkaError("Failed to close the Kafka producer: " + e.getMessage());
         }
         return null;
     }
@@ -143,7 +142,7 @@ public class ProducerActions {
             kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId);
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);
-            return createKafkaError("Failed to commit consumer: " + e.getMessage(), PRODUCER_ERROR);
+            return createKafkaError("Failed to commit consumer: " + e.getMessage());
         }
         return null;
     }
@@ -167,7 +166,7 @@ public class ProducerActions {
             kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId.getValue());
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);
-            return createKafkaError("Failed to commit consumer offsets: " + e.getMessage(), PRODUCER_ERROR);
+            return createKafkaError("Failed to commit consumer offsets: " + e.getMessage());
         }
         return null;
     }
@@ -188,7 +187,7 @@ public class ProducerActions {
             kafkaProducer.flush();
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_FLUSH);
-            return createKafkaError("Failed to flush Kafka records: " + e.getMessage(), PRODUCER_ERROR);
+            return createKafkaError("Failed to flush Kafka records: " + e.getMessage());
         }
         return null;
     }
@@ -218,7 +217,7 @@ public class ProducerActions {
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_TOPIC_PARTITIONS);
-            return createKafkaError("Failed to fetch partitions from the producer " + e.getMessage(), PRODUCER_ERROR);
+            return createKafkaError("Failed to fetch partitions from the producer " + e.getMessage());
         }
     }
 }

@@ -35,7 +35,6 @@ import java.util.Objects;
 import java.util.Properties;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
@@ -62,7 +61,7 @@ public class Register {
                     kafkaConsumer);
             listener.addNativeData(SERVER_CONNECTOR, serverConnector);
         } catch (KafkaConnectorException e) {
-            return KafkaUtils.createKafkaError(e.getMessage(), CONSUMER_ERROR);
+            return KafkaUtils.createKafkaError(e.getMessage());
         }
         return null;
     }

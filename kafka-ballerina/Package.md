@@ -32,7 +32,7 @@ kafka:Producer kafkaProducer = new (producerConfiguration);
 2. Use the `kafka:Producer` to publish messages. 
 ```ballerina
 string message = "Hello World, Ballerina";
-kafka:ProducerError? result = kafkaProducer->send(message.toBytes(), "kafka-topic", key = 1);
+kafka:Error? result = kafkaProducer->send(message.toBytes(), "kafka-topic", key = 1);
 ```
 
 ##### Consuming Messages
@@ -50,7 +50,7 @@ kafka:Consumer consumer = new (consumerConfiguration);
 ```
 2. Use the `kafka:Consumer` as a simple record consumer.
 ```ballerina
-kafka:ConsumerRecord[]|kafka:ConsumerError result = consumer->poll(1000);
+kafka:ConsumerRecord[]|kafka:Error result = consumer->poll(1000);
 ```
 3. Use the `kafka:Consumer` as a listener.
 ```ballerina

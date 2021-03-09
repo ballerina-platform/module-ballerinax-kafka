@@ -43,7 +43,6 @@ import java.util.Properties;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_DURATION;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_PARTITION;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.ALIAS_TOPIC;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
@@ -90,8 +89,7 @@ public class GetOffsets {
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_GET_BEG_OFFSETS);
-            return createKafkaError("Failed to retrieve offsets for the topic partitions: " + e.getMessage(),
-                                    CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve offsets for the topic partitions: " + e.getMessage());
         }
     }
 
@@ -132,7 +130,7 @@ public class GetOffsets {
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_GET_COMMIT_OFFSET);
-            return createKafkaError("Failed to retrieve committed offsets: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve committed offsets: " + e.getMessage());
         }
     }
 
@@ -165,8 +163,7 @@ public class GetOffsets {
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_GET_END_OFFSETS);
-            return createKafkaError("Failed to retrieve end offsets for the consumer: " + e.getMessage(),
-                                    CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve end offsets for the consumer: " + e.getMessage());
         }
 
         return getPartitionOffsetArrayFromOffsetMap(offsetMap);
@@ -204,7 +201,7 @@ public class GetOffsets {
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_GET_POSITION_OFFSET);
-            return createKafkaError("Failed to retrieve position offset: " + e.getMessage(), CONSUMER_ERROR);
+            return createKafkaError("Failed to retrieve position offset: " + e.getMessage());
         }
     }
 
