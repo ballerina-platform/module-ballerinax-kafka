@@ -247,7 +247,7 @@ service object {
             byte[] value = kafkaRecord.value;
             string|error message = 'string:fromBytes(value);
             if (message is string) {
-                log:print("Message received: " + message);
+                log:printInfo("Message received: " + message);
                 receivedMessage = <@untainted>message;
             }
         }
