@@ -28,6 +28,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -47,6 +48,7 @@ import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.slf4j.Logger;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -133,13 +135,13 @@ public class KafkaUtils {
         addStringArrayParamIfPresent(KafkaConstants.ALIAS_TOPICS.getValue(), configurations, properties,
                                      KafkaConstants.ALIAS_TOPICS);
 
-        addIntParamIfPresent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_SESSION_TIMEOUT_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_HEARTBEAT_INTERVAL_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.METADATA_MAX_AGE_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.METADATA_MAX_AGE_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_METADATA_MAX_AGE_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_AUTO_COMMIT_INTERVAL_MS_CONFIG);
         addIntParamIfPresent(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_MAX_PARTITION_FETCH_BYTES_CONFIG);
@@ -151,33 +153,33 @@ public class KafkaUtils {
                              KafkaConstants.CONSUMER_FETCH_MIN_BYTES_CONFIG);
         addIntParamIfPresent(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_FETCH_MAX_BYTES_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_FETCH_MAX_WAIT_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.RECONNECT_BACKOFF_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.RECONNECT_BACKOFF_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_RECONNECT_BACKOFF_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.RETRY_BACKOFF_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.RETRY_BACKOFF_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_RETRY_BACKOFF_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_METRICS_SAMPLE_WINDOW_MS_CONFIG);
 
         addIntParamIfPresent(ConsumerConfig.METRICS_NUM_SAMPLES_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_METRICS_NUM_SAMPLES_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_REQUEST_TIMEOUT_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
         addIntParamIfPresent(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_MAX_POLL_RECORDS_CONFIG);
         addIntParamIfPresent(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_RECONNECT_BACKOFF_MAX_MS_CONFIG);
-        addIntParamIfPresent(ConsumerConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, configurations, properties,
+        addTimeParamIfPresent(ConsumerConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, configurations, properties,
                              KafkaConstants.CONSUMER_DEFAULT_API_TIMEOUT_CONFIG);
 
-        addIntParamIfPresent(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue(), configurations, properties,
+        addTimeParamIfPresent(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue(), configurations, properties,
                              KafkaConstants.ALIAS_POLLING_TIMEOUT);
-        addIntParamIfPresent(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue(), configurations, properties,
+        addTimeParamIfPresent(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue(), configurations, properties,
                              KafkaConstants.ALIAS_POLLING_INTERVAL);
         addIntParamIfPresent(KafkaConstants.ALIAS_CONCURRENT_CONSUMERS.getValue(), configurations, properties,
                              KafkaConstants.ALIAS_CONCURRENT_CONSUMERS);
@@ -241,7 +243,7 @@ public class KafkaUtils {
                              properties, KafkaConstants.PRODUCER_RETRIES_CONFIG);
         addIntParamIfPresent(ProducerConfig.BATCH_SIZE_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_BATCH_SIZE_CONFIG);
-        addIntParamIfPresent(ProducerConfig.LINGER_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.LINGER_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_LINGER_MS_CONFIG);
         addIntParamIfPresent(ProducerConfig.SEND_BUFFER_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_SEND_BUFFER_CONFIG);
@@ -249,27 +251,27 @@ public class KafkaUtils {
                              properties, KafkaConstants.PRODUCER_RECEIVE_BUFFER_CONFIG);
         addIntParamIfPresent(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_MAX_REQUEST_SIZE_CONFIG);
-        addIntParamIfPresent(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_RECONNECT_BACKOFF_MS_CONFIG);
-        addIntParamIfPresent(ProducerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_RECONNECT_BACKOFF_MAX_MS_CONFIG);
-        addIntParamIfPresent(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_RETRY_BACKOFF_MS_CONFIG);
-        addIntParamIfPresent(ProducerConfig.MAX_BLOCK_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.MAX_BLOCK_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_MAX_BLOCK_MS_CONFIG);
-        addIntParamIfPresent(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_REQUEST_TIMEOUT_MS_CONFIG);
-        addIntParamIfPresent(ProducerConfig.METADATA_MAX_AGE_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.METADATA_MAX_AGE_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_METADATA_MAX_AGE_CONFIG);
-        addIntParamIfPresent(ProducerConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_METRICS_SAMPLE_WINDOW_MS_CONFIG);
         addIntParamIfPresent(ProducerConfig.METRICS_NUM_SAMPLES_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_METRICS_NUM_SAMPLES_CONFIG);
         addIntParamIfPresent(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, configurations,
                              properties, KafkaConstants.PRODUCER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION);
-        addIntParamIfPresent(ProducerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
-        addIntParamIfPresent(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, configurations,
+        addTimeParamIfPresent(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_TRANSACTION_TIMEOUT_CONFIG);
 
         addBooleanParamIfPresent(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, configurations,
@@ -457,6 +459,17 @@ public class KafkaUtils {
         BArray stringArray = (BArray) configs.get(key);
         List<String> values = getStringListFromStringBArray(stringArray);
         configParams.put(paramName, values);
+    }
+
+    private static void addTimeParamIfPresent(String paramName,
+                                             BMap<BString, Object> configs,
+                                             Properties configParams,
+                                             BString key) {
+        BigDecimal configValueInSeconds = ((BDecimal) configs.get(key)).decimalValue();
+        int valueInMilliSeconds = (configValueInSeconds).multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
+        if (Objects.nonNull(valueInMilliSeconds)) {
+            configParams.put(paramName, valueInMilliSeconds);
+        }
     }
 
     private static void addIntParamIfPresent(String paramName,
