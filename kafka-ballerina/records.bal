@@ -52,9 +52,12 @@ public type SecureSocket record {|
     KeyStore keyStore;
     TrustStore trustStore;
     Protocols protocol;
+    string sslCipherSuites?;
+
+
+
     string sslProvider?;
     string sslKeyPassword?;
-    string sslCipherSuites?;
     string sslEndpointIdentificationAlgorithm?;
     string sslSecureRandomImplementation?;
 |};
