@@ -35,8 +35,8 @@ ProducerConfiguration producerConfiguration = {
     bootstrapServers: "localhost:9092",
     clientId: "basic-producer",
     acks: ACKS_ALL,
-    maxBlockInMillis: 6000,
-    requestTimeoutInMillis: 2000,
+    maxBlock: 6000,
+    requestTimeout: 2000,
     retryCount: 3
 };
 Producer producer = checkpanic new (producerConfiguration);
@@ -109,7 +109,7 @@ function consumerSubscribeTest() returns error? {
         bootstrapServers: "localhost:9092",
         groupId: "consumer-subscriber-test-group",
         clientId: "test-consumer-4",
-        metadataMaxAgeInMillis: 2000
+        metadataMaxAge: 2000
     });
     string[] availableTopics = check consumer->getAvailableTopics();
     test:assertEquals(availableTopics.length(), 5);
@@ -247,7 +247,7 @@ service object {
             byte[] value = kafkaRecord.value;
             string|error message = 'string:fromBytes(value);
             if (message is string) {
-                log:print("Message received: " + message);
+                log:printInfo("Message received: " + message);
                 receivedMessage = <@untainted>message;
             }
         }

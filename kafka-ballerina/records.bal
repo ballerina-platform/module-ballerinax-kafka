@@ -131,29 +131,29 @@ public type AuthenticationConfiguration record {|
 # + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
 #                          this with caution since this can override any of the fields. It is not recomendded to use
 #                          this field except in an extreme situation
-# + sessionTimeoutInMillis - Timeout used to detect consumer failures when heartbeat threshold is reached
-# + heartBeatIntervalInMillis - Expected time between heartbeats
-# + metadataMaxAgeInMillis - Maximum time to force a refresh of metadata
-# + autoCommitIntervalInMillis - Auto committing interval for commit offset, when auto-commit is enabled
+# + sessionTimeout - Timeout used to detect consumer failures when heartbeat threshold is reached in seconds
+# + heartBeatInterval - Expected time between heartbeats in seconds
+# + metadataMaxAge - Maximum time to force a refresh of metadata in seconds
+# + autoCommitInterval - Auto committing interval (in seconds) for commit offset, when auto-commit is enabled
 # + maxPartitionFetchBytes - The maximum amount of data per-partition the server returns
 # + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
 # + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
 # + fetchMinBytes - Minimum amount of data the server should return for a fetch request
 # + fetchMaxBytes - Maximum amount of data the server should return for a fetch request
-# + fetchMaxWaitTimeInMillis - Maximum amount of time the server will block before answering the fetch request
-# + reconnectBackoffTimeMaxInMillis - Maximum amount of time in milliseconds to wait when reconnecting
-# + retryBackoffInMillis - Time to wait before attempting to retry a failed request
-# + metricsSampleWindowInMillis - Window of time a metrics sample is computed over
+# + fetchMaxWaitTime - Maximum amount of time (in seconds) the server will block before answering the fetch request
+# + reconnectBackoffTimeMax - Maximum amount of time in seconds to wait when reconnecting
+# + retryBackoff - Time (in seconds) to wait before attempting to retry a failed request
+# + metricsSampleWindow - Window of time (in seconds) a metrics sample is computed over
 # + metricsNumSamples - Number of samples maintained to compute metrics
-# + requestTimeoutInMillis - Wait time for response of a request
-# + connectionMaxIdleTimeInMillis - Close idle connections after the number of milliseconds
+# + requestTimeout - Wait time (in seconds) for response of a request
+# + connectionMaxIdleTime - Close idle connections after the number of seconds
 # + maxPollRecords - Maximum number of records returned in a single call to poll
 # + maxPollInterval - Maximum delay between invocations of poll
-# + reconnectBackoffTimeInMillis - Time to wait before attempting to reconnect
-# + pollingTimeoutInMillis - Timeout interval for polling
-# + pollingIntervalInMillis - Polling interval for the consumer
+# + reconnectBackoffTime - Time (in seconds) to wait before attempting to reconnect
+# + pollingTimeout - Timeout interval for polling in seconds
+# + pollingInterval - Polling interval for the consumer in seconds
 # + concurrentConsumers - Number of concurrent consumers
-# + defaultApiTimeoutInMillis - Default API timeout value for APIs with duration
+# + defaultApiTimeout - Default API timeout value (in seconds) for APIs with duration
 # + autoCommit - Enables auto committing offsets
 # + checkCRCS - Check the CRC32 of the records consumed. This ensures that no on-the-wire or on-disk corruption to
 #               the messages occurred. This may add some overhead, and might needed set to `false` if extreme
@@ -179,29 +179,29 @@ public type ConsumerConfiguration record {|
 
     map<string> additionalProperties?;
 
-    int sessionTimeoutInMillis?;
-    int heartBeatIntervalInMillis?;
-    int metadataMaxAgeInMillis?;
-    int autoCommitIntervalInMillis?;
+    decimal sessionTimeout?;
+    decimal heartBeatInterval?;
+    decimal metadataMaxAge?;
+    decimal autoCommitInterval?;
     int maxPartitionFetchBytes?;
     int sendBuffer?;
     int receiveBuffer?;
     int fetchMinBytes?;
     int fetchMaxBytes?;
-    int fetchMaxWaitTimeInMillis?;
-    int reconnectBackoffTimeMaxInMillis?;
-    int retryBackoffInMillis?;
-    int metricsSampleWindowInMillis?;
+    decimal fetchMaxWaitTime?;
+    decimal reconnectBackoffTimeMax?;
+    decimal retryBackoff?;
+    decimal metricsSampleWindow?;
     int metricsNumSamples?;
-    int requestTimeoutInMillis?;
-    int connectionMaxIdleTimeInMillis?;
+    decimal requestTimeout?;
+    decimal connectionMaxIdleTime?;
     int maxPollRecords?;
     int maxPollInterval?;
-    int reconnectBackoffTimeInMillis?;
-    int pollingTimeoutInMillis?;
-    int pollingIntervalInMillis?;
+    decimal reconnectBackoffTime?;
+    decimal pollingTimeout?;
+    decimal pollingInterval?;
     int concurrentConsumers?;
-    int defaultApiTimeoutInMillis?;
+    decimal defaultApiTimeout?;
 
     boolean autoCommit = true;
     boolean checkCRCS = true;
@@ -267,21 +267,21 @@ public type AvroGenericRecord record {
 # + retryCount - Number of retries to resend a record
 # + batchSize - Maximum number of bytes to be batched together when sending records.
 #               Records exceeding this limit will not be batched. Setting this to 0 will disable batching.
-# + lingerInMillis - Delay to allow other records to be batched before sending them to the Kafka server
+# + linger - Delay (in seconds) to allow other records to be batched before sending them to the Kafka server
 # + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
 # + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
 # + maxRequestSize - The maximum size of a request in bytes
-# + reconnectBackoffTimeInMillis - Time to wait before attempting to reconnect
-# + reconnectBackoffMaxTimeInMillis - Maximum amount of time in milliseconds to wait when reconnecting
-# + retryBackoffTimeInMillis - Time to wait before attempting to retry a failed request
-# + maxBlockInMillis - Maximum block time during which the sending is blocked when the buffer is full
-# + requestTimeoutInMillis - Wait time for the response of a request
-# + metadataMaxAgeInMillis - Maximum time to force a refresh of metadata
-# + metricsSampleWindowInMillis - Time window for a metrics sample to compute over
+# + reconnectBackoffTime - Time (in seconds) to wait before attempting to reconnect
+# + reconnectBackoffMaxTime - Maximum amount of time in seconds to wait when reconnecting
+# + retryBackoffTime - Time (in seconds) to wait before attempting to retry a failed request
+# + maxBlock - Maximum block time (in seconds) during which the sending is blocked when the buffer is full
+# + requestTimeout - Wait time (in seconds) for the response of a request
+# + metadataMaxAge - Maximum time (in seconds) to force a refresh of metadata
+# + metricsSampleWindow - Time (in seconds) window for a metrics sample to compute over
 # + metricsNumSamples - Number of samples maintained to compute the metrics
 # + maxInFlightRequestsPerConnection - Maximum number of unacknowledged requests on a single connection
-# + connectionsMaxIdleTimeInMillis - Close the idle connections after this number of milliseconds
-# + transactionTimeoutInMillis - Timeout for transaction status update from the producer
+# + connectionsMaxIdleTime - Close the idle connections after this number of seconds
+# + transactionTimeout - Timeout (in seconds) for transaction status update from the producer
 # + enableIdempotence - Exactly one copy of each message is written to the stream when enabled
 # + secureSocket - Configurations related to SSL/TLS encryption
 # + authenticationConfiguration - Authentication-related configurations for the Kafka producer
@@ -304,21 +304,21 @@ public type ProducerConfiguration record {|
     int bufferMemory?;
     int retryCount?;
     int batchSize?;
-    int lingerInMillis?;
+    decimal linger?;
     int sendBuffer?;
     int receiveBuffer?;
     int maxRequestSize?;
-    int reconnectBackoffTimeInMillis?;
-    int reconnectBackoffMaxTimeInMillis?;
-    int retryBackoffTimeInMillis?;
-    int maxBlockInMillis?;
-    int requestTimeoutInMillis?;
-    int metadataMaxAgeInMillis?;
-    int metricsSampleWindowInMillis?;
+    decimal reconnectBackoffTime?;
+    decimal reconnectBackoffMaxTime?;
+    decimal retryBackoffTime?;
+    decimal maxBlock?;
+    decimal requestTimeout?;
+    decimal metadataMaxAge?;
+    decimal metricsSampleWindow?;
     int metricsNumSamples?;
     int maxInFlightRequestsPerConnection?;
-    int connectionsMaxIdleTimeInMillis?;
-    int transactionTimeoutInMillis?;
+    decimal connectionsMaxIdleTime?;
+    decimal transactionTimeout?;
 
     boolean enableIdempotence = false;
 

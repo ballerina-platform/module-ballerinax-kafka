@@ -21,6 +21,8 @@ package org.ballerinalang.messaging.kafka.utils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
 
+import java.math.BigDecimal;
+
 /**
  * Constants related to for Kafka API.
  */
@@ -66,8 +68,8 @@ public class KafkaConstants {
 
     public static final BString ALIAS_CONCURRENT_CONSUMERS = StringUtils.fromString("concurrentConsumers");
     public static final BString ALIAS_TOPICS = StringUtils.fromString("topics");
-    public static final BString ALIAS_POLLING_TIMEOUT = StringUtils.fromString("pollingTimeoutInMillis");
-    public static final BString ALIAS_POLLING_INTERVAL = StringUtils.fromString("pollingIntervalInMillis");
+    public static final BString ALIAS_POLLING_TIMEOUT = StringUtils.fromString("pollingTimeout");
+    public static final BString ALIAS_POLLING_INTERVAL = StringUtils.fromString("pollingInterval");
     public static final BString ALIAS_DECOUPLE_PROCESSING = StringUtils.fromString("decoupleProcessing");
     public static final BString ALIAS_TOPIC = StringUtils.fromString("topic");
     public static final BString ALIAS_PARTITION = StringUtils.fromString("partition");
@@ -93,38 +95,38 @@ public class KafkaConstants {
     public static final String BALLERINA_STRAND = "ballerina.strand";
     public static final BString CONSUMER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
 
-    public static final BString CONSUMER_SESSION_TIMEOUT_MS_CONFIG = StringUtils.fromString("sessionTimeoutInMillis");
+    public static final BString CONSUMER_SESSION_TIMEOUT_MS_CONFIG = StringUtils.fromString("sessionTimeout");
     public static final BString CONSUMER_HEARTBEAT_INTERVAL_MS_CONFIG = StringUtils.fromString(
-            "heartBeatIntervalInMillis");
-    public static final BString CONSUMER_METADATA_MAX_AGE_CONFIG = StringUtils.fromString("metadataMaxAgeInMillis");
+            "heartBeatInterval");
+    public static final BString CONSUMER_METADATA_MAX_AGE_CONFIG = StringUtils.fromString("metadataMaxAge");
     public static final BString CONSUMER_AUTO_COMMIT_INTERVAL_MS_CONFIG = StringUtils.fromString(
-            "autoCommitIntervalInMillis");
+            "autoCommitInterval");
     public static final BString CONSUMER_MAX_PARTITION_FETCH_BYTES_CONFIG = StringUtils.fromString(
             "maxPartitionFetchBytes");
     public static final BString CONSUMER_SEND_BUFFER_CONFIG = StringUtils.fromString("sendBuffer");
     public static final BString CONSUMER_RECEIVE_BUFFER_CONFIG = StringUtils.fromString("receiveBuffer");
     public static final BString CONSUMER_FETCH_MIN_BYTES_CONFIG = StringUtils.fromString("fetchMinBytes");
     public static final BString CONSUMER_FETCH_MAX_BYTES_CONFIG = StringUtils.fromString("fetchMaxBytes");
-    public static final BString CONSUMER_FETCH_MAX_WAIT_MS_CONFIG = StringUtils.fromString("fetchMaxWaitTimeInMillis");
+    public static final BString CONSUMER_FETCH_MAX_WAIT_MS_CONFIG = StringUtils.fromString("fetchMaxWaitTime");
     public static final BString CONSUMER_RECONNECT_BACKOFF_MS_CONFIG = StringUtils.fromString(
-            "reconnectBackoffTimeInMillis");
-    public static final BString CONSUMER_RETRY_BACKOFF_MS_CONFIG = StringUtils.fromString("retryBackoffInMillis");
+            "reconnectBackoffTime");
+    public static final BString CONSUMER_RETRY_BACKOFF_MS_CONFIG = StringUtils.fromString("retryBackoff");
     public static final BString CONSUMER_METRICS_SAMPLE_WINDOW_MS_CONFIG = StringUtils.fromString(
-            "metricsSampleWindowInMillis");
+            "metricsSampleWindow");
     public static final BString CONSUMER_METRICS_NUM_SAMPLES_CONFIG = StringUtils.fromString("metricsNumSamples");
-    public static final BString CONSUMER_REQUEST_TIMEOUT_MS_CONFIG = StringUtils.fromString("requestTimeoutInMillis");
+    public static final BString CONSUMER_REQUEST_TIMEOUT_MS_CONFIG = StringUtils.fromString("requestTimeout");
     public static final BString CONSUMER_CONNECTIONS_MAX_IDLE_MS_CONFIG = StringUtils.fromString(
-            "connectionMaxIdleTimeInMillis");
+            "connectionMaxIdleTime");
     public static final BString CONSUMER_MAX_POLL_RECORDS_CONFIG = StringUtils.fromString("maxPollRecords");
     public static final BString CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG = StringUtils.fromString("maxPollInterval");
     public static final BString CONSUMER_RECONNECT_BACKOFF_MAX_MS_CONFIG = StringUtils.fromString(
-            "reconnectBackoffTimeMaxInMillis");
+            "reconnectBackoffTimeMax");
     public static final BString CONSUMER_ENABLE_AUTO_COMMIT_CONFIG = StringUtils.fromString("autoCommit");
     public static final BString CONSUMER_CHECK_CRCS_CONFIG = StringUtils.fromString("checkCRCS");
     public static final BString CONSUMER_EXCLUDE_INTERNAL_TOPICS_CONFIG = StringUtils.fromString(
             "excludeInternalTopics");
     public static final BString CONSUMER_DEFAULT_API_TIMEOUT_CONFIG = StringUtils.fromString(
-            "defaultApiTimeoutInMillis");
+            "defaultApiTimeout");
 
     // Producer Configuration.
     public static final BString PRODUCER_BOOTSTRAP_SERVERS_CONFIG = StringUtils.fromString("bootstrapServers");
@@ -149,22 +151,22 @@ public class KafkaConstants {
     public static final BString PRODUCER_RECEIVE_BUFFER_CONFIG = StringUtils.fromString("receiveBuffer");
     public static final BString PRODUCER_MAX_REQUEST_SIZE_CONFIG = StringUtils.fromString("maxRequestSize");
     public static final BString PRODUCER_RECONNECT_BACKOFF_MS_CONFIG = StringUtils.fromString(
-            "reconnectBackoffTimeInMillis");
+            "reconnectBackoffTime");
     public static final BString PRODUCER_RECONNECT_BACKOFF_MAX_MS_CONFIG = StringUtils.fromString(
-            "reconnectBackoffMaxTimeInMillis");
-    public static final BString PRODUCER_RETRY_BACKOFF_MS_CONFIG = StringUtils.fromString("retryBackoffTimeInMillis");
+            "reconnectBackoffMaxTime");
+    public static final BString PRODUCER_RETRY_BACKOFF_MS_CONFIG = StringUtils.fromString("retryBackoffTime");
     public static final BString PRODUCER_MAX_BLOCK_MS_CONFIG = StringUtils.fromString("maxBlock");
-    public static final BString PRODUCER_REQUEST_TIMEOUT_MS_CONFIG = StringUtils.fromString("requestTimeoutInMillis");
-    public static final BString PRODUCER_METADATA_MAX_AGE_CONFIG = StringUtils.fromString("metadataMaxAgeInMillis");
+    public static final BString PRODUCER_REQUEST_TIMEOUT_MS_CONFIG = StringUtils.fromString("requestTimeout");
+    public static final BString PRODUCER_METADATA_MAX_AGE_CONFIG = StringUtils.fromString("metadataMaxAge");
     public static final BString PRODUCER_METRICS_SAMPLE_WINDOW_MS_CONFIG = StringUtils.fromString(
-            "metricsSampleWindowInMillis");
+            "metricsSampleWindow");
     public static final BString PRODUCER_METRICS_NUM_SAMPLES_CONFIG = StringUtils.fromString("metricsNumSamples");
     public static final BString PRODUCER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION = StringUtils.fromString(
             "maxInFlightRequestsPerConnection");
     public static final BString PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG = StringUtils.fromString(
-            "connectionsMaxIdleTimeInMillis");
+            "connectionsMaxIdleTime");
     public static final BString PRODUCER_TRANSACTION_TIMEOUT_CONFIG = StringUtils.fromString(
-            "transactionTimeoutInMillis");
+            "transactionTimeout");
     public static final BString PRODUCER_ENABLE_IDEMPOTENCE_CONFIG = StringUtils.fromString("enableIdempotence");
 
     // SSL Configuration parameters.
@@ -231,4 +233,6 @@ public class KafkaConstants {
     public static final String CLIENT_ID = "client.id";
     public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
     public static final String DEFAULT_SER_DES_TYPE = "BYTE_ARRAY";
+
+    public static final BigDecimal MILLISECOND_MULTIPLIER = new BigDecimal(1000);
 }
