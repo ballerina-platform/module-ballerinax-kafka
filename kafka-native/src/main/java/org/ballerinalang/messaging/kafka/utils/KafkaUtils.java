@@ -465,9 +465,9 @@ public class KafkaUtils {
                                              BMap<BString, Object> configs,
                                              Properties configParams,
                                              BString key) {
-        BigDecimal configValueInSeconds = ((BDecimal) configs.get(key)).decimalValue();
-        int valueInMilliSeconds = (configValueInSeconds).multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
-        if (Objects.nonNull(valueInMilliSeconds)) {
+        if (configs.containsKey(key)) {
+            BigDecimal configValueInSeconds = ((BDecimal) configs.get(key)).decimalValue();
+            int valueInMilliSeconds = (configValueInSeconds).multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
             configParams.put(paramName, valueInMilliSeconds);
         }
     }
