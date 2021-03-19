@@ -1,8 +1,0 @@
-codecov:
-  require_ci_to_pass: no
-
-fixes:
-  - "ballerinax/kafka/*/::kafka-ballerina/"
-
-ignore:
-  - "**/tests"
