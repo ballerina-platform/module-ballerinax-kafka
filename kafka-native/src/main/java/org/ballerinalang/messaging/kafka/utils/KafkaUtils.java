@@ -444,18 +444,22 @@ public class KafkaUtils {
                                                      BMap<BString, Object> configs,
                                                      Properties configParams,
                                                      BString key) {
-        BArray stringArray = (BArray) configs.get(key);
-        List<String> values = getStringListFromStringBArray(stringArray);
-        configParams.put(paramName, values);
+        if (configs.containsKey(key)) {
+            BArray stringArray = (BArray) configs.get(key);
+            List<String> values = getStringListFromStringBArray(stringArray);
+            configParams.put(paramName, values);
+        }
     }
 
     private static void addStringArrayAsStringParamIfPresent(String paramName,
                                                      BMap<BString, Object> configs,
                                                      Properties configParams,
                                                      BString key) {
-        BArray stringArray = (BArray) configs.get(key);
-        String values = getStringFromStringBArray(stringArray);
-        configParams.put(paramName, values);
+        if (configs.containsKey(key)) {
+            BArray stringArray = (BArray) configs.get(key);
+            String values = getStringFromStringBArray(stringArray);
+            configParams.put(paramName, values);
+        }
     }
 
     private static String getStringFromStringBArray(BArray stringArray) {
