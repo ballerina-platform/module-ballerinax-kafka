@@ -52,8 +52,8 @@ function consumerServiceTest() returns error? {
         clientId: "test-consumer-1"
     };
     Listener consumer = check new (consumerConfiguration);
-    Error? attachResult = check consumer.attach(consumerService);
-    Error? startResult = check consumer.'start();
+    check consumer.attach(consumerService);
+    check consumer.'start();
 
     runtime:sleep(7);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
@@ -79,7 +79,7 @@ function consumerFunctionsTest() returns error? {
     } else {
         test:assertFail("Invalid message type received. Expected string");
     }
-    Error? closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {
@@ -95,10 +95,10 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 2);
 
-    Error? result = check consumer->unsubscribe();
+    check consumer->unsubscribe();
     subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
-    Error? closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {
@@ -115,11 +115,11 @@ function consumerSubscribeTest() returns error? {
     test:assertEquals(availableTopics.length(), 5);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
-    Error? result = check consumer->subscribeWithPattern("test.*");
+    check consumer->subscribeWithPattern("test.*");
     ConsumerRecord[]|Error pollResult = consumer->poll(1000); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.length(), 3);
-    Error? closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {}
@@ -149,13 +149,13 @@ function manualCommitTest() returns error? {
         offset: 0
     };
 
-    Error? commitResult = check consumer->commitOffset([partitionOffset]);
+    check consumer->commitOffset([partitionOffset]);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
     int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, 0);
 
-    Error? commitAllResult = check consumer->'commit();
+    check consumer->'commit();
     committedOffset = check consumer->getCommittedOffset(topicPartition);
     committedPartitionOffset = <PartitionOffset>committedOffset;
     offsetValue = committedPartitionOffset.offset;
@@ -163,7 +163,7 @@ function manualCommitTest() returns error? {
 
     int positionOffset = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(positionOffset, messageCount);
-    Error? closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {}
@@ -182,7 +182,7 @@ function nonExistingTopicPartitionTest() returns error? {
         topic: nonExistingTopic,
         partition: 999
     };
-    PartitionOffset|Error? committedOffset = check consumer->getCommittedOffset(nonExistingTopicPartition);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(nonExistingTopicPartition);
     test:assertEquals(committedOffset, ());
 
     int|Error nonExistingPositionOffset = consumer->getPositionOffset(nonExistingTopicPartition);
@@ -190,14 +190,14 @@ function nonExistingTopicPartitionTest() returns error? {
     Error positionOffsetError = <Error>nonExistingPositionOffset;
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
-    Error? closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {}
 function producerSendStringTest() returns error? {
     Producer stringProducer = check new (producerConfiguration);
     string message = "Hello, Ballerina";
-    Error? result = stringProducer->send({ topic: topic3, value: message.toBytes() });
+    check stringProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
@@ -225,9 +225,9 @@ function producerSendStringTest() returns error? {
 function producerCloseTest() returns error? {
     Producer closeTestProducer = check new (producerConfiguration);
     string message = "Test Message";
-    Error? result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
+    check closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->close();
+    check closeTestProducer->close();
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertTrue(result is error);
