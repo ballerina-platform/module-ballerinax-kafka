@@ -53,7 +53,7 @@ public type SecureSocket record {|
    record {|
         Protocol name;
         string[] versions?;
-   |} protocol;
+   |} protocol?;
    string[] ciphers?;
    string provider?;
 |};
