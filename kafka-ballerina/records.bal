@@ -52,9 +52,9 @@ public type SecureSocket record {|
   |} key?;
    record {|
         Protocol name;
-        string versions?; // todo: make this string[]
+        string[] versions?;
    |} protocol;
-   string ciphers?; // todo: make this string[]
+   string[] ciphers?;
    string provider?;
 |};
 

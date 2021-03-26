@@ -191,6 +191,8 @@ public class KafkaUtils {
 
         addBooleanParamIfPresent(KafkaConstants.ALIAS_DECOUPLE_PROCESSING.getValue(), configurations, properties,
                                  KafkaConstants.ALIAS_DECOUPLE_PROCESSING, false);
+        addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, configurations,
+                properties, KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
             processSslProperties(configurations, properties);
         }
@@ -270,7 +272,8 @@ public class KafkaUtils {
                              properties, KafkaConstants.PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_TRANSACTION_TIMEOUT_CONFIG);
-
+        addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, configurations,
+                             properties, KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         addBooleanParamIfPresent(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, configurations,
                                  properties, KafkaConstants.PRODUCER_ENABLE_IDEMPOTENCE_CONFIG);
         if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
@@ -308,23 +311,19 @@ public class KafkaUtils {
                                 (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
                                 configParams, KafkaConstants.PASSWORD_CONFIG);
         // ciphers
-        addStringParamIfPresent(SslConfigs.SSL_CIPHER_SUITES_CONFIG, configurations, configParams,
-                KafkaConstants.SSL_CIPHER_SUITES_CONFIG); // todo: list
+        addStringArrayAsStringParamIfPresent(SslConfigs.SSL_CIPHER_SUITES_CONFIG, configurations, configParams,
+                KafkaConstants.SSL_CIPHER_SUITES_CONFIG);
         // provider
         addStringParamIfPresent(SslConfigs.SSL_PROVIDER_CONFIG, configurations, configParams,
                 KafkaConstants.SSL_PROVIDER_CONFIG);
-
-        addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
-                                KafkaConstants.SECURITY_PROTOCOL_CONFIG); // todo - check
 
         // protocol
         BMap<BString, Object> protocol = (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG, protocol, configParams,
                                 KafkaConstants.SSL_PROTOCOL_NAME);
-        addStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
+        addStringArrayAsStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
                                 protocol, configParams,
-                                KafkaConstants.SSL_PROTOCOL_VERSIONS); // todo: list
+                                KafkaConstants.SSL_PROTOCOL_VERSIONS);
     }
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)
@@ -448,6 +447,20 @@ public class KafkaUtils {
         BArray stringArray = (BArray) configs.get(key);
         List<String> values = getStringListFromStringBArray(stringArray);
         configParams.put(paramName, values);
+    }
+
+    private static void addStringArrayAsStringParamIfPresent(String paramName,
+                                                     BMap<BString, Object> configs,
+                                                     Properties configParams,
+                                                     BString key) {
+        BArray stringArray = (BArray) configs.get(key);
+        String values = getStringFromStringBArray(stringArray);
+        configParams.put(paramName, values);
+    }
+
+    private static String getStringFromStringBArray(BArray stringArray) {
+        String[] values = stringArray.getStringArray();
+        return String.join(",", values);
     }
 
     private static void addTimeParamIfPresent(String paramName,
