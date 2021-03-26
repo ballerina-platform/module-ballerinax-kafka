@@ -20,6 +20,7 @@ package org.ballerinalang.messaging.kafka.utils;
 
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
@@ -27,6 +28,7 @@ import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
@@ -97,11 +99,9 @@ public class KafkaUtils {
         }
     }
 
-    public static Properties processKafkaConsumerConfig(BMap<BString, Object> configurations) {
+    public static Properties processKafkaConsumerConfig(Object bootStrapServers, BMap<BString, Object> configurations) {
         Properties properties = new Properties();
-
-        addStringParamIfPresent(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getServerUrls(bootStrapServers));
         addStringParamIfPresent(ConsumerConfig.GROUP_ID_CONFIG, configurations, properties,
                                 KafkaConstants.CONSUMER_GROUP_ID_CONFIG);
         addStringParamIfPresent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, configurations, properties,
@@ -193,6 +193,8 @@ public class KafkaUtils {
 
         addBooleanParamIfPresent(KafkaConstants.ALIAS_DECOUPLE_PROCESSING.getValue(), configurations, properties,
                                  KafkaConstants.ALIAS_DECOUPLE_PROCESSING, false);
+        addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, configurations,
+                properties, KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
             processSslProperties(configurations, properties);
         }
@@ -207,10 +209,9 @@ public class KafkaUtils {
         return properties;
     }
 
-    public static Properties processKafkaProducerConfig(BMap<BString, Object> configurations) {
+    public static Properties processKafkaProducerConfig(Object bootstrapServers, BMap<BString, Object> configurations) {
         Properties properties = new Properties();
-        addStringParamIfPresent(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_BOOTSTRAP_SERVERS_CONFIG);
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getServerUrls(bootstrapServers));
         addStringParamIfPresent(ProducerConfig.ACKS_CONFIG, configurations,
                                 properties, KafkaConstants.PRODUCER_ACKS_CONFIG);
         addStringParamIfPresent(ProducerConfig.COMPRESSION_TYPE_CONFIG, configurations,
@@ -273,7 +274,8 @@ public class KafkaUtils {
                              properties, KafkaConstants.PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_TRANSACTION_TIMEOUT_CONFIG);
-
+        addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, configurations,
+                             properties, KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         addBooleanParamIfPresent(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, configurations,
                                  properties, KafkaConstants.PRODUCER_ENABLE_IDEMPOTENCE_CONFIG);
         if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
@@ -293,49 +295,37 @@ public class KafkaUtils {
     private static void processSslProperties(BMap<BString, Object> configurations, Properties configParams) {
         BMap<BString, Object> secureSocket = (BMap<BString, Object>) configurations.get(
                 KafkaConstants.SECURE_SOCKET);
-        addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
-                                KafkaConstants.KEYSTORE_TYPE_CONFIG);
+        // keystore
+        BMap<BString, Object> keyConfig = (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEY_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.PASSWORD_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_KEYMANAGER_ALGORITHM_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
-                                KafkaConstants.KEYMANAGER_ALGORITHM_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
-                                configParams, KafkaConstants.TRUSTSTORE_TYPE_CONFIG);
+        addStringParamIfPresent(SslConfigs.SSL_KEY_PASSWORD_CONFIG, keyConfig, configParams,
+                                KafkaConstants.SSL_KEY_PASSWORD_CONFIG);
+        // truststore
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
                                 (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
                                 configParams, KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG,
                                 (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
                                 configParams, KafkaConstants.PASSWORD_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_TRUSTMANAGER_ALGORITHM_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
-                                configParams, KafkaConstants.TRUSTMANAGER_ALGORITHM_CONFIG);
-        addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
-                                KafkaConstants.SECURITY_PROTOCOL_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
-                                KafkaConstants.SSL_PROTOCOL_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
-                                KafkaConstants.ENABLED_PROTOCOLS_CONFIG);
+        // ciphers
+        addStringArrayAsStringParamIfPresent(SslConfigs.SSL_CIPHER_SUITES_CONFIG, configurations, configParams,
+                KafkaConstants.SSL_CIPHER_SUITES_CONFIG);
+        // provider
         addStringParamIfPresent(SslConfigs.SSL_PROVIDER_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_PROVIDER_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_KEY_PASSWORD_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_KEY_PASSWORD_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_CIPHER_SUITES_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_CIPHER_SUITES_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG);
+                KafkaConstants.SSL_PROVIDER_CONFIG);
+
+        // protocol
+        BMap<BString, Object> protocol = (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG);
+        addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG, protocol, configParams,
+                                KafkaConstants.SSL_PROTOCOL_NAME);
+        addStringArrayAsStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
+                                protocol, configParams,
+                                KafkaConstants.SSL_PROTOCOL_VERSIONS);
     }
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)
@@ -456,9 +446,27 @@ public class KafkaUtils {
                                                      BMap<BString, Object> configs,
                                                      Properties configParams,
                                                      BString key) {
-        BArray stringArray = (BArray) configs.get(key);
-        List<String> values = getStringListFromStringBArray(stringArray);
-        configParams.put(paramName, values);
+        if (configs.containsKey(key)) {
+            BArray stringArray = (BArray) configs.get(key);
+            List<String> values = getStringListFromStringBArray(stringArray);
+            configParams.put(paramName, values);
+        }
+    }
+
+    private static void addStringArrayAsStringParamIfPresent(String paramName,
+                                                     BMap<BString, Object> configs,
+                                                     Properties configParams,
+                                                     BString key) {
+        if (configs.containsKey(key)) {
+            BArray stringArray = (BArray) configs.get(key);
+            String values = getStringFromStringBArray(stringArray);
+            configParams.put(paramName, values);
+        }
+    }
+
+    private static String getStringFromStringBArray(BArray stringArray) {
+        String[] values = stringArray.getStringArray();
+        return String.join(",", values);
     }
 
     private static void addTimeParamIfPresent(String paramName,
@@ -707,6 +715,21 @@ public class KafkaUtils {
         }
     }
 
+    public static int getIntFromBDecimal(BDecimal bDecimal, Logger logger, String name) {
+        try {
+            return  getMilliSeconds(bDecimal);
+        } catch (ArithmeticException e) {
+            logger.warn("The value set for {} needs to be less than {}. The {} value is set to {}", name,
+                    Integer.MAX_VALUE, name, Integer.MAX_VALUE);
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    public static int getMilliSeconds(BDecimal longValue) {
+        BigDecimal valueInSeconds = longValue.decimalValue();
+        return  (valueInSeconds).multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
+    }
+
     /**
      * Get the {@code Long} value from an {@code Object}.
      *
@@ -741,12 +764,6 @@ public class KafkaUtils {
                                      producerProperties.getProperty(KafkaConstants.BOOTSTRAP_SERVERS));
         producerObject.addNativeData(KafkaConstants.CLIENT_ID, getClientIdFromProperties(producerProperties));
         KafkaMetricsUtil.reportNewProducer(producerObject);
-    }
-
-    public static String getBrokerNames(BObject listener) {
-        BMap<BString, Object> listenerConfigurations = listener.getMapValue(
-                KafkaConstants.CONSUMER_CONFIG_FIELD_NAME);
-        return listenerConfigurations.get(KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG).toString();
     }
 
     public static String getTopicNamesString(List<String> topicsList) {
@@ -784,6 +801,17 @@ public class KafkaUtils {
             return KafkaObservabilityConstants.UNKNOWN;
         }
         return clientId;
+    }
+
+    public static String getServerUrls(Object bootstrapServer) {
+        if (TypeUtils.getType(bootstrapServer).getTag() == TypeTags.ARRAY_TAG) {
+            // if string[]
+            String[] serverUrls = ((BArray) bootstrapServer).getStringArray();
+            return String.join(",", serverUrls);
+        } else {
+            // if string
+            return ((BString) bootstrapServer).getValue();
+        }
     }
 
     public static Object invokeMethodSync(Runtime runtime, BObject object, String methodName, String strandName,

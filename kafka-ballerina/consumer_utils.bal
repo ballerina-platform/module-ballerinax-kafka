@@ -16,7 +16,7 @@
 
 import ballerina/jballerina.java;
 
-isolated function consumerClose(Consumer consumer, int duration) returns Error? =
+isolated function consumerClose(Consumer consumer, decimal duration) returns Error? =
 @java:Method {
     name: "close",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.BrokerConnection"
@@ -46,7 +46,7 @@ isolated function consumerCommit(Consumer|Caller consumer) returns Error? =
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.Commit"
 } external;
 
-isolated function consumerCommitOffset(Consumer|Caller consumer, PartitionOffset[] offsets, int duration = -1)
+isolated function consumerCommitOffset(Consumer|Caller consumer, PartitionOffset[] offsets, decimal duration = -1)
 returns Error? =
 @java:Method {
     name: "commitOffset",
@@ -65,7 +65,7 @@ isolated function consumerGetAssignment(Consumer consumer) returns TopicPartitio
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.ConsumerInformationHandler"
 } external;
 
-isolated function consumerGetAvailableTopics(Consumer consumer, int duration) returns string[]|Error =
+isolated function consumerGetAvailableTopics(Consumer consumer, decimal duration) returns string[]|Error =
 @java:Method {
     name: "getAvailableTopics",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.ConsumerInformationHandler"
@@ -77,7 +77,7 @@ isolated function consumerGetPausedPartitions(Consumer consumer) returns TopicPa
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.ConsumerInformationHandler"
 } external;
 
-isolated function consumerGetTopicPartitions(Consumer consumer, string topic, int duration = -1)
+isolated function consumerGetTopicPartitions(Consumer consumer, string topic, decimal duration = -1)
 returns TopicPartition[]|Error =
 @java:Method {
     name: "getTopicPartitions",
@@ -90,35 +90,35 @@ isolated function consumerGetSubscription(Consumer consumer) returns string[]|Er
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.ConsumerInformationHandler"
 } external;
 
-isolated function consumerGetBeginningOffsets(Consumer consumer, TopicPartition[] partitions, int duration)
+isolated function consumerGetBeginningOffsets(Consumer consumer, TopicPartition[] partitions, decimal duration)
 returns PartitionOffset[]|Error =
 @java:Method {
     name: "getBeginningOffsets",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.GetOffsets"
 } external;
 
-isolated function consumerGetCommittedOffset(Consumer consumer, TopicPartition partition, int duration)
+isolated function consumerGetCommittedOffset(Consumer consumer, TopicPartition partition, decimal duration)
 returns PartitionOffset|Error? =
 @java:Method {
     name: "getCommittedOffset",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.GetOffsets"
 } external;
 
-isolated function consumerGetEndOffsets(Consumer consumer, TopicPartition[] partitions, int duration)
+isolated function consumerGetEndOffsets(Consumer consumer, TopicPartition[] partitions, decimal duration)
 returns PartitionOffset[]|Error =
 @java:Method {
     name: "getEndOffsets",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.GetOffsets"
 } external;
 
-isolated function consumerGetPositionOffset(Consumer consumer, TopicPartition partition, int duration = -1)
+isolated function consumerGetPositionOffset(Consumer consumer, TopicPartition partition, decimal duration = -1)
 returns int|Error =
 @java:Method {
     name: "getPositionOffset",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.GetOffsets"
 } external;
 
-isolated function consumerPoll(Consumer consumer, int timeoutValue) returns ConsumerRecord[]|Error =
+isolated function consumerPoll(Consumer consumer, decimal timeoutValue) returns ConsumerRecord[]|Error =
 @java:Method {
     name: "poll",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.Poll"

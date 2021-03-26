@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -52,7 +53,7 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONS
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromBDecimal;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionRecord;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateTopicPartitionRecord;
@@ -116,12 +117,12 @@ public class ConsumerInformationHandler {
      * @param duration       Duration in milliseconds to try the operation.
      * @return Array of ballerina strings, which consists of the available topics.
      */
-    public static Object getAvailableTopics(Environment environment, BObject consumerObject, long duration) {
+    public static Object getAvailableTopics(Environment environment, BObject consumerObject, BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         Map<String, List<PartitionInfo>> topics;
         try {
             if (apiTimeout > DURATION_UNDEFINED_VALUE) {
@@ -172,13 +173,13 @@ public class ConsumerInformationHandler {
      * @return Topic partition array of the given topic.
      */
     public static Object getTopicPartitions(Environment environment, BObject consumerObject, BString topic,
-                                            long duration) {
+                                            BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
 
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
 
         try {
             List<PartitionInfo> partitionInfoList;

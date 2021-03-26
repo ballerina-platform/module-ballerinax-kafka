@@ -172,27 +172,21 @@ public class KafkaConstants {
     // SSL Configuration parameters.
     public static final BString SECURE_SOCKET = StringUtils.fromString("secureSocket");
     public static final BString KEYSTORE_CONFIG = StringUtils.fromString("keyStore");
-    public static final BString TRUSTSTORE_CONFIG = StringUtils.fromString("trustStore");
+    public static final BString KEY_CONFIG = StringUtils.fromString("key");
+    public static final BString TRUSTSTORE_CONFIG = StringUtils.fromString("cert");
     public static final BString PROTOCOL_CONFIG = StringUtils.fromString("protocol");
-    public static final BString LOCATION_CONFIG = StringUtils.fromString("location");
+    public static final BString LOCATION_CONFIG = StringUtils.fromString("path");
     public static final BString PASSWORD_CONFIG = StringUtils.fromString("password");
-    public static final BString KEYSTORE_TYPE_CONFIG = StringUtils.fromString("keyStoreType");
-    public static final BString KEYMANAGER_ALGORITHM_CONFIG = StringUtils.fromString("keyManagerAlgorithm");
-    public static final BString TRUSTSTORE_TYPE_CONFIG = StringUtils.fromString("trustStoreType");
-    public static final BString TRUSTMANAGER_ALGORITHM_CONFIG = StringUtils.fromString("trustManagerAlgorithm");
-    public static final BString ENABLED_PROTOCOLS_CONFIG = StringUtils.fromString("sslProtocolVersions");
+    public static final BString SSL_PROTOCOL_VERSIONS = StringUtils.fromString("versions");
     public static final BString SECURITY_PROTOCOL_CONFIG = StringUtils.fromString("securityProtocol");
-    public static final BString SSL_PROTOCOL_CONFIG = StringUtils.fromString("sslProtocol");
-    public static final BString SSL_PROVIDER_CONFIG = StringUtils.fromString("sslProvider");
-    public static final BString SSL_KEY_PASSWORD_CONFIG = StringUtils.fromString("sslKeyPassword");
-    public static final BString SSL_CIPHER_SUITES_CONFIG = StringUtils.fromString("sslCipherSuites");
-    public static final BString SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG = StringUtils.fromString(
-            "sslEndpointIdentificationAlgorithm");
-    public static final BString SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG = StringUtils.fromString(
-            "sslSecureRandomImplementation");
+    public static final BString SSL_PROTOCOL_CONFIG = StringUtils.fromString("protocol");
+    public static final BString SSL_PROTOCOL_NAME = StringUtils.fromString("name");
+    public static final BString SSL_PROVIDER_CONFIG = StringUtils.fromString("provider");
+    public static final BString SSL_KEY_PASSWORD_CONFIG = StringUtils.fromString("keyPassword");
+    public static final BString SSL_CIPHER_SUITES_CONFIG = StringUtils.fromString("ciphers");
 
     // SASL Configuration parameters
-    public static final BString AUTHENTICATION_CONFIGURATION = StringUtils.fromString("authenticationConfiguration");
+    public static final BString AUTHENTICATION_CONFIGURATION = StringUtils.fromString("auth");
     public static final BString AUTHENTICATION_MECHANISM = StringUtils.fromString("mechanism");
     public static final BString USERNAME = StringUtils.fromString("username");
     public static final BString PASSWORD = StringUtils.fromString("password");

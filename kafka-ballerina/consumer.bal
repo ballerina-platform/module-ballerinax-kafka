@@ -22,12 +22,15 @@ public client class Consumer {
     public ConsumerConfiguration consumerConfig;
     private string keyDeserializerType;
     private string valueDeserializerType;
+    private string|string[] bootstrapServers;
 
     # Creates a new Kafka `Consumer`.
     #
+    # + bootstrapServers - List of remote server endpoints of kafka brokers
     # + config - Configurations related to consumer endpoint
     # + return - A `kafka:Error` if an error is encountered or else '()'
-    public isolated function init (ConsumerConfiguration config) returns Error? {
+    public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
+        self.bootstrapServers = bootstrapServers;
         self.consumerConfig = config;
         self.keyDeserializerType = DES_BYTE_ARRAY;
         self.valueDeserializerType = DES_BYTE_ARRAY;
@@ -52,9 +55,9 @@ public client class Consumer {
     # kafka:Error? result = consumer->close();
     # ```
     #
-    # + duration - Timeout duration for the close operation execution
+    # + duration - Timeout duration (in seconds) for the close operation execution
     # + return - A `kafka:Error` if an error is encountered or else '()'
-    isolated remote function close(int duration = -1) returns Error? {
+    isolated remote function close(decimal duration = -1) returns Error? {
         return consumerClose(self, duration);
     }
 
@@ -70,10 +73,10 @@ public client class Consumer {
 
     # Commits given offsets and partitions for the given topics, for consumer.
     #
-    # + duration - Timeout duration for the commit operation execution
+    # + duration - Timeout duration (in seconds) for the commit operation execution
     # + offsets - Offsets to be commited
     # + return - `kafka:Error` if an error is encountered or else nil
-    isolated remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns Error? {
+    isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? {
         return consumerCommitOffset(self, offsets, duration);
     }
 
@@ -92,19 +95,19 @@ public client class Consumer {
     # string[]|kafka:Error result = consumer->getAvailableTopics();
     # ```
     #
-    # + duration - Timeout duration for the execution of the `get available topics` operation
+    # + duration - Timeout duration (in seconds) for the execution of the `get available topics` operation
     # + return - Array of topics currently available (authorized) for the consumer to subscribe or else
     #           a `kafka:Error`
-    isolated remote function getAvailableTopics(int duration = -1) returns string[]|Error {
+    isolated remote function getAvailableTopics(decimal duration = -1) returns string[]|Error {
         return consumerGetAvailableTopics(self, duration);
     }
 
     # Retrieves the start offsets for given set of partitions.
     #
     # + partitions - Array of topic partitions to get the starting offsets
-    # + duration - Timeout duration for the get beginning offsets execution
+    # + duration - Timeout duration (in seconds) for the get beginning offsets execution
     # + return - Starting offsets for the given partitions if executes successfully or else `kafka:Error`
-    isolated remote function getBeginningOffsets(TopicPartition[] partitions, int duration = -1)
+    isolated remote function getBeginningOffsets(TopicPartition[] partitions, decimal duration = -1)
     returns PartitionOffset[]|Error {
         return consumerGetBeginningOffsets(self, partitions, duration);
     }
@@ -112,10 +115,10 @@ public client class Consumer {
     # Retrieves the last committed offsets for the given topic partitions.
     #
     # + partition - The `TopicPartition` in which the committed offset is returned for consumer
-    # + duration - Timeout duration for the get committed offset operation to execute
+    # + duration - Timeout duration (in seconds) for the get committed offset operation to execute
     # + return - The last committed offset for the consumer for the given partition if there is a committed offset
     #            present, `()` if there are no committed offsets or else a `kafka:Error`
-    isolated remote function getCommittedOffset(TopicPartition partition, int duration = -1)
+    isolated remote function getCommittedOffset(TopicPartition partition, decimal duration = -1)
     returns PartitionOffset|Error? {
         return consumerGetCommittedOffset(self, partition, duration);
     }
@@ -123,9 +126,9 @@ public client class Consumer {
     # Retrieves the last offsets for given set of partitions.
     #
     # + partitions - Set of partitions to get the last offsets
-    # + duration - Timeout duration for the get end offsets operation to execute
+    # + duration - Timeout duration (in seconds) for the get end offsets operation to execute
     # + return - End offsets for the given partitions if executes successfully or else `kafka:Error`
-    isolated remote function getEndOffsets(TopicPartition[] partitions, int duration = -1)
+    isolated remote function getEndOffsets(TopicPartition[] partitions, decimal duration = -1)
     returns PartitionOffset[]|Error {
         return consumerGetEndOffsets(self, partitions, duration);
     }
@@ -144,10 +147,10 @@ public client class Consumer {
     # Retrieves the offset of the next record that will be fetched, if a records exists in that position.
     #
     # + partition - The `TopicPartition` in which the position is required
-    # + duration - Timeout duration for the get position offset operation to execute
+    # + duration - Timeout duration (in seconds) for the get position offset operation to execute
     # + return - Offset which will be fetched next (if a records exists in that offset) or else `kafka:Error` if
     #            the operation fails
-    isolated remote function getPositionOffset(TopicPartition partition, int duration = -1)
+    isolated remote function getPositionOffset(TopicPartition partition, decimal duration = -1)
     returns int|Error {
         return consumerGetPositionOffset(self, partition, duration);
     }
@@ -168,9 +171,9 @@ public client class Consumer {
     # ```
     #
     # + topic - The topic for which the partition information is needed
-    # + duration - Timeout duration for the `get topic partitions` operation to execute
+    # + duration - Timeout duration (in seconds) for the `get topic partitions` operation to execute
     # + return - Array of partitions for the given topic if executes successfully or else a `kafka:Error`
-    isolated remote function getTopicPartitions(string topic, int duration = -1)
+    isolated remote function getTopicPartitions(string topic, decimal duration = -1)
     returns TopicPartition[]|Error {
         return consumerGetTopicPartitions(self, topic, duration);
     }
@@ -188,10 +191,10 @@ public client class Consumer {
     # kafka:ConsumerRecord[]|kafka:Error result = consumer->poll(1000);
     # ```
     #
-    # + timeoutValue - Polling time in milliseconds
+    # + timeout - Polling time in seconds
     # + return - Array of consumer records if executed successfully or else a `kafka:Error`
-    isolated remote function poll(int timeoutValue) returns ConsumerRecord[]|Error {
-        return consumerPoll(self, timeoutValue);
+    isolated remote function poll(decimal timeout) returns ConsumerRecord[]|Error {
+        return consumerPoll(self, timeout);
     }
 
     # Resumes consumer retrieving messages from set of partitions which were paused earlier.

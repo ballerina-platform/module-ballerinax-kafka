@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
+
 // Common record types
 # Represents the topic partition position in which the consumed record is stored.
 #
@@ -34,72 +36,34 @@ public type TopicPartition record {|
 |};
 
 // Security-related records
-# Configurations for facilitating secure communication with the Kafka server.
+# Configurations for secure communication with the Kafka server.
 #
-# + keyStore - Configurations associated with the KeyStore
-# + trustStore - Configurations associated with the TrustStore
-# + protocol - Configurations related to the SSL/TLS protocol and the version to be used
-# + sslProvider - The name of the security provider used for SSL connections. Default value is the default security
+# + cert - Configurations associated with `crypto:TrustStore`
+# + key - Configurations associated with `crypto:KeyStore`
+# + protocol - SSL/TLS protocol related options
+# + ciphers - List of ciphers to be used. By default, all the available cipher suites are supported
+# + provider - Name of the security provider used for SSL connections. Default value is the default security
 #                 provider of the JVM
-# + sslKeyPassword - The password of the private key in the key store file. This is optional for the client
-# + sslCipherSuites - A list of Cipher suites. This is a named combination of the authentication, encryption, MAC, and key
-#                     exchange algorithms used to negotiate the security settings for a network connection using the TLS
-#                     or SSL network protocols. By default, all the available Cipher suites are supported
-# + sslEndpointIdentificationAlgorithm - The endpoint identification algorithm to validate the server hostname using
-#                                        the server certificate
-# + sslSecureRandomImplementation - The `SecureRandom` PRNG implementation to use for the SSL cryptography operations
 public type SecureSocket record {|
-    KeyStore keyStore;
-    TrustStore trustStore;
-    Protocols protocol;
-    string sslProvider?;
-    string sslKeyPassword?;
-    string sslCipherSuites?;
-    string sslEndpointIdentificationAlgorithm?;
-    string sslSecureRandomImplementation?;
+   crypto:TrustStore cert;
+   record {|
+        crypto:KeyStore keyStore;
+        string keyPassword?;
+  |} key?;
+   record {|
+        Protocol name;
+        string[] versions?;
+   |} protocol?;
+   string[] ciphers?;
+   string provider?;
 |};
 
-# Configurations related to the KeyStore.
-#
-# + keyStoreType - The file format of the KeyStore file. This is optional for the client
-# + location - The location of the KeyStore file. This is optional for the client and can be used for two-way
-#              authentication for the client
-# + password - The store password for the KeyStore file. This is optional for the client and is only needed if
-#              the `ssl.keystore.location` is configured
-# + keyManagerAlgorithm - The algorithm used by the key manager factory for SSL connections. The default value is the
-#                         key manager factory algorithm configured for the JVM
-public type KeyStore record {|
-    string keyStoreType?;
-    string location;
-    string password;
-    string keyManagerAlgorithm?;
-|};
-
-# Configurations related to the TrustStore.
-#
-# + trustStoreType - The file format of the TrustStore file
-# + location - The location of the TrustStore file
-# + password - The password for the TrustStore file. If a password is not set, access to the TrustStore is still
-#              available but integrity checking is disabled
-# + trustManagerAlgorithm - The algorithm used by the trust manager factory for SSL connections. The default value is
-#                           the trust manager factory algorithm configured for the JVM
-public type TrustStore record {|
-    string trustStoreType?;
-    string location;
-    string password;
-    string trustManagerAlgorithm?;
-|};
-
-# Configurations related to the SSL/TLS protocol and the versions to be used.
-#
-# + sslProtocol - The SSL protocol used to generate the SSLContext. The default setting is TLS, which is fine for most
-#                 cases. Allowed values in recent JVMs are TLS, TLSv1.1, and TLSv1.2. Also, SSL, SSLv2 and SSLv3 may be
-#                 supported in older JVMs but their usage is discouraged due to known security vulnerabilities
-# + sslProtocolVersions - The list of protocols enabled for SSL connections
-public type Protocols record {|
-    string sslProtocol;
-    string sslProtocolVersions;
-|};
+# Represents protocol options.
+public enum Protocol {
+   SSL,
+   TLS,
+   DTLS
+}
 
 # Configurations related to Kafka authentication mechanisms.
 #
@@ -116,7 +80,6 @@ public type AuthenticationConfiguration record {|
 // Consumer-related records
 # Configurations related to consumer endpoint.
 #
-# + bootstrapServers - List of remote server endpoints of kafka brokers
 # + groupId - Unique string that identifies the consumer
 # + topics - Topics to be subscribed by the consumer
 # + offsetReset - Offset reset strategy if no initial offset
@@ -161,10 +124,9 @@ public type AuthenticationConfiguration record {|
 # + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
 # + decoupleProcessing - Decouples processing
 # + secureSocket - Configurations related to SSL/TLS encryption
-# + authenticationConfiguration - Authentication-related configurations for the Kafka consumer
+# + auth - Authentication-related configurations for the Kafka consumer
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ConsumerConfiguration record {|
-    string bootstrapServers;
     string groupId?;
     string[] topics?;
     OffsetResetMethod offsetReset?;
@@ -209,7 +171,7 @@ public type ConsumerConfiguration record {|
     boolean decoupleProcessing = false;
 
     SecureSocket secureSocket?;
-    AuthenticationConfiguration authenticationConfiguration?;
+    AuthenticationConfiguration auth?;
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 
@@ -249,7 +211,6 @@ public type AvroGenericRecord record {
 // Producer-related records
 # Represents the Kafka Producer configuration.
 #
-# + bootstrapServers - List of remote server endpoints of Kafka brokers
 # + acks - Number of acknowledgments
 # + compressionType - Compression type to be used for messages
 # + clientId - Identifier to be used for server side logging
@@ -284,10 +245,9 @@ public type AvroGenericRecord record {
 # + transactionTimeout - Timeout (in seconds) for transaction status update from the producer
 # + enableIdempotence - Exactly one copy of each message is written to the stream when enabled
 # + secureSocket - Configurations related to SSL/TLS encryption
-# + authenticationConfiguration - Authentication-related configurations for the Kafka producer
+# + auth - Authentication-related configurations for the Kafka producer
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ProducerConfiguration record {|
-    string bootstrapServers;
     ProducerAcks acks = ACKS_SINGLE;
     CompressionType compressionType = COMPRESSION_NONE;
     string clientId?;
@@ -323,7 +283,7 @@ public type ProducerConfiguration record {|
     boolean enableIdempotence = false;
 
     SecureSocket secureSocket?;
-    AuthenticationConfiguration authenticationConfiguration?;
+    AuthenticationConfiguration auth?;
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 

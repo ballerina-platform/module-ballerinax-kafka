@@ -110,6 +110,7 @@ task copyPackingJarsToLib(type: Copy) {
 task updateTomlVersions {
     doLast {
         def stdlibDependentUuidVersion = project.stdlibUuidVersion.replace("-SNAPSHOT", "")
+        def stdlibDependentCryptoVersion = project.stdlibCryptoVersion.replace("-SNAPSHOT", "")
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
@@ -117,6 +118,7 @@ task updateTomlVersions {
         ballerinaConfigFile.text = newConfig
 
         def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.uuid.version@", stdlibDependentUuidVersion)
+        newDependencyConfig = newDependencyConfig.replace("@stdlib.crypto.version@", stdlibDependentCryptoVersion)
         ballerinaDependencyFile.text = newDependencyConfig
     }
 }
