@@ -97,11 +97,9 @@ public class KafkaUtils {
         }
     }
 
-    public static Properties processKafkaConsumerConfig(BMap<BString, Object> configurations) {
+    public static Properties processKafkaConsumerConfig(String bootStrapServers, BMap<BString, Object> configurations) {
         Properties properties = new Properties();
-
-        addStringParamIfPresent(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrapServers);
         addStringParamIfPresent(ConsumerConfig.GROUP_ID_CONFIG, configurations, properties,
                                 KafkaConstants.CONSUMER_GROUP_ID_CONFIG);
         addStringParamIfPresent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, configurations, properties,
@@ -207,10 +205,9 @@ public class KafkaUtils {
         return properties;
     }
 
-    public static Properties processKafkaProducerConfig(BMap<BString, Object> configurations) {
+    public static Properties processKafkaProducerConfig(String bootstrapServers, BMap<BString, Object> configurations) {
         Properties properties = new Properties();
-        addStringParamIfPresent(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_BOOTSTRAP_SERVERS_CONFIG);
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         addStringParamIfPresent(ProducerConfig.ACKS_CONFIG, configurations,
                                 properties, KafkaConstants.PRODUCER_ACKS_CONFIG);
         addStringParamIfPresent(ProducerConfig.COMPRESSION_TYPE_CONFIG, configurations,
@@ -736,9 +733,9 @@ public class KafkaUtils {
     }
 
     public static String getBrokerNames(BObject listener) {
-        BMap<BString, Object> listenerConfigurations = listener.getMapValue(
-                KafkaConstants.CONSUMER_CONFIG_FIELD_NAME);
-        return listenerConfigurations.get(KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG).toString();
+        BString bootstrapServers = listener.getStringValue(
+                KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
+        return bootstrapServers.getValue();
     }
 
     public static String getTopicNamesString(List<String> topicsList) {

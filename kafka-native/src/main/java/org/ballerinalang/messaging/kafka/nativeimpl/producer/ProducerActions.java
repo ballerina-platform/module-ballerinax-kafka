@@ -49,6 +49,7 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CO
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_GROUP_ID_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_BOOTSTRAP_SERVERS_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_CONFIG_FIELD_NAME;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.TRANSACTION_CONTEXT;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
@@ -72,8 +73,9 @@ public class ProducerActions {
      * @return {@code BError}, if there's any error, null otherwise.
      */
     public static Object init(BObject producerObject) {
+        BString bootstrapServer = producerObject.getStringValue(PRODUCER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> configs = producerObject.getMapValue(PRODUCER_CONFIG_FIELD_NAME);
-        Properties producerProperties = processKafkaProducerConfig(configs);
+        Properties producerProperties = processKafkaProducerConfig(bootstrapServer.getValue(), configs);
         try {
             if (Objects.nonNull(
                     producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {

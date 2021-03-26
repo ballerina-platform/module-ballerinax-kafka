@@ -32,26 +32,24 @@ string manualCommitTopic = "manual-commit-test-topic";
 string receivedMessage = "";
 
 ProducerConfiguration producerConfiguration = {
-    bootstrapServers: "localhost:9092",
     clientId: "basic-producer",
     acks: ACKS_ALL,
     maxBlock: 6000,
     requestTimeout: 2000,
     retryCount: 3
 };
-Producer producer = checkpanic new (producerConfiguration);
+Producer producer = checkpanic new (DEFAULT_URL, producerConfiguration);
 
 @test:Config {}
 function consumerServiceTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic1);
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-service-test-group",
         clientId: "test-consumer-1"
     };
-    Listener consumer = check new (consumerConfiguration);
+    Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     var attachResult = check consumer.attach(consumerService);
     var startResult = check consumer.'start();
 
@@ -63,13 +61,12 @@ function consumerServiceTest() returns error? {
 function consumerFunctionsTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic2);
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
         clientId: "test-consumer-2"
     };
-    Consumer consumer = check new (consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5000);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     byte[] value = consumerRecords[0].value;
@@ -86,8 +83,7 @@ function consumerFunctionsTest() returns error? {
     dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeUnsubscribeTest() returns error? {
-    Consumer consumer = check new ({
-        bootstrapServers: "localhost:9092",
+    Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-unsubscribe-test-group",
         clientId: "test-consumer-3",
         topics: [topic1, topic2]
@@ -105,8 +101,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
 }
 function consumerSubscribeTest() returns error? {
-    Consumer consumer = check new ({
-        bootstrapServers: "localhost:9092",
+    Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
         clientId: "test-consumer-4",
         metadataMaxAge: 2000
@@ -125,14 +120,13 @@ function consumerSubscribeTest() returns error? {
 @test:Config {}
 function manualCommitTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
         clientId: "test-consumer-5",
         autoCommit: false
     };
-    Consumer consumer = check new(consumerConfiguration);
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
     int messageCount = 10;
     int count = 0;
     while (count < messageCount) {
@@ -169,14 +163,13 @@ function manualCommitTest() returns error? {
 @test:Config {}
 function nonExistingTopicPartitionTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
         clientId: "test-consumer-6",
         autoCommit: false
     };
-    Consumer consumer = check new(consumerConfiguration);
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
 
     TopicPartition nonExistingTopicPartition = {
         topic: nonExistingTopic,
@@ -195,19 +188,18 @@ function nonExistingTopicPartitionTest() returns error? {
 
 @test:Config {}
 function producerSendStringTest() returns error? {
-    Producer stringProducer = check new (producerConfiguration);
+    Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
     var result = stringProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
         clientId: "test-consumer-7"
     };
-    Consumer stringConsumer = check new (consumerConfiguration);
+    Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3000);
     test:assertEquals(consumerRecords.length(), 1);
     byte[] messageValue = consumerRecords[0].value;
@@ -223,7 +215,7 @@ function producerSendStringTest() returns error? {
     dependsOn: [producerSendStringTest]
 }
 function producerCloseTest() returns error? {
-    Producer closeTestProducer = check new (producerConfiguration);
+    Producer closeTestProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Test Message";
     var result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());

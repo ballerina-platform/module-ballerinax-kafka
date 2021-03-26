@@ -34,6 +34,7 @@ import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 import java.util.Objects;
 import java.util.Properties;
 
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
@@ -46,8 +47,9 @@ public class Register {
 
     @SuppressWarnings(UNCHECKED)
     public static Object register(Environment env, BObject listener, BObject service, Object name) {
+        BString bootStrapServer = listener.getStringValue(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> listenerConfigurations = listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
-        Properties configs = KafkaUtils.processKafkaConsumerConfig(listenerConfigurations);
+        Properties configs = KafkaUtils.processKafkaConsumerConfig(bootStrapServer.getValue(), listenerConfigurations);
         Runtime runtime = env.getRuntime();
 
         try {

@@ -108,8 +108,9 @@ public class BrokerConnection {
                     "Kafka consumer is already connected to external broker. Please close it before re-connecting " +
                             "the external broker again.");
         }
+        BString bootStrapServers = consumerObject.getStringValue(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> configs = consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
-        Properties consumerProperties = processKafkaConsumerConfig(configs);
+        Properties consumerProperties = processKafkaConsumerConfig(bootStrapServers.getValue(), configs);
         try {
             KafkaConsumer kafkaConsumer = new KafkaConsumer<>(consumerProperties);
             consumerObject.addNativeData(NATIVE_CONSUMER, kafkaConsumer);
@@ -121,7 +122,7 @@ public class BrokerConnection {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
             return createKafkaError("Cannot connect to the kafka server: " + e.getMessage());
         }
-        console.println(KAFKA_SERVERS + configs.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG));
+        console.println(KAFKA_SERVERS + bootStrapServers.getValue());
         return null;
     }
 

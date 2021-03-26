@@ -24,6 +24,9 @@ const BYTE_ARRAY = "byte[]";
 const AVRO_RECORD = "kafka:AvroRecord";
 const ANY = "anydata";
 
+// default server url
+public const DEFAULT_URL = "localhost:9092";
+
 // ********************************************
 //         Consumer-Related constants         *
 // ********************************************

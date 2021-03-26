@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
+
 // Common record types
 # Represents the topic partition position in which the consumed record is stored.
 #
@@ -38,7 +40,6 @@ public type TopicPartition record {|
 #
 # + cert - Configurations associated with `crypto:TrustStore`
 # + key - Configurations associated with `crypto:KeyStore`
-# + keyPassword - The password of the private key in the key store file. This is optional for the client
 # + protocol - SSL/TLS protocol related options
 # + ciphers - List of ciphers to be used. By default, all the available cipher suites are supported
 # + provider - Name of the security provider used for SSL connections. Default value is the default security
@@ -47,11 +48,11 @@ public type SecureSocket record {|
    crypto:TrustStore cert;
    record {|
         crypto:KeyStore keyStore;
-        string keyPassword?
+        string keyPassword?;
   |} key?;
    record {|
         Protocol name;
-        string versions? = []; // todo: make this string[]
+        string versions?; // todo: make this string[]
    |} protocol;
    string ciphers?; // todo: make this string[]
    string provider?;
@@ -79,7 +80,6 @@ public type AuthenticationConfiguration record {|
 // Consumer-related records
 # Configurations related to consumer endpoint.
 #
-# + bootstrapServers - List of remote server endpoints of kafka brokers
 # + groupId - Unique string that identifies the consumer
 # + topics - Topics to be subscribed by the consumer
 # + offsetReset - Offset reset strategy if no initial offset
@@ -127,7 +127,6 @@ public type AuthenticationConfiguration record {|
 # + authenticationConfiguration - Authentication-related configurations for the Kafka consumer
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ConsumerConfiguration record {|
-    string bootstrapServers;
     string groupId?;
     string[] topics?;
     OffsetResetMethod offsetReset?;
@@ -212,7 +211,6 @@ public type AvroGenericRecord record {
 // Producer-related records
 # Represents the Kafka Producer configuration.
 #
-# + bootstrapServers - List of remote server endpoints of Kafka brokers
 # + acks - Number of acknowledgments
 # + compressionType - Compression type to be used for messages
 # + clientId - Identifier to be used for server side logging
@@ -250,7 +248,6 @@ public type AvroGenericRecord record {
 # + authenticationConfiguration - Authentication-related configurations for the Kafka producer
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ProducerConfiguration record {|
-    string bootstrapServers;
     ProducerAcks acks = ACKS_SINGLE;
     CompressionType compressionType = COMPRESSION_NONE;
     string clientId?;
