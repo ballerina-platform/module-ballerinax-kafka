@@ -186,7 +186,7 @@ public class KafkaConstants {
     public static final BString SSL_CIPHER_SUITES_CONFIG = StringUtils.fromString("ciphers");
 
     // SASL Configuration parameters
-    public static final BString AUTHENTICATION_CONFIGURATION = StringUtils.fromString("authenticationConfiguration");
+    public static final BString AUTHENTICATION_CONFIGURATION = StringUtils.fromString("auth");
     public static final BString AUTHENTICATION_MECHANISM = StringUtils.fromString("mechanism");
     public static final BString USERNAME = StringUtils.fromString("username");
     public static final BString PASSWORD = StringUtils.fromString("password");

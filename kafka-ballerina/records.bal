@@ -124,7 +124,7 @@ public type AuthenticationConfiguration record {|
 # + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
 # + decoupleProcessing - Decouples processing
 # + secureSocket - Configurations related to SSL/TLS encryption
-# + authenticationConfiguration - Authentication-related configurations for the Kafka consumer
+# + auth - Authentication-related configurations for the Kafka consumer
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ConsumerConfiguration record {|
     string groupId?;
@@ -171,7 +171,7 @@ public type ConsumerConfiguration record {|
     boolean decoupleProcessing = false;
 
     SecureSocket secureSocket?;
-    AuthenticationConfiguration authenticationConfiguration?;
+    AuthenticationConfiguration auth?;
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 
@@ -245,7 +245,7 @@ public type AvroGenericRecord record {
 # + transactionTimeout - Timeout (in seconds) for transaction status update from the producer
 # + enableIdempotence - Exactly one copy of each message is written to the stream when enabled
 # + secureSocket - Configurations related to SSL/TLS encryption
-# + authenticationConfiguration - Authentication-related configurations for the Kafka producer
+# + auth - Authentication-related configurations for the Kafka producer
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ProducerConfiguration record {|
     ProducerAcks acks = ACKS_SINGLE;
@@ -283,7 +283,7 @@ public type ProducerConfiguration record {|
     boolean enableIdempotence = false;
 
     SecureSocket secureSocket?;
-    AuthenticationConfiguration authenticationConfiguration?;
+    AuthenticationConfiguration auth?;
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 
