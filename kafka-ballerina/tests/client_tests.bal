@@ -197,7 +197,7 @@ function nonExistingTopicPartitionTest() returns error? {
 function producerSendStringTest() returns error? {
     Producer stringProducer = check new (producerConfiguration);
     string message = "Hello, Ballerina";
-    check stringProducer->send({ topic: topic3, value: message.toBytes() });
+    Error? result = stringProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
@@ -225,9 +225,9 @@ function producerSendStringTest() returns error? {
 function producerCloseTest() returns error? {
     Producer closeTestProducer = check new (producerConfiguration);
     string message = "Test Message";
-    check closeTestProducer->send({ topic: topic3, value: message.toBytes() });
+    Error? result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    check closeTestProducer->close();
+    result = closeTestProducer->close();
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertTrue(result is error);
