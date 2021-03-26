@@ -32,28 +32,26 @@ string manualCommitTopic = "manual-commit-test-topic";
 string receivedMessage = "";
 
 ProducerConfiguration producerConfiguration = {
-    bootstrapServers: "localhost:9092",
     clientId: "basic-producer",
     acks: ACKS_ALL,
-    maxBlock: 6000,
-    requestTimeout: 2000,
+    maxBlock: 6,
+    requestTimeout: 2,
     retryCount: 3
 };
-Producer producer = checkpanic new (producerConfiguration);
+Producer producer = checkpanic new (DEFAULT_URL, producerConfiguration);
 
 @test:Config {}
 function consumerServiceTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic1);
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-service-test-group",
         clientId: "test-consumer-1"
     };
-    Listener consumer = check new (consumerConfiguration);
-    var attachResult = check consumer.attach(consumerService);
-    var startResult = check consumer.'start();
+    Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
+    check consumer.attach(consumerService);
+    check consumer.'start();
 
     runtime:sleep(7);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
@@ -63,14 +61,13 @@ function consumerServiceTest() returns error? {
 function consumerFunctionsTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic2);
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
         clientId: "test-consumer-2"
     };
-    Consumer consumer = check new (consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5000);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     byte[] value = consumerRecords[0].value;
     string|error message = 'string:fromBytes(value);
@@ -79,15 +76,14 @@ function consumerFunctionsTest() returns error? {
     } else {
         test:assertFail("Invalid message type received. Expected string");
     }
-    var closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {
     dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeUnsubscribeTest() returns error? {
-    Consumer consumer = check new ({
-        bootstrapServers: "localhost:9092",
+    Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-unsubscribe-test-group",
         clientId: "test-consumer-3",
         topics: [topic1, topic2]
@@ -95,51 +91,49 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 2);
 
-    var result = check consumer->unsubscribe();
+    check consumer->unsubscribe();
     subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
-    var closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {
     dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
 }
 function consumerSubscribeTest() returns error? {
-    Consumer consumer = check new ({
-        bootstrapServers: "localhost:9092",
+    Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
         clientId: "test-consumer-4",
-        metadataMaxAge: 2000
+        metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
     test:assertEquals(availableTopics.length(), 5);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
-    var result = check consumer->subscribeWithPattern("test.*");
-    var pollResult = consumer->poll(1000); // Polling to force-update the metadata
+    check consumer->subscribeWithPattern("test.*");
+    ConsumerRecord[]|Error pollResult = consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.length(), 3);
-    var closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {}
 function manualCommitTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
         clientId: "test-consumer-5",
         autoCommit: false
     };
-    Consumer consumer = check new(consumerConfiguration);
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
     int messageCount = 10;
     int count = 0;
     while (count < messageCount) {
         check sendMessage(count.toString().toBytes(), manualCommitTopic);
         count += 1;
     }
-    var messages = consumer->poll(1000);
+    ConsumerRecord[]|Error messages = consumer->poll(1);
     TopicPartition topicPartition = {
         topic: manualCommitTopic,
         partition: 0
@@ -149,13 +143,13 @@ function manualCommitTest() returns error? {
         offset: 0
     };
 
-    var commitResult = check consumer->commitOffset([partitionOffset]);
-    var committedOffset = check consumer->getCommittedOffset(topicPartition);
+    check consumer->commitOffset([partitionOffset]);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
     int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, 0);
 
-    var commitAllResult = check consumer->'commit();
+    check consumer->'commit();
     committedOffset = check consumer->getCommittedOffset(topicPartition);
     committedPartitionOffset = <PartitionOffset>committedOffset;
     offsetValue = committedPartitionOffset.offset;
@@ -163,52 +157,50 @@ function manualCommitTest() returns error? {
 
     int positionOffset = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(positionOffset, messageCount);
-    var closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {}
 function nonExistingTopicPartitionTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
         clientId: "test-consumer-6",
         autoCommit: false
     };
-    Consumer consumer = check new(consumerConfiguration);
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
 
     TopicPartition nonExistingTopicPartition = {
         topic: nonExistingTopic,
         partition: 999
     };
-    var committedOffset = check consumer->getCommittedOffset(nonExistingTopicPartition);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(nonExistingTopicPartition);
     test:assertEquals(committedOffset, ());
 
-    var nonExistingPositionOffset = consumer->getPositionOffset(nonExistingTopicPartition);
+    int|Error nonExistingPositionOffset = consumer->getPositionOffset(nonExistingTopicPartition);
     test:assertTrue(nonExistingPositionOffset is Error);
     Error positionOffsetError = <Error>nonExistingPositionOffset;
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
-    var closeResult = consumer->close();
+    check consumer->close();
 }
 
 @test:Config {}
 function producerSendStringTest() returns error? {
-    Producer stringProducer = check new (producerConfiguration);
+    Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
-    var result = stringProducer->send({ topic: topic3, value: message.toBytes() });
+    Error? result = stringProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
 
     ConsumerConfiguration consumerConfiguration = {
-        bootstrapServers: "localhost:9092",
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
         clientId: "test-consumer-7"
     };
-    Consumer stringConsumer = check new (consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3000);
+    Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
     test:assertEquals(consumerRecords.length(), 1);
     byte[] messageValue = consumerRecords[0].value;
     string|error messageConverted = 'string:fromBytes(messageValue);
@@ -223,9 +215,9 @@ function producerSendStringTest() returns error? {
     dependsOn: [producerSendStringTest]
 }
 function producerCloseTest() returns error? {
-    Producer closeTestProducer = check new (producerConfiguration);
+    Producer closeTestProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Test Message";
-    var result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
+    Error? result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = closeTestProducer->close();
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());

@@ -25,12 +25,15 @@ public client class Producer {
     public ProducerConfiguration? producerConfig = ();
     private string keySerializerType;
     private string valueSerializerType;
+    private string|string[] bootstrapServers;
 
     # Creates a new Kafka `Producer`.
     #
+    # + bootstrapServers - List of remote server endpoints of kafka brokers
     # + config - Configurations related to initializing a Kafka `Producer`
     # + return - A `kafka:Error` if closing the producer failed or else '()'
-    public isolated function init(ProducerConfiguration config) returns Error? {
+    public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error? {
+        self.bootstrapServers = bootstrapServers;
         self.producerConfig = config;
         self.keySerializerType = SER_BYTE_ARRAY;
         self.valueSerializerType = SER_BYTE_ARRAY;

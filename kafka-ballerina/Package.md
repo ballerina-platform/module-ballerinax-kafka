@@ -19,20 +19,18 @@ For examples on the usage of the operations, see the following.
 1. Initialize the Kafka message producer.
 ```ballerina
 kafka:ProducerConfiguration producerConfiguration = {
-    bootstrapServers: "localhost:9092",
     clientId: "basic-producer",
     acks: "all",
-    retryCount: 3,
-    valueSerializerType: kafka:SER_BYTE_ARRAY,
-    keySerializerType: kafka:SER_BYTE_ARRAY
+    retryCount: 3
 };
 
-kafka:Producer kafkaProducer = new (producerConfiguration);
+kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL, producerConfiguration);
 ```
 2. Use the `kafka:Producer` to publish messages. 
 ```ballerina
 string message = "Hello World, Ballerina";
-kafka:Error? result = kafkaProducer->send(message.toBytes(), "kafka-topic", key = 1);
+check kafkaProducer->send({ topic: "test-kafka-topic",
+                            value: message.toBytes() });
 ```
 
 ##### Consuming Messages
@@ -40,27 +38,24 @@ kafka:Error? result = kafkaProducer->send(message.toBytes(), "kafka-topic", key 
 1. Initializing the Kafka message consumer. 
 ```ballerina
 kafka:ConsumerConfiguration consumerConfiguration = {
-    bootstrapServers: "localhost:9092",
     groupId: "group-id",
     offsetReset: "earliest",
     topics: ["kafka-topic"]
 };
 
-kafka:Consumer consumer = new (consumerConfiguration);
+kafka:Consumer consumer = check new (kafka:DEFAULT_URL, consumerConfiguration);
 ```
 2. Use the `kafka:Consumer` as a simple record consumer.
 ```ballerina
-kafka:ConsumerRecord[]|kafka:Error result = consumer->poll(1000);
+kafka:ConsumerRecord[]|kafka:Error result = consumer->poll(1);
 ```
-3. Use the `kafka:Consumer` as a listener.
+3. Use the `kafka:Listener` as a listener.
 ```ballerina
-listener kafka:Listener lis = new (consumerConfiguration);
+listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfiguration);
 
-service kafkaService on lis {
-    // This resource will be executed when a message is published to the
-    // subscribed topic/topics.
-    remote function onConsumerRecord(kafka:Caler caller,
-            kafka:ConsumerRecord[] records) {
+service kafka:Service on kafkaListener {
+    remote function onConsumerRecord(kafka:Caller caller,
+                                kafka:ConsumerRecord[] records) {
     }
 }
 ```

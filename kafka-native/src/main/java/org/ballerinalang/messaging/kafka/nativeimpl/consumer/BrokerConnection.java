@@ -20,6 +20,7 @@ package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -51,7 +52,8 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getClientIdFromProperties;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromBDecimal;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getServerUrls;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.processKafkaConsumerConfig;
 
@@ -70,12 +72,12 @@ public class BrokerConnection {
      * @param duration       Duration in milliseconds to try the operation.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object close(Environment environment, BObject consumerObject, long duration) {
+    public static Object close(Environment environment, BObject consumerObject, BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         try {
             if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value
                 closeWithDuration(kafkaConsumer, apiTimeout);
@@ -108,8 +110,9 @@ public class BrokerConnection {
                     "Kafka consumer is already connected to external broker. Please close it before re-connecting " +
                             "the external broker again.");
         }
+        Object bootStrapServers = consumerObject.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> configs = consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
-        Properties consumerProperties = processKafkaConsumerConfig(configs);
+        Properties consumerProperties = processKafkaConsumerConfig(bootStrapServers, configs);
         try {
             KafkaConsumer kafkaConsumer = new KafkaConsumer<>(consumerProperties);
             consumerObject.addNativeData(NATIVE_CONSUMER, kafkaConsumer);
@@ -121,7 +124,7 @@ public class BrokerConnection {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
             return createKafkaError("Cannot connect to the kafka server: " + e.getMessage());
         }
-        console.println(KAFKA_SERVERS + configs.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG));
+        console.println(KAFKA_SERVERS + getServerUrls(bootStrapServers));
         return null;
     }
 

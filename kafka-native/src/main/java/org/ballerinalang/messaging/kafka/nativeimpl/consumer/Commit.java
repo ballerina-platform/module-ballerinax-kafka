@@ -20,6 +20,7 @@ package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BObject;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -41,7 +42,7 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONS
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromBDecimal;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionToMetadataMap;
 
 /**
@@ -77,13 +78,14 @@ public class Commit {
      * @param duration       Duration in milliseconds to try the operation.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object commitOffset(Environment environment, BObject consumerObject, BArray offsets, long duration) {
+    public static Object commitOffset(Environment environment, BObject consumerObject, BArray offsets,
+                                      BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
 
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = getPartitionToMetadataMap(offsets);
         try {
             if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value

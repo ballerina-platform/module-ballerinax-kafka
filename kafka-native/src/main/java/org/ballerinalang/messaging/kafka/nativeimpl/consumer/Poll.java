@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -40,6 +41,7 @@ import java.time.Duration;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getConsumerRecord;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getMilliSeconds;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateConsumerRecord;
 
 /**
@@ -54,13 +56,13 @@ public class Poll {
      * @param timeout        Duration in milliseconds to try the operation.
      * @return Ballerina {@code ConsumerRecords[]} after the polling.
      */
-    public static Object poll(Environment env, BObject consumerObject, long timeout) {
+    public static Object poll(Environment env, BObject consumerObject, BDecimal timeout) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
         String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-        Duration duration = Duration.ofMillis(timeout);
+        Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
         BArray consumerRecordsArray = ValueCreator.createArrayValue(
                 TypeCreator.createArrayType(getConsumerRecord().getType()));
         try {
