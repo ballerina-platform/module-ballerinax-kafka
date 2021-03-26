@@ -53,6 +53,7 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaErro
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getClientIdFromProperties;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromBDecimal;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getServerUrls;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.processKafkaConsumerConfig;
 
@@ -109,9 +110,9 @@ public class BrokerConnection {
                     "Kafka consumer is already connected to external broker. Please close it before re-connecting " +
                             "the external broker again.");
         }
-        BString bootStrapServers = consumerObject.getStringValue(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
+        Object bootStrapServers = consumerObject.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> configs = consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
-        Properties consumerProperties = processKafkaConsumerConfig(bootStrapServers.getValue(), configs);
+        Properties consumerProperties = processKafkaConsumerConfig(bootStrapServers, configs);
         try {
             KafkaConsumer kafkaConsumer = new KafkaConsumer<>(consumerProperties);
             consumerObject.addNativeData(NATIVE_CONSUMER, kafkaConsumer);
@@ -123,7 +124,7 @@ public class BrokerConnection {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
             return createKafkaError("Cannot connect to the kafka server: " + e.getMessage());
         }
-        console.println(KAFKA_SERVERS + bootStrapServers.getValue());
+        console.println(KAFKA_SERVERS + getServerUrls(bootStrapServers));
         return null;
     }
 

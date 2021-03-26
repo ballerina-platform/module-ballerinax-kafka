@@ -73,9 +73,9 @@ public class ProducerActions {
      * @return {@code BError}, if there's any error, null otherwise.
      */
     public static Object init(BObject producerObject) {
-        BString bootstrapServer = producerObject.getStringValue(PRODUCER_BOOTSTRAP_SERVERS_CONFIG);
+        Object bootstrapServer = producerObject.get(PRODUCER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> configs = producerObject.getMapValue(PRODUCER_CONFIG_FIELD_NAME);
-        Properties producerProperties = processKafkaProducerConfig(bootstrapServer.getValue(), configs);
+        Properties producerProperties = processKafkaProducerConfig(bootstrapServer, configs);
         try {
             if (Objects.nonNull(
                     producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {

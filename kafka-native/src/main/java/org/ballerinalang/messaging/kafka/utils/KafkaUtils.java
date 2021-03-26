@@ -20,6 +20,7 @@ package org.ballerinalang.messaging.kafka.utils;
 
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
@@ -27,6 +28,7 @@ import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
@@ -97,9 +99,9 @@ public class KafkaUtils {
         }
     }
 
-    public static Properties processKafkaConsumerConfig(String bootStrapServers, BMap<BString, Object> configurations) {
+    public static Properties processKafkaConsumerConfig(Object bootStrapServers, BMap<BString, Object> configurations) {
         Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrapServers);
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getServerUrls(bootStrapServers));
         addStringParamIfPresent(ConsumerConfig.GROUP_ID_CONFIG, configurations, properties,
                                 KafkaConstants.CONSUMER_GROUP_ID_CONFIG);
         addStringParamIfPresent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, configurations, properties,
@@ -207,9 +209,9 @@ public class KafkaUtils {
         return properties;
     }
 
-    public static Properties processKafkaProducerConfig(String bootstrapServers, BMap<BString, Object> configurations) {
+    public static Properties processKafkaProducerConfig(Object bootstrapServers, BMap<BString, Object> configurations) {
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getServerUrls(bootstrapServers));
         addStringParamIfPresent(ProducerConfig.ACKS_CONFIG, configurations,
                                 properties, KafkaConstants.PRODUCER_ACKS_CONFIG);
         addStringParamIfPresent(ProducerConfig.COMPRESSION_TYPE_CONFIG, configurations,
@@ -764,12 +766,6 @@ public class KafkaUtils {
         KafkaMetricsUtil.reportNewProducer(producerObject);
     }
 
-    public static String getBrokerNames(BObject listener) {
-        BString bootstrapServers = listener.getStringValue(
-                KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
-        return bootstrapServers.getValue();
-    }
-
     public static String getTopicNamesString(List<String> topicsList) {
         return String.join(", ", topicsList);
     }
@@ -805,6 +801,17 @@ public class KafkaUtils {
             return KafkaObservabilityConstants.UNKNOWN;
         }
         return clientId;
+    }
+
+    public static String getServerUrls(Object bootstrapServer) {
+        if (TypeUtils.getType(bootstrapServer).getTag() == TypeTags.ARRAY_TAG) {
+            // if string[]
+            String[] serverUrls = ((BArray) bootstrapServer).getStringArray();
+            return String.join(",", serverUrls);
+        } else {
+            // if string
+            return ((BString) bootstrapServer).getValue();
+        }
     }
 
     public static Object invokeMethodSync(Runtime runtime, BObject object, String methodName, String strandName,

@@ -47,9 +47,9 @@ public class Register {
 
     @SuppressWarnings(UNCHECKED)
     public static Object register(Environment env, BObject listener, BObject service, Object name) {
-        BString bootStrapServer = listener.getStringValue(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
+        Object bootStrapServer = listener.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> listenerConfigurations = listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
-        Properties configs = KafkaUtils.processKafkaConsumerConfig(bootStrapServer.getValue(), listenerConfigurations);
+        Properties configs = KafkaUtils.processKafkaConsumerConfig(bootStrapServer, listenerConfigurations);
         Runtime runtime = env.getRuntime();
 
         try {

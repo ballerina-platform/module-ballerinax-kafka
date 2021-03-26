@@ -23,14 +23,14 @@ public client class Listener {
     public ConsumerConfiguration consumerConfig;
     private string keyDeserializerType;
     private string valueDeserializerType;
-    private string bootstrapServers;
+    private string|string[] bootstrapServers;
 
     # Creates a new Kafka `Listener`.
     #
     # + bootstrapServers - List of remote server endpoints of kafka brokers
     # + config - Configurations related to consumer endpoint
     # + return - A `kafka:Error` if an error is encountered or else '()'
-    public isolated function init (string bootstrapServers, *ConsumerConfiguration config) returns Error? {
+    public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers;
         self.consumerConfig = config;
         self.keyDeserializerType = DES_BYTE_ARRAY;
