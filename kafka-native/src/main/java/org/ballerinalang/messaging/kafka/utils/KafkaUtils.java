@@ -696,6 +696,21 @@ public class KafkaUtils {
         }
     }
 
+    public static int getIntFromBDecimal(BDecimal bDecimal, Logger logger, String name) {
+        try {
+            return  getMilliSeconds(bDecimal);
+        } catch (ArithmeticException e) {
+            logger.warn("The value set for {} needs to be less than {}. The {} value is set to {}", name,
+                    Integer.MAX_VALUE, name, Integer.MAX_VALUE);
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    public static int getMilliSeconds(BDecimal longValue) {
+        BigDecimal valueInSeconds = longValue.decimalValue();
+        return  (valueInSeconds).multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
+    }
+
     /**
      * Get the {@code Long} value from an {@code Object}.
      *

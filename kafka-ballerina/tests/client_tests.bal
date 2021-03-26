@@ -34,8 +34,8 @@ string receivedMessage = "";
 ProducerConfiguration producerConfiguration = {
     clientId: "basic-producer",
     acks: ACKS_ALL,
-    maxBlock: 6000,
-    requestTimeout: 2000,
+    maxBlock: 6,
+    requestTimeout: 2,
     retryCount: 3
 };
 Producer producer = checkpanic new (DEFAULT_URL, producerConfiguration);
@@ -67,7 +67,7 @@ function consumerFunctionsTest() returns error? {
         clientId: "test-consumer-2"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5000);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     byte[] value = consumerRecords[0].value;
     string|error message = 'string:fromBytes(value);
@@ -104,14 +104,14 @@ function consumerSubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
         clientId: "test-consumer-4",
-        metadataMaxAge: 2000
+        metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
     test:assertEquals(availableTopics.length(), 5);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     var result = check consumer->subscribeWithPattern("test.*");
-    var pollResult = consumer->poll(1000); // Polling to force-update the metadata
+    var pollResult = consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.length(), 3);
     var closeResult = consumer->close();
@@ -133,7 +133,7 @@ function manualCommitTest() returns error? {
         check sendMessage(count.toString().toBytes(), manualCommitTopic);
         count += 1;
     }
-    var messages = consumer->poll(1000);
+    var messages = consumer->poll(1);
     TopicPartition topicPartition = {
         topic: manualCommitTopic,
         partition: 0
@@ -200,7 +200,7 @@ function producerSendStringTest() returns error? {
         clientId: "test-consumer-7"
     };
     Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3000);
+    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
     test:assertEquals(consumerRecords.length(), 1);
     byte[] messageValue = consumerRecords[0].value;
     string|error messageConverted = 'string:fromBytes(messageValue);

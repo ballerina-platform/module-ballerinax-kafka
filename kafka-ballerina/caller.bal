@@ -31,9 +31,9 @@ public client class Caller {
     # Commits given offsets and partitions for the given topics, for service.
     #
     # + offsets - Offsets to be commited
-    # + duration - Timeout duration for the commit operation execution
+    # + duration - Timeout duration (in seconds) for the commit operation execution
     # + return - `kafka:Error` if an error is encountered or else nil
-    isolated remote function commitOffset(PartitionOffset[] offsets, int duration = -1) returns Error? {
+    isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? {
         return consumerCommitOffset(self, offsets, duration);
     }
 }

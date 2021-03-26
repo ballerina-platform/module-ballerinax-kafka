@@ -20,6 +20,7 @@ package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -51,7 +52,7 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.UNCHECKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getClientIdFromProperties;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromBDecimal;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.processKafkaConsumerConfig;
 
@@ -70,12 +71,12 @@ public class BrokerConnection {
      * @param duration       Duration in milliseconds to try the operation.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object close(Environment environment, BObject consumerObject, long duration) {
+    public static Object close(Environment environment, BObject consumerObject, BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         try {
             if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value
                 closeWithDuration(kafkaConsumer, apiTimeout);

@@ -20,6 +20,7 @@ package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -48,6 +49,7 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONS
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getDefaultApiTimeout;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromBDecimal;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getIntFromLong;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionOffsetArrayFromOffsetMap;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionList;
@@ -69,12 +71,12 @@ public class GetOffsets {
      * @return ballerina {@code PartitionOffset} array or @{BError} if an error occurred.
      */
     public static Object getBeginningOffsets(Environment environment, BObject consumerObject,
-                                             BArray topicPartitions, long duration) {
+                                             BArray topicPartitions, BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         List<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
         Map<TopicPartition, Long> offsetMap;
         try {
@@ -102,12 +104,12 @@ public class GetOffsets {
      * @return ballerina {@code PartitionOffset} value or @{BError} if an error occurred.
      */
     public static Object getCommittedOffset(Environment environment, BObject consumerObject, BMap<BString,
-            Object> topicPartition, long duration) {
+            Object> topicPartition, BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         String topic = topicPartition.getStringValue(ALIAS_TOPIC).getValue();
         Long partition = topicPartition.getIntValue(ALIAS_PARTITION);
         TopicPartition tp = new TopicPartition(topic, getIntFromLong(partition, logger, ALIAS_PARTITION.getValue()));
@@ -143,12 +145,12 @@ public class GetOffsets {
      * @return ballerina {@code PartitionOffset} array or @{BError} if an error occurred.
      */
     public static Object getEndOffsets(Environment environment, BObject consumerObject, BArray topicPartitions,
-                                       long duration) {
+                                       BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
         Map<TopicPartition, Long> offsetMap;
 
@@ -178,12 +180,12 @@ public class GetOffsets {
      * @return ballerina {@code PartitionOffset} value or @{BError} if an error occurred.
      */
     public static Object getPositionOffset(Environment environment, BObject consumerObject, BMap<BString,
-            Object> topicPartition, long duration) {
+            Object> topicPartition, BDecimal duration) {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         Properties consumerProperties = (Properties) consumerObject.getNativeData(NATIVE_CONSUMER_CONFIG);
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
-        int apiTimeout = getIntFromLong(duration, logger, ALIAS_DURATION);
+        int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         String topic = topicPartition.getStringValue(ALIAS_TOPIC).getValue();
         Long partition = topicPartition.getIntValue(ALIAS_PARTITION);
         TopicPartition tp = new TopicPartition(topic, getIntFromLong(partition, logger, ALIAS_PARTITION.getValue()));
