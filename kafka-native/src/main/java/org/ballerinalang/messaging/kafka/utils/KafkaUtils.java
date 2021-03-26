@@ -293,49 +293,41 @@ public class KafkaUtils {
     private static void processSslProperties(BMap<BString, Object> configurations, Properties configParams) {
         BMap<BString, Object> secureSocket = (BMap<BString, Object>) configurations.get(
                 KafkaConstants.SECURE_SOCKET);
-        addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
-                                KafkaConstants.KEYSTORE_TYPE_CONFIG);
+        // keystore
+        BMap<BString, Object> keyConfig = (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEY_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                                (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
                                 KafkaConstants.PASSWORD_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_KEYMANAGER_ALGORITHM_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
-                                KafkaConstants.KEYMANAGER_ALGORITHM_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
-                                configParams, KafkaConstants.TRUSTSTORE_TYPE_CONFIG);
+        addStringParamIfPresent(SslConfigs.SSL_KEY_PASSWORD_CONFIG, keyConfig, configParams,
+                                KafkaConstants.SSL_KEY_PASSWORD_CONFIG);
+        // truststore
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
                                 (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
                                 configParams, KafkaConstants.LOCATION_CONFIG);
         addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG,
                                 (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
                                 configParams, KafkaConstants.PASSWORD_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_TRUSTMANAGER_ALGORITHM_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
-                                configParams, KafkaConstants.TRUSTMANAGER_ALGORITHM_CONFIG);
+        // ciphers
+        addStringParamIfPresent(SslConfigs.SSL_CIPHER_SUITES_CONFIG, configurations, configParams,
+                KafkaConstants.SSL_CIPHER_SUITES_CONFIG); // todo: list
+        // provider
+        addStringParamIfPresent(SslConfigs.SSL_PROVIDER_CONFIG, configurations, configParams,
+                KafkaConstants.SSL_PROVIDER_CONFIG);
+
         addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
                                 (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
-                                KafkaConstants.SECURITY_PROTOCOL_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
-                                KafkaConstants.SSL_PROTOCOL_CONFIG);
+                                KafkaConstants.SECURITY_PROTOCOL_CONFIG); // todo - check
+
+        // protocol
+        BMap<BString, Object> protocol = (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG);
+        addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG, protocol, configParams,
+                                KafkaConstants.SSL_PROTOCOL_NAME);
         addStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG), configParams,
-                                KafkaConstants.ENABLED_PROTOCOLS_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_PROVIDER_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_PROVIDER_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_KEY_PASSWORD_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_KEY_PASSWORD_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_CIPHER_SUITES_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_CIPHER_SUITES_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG, configurations, configParams,
-                                KafkaConstants.SSL_SECURE_RANDOM_IMPLEMENTATION_CONFIG);
+                                protocol, configParams,
+                                KafkaConstants.SSL_PROTOCOL_VERSIONS); // todo: list
     }
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)

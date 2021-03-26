@@ -34,72 +34,35 @@ public type TopicPartition record {|
 |};
 
 // Security-related records
-# Configurations for facilitating secure communication with the Kafka server.
+# Configurations for secure communication with the Kafka server.
 #
-# + keyStore - Configurations associated with the KeyStore
-# + trustStore - Configurations associated with the TrustStore
-# + protocol - Configurations related to the SSL/TLS protocol and the version to be used
-# + sslProvider - The name of the security provider used for SSL connections. Default value is the default security
+# + cert - Configurations associated with `crypto:TrustStore`
+# + key - Configurations associated with `crypto:KeyStore`
+# + keyPassword - The password of the private key in the key store file. This is optional for the client
+# + protocol - SSL/TLS protocol related options
+# + ciphers - List of ciphers to be used. By default, all the available cipher suites are supported
+# + provider - Name of the security provider used for SSL connections. Default value is the default security
 #                 provider of the JVM
-# + sslKeyPassword - The password of the private key in the key store file. This is optional for the client
-# + sslCipherSuites - A list of Cipher suites. This is a named combination of the authentication, encryption, MAC, and key
-#                     exchange algorithms used to negotiate the security settings for a network connection using the TLS
-#                     or SSL network protocols. By default, all the available Cipher suites are supported
-# + sslEndpointIdentificationAlgorithm - The endpoint identification algorithm to validate the server hostname using
-#                                        the server certificate
-# + sslSecureRandomImplementation - The `SecureRandom` PRNG implementation to use for the SSL cryptography operations
 public type SecureSocket record {|
-    KeyStore keyStore;
-    TrustStore trustStore;
-    Protocols protocol;
-    string sslProvider?;
-    string sslKeyPassword?;
-    string sslCipherSuites?;
-    string sslEndpointIdentificationAlgorithm?;
-    string sslSecureRandomImplementation?;
+   crypto:TrustStore cert;
+   record {|
+        crypto:KeyStore keyStore;
+        string keyPassword?
+  |} key?;
+   record {|
+        Protocol name;
+        string versions? = []; // todo: make this string[]
+   |} protocol;
+   string ciphers?; // todo: make this string[]
+   string provider?;
 |};
 
-# Configurations related to the KeyStore.
-#
-# + keyStoreType - The file format of the KeyStore file. This is optional for the client
-# + location - The location of the KeyStore file. This is optional for the client and can be used for two-way
-#              authentication for the client
-# + password - The store password for the KeyStore file. This is optional for the client and is only needed if
-#              the `ssl.keystore.location` is configured
-# + keyManagerAlgorithm - The algorithm used by the key manager factory for SSL connections. The default value is the
-#                         key manager factory algorithm configured for the JVM
-public type KeyStore record {|
-    string keyStoreType?;
-    string location;
-    string password;
-    string keyManagerAlgorithm?;
-|};
-
-# Configurations related to the TrustStore.
-#
-# + trustStoreType - The file format of the TrustStore file
-# + location - The location of the TrustStore file
-# + password - The password for the TrustStore file. If a password is not set, access to the TrustStore is still
-#              available but integrity checking is disabled
-# + trustManagerAlgorithm - The algorithm used by the trust manager factory for SSL connections. The default value is
-#                           the trust manager factory algorithm configured for the JVM
-public type TrustStore record {|
-    string trustStoreType?;
-    string location;
-    string password;
-    string trustManagerAlgorithm?;
-|};
-
-# Configurations related to the SSL/TLS protocol and the versions to be used.
-#
-# + sslProtocol - The SSL protocol used to generate the SSLContext. The default setting is TLS, which is fine for most
-#                 cases. Allowed values in recent JVMs are TLS, TLSv1.1, and TLSv1.2. Also, SSL, SSLv2 and SSLv3 may be
-#                 supported in older JVMs but their usage is discouraged due to known security vulnerabilities
-# + sslProtocolVersions - The list of protocols enabled for SSL connections
-public type Protocols record {|
-    string sslProtocol;
-    string sslProtocolVersions;
-|};
+# Represents protocol options.
+public enum Protocol {
+   SSL,
+   TLS,
+   DTLS
+}
 
 # Configurations related to Kafka authentication mechanisms.
 #
