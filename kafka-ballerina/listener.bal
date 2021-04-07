@@ -39,7 +39,7 @@ public client class Listener {
 
         string[]? topics = config?.topics;
         if (topics is string[]){
-            check self->subscribe(topics);
+            check self.subscribe(topics);
         }
     }
 
