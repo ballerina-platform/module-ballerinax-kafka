@@ -1,0 +1,6 @@
+[plugin]
+id = "kafka-compiler-plugin"
+class = "io.ballerina.stdlib.kafka.plugin.KafkaCompilerPlugin"
+
+[[dependency]]
+path = "../kafka-compiler-plugin/build/libs/kafka-compiler-plugin-@project.version@.jar"
