@@ -34,6 +34,8 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.kafka.plugin.PluginUtils.validateModuleId;
+
 /**
  * Kafka service compilation analysis task.
  */
@@ -64,19 +66,13 @@ public class KafkaServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysis
                     for (TypeSymbol memberSymbol : members) {
                         Optional<ModuleSymbol> module = memberSymbol.getModule();
                         if (module.isPresent()) {
-                            String moduleName = module.get().id().moduleName();
-                            String orgName = module.get().id().orgName();
-                            isKafkaService = moduleName.equals(PluginConstants.PACKAGE_PREFIX) &&
-                                    orgName.equals(PluginConstants.PACKAGE_ORG);
+                            isKafkaService = validateModuleId(module.get());
                         }
                     }
                 } else {
                     Optional<ModuleSymbol> module = listeners.get(0).getModule();
                     if (module.isPresent()) {
-                        String moduleName = module.get().id().moduleName();
-                        String orgName = module.get().id().orgName();
-                        isKafkaService = moduleName.equals(PluginConstants.PACKAGE_PREFIX) &&
-                                orgName.equals(PluginConstants.PACKAGE_ORG);
+                        isKafkaService = validateModuleId(module.get());
                     }
                 }
             }

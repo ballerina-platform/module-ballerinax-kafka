@@ -52,18 +52,16 @@ public class KafkaServiceValidator {
         validateAnnotation(this.context);
         FunctionDefinitionNode onConsumerRecord = null;
 
-        if (!memberNodes.isEmpty()) {
-            for (Node node : memberNodes) {
-                FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
-                if (node.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
-                    MethodSymbol methodSymbol = PluginUtils.getMethodSymbol(context, functionDefinitionNode);
-                    Optional<String> functionName = methodSymbol.getName();
-                    if (functionName.isPresent()) {
-                        if (functionName.get().equals(PluginConstants.ON_RECORDS_FUNC)) {
-                            onConsumerRecord = functionDefinitionNode;
-                        } else {
-                            validateNonStanFunction(functionDefinitionNode);
-                        }
+        for (Node node : memberNodes) {
+            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
+            if (node.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
+                MethodSymbol methodSymbol = PluginUtils.getMethodSymbol(context, functionDefinitionNode);
+                Optional<String> functionName = methodSymbol.getName();
+                if (functionName.isPresent()) {
+                    if (functionName.get().equals(PluginConstants.ON_RECORDS_FUNC)) {
+                        onConsumerRecord = functionDefinitionNode;
+                    } else {
+                        validateNonStanFunction(functionDefinitionNode);
                     }
                 }
             }

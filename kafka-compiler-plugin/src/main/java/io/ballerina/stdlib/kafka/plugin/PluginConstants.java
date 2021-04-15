@@ -46,17 +46,17 @@ public class PluginConstants {
      * Compilation errors.
      */
     enum CompilationErrors {
-        NO_ON_CONSUMER_RECORD("Service must have remote function onConsumerRecord.",
+        NO_ON_CONSUMER_RECORD("Service must have remote method onConsumerRecord.",
                 "KAFKA_101"),
-        INVALID_REMOTE_FUNCTION("Invalid remote function.", "KAFKA_102"),
-        FUNCTION_SHOULD_BE_REMOTE("Function must have the remote qualifier.", "KAFKA_103"),
-        MUST_HAVE_CALLER_AND_RECORDS("Must have the function parameters kafka:Caller and kafka:ConsumerRecord[].",
+        INVALID_REMOTE_FUNCTION("Invalid remote method.", "KAFKA_102"),
+        FUNCTION_SHOULD_BE_REMOTE("Method must have the remote qualifier.", "KAFKA_103"),
+        MUST_HAVE_CALLER_AND_RECORDS("Must have the method parameters kafka:Caller and kafka:ConsumerRecord[].",
                 "KAFKA_105"),
-        INVALID_FUNCTION_PARAM_CALLER("Invalid function parameter. Only kafka:Caller is allowed.",
+        INVALID_FUNCTION_PARAM_CALLER("Invalid method parameter. Only kafka:Caller is allowed.",
                 "KAFKA_106"),
-        INVALID_FUNCTION_PARAM_RECORDS("Invalid function parameter. Only kafka:ConsumerRecord[] is allowed.",
+        INVALID_FUNCTION_PARAM_RECORDS("Invalid method parameter. Only kafka:ConsumerRecord[] is allowed.",
                 "KAFKA_107"),
-        ONLY_PARAMS_ALLOWED("Invalid function parameter count. " +
+        ONLY_PARAMS_ALLOWED("Invalid method parameter count. " +
                 "Only kafka:Caller and kafka:ConsumerRecord[] are allowed.", "KAFKA_108"),
         INVALID_RETURN_TYPE_ERROR_OR_NIL("Invalid return type. Only error? or kafka:Error? is allowed.",
                 "KAFKA_109"),

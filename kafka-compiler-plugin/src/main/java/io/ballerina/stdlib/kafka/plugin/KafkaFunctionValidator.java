@@ -18,25 +18,32 @@
 
 package io.ballerina.stdlib.kafka.plugin;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static io.ballerina.stdlib.kafka.plugin.PluginUtils.getMethodSymbol;
+import static io.ballerina.stdlib.kafka.plugin.PluginUtils.validateModuleId;
 
 /**
  * Kafka remote function validator.
@@ -81,8 +88,8 @@ public class KafkaFunctionValidator {
     private void validateFunctionParameters(SeparatedNodeList<ParameterNode> parameters,
                                             FunctionDefinitionNode functionDefinitionNode) {
         if (parameters.size() > 1) {
-            validateFirstParam(functionDefinitionNode, parameters.get(0));
-            validateSecondParam(functionDefinitionNode, parameters.get(1));
+            validateFirstParam(parameters.get(0));
+            validateSecondParam(parameters.get(1));
         }
         if (parameters.size() > 2) {
             context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.ONLY_PARAMS_ALLOWED,
@@ -94,68 +101,83 @@ public class KafkaFunctionValidator {
         }
     }
 
-    private void validateFirstParam(FunctionDefinitionNode functionDefinitionNode, ParameterNode parameterNode) {
+    private void validateFirstParam(ParameterNode parameterNode) {
         RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
         Node parameterTypeNode = requiredParameterNode.typeName();
-        if (!parameterTypeNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(
-                    CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
-                    DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
-        } else {
-            Token modulePrefix = ((QualifiedNameReferenceNode) parameterTypeNode).modulePrefix();
-            IdentifierToken identifierToken = ((QualifiedNameReferenceNode) parameterTypeNode).identifier();
-            if (!modulePrefix.text().equals(PluginConstants.PACKAGE_PREFIX) ||
-                    !identifierToken.text().equals(PluginConstants.CALLER)) {
-                context.reportDiagnostic(PluginUtils.getDiagnostic(
-                        CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
-                        DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+        SemanticModel semanticModel = context.semanticModel();
+        Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
+        if (paramSymbol.isPresent()) {
+            Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
+            if (moduleSymbol.isPresent()) {
+                String paramName = paramSymbol.get().getName().isPresent() ?
+                        paramSymbol.get().getName().get() : "";
+                if (!validateModuleId(moduleSymbol.get()) ||
+                        !paramName.equals(PluginConstants.CALLER)) {
+                    context.reportDiagnostic(PluginUtils.getDiagnostic(
+                            CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
+                            DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                }
             }
         }
     }
 
-    private void validateSecondParam(FunctionDefinitionNode functionDefinitionNode,
-                                     ParameterNode parameterNode) {
+    private void validateSecondParam(ParameterNode parameterNode) {
         RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
         Node parameterTypeNode = requiredParameterNode.typeName();
         if (!parameterTypeNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
             context.reportDiagnostic(PluginUtils.getDiagnostic(
                     CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
-                    DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+                    DiagnosticSeverity.ERROR, parameterNode.location()));
         } else {
             ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) parameterTypeNode;
             TypeDescriptorNode memberType = arrayTypeDescriptorNode.memberTypeDesc();
-            if (memberType.kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE) {
-                context.reportDiagnostic(PluginUtils.getDiagnostic(
-                        CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
-                        DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
-            } else {
-                Token modulePrefix =
-                        ((QualifiedNameReferenceNode) arrayTypeDescriptorNode.memberTypeDesc()).modulePrefix();
-                IdentifierToken identifierToken =
-                        ((QualifiedNameReferenceNode) arrayTypeDescriptorNode.memberTypeDesc()).identifier();
-                if (!modulePrefix.text().equals(PluginConstants.PACKAGE_PREFIX) ||
-                        !identifierToken.text().equals(PluginConstants.RECORD_PARAM)) {
-                    context.reportDiagnostic(PluginUtils.getDiagnostic(
-                            CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
-                            DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+            SemanticModel semanticModel = context.semanticModel();
+            Optional<Symbol> paramSymbol = semanticModel.symbol(memberType);
+            if (paramSymbol.isPresent()) {
+                Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
+                if (moduleSymbol.isPresent()) {
+                    String paramName = paramSymbol.get().getName().isPresent() ?
+                            paramSymbol.get().getName().get() : "";
+                    if (!validateModuleId(moduleSymbol.get()) ||
+                            !paramName.equals(PluginConstants.RECORD_PARAM)) {
+                        context.reportDiagnostic(PluginUtils.getDiagnostic(
+                                CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
+                                DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                    }
                 }
             }
         }
     }
 
     private void validateReturnTypeErrorOrNil(FunctionDefinitionNode functionDefinitionNode) {
-        Optional<ReturnTypeDescriptorNode> returnTypes = functionDefinitionNode.functionSignature().returnTypeDesc();
-        if (returnTypes.isPresent()) {
-            ReturnTypeDescriptorNode returnTypeDescriptorNode = returnTypes.get();
-            Node returnNodeType = returnTypeDescriptorNode.type();
-            String returnType = returnNodeType.toString().split(" ")[0];
-            if (!returnType.equals(PluginConstants.ERROR_OR_NIL) &&
-                    !returnType.equals(PluginConstants.NIL_OR_ERROR) &&
-                    !returnType.equals(PluginConstants.KAFKA_ERROR_OR_NIL) &&
-                    !returnType.equals(PluginConstants.NIL_OR_KAFKA_ERROR)) {
-                context.reportDiagnostic(PluginUtils.getDiagnostic(
-                        PluginConstants.CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL,
-                        DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+        MethodSymbol methodSymbol = getMethodSymbol(context, functionDefinitionNode);
+        if (methodSymbol != null) {
+            Optional<TypeSymbol> returnTypeDesc = methodSymbol.typeDescriptor().returnTypeDescriptor();
+            if (returnTypeDesc.isPresent()) {
+                if (returnTypeDesc.get().typeKind() == TypeDescKind.UNION) {
+                    List<TypeSymbol> returnTypeMembers =
+                            ((UnionTypeSymbol) returnTypeDesc.get()).memberTypeDescriptors();
+                    for (TypeSymbol returnType : returnTypeMembers) {
+                        if (returnType.typeKind() != TypeDescKind.NIL) {
+                            if (returnType.typeKind() == TypeDescKind.ERROR) {
+                                if (!returnType.signature().equals(PluginConstants.ERROR) &&
+                                        !validateModuleId(returnType.getModule().get())) {
+                                    context.reportDiagnostic(PluginUtils.getDiagnostic(
+                                            CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL,
+                                            DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+                                }
+                            } else {
+                                context.reportDiagnostic(PluginUtils.getDiagnostic(
+                                        CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL,
+                                        DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+                            }
+                        }
+                    }
+                } else if (returnTypeDesc.get().typeKind() != TypeDescKind.NIL) {
+                    context.reportDiagnostic(PluginUtils.getDiagnostic(
+                            CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL,
+                            DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+                }
             }
         }
     }

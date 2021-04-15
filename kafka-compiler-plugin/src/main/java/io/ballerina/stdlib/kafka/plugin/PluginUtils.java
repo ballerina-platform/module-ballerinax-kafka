@@ -20,6 +20,7 @@ package io.ballerina.stdlib.kafka.plugin;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.Qualifier;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -60,6 +61,13 @@ public class PluginUtils {
     public static boolean isRemoteFunction(SyntaxNodeAnalysisContext context,
                                            FunctionDefinitionNode functionDefinitionNode) {
         MethodSymbol methodSymbol = getMethodSymbol(context, functionDefinitionNode);
-        return methodSymbol.qualifiers().contains(Qualifier.valueOf(PluginConstants.REMOTE_QUALIFIER));
+        return methodSymbol.qualifiers().contains(Qualifier.REMOTE);
+    }
+
+    public static boolean validateModuleId(ModuleSymbol moduleSymbol) {
+        String moduleName = moduleSymbol.id().moduleName();
+        String orgName = moduleSymbol.id().orgName();
+        return moduleName.equals(PluginConstants.PACKAGE_PREFIX) &&
+                orgName.equals(PluginConstants.PACKAGE_ORG);
     }
 }
