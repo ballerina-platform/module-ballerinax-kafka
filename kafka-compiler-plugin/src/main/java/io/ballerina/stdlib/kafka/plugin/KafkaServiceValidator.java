@@ -39,17 +39,12 @@ import java.util.Optional;
  * Kafka service compilation validator.
  */
 public class KafkaServiceValidator {
-    private final SyntaxNodeAnalysisContext context;
-    private final NodeList<Node> memberNodes;
 
-    public KafkaServiceValidator(SyntaxNodeAnalysisContext context) {
-        this.context = context;
+    public void validate(SyntaxNodeAnalysisContext context) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) context.node();
-        this.memberNodes = serviceDeclarationNode.members();
-    }
+        NodeList<Node> memberNodes = serviceDeclarationNode.members();
 
-    public void validate() {
-        validateAnnotation(this.context);
+        validateAnnotation(context);
         FunctionDefinitionNode onConsumerRecord = null;
 
         for (Node node : memberNodes) {
@@ -61,7 +56,7 @@ public class KafkaServiceValidator {
                     if (functionName.get().equals(PluginConstants.ON_RECORDS_FUNC)) {
                         onConsumerRecord = functionDefinitionNode;
                     } else {
-                        validateNonStanFunction(functionDefinitionNode);
+                        validateNonStanFunction(functionDefinitionNode, context);
                     }
                 }
             }
@@ -69,7 +64,8 @@ public class KafkaServiceValidator {
         new KafkaFunctionValidator(context, onConsumerRecord).validate();
     }
 
-    public void validateNonStanFunction(FunctionDefinitionNode functionDefinitionNode) {
+    public void validateNonStanFunction(FunctionDefinitionNode functionDefinitionNode,
+                                        SyntaxNodeAnalysisContext context) {
         if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
             context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
                     DiagnosticSeverity.ERROR, functionDefinitionNode.location()));

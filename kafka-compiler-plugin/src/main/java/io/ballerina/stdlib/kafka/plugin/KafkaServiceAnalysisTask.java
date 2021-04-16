@@ -40,12 +40,17 @@ import static io.ballerina.stdlib.kafka.plugin.PluginUtils.validateModuleId;
  * Kafka service compilation analysis task.
  */
 public class KafkaServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
+    private final KafkaServiceValidator serviceValidator;
+
+    public KafkaServiceAnalysisTask() {
+        this.serviceValidator = new KafkaServiceValidator();
+    }
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
         if (!isKafkaService(context)) {
             return;
         }
-        new KafkaServiceValidator(context).validate();
+        this.serviceValidator.validate(context);
     }
 
     private boolean isKafkaService(SyntaxNodeAnalysisContext context) {
