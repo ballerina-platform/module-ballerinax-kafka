@@ -16,7 +16,7 @@
  * under the License.
  */
 
-module io.ballerina.stdlib.kafka {
+module io.ballerina.stdlib.kafka.runtime {
     requires kafka.clients;
     requires io.ballerina.runtime;
     requires java.transaction.xa;

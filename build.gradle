@@ -51,6 +51,10 @@ allprojects {
         }
 
         maven {
+            url = 'https://mvnrepository.com/artifact/org.testng/testng'
+        }
+
+        maven {
             url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
         }
 
@@ -142,9 +146,15 @@ subprojects {
 
     configurations {
         ballerinaStdLibs
+        jbalTools
     }
 
     dependencies {
+        /* JBallerina Tools */
+        jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+            transitive = false
+        }
+
         /* Standard libraries */
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
