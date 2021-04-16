@@ -35,12 +35,6 @@ public class PluginConstants {
 
     // return types error or nil
     public static final String ERROR = "error";
-    public static final String KAFKA_ERROR = PACKAGE_PREFIX + ":" + ERROR_PARAM;
-    public static final String NIL = "?";
-    public static final String ERROR_OR_NIL = ERROR + NIL;
-    public static final String NIL_OR_ERROR = "()|" + ERROR;
-    public static final String KAFKA_ERROR_OR_NIL = KAFKA_ERROR + NIL;
-    public static final String NIL_OR_KAFKA_ERROR = "()|" + KAFKA_ERROR;
 
     /**
      * Compilation errors.
@@ -49,7 +43,8 @@ public class PluginConstants {
         NO_ON_CONSUMER_RECORD("Service must have remote method onConsumerRecord.",
                 "KAFKA_101"),
         INVALID_REMOTE_FUNCTION("Invalid remote method.", "KAFKA_102"),
-        FUNCTION_SHOULD_BE_REMOTE("Method must have the remote qualifier.", "KAFKA_103"),
+        INVALID_FUNCTION("Invalid remote method.", "KAFKA_103"),
+        FUNCTION_SHOULD_BE_REMOTE("Method must have the remote qualifier.", "KAFKA_104"),
         MUST_HAVE_CALLER_AND_RECORDS("Must have the method parameters kafka:Caller and kafka:ConsumerRecord[].",
                 "KAFKA_105"),
         INVALID_FUNCTION_PARAM_CALLER("Invalid method parameter. Only kafka:Caller is allowed.",

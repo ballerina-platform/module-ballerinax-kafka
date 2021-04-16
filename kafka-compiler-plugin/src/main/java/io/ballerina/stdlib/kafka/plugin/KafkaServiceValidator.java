@@ -56,19 +56,26 @@ public class KafkaServiceValidator {
                     if (functionName.get().equals(PluginConstants.ON_RECORDS_FUNC)) {
                         onConsumerRecord = functionDefinitionNode;
                     } else {
-                        validateNonStanFunction(functionDefinitionNode, context);
+                        validateNonKafkaFunction(functionDefinitionNode, context);
                     }
                 }
+            } else {
+                validateNonKafkaFunction(functionDefinitionNode, context);
             }
         }
         new KafkaFunctionValidator(context, onConsumerRecord).validate();
     }
 
-    public void validateNonStanFunction(FunctionDefinitionNode functionDefinitionNode,
+    public void validateNonKafkaFunction(FunctionDefinitionNode functionDefinitionNode,
                                         SyntaxNodeAnalysisContext context) {
-        if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
+        if (functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_FUNCTION,
                     DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+        } else {
+            if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
+                        DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+            }
         }
     }
 

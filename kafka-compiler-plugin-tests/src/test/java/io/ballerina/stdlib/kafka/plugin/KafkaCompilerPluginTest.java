@@ -25,6 +25,7 @@ import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
+import io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -64,7 +65,7 @@ public class KafkaCompilerPluginTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD);
+        assertDiagnostic(diagnostic, CompilationErrors.NO_ON_CONSUMER_RECORD);
     }
 
     @Test
@@ -74,7 +75,7 @@ public class KafkaCompilerPluginTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTION);
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_REMOTE_FUNCTION);
     }
 
     @Test
@@ -84,7 +85,7 @@ public class KafkaCompilerPluginTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE);
+        assertDiagnostic(diagnostic, CompilationErrors.FUNCTION_SHOULD_BE_REMOTE);
     }
 
     @Test
@@ -94,7 +95,7 @@ public class KafkaCompilerPluginTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.ONLY_PARAMS_ALLOWED);
+        assertDiagnostic(diagnostic, CompilationErrors.ONLY_PARAMS_ALLOWED);
     }
 
     @Test
@@ -106,7 +107,7 @@ public class KafkaCompilerPluginTest {
         Object[] diagnostics = diagnosticResult.diagnostics().toArray();
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
-            assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_CALLER);
+            assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_CALLER);
         }
     }
 
@@ -117,7 +118,7 @@ public class KafkaCompilerPluginTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL);
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL);
     }
 
     @Test
@@ -127,7 +128,7 @@ public class KafkaCompilerPluginTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS);
+        assertDiagnostic(diagnostic, CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS);
     }
 
     @Test
@@ -139,7 +140,7 @@ public class KafkaCompilerPluginTest {
         Object[] diagnostics = diagnosticResult.diagnostics().toArray();
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
-            assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS);
+            assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS);
         }
     }
 
@@ -150,7 +151,17 @@ public class KafkaCompilerPluginTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_MULTIPLE_LISTENERS);
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_MULTIPLE_LISTENERS);
+    }
+
+    @Test
+    public void testInvalidService10() {
+        Package currentPackage = loadPackage("invalid_service_10");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION);
     }
 
     private Package loadPackage(String path) {
