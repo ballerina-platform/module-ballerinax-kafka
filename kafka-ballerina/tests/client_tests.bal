@@ -21,7 +21,7 @@ import ballerina/test;
 
 const DOCKER_COMPOSE_FILE = "docker-compose.yaml";
 const TEST_MESSAGE = "Hello, Ballerina";
-const EMPTY_MESSAGE = "";
+const EMPTY_MEESAGE = "";
 const TEST_DIRECTORY = "";
 
 string topic1 = "test-topic-1";
@@ -171,13 +171,73 @@ function consumerCloseTest() returns error? {
 }
 
 @test:Config {}
+function consumerCloseWithDurationTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+            topics: [topic1],
+            offsetReset: OFFSET_RESET_EARLIEST,
+            groupId: "consumer-close-with-duration-test-group",
+            clientId: "test-consumer-8"
+        };
+    Consumer closeWithDurationTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
+    var result = check closeWithDurationTestConsumer->poll(5);
+    var closeresult = closeWithDurationTestConsumer->close(5);
+    test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
+    var newresult = closeWithDurationTestConsumer->poll(5);
+    test:assertTrue(newresult is error);
+    error receivedErr = <error>newresult;
+    string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
+    test:assertEquals(receivedErr.message(), expectedErr);
+}
+
+@test:Config {}
+function consumerCloseWithDefaultTimeoutTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+            topics: [topic1],
+            offsetReset: OFFSET_RESET_EARLIEST,
+            groupId: "consumer-close-with-default-timeout-test-group",
+            clientId: "test-consumer-9",
+            defaultApiTimeout: 5
+        };
+    Consumer closeWithDefaultTimeoutTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
+    var result = check closeWithDefaultTimeoutTestConsumer->poll(5);
+    var closeresult = closeWithDefaultTimeoutTestConsumer->close();
+    test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
+    var newresult = closeWithDefaultTimeoutTestConsumer->poll(5);
+    test:assertTrue(newresult is error);
+    error receivedErr = <error>newresult;
+    string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
+    test:assertEquals(receivedErr.message(), expectedErr);
+}
+
+@test:Config {}
+function consumerConnectErrorTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+            topics: [topic1],
+            offsetReset: OFFSET_RESET_EARLIEST,
+            groupId: "consumer-close-test-group",
+            clientId: "test-consumer-10"
+        };
+    Consumer consumerConnectErrorTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
+    (Error|error)? result = trap connect(consumerConnectErrorTestConsumer);
+
+    if (result is Error) {
+        string expectedErr = "Kafka consumer is already connected to external broker. Please close it before " +
+            "re-connecting the external broker again.";
+        test:assertEquals(result.message(), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+    check consumerConnectErrorTestConsumer->close();
+}
+
+@test:Config {}
 function consumerFunctionsTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic2);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
-        clientId: "test-consumer-8"
+        clientId: "test-consumer-11"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
@@ -199,7 +259,7 @@ function consumerSeekTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-seek-test-group",
-        clientId: "test-consumer-9"
+        clientId: "test-consumer-12"
     };
     TopicPartition topicPartition = {
         topic: topic4,
@@ -224,7 +284,7 @@ function consumerSeekToBeginningTest() returns error? {
         topics: [topic4],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-seek-beginning-test-group",
-        clientId: "test-consumer-10"
+        clientId: "test-consumer-13"
     };
     TopicPartition topicPartition = {
         topic: topic4,
@@ -246,7 +306,7 @@ function consumerSeekToEndTest() returns error? {
         topics: [topic4],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-seek-end-test-group",
-        clientId: "test-consumer-11"
+        clientId: "test-consumer-14"
     };
     TopicPartition topicPartition = {
         topic: topic4,
@@ -269,7 +329,7 @@ function consumerPositionOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-position-offset-test-group",
-        clientId: "test-consumer-12"
+        clientId: "test-consumer-15"
     };
     TopicPartition topicPartition = {
         topic: topic4,
@@ -300,7 +360,7 @@ function consumerBeginningOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-end-offset-test-group",
-        clientId: "test-consumer-13"
+        clientId: "test-consumer-16"
     };
     TopicPartition topic1Partition = {
         topic: topic4,
@@ -330,7 +390,7 @@ function consumerEndOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-end-offset-test-group",
-        clientId: "test-consumer-14"
+        clientId: "test-consumer-17"
     };
     TopicPartition topic1Partition = {
         topic: topic4,
@@ -357,7 +417,7 @@ function consumerTopicPartitionsTest() returns error? {
         topics: [topic1, topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-topic-partitions-test-group",
-        clientId: "test-consumer-15"
+        clientId: "test-consumer-18"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     TopicPartition[]|Error topic1Partitions = consumer->getTopicPartitions(topic1);
@@ -380,7 +440,7 @@ function consumerPauseResumePartitionTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-pause-partition-test-group",
-        clientId: "test-consumer-16"
+        clientId: "test-consumer-19"
     };
     TopicPartition topicPartition = {
         topic: topic1,
@@ -409,11 +469,51 @@ function consumerPauseResumePartitionTest() returns error? {
 }
 
 @test:Config {}
+function consumerPauseResumePartitionErrorTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-pause-partition-test-group",
+        clientId: "test-consumer-20"
+    };
+    string failingPartition = "test-topic-2-0";
+    TopicPartition topicPartition1 = {
+        topic: topic1,
+        partition: 0
+    };
+    TopicPartition topicPartition2 = {
+        topic: topic2,
+        partition: 0
+    };
+
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    check consumer->assign([topicPartition1]);
+    Error? result = consumer->pause([topicPartition2]);
+    if (result is Error) {
+        string expectedErr = "Failed to pause topic partitions for the consumer: No current assignment for " +
+            "partition " + failingPartition;
+        test:assertEquals(result.message(), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+    result = consumer->pause([topicPartition1]);
+
+    result = consumer->resume([topicPartition2]);
+    if (result is Error) {
+        string expectedErr = "Failed to resume topic partitions for the consumer: No current assignment for " +
+            "partition " + failingPartition;
+        test:assertEquals(result.message(), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+    check consumer->close();
+}
+
+@test:Config {}
 function consumerGetAssignedPartitionsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-get-assigned-partitions-test-group",
-        clientId: "test-consumer-17"
+        clientId: "test-consumer-21"
     };
     TopicPartition topicPartition = {
         topic: topic1,
@@ -437,7 +537,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
 function consumerSubscribeUnsubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-unsubscribe-test-group",
-        clientId: "test-consumer-18",
+        clientId: "test-consumer-22",
         topics: [topic1, topic2]
     });
     string[] subscribedTopics = check consumer->getSubscription();
@@ -455,7 +555,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
-        clientId: "test-consumer-19",
+        clientId: "test-consumer-23",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
@@ -474,7 +574,7 @@ function consumerSubscribeTest() returns error? {
 }
 function consumerSubscribeErrorTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
-        clientId: "test-consumer-20"
+        clientId: "test-consumer-24"
     });
     (Error|error)? result = trap consumer->subscribe([topic1]);
 
@@ -493,7 +593,7 @@ function manualCommitTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-21",
+        clientId: "test-consumer-25",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -536,7 +636,7 @@ function nonExistingTopicPartitionTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-22",
+        clientId: "test-consumer-26",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -567,7 +667,7 @@ function producerSendStringTest() returns error? {
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
-        clientId: "test-consumer-23"
+        clientId: "test-consumer-27"
     };
     Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
@@ -607,7 +707,7 @@ function producerFlushTest() returns error? {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-flush-test-group",
-        clientId: "test-consumer-24"
+        clientId: "test-consumer-28"
     };
     Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
