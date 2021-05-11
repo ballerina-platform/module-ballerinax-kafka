@@ -23,6 +23,8 @@ const DOCKER_COMPOSE_FILE = "docker-compose.yaml";
 const TEST_MESSAGE = "Hello, Ballerina";
 const EMPTY_MEESAGE = "";
 const TEST_DIRECTORY = "";
+const decimal TIMEOUT_DURATION = 5;
+const decimal DEFAULT_TIMEOUT = 10;
 
 string topic1 = "test-topic-1";
 string topic2 = "test-topic-2";
@@ -180,7 +182,7 @@ function consumerCloseWithDurationTest() returns error? {
         };
     Consumer closeWithDurationTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
     var result = check closeWithDurationTestConsumer->poll(5);
-    var closeresult = closeWithDurationTestConsumer->close(5);
+    var closeresult = closeWithDurationTestConsumer->close(TIMEOUT_DURATION);
     test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
     var newresult = closeWithDurationTestConsumer->poll(5);
     test:assertTrue(newresult is error);
@@ -196,7 +198,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
             offsetReset: OFFSET_RESET_EARLIEST,
             groupId: "consumer-close-with-default-timeout-test-group",
             clientId: "test-consumer-9",
-            defaultApiTimeout: 5
+            defaultApiTimeout: DEFAULT_TIMEOUT
         };
     Consumer closeWithDefaultTimeoutTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
     var result = check closeWithDefaultTimeoutTestConsumer->poll(5);
@@ -432,6 +434,25 @@ function consumerTopicPartitionsTest() returns error? {
     } else {
         test:assertEquals(topic2Partitions[0].partition, 0, "Expected: 0. Received: " + topic2Partitions[0].partition.toString());
     }
+    topic1Partitions = consumer->getTopicPartitions(topic1, TIMEOUT_DURATION);
+    if (topic1Partitions is error) {
+        test:assertFail(msg = "Invalid offset received");
+    } else {
+        test:assertEquals(topic1Partitions[0].partition, 0, "Expected: 0. Received: " + topic1Partitions[0].partition.toString());
+    }
+    consumer = check new (DEFAULT_URL, {
+       topics: [topic1, topic2],
+       offsetReset: OFFSET_RESET_EARLIEST,
+       groupId: "consumer-topic-partitions-test-group",
+       clientId: "test-consumer-18",
+       defaultApiTimeout: DEFAULT_TIMEOUT
+    });
+    topic1Partitions = consumer->getTopicPartitions(topic1);
+    if (topic1Partitions is error) {
+        test:assertFail(msg = "Invalid offset received");
+    } else {
+        test:assertEquals(topic1Partitions[0].partition, 0, "Expected: 0. Received: " + topic1Partitions[0].partition.toString());
+    }
     check consumer->close();
 }
 
@@ -527,6 +548,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
         test:assertFail(msg = "Invalid result received");
     } else {
         test:assertEquals(result[0].topic, "test-topic-1", "Expected: test-topic-1. Received: " + result[0].topic);
+        test:assertEquals(result[0].partition, 0, "Expected: 0. Received: " + result[0].partition.toString());
     }
     check consumer->close();
 }
@@ -569,12 +591,34 @@ function consumerSubscribeTest() returns error? {
     check consumer->close();
 }
 
+@test:Config {}
+function consumerTopicsAvailableWithTimeoutTest() returns error? {
+    Consumer consumer = check new (DEFAULT_URL, {
+        groupId: "consumer-subscriber-timeout-test-group",
+        clientId: "test-consumer-24",
+        metadataMaxAge: 2
+    });
+    string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
+    test:assertEquals(availableTopics.length(), 8);
+    check consumer->close();
+
+    consumer = check new (DEFAULT_URL, {
+        groupId: "consumer-subscriber-timeout-test-group",
+        clientId: "test-consumer-25",
+        metadataMaxAge: 2,
+        defaultApiTimeout: DEFAULT_TIMEOUT
+    });
+    availableTopics = check consumer->getAvailableTopics();
+    test:assertEquals(availableTopics.length(), 8);
+    check consumer->close();
+}
+
 @test:Config {
     dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeErrorTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
-        clientId: "test-consumer-24"
+        clientId: "test-consumer-26"
     });
     (Error|error)? result = trap consumer->subscribe([topic1]);
 
@@ -593,7 +637,7 @@ function manualCommitTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-25",
+        clientId: "test-consumer-27",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -631,12 +675,71 @@ function manualCommitTest() returns error? {
 }
 
 @test:Config {}
+function manualCommitWithDurationTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [manualCommitTopic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-manual-commit-with-duration-test-group",
+        clientId: "test-consumer-28",
+        autoCommit: false
+    };
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[]|Error messages = consumer->poll(1);
+    int manualCommitOffset = 5;
+    TopicPartition topicPartition = {
+        topic: manualCommitTopic,
+        partition: 0
+    };
+    PartitionOffset partitionOffset = {
+        partition: topicPartition,
+        offset: manualCommitOffset
+    };
+
+    check consumer->commitOffset([partitionOffset], TIMEOUT_DURATION);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
+    PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
+    int offsetValue = committedPartitionOffset.offset;
+    test:assertEquals(offsetValue, manualCommitOffset);
+    check consumer->close();
+}
+
+@test:Config {}
+function manualCommitWithDefaultTimeoutTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [manualCommitTopic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-manual-commit-with-default-timeout-test-group",
+        clientId: "test-consumer-29",
+        autoCommit: false,
+        defaultApiTimeout: DEFAULT_TIMEOUT
+    };
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[]|Error messages = consumer->poll(1);
+    int manualCommitOffset = 5;
+    TopicPartition topicPartition = {
+        topic: manualCommitTopic,
+        partition: 0
+    };
+    PartitionOffset partitionOffset = {
+        partition: topicPartition,
+        offset: manualCommitOffset
+    };
+
+    check consumer->commitOffset([partitionOffset]);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
+    PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
+    int offsetValue = committedPartitionOffset.offset;
+    test:assertEquals(offsetValue, manualCommitOffset);
+    check consumer->close();
+}
+
+@test:Config {}
 function nonExistingTopicPartitionTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-26",
+        clientId: "test-consumer-30",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -667,7 +770,7 @@ function producerSendStringTest() returns error? {
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
-        clientId: "test-consumer-27"
+        clientId: "test-consumer-31"
     };
     Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
@@ -707,7 +810,7 @@ function producerFlushTest() returns error? {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-flush-test-group",
-        clientId: "test-consumer-28"
+        clientId: "test-consumer-32"
     };
     Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
