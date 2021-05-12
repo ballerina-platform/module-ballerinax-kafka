@@ -70,7 +70,7 @@ public class Poll {
             if (!recordsRetrieved.isEmpty()) {
                 for (Object record : recordsRetrieved) {
                     BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record, keyType,
-                                                                                   valueType);
+                            valueType);
                     consumerRecordsArray.append(recordValue);
                 }
             }

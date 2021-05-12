@@ -48,38 +48,7 @@ public class SendByteArrayValues extends Send {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<?, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue, timestampValue,
-                                                                     null, value.getBytes());
-        return sendKafkaRecord(env, kafkaRecord, producer);
-    }
-
-    // ballerina byte[] and String
-    public static Object sendByteArrayValuesStringKeys(Environment env, BObject producer, BArray value, BString topic,
-                                                       BString key, Object partition, Object timestamp) {
-        Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
-        Long timestampValue = getLongValue(timestamp);
-        ProducerRecord<String, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                                                                          timestampValue, key.getValue(),
-                                                                          value.getBytes());
-        return sendKafkaRecord(env, kafkaRecord, producer);
-    }
-
-    // ballerina byte[] and ballerina int
-    public static Object sendByteArrayValuesIntKeys(Environment env, BObject producer, BArray value, BString topic,
-                                                    long key, Object partition, Object timestamp) {
-        Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
-        Long timestampValue = getLongValue(timestamp);
-        ProducerRecord<Long, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                                                                        timestampValue, key, value.getBytes());
-        return sendKafkaRecord(env, kafkaRecord, producer);
-    }
-
-    // ballerina byte[] and ballerina float
-    public static Object sendByteArrayValuesFloatKeys(Environment env, BObject producer, BArray value, BString topic,
-                                                      double key, Object partition, Object timestamp) {
-        Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
-        Long timestampValue = getLongValue(timestamp);
-        ProducerRecord<Double, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                                                                          timestampValue, key, value.getBytes());
+                null, value.getBytes());
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
@@ -90,18 +59,8 @@ public class SendByteArrayValues extends Send {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<byte[], byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                                                                          timestampValue, key.getBytes(),
-                                                                          value.getBytes());
-        return sendKafkaRecord(env, kafkaRecord, producer);
-    }
-
-    // ballerina byte[] and ballerina anydata
-    public static Object sendByteArrayValuesCustomKeys(Environment env, BObject producer, BArray value, BString topic,
-                                                       Object key, Object partition, Object timestamp) {
-        Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
-        Long timestampValue = getLongValue(timestamp);
-        ProducerRecord<Object, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                                                                          timestampValue, key, value.getBytes());
+                timestampValue, key.getBytes(),
+                value.getBytes());
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 }

@@ -1,3 +1,4 @@
+
 // Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -40,6 +41,11 @@ string receivedMessageWithCommit = "";
 string receivedMessageWithCommitOffset = "";
 
 int receivedMsgCount = 0;
+
+TopicPartition nonExistingPartition = {
+    topic: nonExistingTopic,
+    partition: 999
+};
 
 ProducerConfiguration producerConfiguration = {
     clientId: "basic-producer",
@@ -276,6 +282,16 @@ function consumerSeekTest() returns error? {
     check consumer->seek(partitionOffset);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+
+    (Error|error)? result = trap consumer->seekToBeginning([nonExistingPartition]);
+    if (result is Error) {
+        string expectedErrorMsg = "Failed to seek the consumer to the beginning: No current " +
+            "assignment for partition non-existing-topic-999";
+        test:assertEquals(result.message(), expectedErrorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+
     check consumer->close();
 }
 
@@ -298,6 +314,15 @@ function consumerSeekToBeginningTest() returns error? {
     check consumer->seekToBeginning([topicPartition]);
     consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 3, "Expected: 3. Received: " + consumerRecords.length().toString());
+
+    (Error|error)? result = trap consumer->seekToBeginning([nonExistingPartition]);
+    if (result is Error) {
+        string expectedErrorMsg = "Failed to seek the consumer to the beginning: No current " +
+            "assignment for partition non-existing-topic-999";
+        test:assertEquals(result.message(), expectedErrorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
     check consumer->close();
 }
 
@@ -321,6 +346,16 @@ function consumerSeekToEndTest() returns error? {
     check consumer->seekToEnd([topicPartition]);
     consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
+
+    (Error|error)? result = trap consumer->seekToEnd([nonExistingPartition]);
+    if (result is Error) {
+        string expectedErrorMsg = "Failed to seek the consumer to the end: No current " +
+            "assignment for partition non-existing-topic-999";
+        test:assertEquals(result.message(), expectedErrorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+
     check consumer->close();
 }
 
@@ -346,11 +381,28 @@ function consumerPositionOffsetsTest() returns error? {
         test:assertEquals(partitionOffsetBefore, 0, "Expected: 0. Received: " + partitionOffsetBefore.toString());
     }
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
-    int|Error partitionOffsetAfter = consumer->getPositionOffset(topicPartition);
+    int|Error partitionOffsetAfter = consumer->getPositionOffset(topicPartition, TIMEOUT_DURATION);
     if (partitionOffsetAfter is error) {
         test:assertFail(msg = "Invalid offset received");
     } else {
-        test:assertEquals(partitionOffsetAfter, 5, "Expected: 0. Received: " + partitionOffsetAfter.toString());
+        test:assertEquals(partitionOffsetAfter, 5, "Expected: 5. Received: " + partitionOffsetAfter.toString());
+    }
+    check consumer->close();
+    consumerConfiguration = {
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-position-offset-test-group",
+        clientId: "test-consumer-16",
+        defaultApiTimeout: DEFAULT_TIMEOUT
+    };
+    consumer = check new (DEFAULT_URL, consumerConfiguration);
+    check consumer->assign([topicPartition]);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic4);
+    consumerRecords = check consumer->poll(5);
+    partitionOffsetAfter = consumer->getPositionOffset(topicPartition);
+    if (partitionOffsetAfter is error) {
+        test:assertFail(msg = "Invalid offset received");
+    } else {
+        test:assertEquals(partitionOffsetAfter, 6, "Expected: 6. Received: " + partitionOffsetAfter.toString());
     }
     check consumer->close();
 }
@@ -361,8 +413,8 @@ function consumerPositionOffsetsTest() returns error? {
 function consumerBeginningOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-end-offset-test-group",
-        clientId: "test-consumer-16"
+        groupId: "consumer-beginning-offsets-test-group",
+        clientId: "test-consumer-17"
     };
     TopicPartition topic1Partition = {
         topic: topic4,
@@ -382,6 +434,39 @@ function consumerBeginningOffsetsTest() returns error? {
         test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
         test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
     }
+    consumerRecords = check consumer->poll(5);
+    partitionEndOffsets = consumer->getBeginningOffsets([topic1Partition, topic2Partition], TIMEOUT_DURATION);
+    if (partitionEndOffsets is error) {
+        test:assertFail(msg = "Invalid offset received");
+    } else {
+        test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
+        test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
+    }
+    check consumer->close();
+    consumerConfiguration = {
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-beginning-offsets-test-group",
+        clientId: "test-consumer-18",
+        defaultApiTimeout: DEFAULT_TIMEOUT
+    };
+    consumer = check new (DEFAULT_URL, consumerConfiguration);
+    check consumer->assign([topic1Partition, topic2Partition]);
+    consumerRecords = check consumer->poll(5);
+    partitionEndOffsets = consumer->getBeginningOffsets([topic1Partition, topic2Partition]);
+    if (partitionEndOffsets is error) {
+        test:assertFail(msg = "Invalid offset received");
+    } else {
+        test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
+        test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
+    }
+    PartitionOffset[]|Error result = consumer->getBeginningOffsets([nonExistingPartition]);
+    if (result is Error) {
+        string expectedErrorMsg = "Failed to retrieve offsets for the topic " +
+            "partitions: Failed to get offsets by times in ";
+        test:assertEquals(result.message().substring(0, 87), expectedErrorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
     check consumer->close();
 }
 
@@ -392,7 +477,7 @@ function consumerEndOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-end-offset-test-group",
-        clientId: "test-consumer-17"
+        clientId: "test-consumer-19"
     };
     TopicPartition topic1Partition = {
         topic: topic4,
@@ -410,6 +495,42 @@ function consumerEndOffsetsTest() returns error? {
         test:assertEquals(partitionEndOffsets[0].offset, 5, "Expected: 5. Received: " + partitionEndOffsets[0].offset.toString());
         test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
     }
+    consumer = check new (DEFAULT_URL, consumerConfiguration);
+    partitionEndOffsets = consumer->getEndOffsets([topic1Partition, topic2Partition], TIMEOUT_DURATION);
+    if (partitionEndOffsets is error) {
+        test:assertFail(msg = "Invalid offset received");
+    } else {
+        test:assertEquals(partitionEndOffsets[0].offset, 5, "Expected: 5. Received: " + partitionEndOffsets[0].offset.toString());
+        test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
+    }
+    check consumer->close();
+    consumerConfiguration = {
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-end-offset-test-group",
+        clientId: "test-consumer-20",
+        defaultApiTimeout: DEFAULT_TIMEOUT
+    };
+    consumer = check new (DEFAULT_URL, consumerConfiguration);
+    partitionEndOffsets = consumer->getEndOffsets([topic1Partition, topic2Partition]);
+    if (partitionEndOffsets is error) {
+        test:assertFail(msg = "Invalid offset received");
+    } else {
+        test:assertEquals(partitionEndOffsets[0].offset, 5, "Expected: 5. Received: " + partitionEndOffsets[0].offset.toString());
+        test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
+    }
+
+
+    PartitionOffset[]|Error result = consumer->getEndOffsets([nonExistingPartition]);
+    if (result is Error) {
+        string expectedErrorMsg = "Failed to retrieve end offsets for the " +
+        "consumer: Failed to get offsets by times in ";
+        test:assertEquals(result.message().substring(0, 83), expectedErrorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+
+
+
     check consumer->close();
 }
 
@@ -419,7 +540,7 @@ function consumerTopicPartitionsTest() returns error? {
         topics: [topic1, topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-topic-partitions-test-group",
-        clientId: "test-consumer-18"
+        clientId: "test-consumer-21"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     TopicPartition[]|Error topic1Partitions = consumer->getTopicPartitions(topic1);
@@ -444,7 +565,7 @@ function consumerTopicPartitionsTest() returns error? {
        topics: [topic1, topic2],
        offsetReset: OFFSET_RESET_EARLIEST,
        groupId: "consumer-topic-partitions-test-group",
-       clientId: "test-consumer-18",
+       clientId: "test-consumer-22",
        defaultApiTimeout: DEFAULT_TIMEOUT
     });
     topic1Partitions = consumer->getTopicPartitions(topic1);
@@ -461,7 +582,7 @@ function consumerPauseResumePartitionTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-pause-partition-test-group",
-        clientId: "test-consumer-19"
+        clientId: "test-consumer-23"
     };
     TopicPartition topicPartition = {
         topic: topic1,
@@ -494,7 +615,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-pause-partition-test-group",
-        clientId: "test-consumer-20"
+        clientId: "test-consumer-24"
     };
     string failingPartition = "test-topic-2-0";
     TopicPartition topicPartition1 = {
@@ -534,7 +655,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-get-assigned-partitions-test-group",
-        clientId: "test-consumer-21"
+        clientId: "test-consumer-25"
     };
     TopicPartition topicPartition = {
         topic: topic1,
@@ -559,7 +680,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
 function consumerSubscribeUnsubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-unsubscribe-test-group",
-        clientId: "test-consumer-22",
+        clientId: "test-consumer-26",
         topics: [topic1, topic2]
     });
     string[] subscribedTopics = check consumer->getSubscription();
@@ -568,6 +689,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     check consumer->unsubscribe();
     subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
+
     check consumer->close();
 }
 
@@ -577,11 +699,11 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
-        clientId: "test-consumer-23",
+        clientId: "test-consumer-27",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 8);
+    test:assertEquals(availableTopics.length(), 9);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("test.*");
@@ -595,21 +717,21 @@ function consumerSubscribeTest() returns error? {
 function consumerTopicsAvailableWithTimeoutTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-timeout-test-group",
-        clientId: "test-consumer-24",
+        clientId: "test-consumer-28",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 8);
+    test:assertEquals(availableTopics.length(), 9);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-timeout-test-group",
-        clientId: "test-consumer-25",
+        clientId: "test-consumer-28",
         metadataMaxAge: 2,
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 8);
+    test:assertEquals(availableTopics.length(), 9);
     check consumer->close();
 }
 
@@ -618,7 +740,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
 }
 function consumerSubscribeErrorTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
-        clientId: "test-consumer-26"
+        clientId: "test-consumer-29"
     });
     (Error|error)? result = trap consumer->subscribe([topic1]);
 
@@ -637,7 +759,7 @@ function manualCommitTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-27",
+        clientId: "test-consumer-30",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -680,7 +802,7 @@ function manualCommitWithDurationTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-with-duration-test-group",
-        clientId: "test-consumer-28",
+        clientId: "test-consumer-31",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -696,7 +818,7 @@ function manualCommitWithDurationTest() returns error? {
     };
 
     check consumer->commitOffset([partitionOffset], TIMEOUT_DURATION);
-    PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition, TIMEOUT_DURATION);
     PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
     int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, manualCommitOffset);
@@ -709,7 +831,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-with-default-timeout-test-group",
-        clientId: "test-consumer-29",
+        clientId: "test-consumer-32",
         autoCommit: false,
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
@@ -739,7 +861,7 @@ function nonExistingTopicPartitionTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-30",
+        clientId: "test-consumer-33",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -757,76 +879,6 @@ function nonExistingTopicPartitionTest() returns error? {
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
     check consumer->close();
-}
-
-@test:Config {}
-function producerSendStringTest() returns error? {
-    Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
-    string message = "Hello, Ballerina";
-    Error? result = stringProducer->send({ topic: topic3, value: message.toBytes() });
-    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic3],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "producer-functions-test-group",
-        clientId: "test-consumer-31"
-    };
-    Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
-    test:assertEquals(consumerRecords.length(), 1);
-    byte[] messageValue = consumerRecords[0].value;
-    string|error messageConverted = 'string:fromBytes(messageValue);
-    if (messageConverted is string) {
-        test:assertEquals(messageConverted, TEST_MESSAGE);
-    } else {
-        test:assertFail("Invalid message type received. Expected string");
-    }
-}
-
-@test:Config {
-    dependsOn: [producerSendStringTest]
-}
-function producerCloseTest() returns error? {
-    Producer closeTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    string message = "Test Message";
-    Error? result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
-    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->close();
-    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
-    test:assertTrue(result is error);
-    error receivedErr = <error>result;
-    string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
-    test:assertEquals(receivedErr.message(), expectedErr);
-}
-
-@test:Config {}
-function producerFlushTest() returns error? {
-    Producer flushTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    check flushTestProducer->send({ topic: topic1, value: TEST_MESSAGE.toBytes() });
-    check flushTestProducer->'flush();
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic1],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "producer-flush-test-group",
-        clientId: "test-consumer-32"
-    };
-    Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
-    test:assertEquals('string:fromBytes(consumerRecords[0].value), TEST_MESSAGE);
-}
-
-@test:Config {}
-function producerGetTopicPartitionsTest() returns error? {
-    Producer topicPartitionTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    TopicPartition[]|Error topicPartitions = check topicPartitionTestProducer->getTopicPartitions(topic1);
-    if (topicPartitions is error) {
-        test:assertFail(msg = "Invalid result received");
-    } else {
-        test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
-    }
-    check topicPartitionTestProducer->close();
 }
 
 function sendMessage(byte[] message, string topic) returns error? {

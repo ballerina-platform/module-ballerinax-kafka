@@ -26,35 +26,25 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.transactions.TransactionResourceManager;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
-import org.apache.kafka.common.TopicPartition;
 import org.ballerinalang.messaging.kafka.impl.KafkaTransactionContext;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Set;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_GROUP_ID_CONFIG;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_BOOTSTRAP_SERVERS_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.PRODUCER_CONFIG_FIELD_NAME;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.TRANSACTION_CONTEXT;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaProducer;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getPartitionToMetadataMap;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionRecord;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateTopicPartitionRecord;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.processKafkaProducerConfig;
@@ -81,7 +71,7 @@ public class ProducerActions {
                     producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {
                 if (!((boolean) producerProperties.get(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG))) {
                     return createKafkaError("configuration enableIdempotence must be set to true to enable " +
-                                                            "transactional producer");
+                            "transactional producer");
                 }
                 createKafkaProducer(producerProperties, producerObject);
                 KafkaTransactionContext transactionContext = createKafkaTransactionContext(producerObject);
@@ -91,7 +81,7 @@ public class ProducerActions {
             }
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
+                    KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
             return createKafkaError("Failed to initialize the producer: " + e.getMessage());
         }
         return null;
@@ -112,63 +102,6 @@ public class ProducerActions {
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_CLOSE);
             return createKafkaError("Failed to close the Kafka producer: " + e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * Commits all the messages consumed by the provided ballerina kafka consumer object.
-     *
-     * @param producerObject Kafka producer object from ballerina.
-     * @param consumer       Kafka consumer object from ballerina.
-     * @return {@code BError}, if there's any error, null otherwise.
-     */
-    public static Object commitConsumer(Environment environment, BObject producerObject, BObject consumer) {
-        KafkaTracingUtil.traceResourceInvocation(environment, producerObject);
-        KafkaConsumer kafkaConsumer = (KafkaConsumer) consumer.getNativeData(NATIVE_CONSUMER);
-        KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
-        Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = new HashMap<>();
-        Set<TopicPartition> topicPartitions = kafkaConsumer.assignment();
-
-        for (TopicPartition topicPartition : topicPartitions) {
-            long position = kafkaConsumer.position(topicPartition);
-            partitionToMetadataMap.put(new TopicPartition(topicPartition.topic(), topicPartition.partition()),
-                                       new OffsetAndMetadata(position));
-        }
-        BMap<BString, Object> consumerConfig = consumer.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
-        String groupId = consumerConfig.getStringValue(CONSUMER_GROUP_ID_CONFIG).getValue();
-        try {
-            if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(producerObject);
-            }
-            kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId);
-        } catch (IllegalStateException | KafkaException e) {
-            KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);
-            return createKafkaError("Failed to commit consumer: " + e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * Commits the given partition offsets.
-     * @param producerObject Kafka producer object from ballerina.
-     * @param offsets Ballerina {@code PartitionOffset[]} to commit.
-     * @param groupId Group ID of the consumers to commit the messages.
-     * @return {@code BError}, if there's any error, null otherwise.
-     */
-    public static Object commitConsumerOffsets(Environment environment, BObject producerObject, BArray offsets,
-                                               BString groupId) {
-        KafkaTracingUtil.traceResourceInvocation(environment, producerObject);
-        KafkaProducer kafkaProducer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
-        Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = getPartitionToMetadataMap(offsets);
-        try {
-            if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(producerObject);
-            }
-            kafkaProducer.sendOffsetsToTransaction(partitionToMetadataMap, groupId.getValue());
-        } catch (IllegalStateException | KafkaException e) {
-            KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);
-            return createKafkaError("Failed to commit consumer offsets: " + e.getMessage());
         }
         return null;
     }
@@ -218,7 +151,7 @@ public class ProducerActions {
             return topicPartitionArray;
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_TOPIC_PARTITIONS);
+                    KafkaObservabilityConstants.ERROR_TYPE_TOPIC_PARTITIONS);
             return createKafkaError("Failed to fetch partitions from the producer " + e.getMessage());
         }
     }

@@ -19,40 +19,25 @@
 package org.ballerinalang.messaging.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
-import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.StrandMetadata;
-import io.ballerina.runtime.api.creators.TypeCreator;
-import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BArray;
-import io.ballerina.runtime.api.values.BFunctionPointer;
-import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.TopicPartition;
 import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
-import org.ballerinalang.messaging.kafka.utils.ModuleUtils;
 
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_ASSIGNED;
-import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.FUNCTION_ON_PARTITION_REVOKED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getStringListFromStringBArray;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicNamesString;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicPartitionRecord;
-import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateTopicPartitionRecord;
 
 /**
  * Native methods to handle subscription of the ballerina kafka consumer.
@@ -100,7 +85,7 @@ public class SubscriptionHandler {
             KafkaMetricsUtil.reportBulkSubscription(consumerObject, topicsList);
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PATTERN);
+                    KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PATTERN);
             return createKafkaError("Failed to subscribe to the topics: " + e.getMessage());
         }
         return null;
@@ -113,27 +98,27 @@ public class SubscriptionHandler {
      * @param topics               Ballerina {@code string[]} of topics.
      * @return {@code BError}, if there's any error, null otherwise.
      */
-    public static Object subscribeWithPartitionRebalance(Environment env, BObject consumerObject, BArray topics,
-                                                         BFunctionPointer onPartitionsRevoked,
-                                                         BFunctionPointer onPartitionsAssigned) {
-        KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
-        Future balFuture = env.markAsync();
-        KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
-        List<String> topicsList = getStringListFromStringBArray(topics);
-        ConsumerRebalanceListener consumer = new SubscriptionHandler.KafkaRebalanceListener(env,
-                                                                                            consumerObject);
-        try {
-            kafkaConsumer.subscribe(topicsList, consumer);
-            Set<String> subscribedTopics = kafkaConsumer.subscription();
-            KafkaMetricsUtil.reportBulkSubscription(consumerObject, subscribedTopics);
-            balFuture.complete(null);
-        } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
-            KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PARTITION_REBALANCE);
-            balFuture.complete(createKafkaError("Failed to subscribe the consumer: " + e.getMessage()));
-        }
-        return null;
-    }
+//    public static Object subscribeWithPartitionRebalance(Environment env, BObject consumerObject, BArray topics,
+//                                                         BFunctionPointer onPartitionsRevoked,
+//                                                         BFunctionPointer onPartitionsAssigned) {
+//        KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
+//        Future balFuture = env.markAsync();
+//        KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
+//        List<String> topicsList = getStringListFromStringBArray(topics);
+//        ConsumerRebalanceListener consumer = new SubscriptionHandler.KafkaRebalanceListener(env,
+//                                                                                            consumerObject);
+//        try {
+//            kafkaConsumer.subscribe(topicsList, consumer);
+//            Set<String> subscribedTopics = kafkaConsumer.subscription();
+//            KafkaMetricsUtil.reportBulkSubscription(consumerObject, subscribedTopics);
+//            balFuture.complete(null);
+//        } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
+//            KafkaMetricsUtil.reportConsumerError(consumerObject,
+//                                         KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PARTITION_REBALANCE);
+//            balFuture.complete(createKafkaError("Failed to subscribe the consumer: " + e.getMessage()));
+//        }
+//        return null;
+//    }
 
     /**
      * Unsubscribe the ballerina kafka consumer from all the topics.
@@ -161,55 +146,55 @@ public class SubscriptionHandler {
      * <p>
      * {@inheritDoc}
      */
-    static class KafkaRebalanceListener implements ConsumerRebalanceListener {
-
-        private BObject consumer;
-        private Runtime runtime;
-
-        KafkaRebalanceListener(Environment environment, BObject consumer) {
-            this.consumer = consumer;
-            this.runtime = environment.getRuntime();
-
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-            Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
-            StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
-                                                         ModuleUtils.getModule().getName(),
-                                                         ModuleUtils.getModule().getVersion(),
-                                                         FUNCTION_ON_PARTITION_REVOKED);
-
-            this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_REVOKED, null,
-                                           metadata, null, inputArgs);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
-            StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
-                                                         ModuleUtils.getModule().getName(),
-                                                         ModuleUtils.getModule().getVersion(),
-                                                         FUNCTION_ON_PARTITION_ASSIGNED);
-            this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_ASSIGNED, null,
-                                           metadata, null, inputArgs);
-        }
-
-        private BArray getPartitionsArray(Collection<TopicPartition> partitions) {
-            BArray topicPartitionArray = ValueCreator.createArrayValue(
-                    TypeCreator.createArrayType(getTopicPartitionRecord().getType()));
-            for (TopicPartition partition : partitions) {
-                BMap<BString, Object> topicPartition = populateTopicPartitionRecord(partition.topic(),
-                                                                                        partition.partition());
-                topicPartitionArray.append(topicPartition);
-            }
-            return topicPartitionArray;
-        }
-    }
+//    static class KafkaRebalanceListener implements ConsumerRebalanceListener {
+//
+//        private BObject consumer;
+//        private Runtime runtime;
+//
+//        KafkaRebalanceListener(Environment environment, BObject consumer) {
+//            this.consumer = consumer;
+//            this.runtime = environment.getRuntime();
+//
+//        }
+//
+//        /**
+//         * {@inheritDoc}
+//         */
+//        @Override
+//        public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+//            Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
+//            StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+//                                                         ModuleUtils.getModule().getName(),
+//                                                         ModuleUtils.getModule().getVersion(),
+//                                                         FUNCTION_ON_PARTITION_REVOKED);
+//
+//            this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_REVOKED, null,
+//                                           metadata, null, inputArgs);
+//        }
+//
+//        /**
+//         * {@inheritDoc}
+//         */
+//        @Override
+//        public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+//            Object[] inputArgs = {consumer, true, getPartitionsArray(partitions), true};
+//            StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+//                                                         ModuleUtils.getModule().getName(),
+//                                                         ModuleUtils.getModule().getVersion(),
+//                                                         FUNCTION_ON_PARTITION_ASSIGNED);
+//            this.runtime.invokeMethodAsync(consumer, FUNCTION_ON_PARTITION_ASSIGNED, null,
+//                                           metadata, null, inputArgs);
+//        }
+//
+//        private BArray getPartitionsArray(Collection<TopicPartition> partitions) {
+//            BArray topicPartitionArray = ValueCreator.createArrayValue(
+//                    TypeCreator.createArrayType(getTopicPartitionRecord().getType()));
+//            for (TopicPartition partition : partitions) {
+//                BMap<BString, Object> topicPartition = populateTopicPartitionRecord(partition.topic(),
+//                                                                                        partition.partition());
+//                topicPartitionArray.append(topicPartition);
+//            }
+//            return topicPartitionArray;
+//        }
+//    }
 }

@@ -41,19 +41,6 @@ isolated function producerClose(Producer producer) returns Error? =
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 
-isolated function producerCommitConsumer(Producer producer, Consumer consumer) returns Error? =
-@java:Method {
-    name: "commitConsumer",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
-isolated function producerCommitConsumerOffsets(Producer producer, PartitionOffset[] offsets, string groupID)
-returns Error? =
-@java:Method {
-    name: "commitConsumerOffsets",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
 isolated function producerFlushRecords(Producer producer) returns Error? =
 @java:Method {
     name: "flushRecords",
