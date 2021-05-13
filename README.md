@@ -6,9 +6,11 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-kafka/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-kafka)
 
-Ballerina Kafka module is one of the Ballerina language standard library modules.
+Ballerina Kafka module is one of the <a target="_blank" href="https://ballerina.io/"> Ballerina</a> language standard library modules.
 
 This module helps to communicate with Kafka brokers as Producers and Consumers.
+
+For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
 
 ## Issues and Projects 
 

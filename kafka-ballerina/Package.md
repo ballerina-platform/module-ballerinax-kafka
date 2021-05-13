@@ -1,61 +1,20 @@
 ## Package Overview
 
-This package is used to interact with Kafka Brokers via Kafka Consumer and Kafka Producer clients.
-This package supports Kafka 1.x.x and 2.0.0 versions.
+The Kafka package is one of the standard library packages of the <a target="_blank" href="https://ballerina.io /"> Ballerina</a> language.
 
-For information on the operations, which you can perform with this package, see the below **Functions**.
-For examples on the usage of the operations, see the following. 
-* [Producer Example](https://ballerina.io/learn/by-example/kafka-producer.html) 
-* [Consumer Service Example](https://ballerina.io/learn/by-example/kafka-consumer-service.html)
-* [Consumer Client Example](https://ballerina.io/learn/by-example/kafka-consumer-client.html)
-* [Transactional Producer Example](https://ballerina.io/learn/by-example/kafka-producer-transactional.html)
-* [Consumer with SASL Authentication Example](https://ballerina.io/learn/by-example/kafka-authentication-sasl-plain-consumer.html)
-* [Producer with SASL Authentication Example](https://ballerina.io/learn/by-example/kafka-authentication-sasl-plain-producer.html)
+This package provides support for the Apache Kafka event streaming platform. Apache Kafka is an open-source distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.  
 
-#### Basic Usages
+This package helps to communicate with Kafka brokers as Producers and Consumers.
 
-##### Publishing Messages
+For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
 
-1. Initialize the Kafka message producer.
-```ballerina
-kafka:ProducerConfiguration producerConfiguration = {
-    clientId: "basic-producer",
-    acks: "all",
-    retryCount: 3
-};
+### Report Issues
 
-kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL, producerConfiguration);
-```
-2. Use the `kafka:Producer` to publish messages. 
-```ballerina
-string message = "Hello World, Ballerina";
-check kafkaProducer->send({ topic: "test-kafka-topic",
-                            value: message.toBytes() });
-```
+To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina
+[Standard Library parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
 
-##### Consuming Messages
+### Useful Links
 
-1. Initializing the Kafka message consumer. 
-```ballerina
-kafka:ConsumerConfiguration consumerConfiguration = {
-    groupId: "group-id",
-    offsetReset: "earliest",
-    topics: ["kafka-topic"]
-};
-
-kafka:Consumer consumer = check new (kafka:DEFAULT_URL, consumerConfiguration);
-```
-2. Use the `kafka:Consumer` as a simple record consumer.
-```ballerina
-kafka:ConsumerRecord[]|kafka:Error result = consumer->poll(1);
-```
-3. Use the `kafka:Listener` as a listener.
-```ballerina
-listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfiguration);
-
-service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) {
-    }
-}
-```
+- Discuss about code changes of the Ballerina project in [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).
+- Chat live with us via our [Slack channel](https://ballerina.io/community/slack/).
+- Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
