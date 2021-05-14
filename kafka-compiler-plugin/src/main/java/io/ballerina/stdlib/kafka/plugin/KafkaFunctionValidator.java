@@ -117,6 +117,10 @@ public class KafkaFunctionValidator {
                             CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
                             DiagnosticSeverity.ERROR, requiredParameterNode.location()));
                 }
+            } else {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(
+                        CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
+                        DiagnosticSeverity.ERROR, requiredParameterNode.location()));
             }
         }
     }
@@ -144,6 +148,10 @@ public class KafkaFunctionValidator {
                                 CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
                                 DiagnosticSeverity.ERROR, requiredParameterNode.location()));
                     }
+                } else {
+                    context.reportDiagnostic(PluginUtils.getDiagnostic(
+                            CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
+                            DiagnosticSeverity.ERROR, requiredParameterNode.location()));
                 }
             }
         }
