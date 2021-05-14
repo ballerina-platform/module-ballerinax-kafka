@@ -1,4 +1,4 @@
-# Module Overview
+# Overview
 
 This module provides an implementation to interact with Kafka Brokers via Kafka Consumer and Kafka Producer clients.
 
