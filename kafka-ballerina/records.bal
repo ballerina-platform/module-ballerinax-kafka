@@ -29,7 +29,7 @@ public type PartitionOffset record {|
 # Represents a topic partition.
 #
 # + topic - Topic to which the partition is related
-# + partition - Index for the partition
+# + partition - Index for the specific partition
 public type TopicPartition record {|
     string topic;
     int partition;
@@ -42,8 +42,8 @@ public type TopicPartition record {|
 # + key - Configurations associated with `crypto:KeyStore`
 # + protocol - SSL/TLS protocol related options
 # + ciphers - List of ciphers to be used. By default, all the available cipher suites are supported
-# + provider - Name of the security provider used for SSL connections. Default value is the default security
-#                 provider of the JVM
+# + provider - Name of the security provider used for SSL connections. Default value is the default security provider
+#              of the JVM
 public type SecureSocket record {|
    crypto:TrustStore cert;
    record {|

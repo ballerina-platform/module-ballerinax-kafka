@@ -26,7 +26,7 @@ public client class Consumer {
 
     # Creates a new Kafka `Consumer`.
     #
-    # + bootstrapServers - List of remote server endpoints of kafka brokers
+    # + bootstrapServers - List of remote server endpoints of Kafka brokers
     # + config - Configurations related to consumer endpoint
     # + return - A `kafka:Error` if an error is encountered or else '()'
     public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
@@ -50,7 +50,7 @@ public client class Consumer {
         return consumerAssign(self, partitions);
     }
 
-    # Closes the consumer connection of the external Kafka broker.
+    # Closes the consumer connection with the external Kafka broker.
     # ```ballerina
     # kafka:Error? result = consumer->close();
     # ```
@@ -61,7 +61,7 @@ public client class Consumer {
         return consumerClose(self, duration);
     }
 
-    # Commits the current consumed offsets for the consumer.
+    # Commits the current consumed offsets of the consumer.
     # ```ballerina
     # kafka:Error? result = consumer->commit();
     # ```
@@ -71,16 +71,16 @@ public client class Consumer {
         return consumerCommit(self);
     }
 
-    # Commits given offsets and partitions for the given topics, for consumer.
+    # Commits given offsets of specific topic partitions for the consumer.
     #
-    # + duration - Timeout duration (in seconds) for the commit operation execution
     # + offsets - Offsets to be commited
+    # + duration - Timeout duration (in seconds) for the commit operation execution
     # + return - `kafka:Error` if an error is encountered or else nil
     isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? {
         return consumerCommitOffset(self, offsets, duration);
     }
 
-    # Retrieves the currently-assigned partitions for the consumer.
+    # Retrieves the currently-assigned partitions of the consumer.
     # ```ballerina
     # kafka:TopicPartition[]|kafka:Error result = consumer->getAssignment();
     # ```
@@ -95,14 +95,14 @@ public client class Consumer {
     # string[]|kafka:Error result = consumer->getAvailableTopics();
     # ```
     #
-    # + duration - Timeout duration (in seconds) for the execution of the `get available topics` operation
+    # + duration - Timeout duration (in seconds) for the execution of the `getAvailableTopics` operation
     # + return - Array of topics currently available (authorized) for the consumer to subscribe or else
-    #           a `kafka:Error`
+    #            a `kafka:Error`
     isolated remote function getAvailableTopics(decimal duration = -1) returns string[]|Error {
         return consumerGetAvailableTopics(self, duration);
     }
 
-    # Retrieves the start offsets for given set of partitions.
+    # Retrieves the start offsets for a given set of partitions.
     #
     # + partitions - Array of topic partitions to get the starting offsets
     # + duration - Timeout duration (in seconds) for the get beginning offsets execution
@@ -112,34 +112,33 @@ public client class Consumer {
         return consumerGetBeginningOffsets(self, partitions, duration);
     }
 
-    # Retrieves the last committed offsets for the given topic partitions.
+    # Retrieves the last committed offset for the given topic partition.
     #
-    # + partition - The `TopicPartition` in which the committed offset is returned for consumer
-    # + duration - Timeout duration (in seconds) for the get committed offset operation to execute
-    # + return - The last committed offset for the consumer for the given partition if there is a committed offset
+    # + partition - The `TopicPartition` in which the committed offset is returned to the consumer
+    # + duration - Timeout duration (in seconds) for the `getCommittedOffset` operation to execute
+    # + return - The last committed offset for a given partition for the consumer if there is a committed offset
     #            present, `()` if there are no committed offsets or else a `kafka:Error`
     isolated remote function getCommittedOffset(TopicPartition partition, decimal duration = -1)
     returns PartitionOffset|Error? {
         return consumerGetCommittedOffset(self, partition, duration);
     }
 
-    # Retrieves the last offsets for given set of partitions.
+    # Retrieves the last offsets for a given set of partitions.
     #
     # + partitions - Set of partitions to get the last offsets
-    # + duration - Timeout duration (in seconds) for the get end offsets operation to execute
+    # + duration - Timeout duration (in seconds) for the `getEndOffsets` operation to execute
     # + return - End offsets for the given partitions if executes successfully or else `kafka:Error`
     isolated remote function getEndOffsets(TopicPartition[] partitions, decimal duration = -1)
     returns PartitionOffset[]|Error {
         return consumerGetEndOffsets(self, partitions, duration);
     }
 
-    # Retrieves the partitions, which are currently paused.
+    # Retrieves the partitions which are currently paused.
     # ```ballerina
     # kafka:TopicPartition[]|kafka:Error result = consumer->getPausedPartitions();
     # ```
     #
-    # + return - Set of partitions paused from message retrieval if executes successfully or else
-    #            a `kafka:Error`
+    # + return - The set of partitions paused from message retrieval if executes successfully or else a `kafka:Error`
     isolated remote function getPausedPartitions() returns TopicPartition[]|Error {
         return consumerGetPausedPartitions(self);
     }
@@ -148,14 +147,14 @@ public client class Consumer {
     #
     # + partition - The `TopicPartition` in which the position is required
     # + duration - Timeout duration (in seconds) for the get position offset operation to execute
-    # + return - Offset which will be fetched next (if a records exists in that offset) or else `kafka:Error` if
+    # + return - Offset which will be fetched next (if a record exists in that offset) or else `kafka:Error` if
     #            the operation fails
     isolated remote function getPositionOffset(TopicPartition partition, decimal duration = -1)
     returns int|Error {
         return consumerGetPositionOffset(self, partition, duration);
     }
 
-    # Retrieves the set of topics, which are currently subscribed by the consumer.
+    # Retrieves the set of topics which are currently subscribed by the consumer.
     # ```ballerina
     # string[]|kafka:Error result = consumer->getSubscription();
     # ```
@@ -171,7 +170,7 @@ public client class Consumer {
     # ```
     #
     # + topic - The topic for which the partition information is needed
-    # + duration - Timeout duration (in seconds) for the `get topic partitions` operation to execute
+    # + duration - Timeout duration (in seconds) for the `getTopicPartitions` operation to execute
     # + return - Array of partitions for the given topic if executes successfully or else a `kafka:Error`
     isolated remote function getTopicPartitions(string topic, decimal duration = -1)
     returns TopicPartition[]|Error {
@@ -180,13 +179,13 @@ public client class Consumer {
 
     # Pauses retrieving messages from a set of partitions.
     #
-    # + partitions - Partitions to pause the retrieval of messages
+    # + partitions - Set of topic partitions to pause the retrieval of messages
     # + return - `kafka:Error` if an error is encountered or else nil
     isolated remote function pause(TopicPartition[] partitions) returns Error? {
         return consumerPause(self, partitions);
     }
 
-    # Polls the consumer for the records of an external broker.
+    # Polls the external broker to retrieve messages.
     # ```ballerina
     # kafka:ConsumerRecord[]|kafka:Error result = consumer->poll(1000);
     # ```
@@ -197,9 +196,9 @@ public client class Consumer {
         return consumerPoll(self, timeout);
     }
 
-    # Resumes consumer retrieving messages from set of partitions which were paused earlier.
+    # Resumes retrieving messages from a set of partitions which were paused earlier.
     #
-    # + partitions - Partitions to resume the retrieval of messages
+    # + partitions - Topic partitions to resume the retrieval of messages
     # + return - `kafka:Error` if an error is encountered or else ()
     isolated remote function resume(TopicPartition[] partitions) returns Error? {
         return consumerResume(self, partitions);
@@ -213,7 +212,7 @@ public client class Consumer {
         return consumerSeek(self, offset);
     }
 
-    # Seeks the beginning of the offsets for the given set of topic partitions.
+    # Seeks to the beginning of the offsets for a given set of topic partitions.
     #
     # + partitions - The set of topic partitions to seek
     # + return - `kafka:Error` if an error is encountered or else ()
@@ -221,7 +220,7 @@ public client class Consumer {
         return consumerSeekToBeginning(self, partitions);
     }
 
-    # Seeks end of the offsets for the given set of topic partitions.
+    # Seeks to the end of the offsets for a given set of topic partitions.
     #
     # + partitions - The set of topic partitions to seek
     # + return - `kafka:Error` if an error is encountered or else ()
@@ -234,7 +233,7 @@ public client class Consumer {
     # kafka:Error? result = consumer->subscribe(["kafka-topic-1", "kafka-topic-2"]);
     # ```
     #
-    # + topics - Array of topics to be subscribed to
+    # + topics - The array of topics to be subscribed to
     # + return - A `kafka:Error` if an error is encountered or else '()'
     isolated remote function subscribe(string[] topics) returns Error? {
         if (self.consumerConfig?.groupId is string) {
@@ -244,18 +243,18 @@ public client class Consumer {
         }
     }
 
-    # Subscribes the consumer to the topics, which match the provided pattern.
+    # Subscribes the consumer to the topics, which matches the provided pattern.
     # ```ballerina
     # kafka:Error? result = consumer->subscribeWithPattern("kafka.*");
     # ```
     #
-    # + regex - Pattern, which should be matched with the topics to be subscribed to
+    # + regex - The pattern, which should be matched with the topics to be subscribed to
     # + return - A `kafka:Error` if an error is encountered or else '()'
     isolated remote function subscribeWithPattern(string regex) returns Error? {
         return consumerSubscribeWithPattern(self, regex);
     }
 
-    # Unsubscribes from all the topic subscriptions.
+    # Unsubscribes from all the topics that the consumer is subscribed.
     # ```ballerina
     # kafka:Error? result = consumer->unsubscribe();
     # ```
