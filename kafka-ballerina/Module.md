@@ -83,14 +83,10 @@ foreach var kafkaRecord in records {
 ### View the available topics in the Kafka cluster
 You can use the consumer to view the available topics in the cluster using the `getAvailableTopics` function.
 ```ballerina
-string[]|kafka:Error result = kafkaConsumer->getAvailableTopics();
-if result is error {
-    io:println("Retrieve failed.");
-} else {
-    // else loop through the topic partitions
-    foreach topic in result {
-        io:println("Topic : ", topic);
-    }
+string[] topics = check kafkaConsumer->getAvailableTopics();
+// loop through the topic partitions
+foreach topic in topics {
+    io:println("Topic : ", topic);
 }
 ```
 
@@ -138,15 +134,10 @@ check kafkaConsumer->assign([topicPartition]);
 ### Retrieve the list of assigned topic partitions
 You can get the list of assigned topic partitions of a consumer using the `getAssignment` function.
 ```ballerina
-kafka:TopicPartition[]|kafka:Error result = consumer->getAssignment();
-// check if the result is error
-if result is kafka:Error {
-    io:println("Retrieve failed.");
-} else {
-    // else loop through the topic partitions
-    foreach topicPartition in result {
-        io:println("Topic : ", topicPartition.topic, " Partition : ", topicPartition.partition.toString());
-    }
+kafka:TopicPartition[] result = check consumer->getAssignment();
+// loop through the topic partitions
+foreach topicPartition in result {
+    io:println("Topic : ", topicPartition.topic, " Partition : ", topicPartition.partition.toString());
 }
 ```
 
@@ -190,28 +181,24 @@ check kafkaConsumer->commitOffset(partitionOffset, 10);
 #### Retrieve start offsets of a set of partitions
 Following code snippet show how to retrieve the start offsets for a given set of partitions.
 ```ballerina
-PartitionOffset[]|Error result = kafkaConsumer->getBeginningOffsets([topicPartition]);
+PartitionOffset[] offsets = check kafkaConsumer->getBeginningOffsets([topicPartition]);
 
-if result is kafka:Error {
-    io:println("Retrieve failed.");
-} else {
-    // else loop through the partition offsets
-    foreach partitionOffset in result {
-        io:println("Topic : ", partitionOffset.partition.topic, " Partition : ", partitionOffset.partition.partition.toString(), " Offset : ", partitionOffset.offset.toString());
-    }
+// loop through the partition offsets
+foreach partitionOffset in offsets {
+    io:println("Topic : ", partitionOffset.partition.topic, " Partition : ", partitionOffset.partition.partition.toString(), " Offset : ", partitionOffset.offset.toString());
 }
 ```
 
 #### Retrieve committed offsets of a set of partitions
 Following code snippet retrieves the last committed offsets for a given topic partition.
 ```ballerina
-PartitionOffset|Error result = kafkaConsumer->getCommittedOffset(topicPartition);
+PartitionOffset result = check kafkaConsumer->getCommittedOffset(topicPartition);
 ```
 
 #### Retrieve end offsets of a set of partitions
 Following code snippet retrieves the last offsets for a given set of partitions.
 ```ballerina
-PartitionOffset[]|Error result = kafkaConsumer->getEndOffsets([topicPartition]);
+PartitionOffset[] result = check kafkaConsumer->getEndOffsets([topicPartition]);
 ```
 
 ### Seek the consumer
