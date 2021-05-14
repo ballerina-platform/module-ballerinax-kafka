@@ -81,13 +81,6 @@ public client class Listener {
         // not implemented
     }
 
-    # Subscribe the listener to a set of topics
-    # ```ballerina
-    # kafka:Error? result = listener->subscribe(topics);
-    # ```
-    #
-    # + topics - The set of topics to be subsribed
-    # + return - A `kafka:Error` if an error is encountered while detaching a service or else nil
     private isolated function subscribe(string[] topics) returns Error? {
         if (self.consumerConfig?.groupId is string) {
             return consumerSubscribe(self, topics);
