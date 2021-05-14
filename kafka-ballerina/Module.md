@@ -73,10 +73,37 @@ kafka:Consumer kafkaConsumer = check new (kafka:DEFAULT_URL, consumerConfigurati
 ```
 
 ### Use the Kafka consumer to read messages
+You can use the `poll` function to retrieve the messages from a subscribed topic. This uses the builtin byte array deserializer for both the key and the value, which is the default deserializer in the kafka:Consumer.
+Following code snippet shows how to retrieve the messages.
+```ballerina
+// pass a timeout value to the poll function
+kafka:ConsumerRecord[] records = check consumer->poll(1);
+
+foreach var kafkaRecord in records {
+    byte[] messageContent = kafkaRecord.value;
+    string|error message = string:fromBytes(messageContent);
+    if (message is string) {
+        log:printInfo("Received Message: " + message);
+
+    } else {
+        log:printError("Error occurred while converting message data",
+            'error = message);
+    }
+}
+```
 
 
 
 
+
+
+
+if (result is error) {
+test:assertFail(msg = "Invalid result received");
+} else {
+test:assertEquals(result[0].topic, "test-topic-1", "Expected: test-topic-1. Received: " + result[0].topic);
+test:assertEquals(result[0].partition, 0, "Expected: 0. Received: " + result[0].partition.toString());
+}
 
 
 
