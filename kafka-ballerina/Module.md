@@ -85,7 +85,7 @@ You can use the consumer to view the available topics in the cluster using the `
 ```ballerina
 string[] topics = check kafkaConsumer->getAvailableTopics();
 // loop through the topic partitions
-foreach topic in topics {
+foreach var topic in topics {
     io:println("Topic : ", topic);
 }
 ```
@@ -136,7 +136,7 @@ You can get the list of assigned topic partitions of a consumer using the `getAs
 ```ballerina
 kafka:TopicPartition[] result = check consumer->getAssignment();
 // loop through the topic partitions
-foreach topicPartition in result {
+foreach var topicPartition in result {
     io:println("Topic : ", topicPartition.topic, " Partition : ", topicPartition.partition.toString());
 }
 ```
@@ -184,7 +184,7 @@ Following code snippet show how to retrieve the start offsets for a given set of
 PartitionOffset[] offsets = check kafkaConsumer->getBeginningOffsets([topicPartition]);
 
 // loop through the partition offsets
-foreach partitionOffset in offsets {
+foreach var partitionOffset in offsets {
     io:println("Topic : ", partitionOffset.partition.topic, " Partition : ", partitionOffset.partition.partition.toString(), " Offset : ", partitionOffset.offset.toString());
 }
 ```
