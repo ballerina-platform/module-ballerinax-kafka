@@ -64,6 +64,7 @@ ballerina{
     module = packageName
     langVersion = ballerinaLangVersion
     packageOrganization = packageOrg
+    testCoverageParam = "--code-coverage --jacoco-xml --includes=*"
 }
 
 configurations {
