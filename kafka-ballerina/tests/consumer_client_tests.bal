@@ -239,6 +239,23 @@ function consumerConnectErrorTest() returns error? {
 }
 
 @test:Config {}
+function consumerConfigTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic1],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-config-test-group",
+        clientId: "test-consumer-30",
+        pollingTimeout: 10,
+        pollingInterval: 1,
+        concurrentConsumers: 5,
+        decoupleProcessing: true
+    };
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+}
+
+@test:Config {}
 function consumerFunctionsTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic2);
     ConsumerConfiguration consumerConfiguration = {
