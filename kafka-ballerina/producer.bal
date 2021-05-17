@@ -65,7 +65,7 @@ public client class Producer {
 
     # Retrieves the topic partition information for the provided topic.
     # ```ballerina
-    # kafka:TopicPartition[]|kafka:Error result = producer->getTopicPartitions("kafka-topic");
+    # kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
     # ```
     #
     # + topic - The specific topic, where the topic partition information is required
