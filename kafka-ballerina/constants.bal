@@ -16,7 +16,7 @@
 
 // Common constants
 
-# Data types for serializer / deserializer functionality
+# Data types for the serializer/deserializer functionality.
 const STRING = "string";
 const INT = "int";
 const FLOAT = "float";
@@ -24,7 +24,7 @@ const BYTE_ARRAY = "byte[]";
 const AVRO_RECORD = "kafka:AvroRecord";
 const ANY = "anydata";
 
-# Default server url
+# The default server URL.
 public const DEFAULT_URL = "localhost:9092";
 
 // ********************************************

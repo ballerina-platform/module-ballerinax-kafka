@@ -38,12 +38,12 @@ public type TopicPartition record {|
 // Security-related records
 # Configurations for secure communication with the Kafka server.
 #
-# + cert - Configurations associated with `crypto:TrustStore`
-# + key - Configurations associated with `crypto:KeyStore`
+# + cert - Configurations associated with the `crypto:TrustStore`
+# + key - Configurations associated with the `crypto:KeyStore`
 # + protocol - SSL/TLS protocol related options
-# + ciphers - List of ciphers to be used. By default, all the available cipher suites are supported.
-# + provider - Name of the security provider used for SSL connections. Default value is the default security provider
-#              of the JVM.
+# + ciphers - List of ciphers to be used. By default, all the available cipher suites are supported
+# + provider - Name of the security provider used for SSL connections. The default value is the default security provider
+#              of the JVM
 public type SecureSocket record {|
    crypto:TrustStore cert;
    record {|
@@ -67,10 +67,9 @@ public enum Protocol {
 
 # Configurations related to Kafka authentication mechanisms.
 #
-# + mechanism - Type of the authentication mechanism. Currently, SASL_PLAIN and SCRAM are supported. See
-#               `kafka:AuthenticationMechanism` for more information.
-# + username - The username to use to authenticate the Kafka producer/consumer
-# + password - The password to use to authenticate the Kafka producer/consumer
+# + mechanism - Type of the authentication mechanism. Currently, SASL_PLAIN and SCRAM are supported
+# + username - The username to authenticate the Kafka producer/consumer
+# + password - The password to authenticate the Kafka producer/consumer
 public type AuthenticationConfiguration record {|
     AuthenticationMechanism mechanism = AUTH_SASL_PLAIN;
     string username;
@@ -87,18 +86,18 @@ public type AuthenticationConfiguration record {|
 # + metricsRecordingLevel - Metrics recording level
 # + metricsReporterClasses - Metrics reporter classes
 # + clientId - Identifier to be used for server side logging
-# + interceptorClasses - Interceptor classes to be used before sending records
+# + interceptorClasses - Interceptor classes to be used before sending the records
 # + isolationLevel - Transactional message reading method
-# + schemaRegistryUrl - Avro schema registry url. Use this field to specify schema registry url, if Avro serializer
-#                       is used.
-# + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
+# + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL, if the Avro serializer
+#                       is used
+# + additionalProperties - Additional properties for the property fields not provided by the Ballerina `kafka` module. Use
 #                          this with caution since this can override any of the fields. It is not recomendded to use
-#                          this field except in an extreme situation.
-# + sessionTimeout - Timeout used to detect consumer failures when heartbeat threshold is reached in seconds
-# + heartBeatInterval - Expected time between heartbeats in seconds
-# + metadataMaxAge - Maximum time to force a refresh of metadata in seconds
-# + autoCommitInterval - Auto committing interval (in seconds) for commit offset, when auto-commit is enabled
-# + maxPartitionFetchBytes - The maximum amount of data the server returns per-partition
+#                          this field except in an extreme situation
+# + sessionTimeout - Timeout (in seconds) used to detect consumer failures when the heartbeat threshold is reached
+# + heartBeatInterval - Expected time (in seconds) between the heartbeats
+# + metadataMaxAge - Maximum time (in seconds) to force a refresh of metadata
+# + autoCommitInterval - Auto committing interval (in seconds) for commit offset when auto-committing is enabled
+# + maxPartitionFetchBytes - The maximum amount of data the server returns per partition
 # + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
 # + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
 # + fetchMinBytes - Minimum amount of data the server should return for a fetch request
@@ -217,17 +216,17 @@ public type AvroGenericRecord record {
 # + metricsRecordingLevel - Metrics recording level
 # + metricReporterClasses - Metrics reporter classes
 # + partitionerClass - Partitioner class to be used to select the partition to which the message is sent
-# + interceptorClasses - Interceptor classes to be used before sending records
+# + interceptorClasses - Interceptor classes to be used before sending the records
 # + transactionalId - Transactional ID to be used in transactional delivery
 # + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro
-#                       serializer is used.
-# + additionalProperties - Additional properties for the property fields not provided by Ballerina Kafka module. Use
+#                       serializer is used
+# + additionalProperties - Additional properties for the property fields not provided by the Ballerina `kafka` module. Use
 #                          this with caution since this can override any of the fields. It is not recomendded to use
-#                          this field except in an extreme situation.
+#                          this field except in an extreme situation
 # + bufferMemory - Total bytes of memory the producer can use to buffer records
 # + retryCount - Number of retries to resend a record
-# + batchSize - Maximum number of bytes to be batched together when sending records. Records exceeding this limit will
-#               not be batched. Setting this to 0 will disable batching.
+# + batchSize - Maximum number of bytes to be batched together when sending the records. Records exceeding this limit will
+#               not be batched. Setting this to 0 will disable batching
 # + linger - Delay (in seconds) to allow other records to be batched before sending them to the Kafka server
 # + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
 # + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)

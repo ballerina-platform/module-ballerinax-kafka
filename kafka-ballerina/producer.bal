@@ -68,7 +68,7 @@ public client class Producer {
     # kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
     # ```
     #
-    # + topic - The specific topic, where the topic partition information is required
+    # + topic - The specific topic, of which the topic partition information is required
     # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:Error` if the operation fails
     isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error {
         return producerGetTopicPartitions(self, topic);

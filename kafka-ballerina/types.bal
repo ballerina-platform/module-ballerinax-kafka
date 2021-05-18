@@ -1,5 +1,5 @@
 // Consumer-related types
-# Represents the differnet types of offset-reset mothods for Kafka consumer.
+# Represents the different types of offset-reset methods of the Kafka consumer.
 public type OffsetResetMethod OFFSET_RESET_EARLIEST|OFFSET_RESET_LATEST|OFFSET_RESET_NONE;
 
 # Kafka in-built deserializer type.

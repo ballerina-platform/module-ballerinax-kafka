@@ -50,16 +50,16 @@ public client class Listener {
         return 'start(self);
     }
 
-    # Stops the kafka listener gracefully.
+    # Stops the Kafka listener gracefully.
     #
-    # + return - An `kafka:Error` if an error is encountered during the listener stopping process or else nil
+    # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function gracefulStop() returns error? {
         return stop(self);
     }
 
     # Stops the kafka listener immediately.
     #
-    # + return - An `kafka:Error` if an error is encountered during the listener stopping process or else nil
+    # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function immediateStop() returns error? {
         return stop(self);
     }
@@ -76,7 +76,7 @@ public client class Listener {
     # Detaches a consumer service from the listener.
     #
     # + s - The service to be detached
-    # + return - A `kafka:Error` if an error is encountered while detaching a service or else nil
+    # + return - A `kafka:Error` if an error is encountered while detaching a service or else `()`
     public isolated function detach(Service s) returns error? {
         // not implemented
     }
