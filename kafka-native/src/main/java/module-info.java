@@ -26,7 +26,7 @@ module io.ballerina.stdlib.kafka.runtime {
     exports org.ballerinalang.messaging.kafka.impl;
     exports org.ballerinalang.messaging.kafka.nativeimpl.consumer;
     exports org.ballerinalang.messaging.kafka.nativeimpl.producer;
-    exports org.ballerinalang.messaging.kafka.serdes;
+//    exports org.ballerinalang.messaging.kafka.serdes;
     exports org.ballerinalang.messaging.kafka.service;
     exports org.ballerinalang.messaging.kafka.observability;
     exports org.ballerinalang.messaging.kafka.api;
