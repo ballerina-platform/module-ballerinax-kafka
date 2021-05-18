@@ -46,7 +46,7 @@ def originalCompilerPlugin = ballerinaCompilerPluginFile.text
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
-        def splitVersion = extVersion.split('-');
+        def splitVersion = extVersion.split('-')
         if (splitVersion.length > 3) {
             def strippedValues = splitVersion[0..-4]
             return strippedValues.join('-')
@@ -60,7 +60,7 @@ def stripBallerinaExtensionVersion(String extVersion) {
 
 apply plugin: 'io.ballerina.plugin'
 
-ballerina{
+ballerina {
     module = packageName
     langVersion = ballerinaLangVersion
     packageOrganization = packageOrg
@@ -72,13 +72,13 @@ configurations {
 }
 
 dependencies {
-    packingJars (group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
+    packingJars(group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
         transitive = false
     }
-    packingJars (group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
+    packingJars(group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    packingJars (group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
+    packingJars(group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
         transitive = false
     }
 }
