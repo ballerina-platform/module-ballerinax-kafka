@@ -1,6 +1,6 @@
 ## Overview
 
-The Kafka package is one of the standard library packages of the <a target="_blank" href="https://ballerina.io /"> Ballerina</a> language.
+The `kafka` package is one of the standard library packages of the <a target="_blank" href="https://ballerina.io /"> Ballerina</a> language.
 
 This package provides support for the Apache Kafka event streaming platform. This helps to communicate with Kafka brokers as Producers and Consumers. Apache Kafka is an open-source distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.  
 
