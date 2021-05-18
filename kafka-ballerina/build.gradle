@@ -68,27 +68,22 @@ ballerina {
 }
 
 configurations {
-    packingJars
+    externalJars
 }
 
 dependencies {
-    packingJars(group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
+    externalJars(group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}") {
         transitive = false
     }
-    packingJars(group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
+    externalJars(group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    packingJars(group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
+    externalJars(group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
         transitive = false
     }
 }
 
-task copyPackingJarsToLib(type: Copy) {
-    into "$project.projectDir/lib"
-    from configurations.packingJars
-}
-
-task updateTomlVersions {
+task updateTomlFiles {
     doLast {
         def stdlibDependentUuidVersion = stripBallerinaExtensionVersion(project.stdlibUuidVersion)
         def stdlibDependentCryptoVersion = stripBallerinaExtensionVersion(project.stdlibCryptoVersion)
@@ -107,7 +102,7 @@ task updateTomlVersions {
     }
 }
 
-task revertTomlFile {
+task revertTomlFiles {
     doLast {
         ballerinaConfigFile.text = originalConfig
         ballerinaDependencyFile.text = originalDependencies
@@ -181,8 +176,7 @@ publishing {
     }
 }
 
-unpackJballerinaTools.dependsOn copyPackingJarsToLib
-updateTomlVersions.dependsOn copyStdlibs
+updateTomlFiles.dependsOn copyStdlibs
 
 test.dependsOn startKafkaServer
 
