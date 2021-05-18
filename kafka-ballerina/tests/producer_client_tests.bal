@@ -162,7 +162,7 @@ function producerTransactionalProducerTest() returns error? {
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-transactional-test-group",
-        clientId: "test-consumer-30"
+        clientId: "test-consumer-38"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);

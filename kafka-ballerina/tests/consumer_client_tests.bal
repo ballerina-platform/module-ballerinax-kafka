@@ -283,7 +283,7 @@ function consumerConfigTest() returns error? {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-config-test-group",
-        clientId: "test-consumer-30",
+        clientId: "test-consumer-11",
         pollingTimeout: 10,
         pollingInterval: 1,
         concurrentConsumers: 5,
@@ -300,7 +300,7 @@ function ListenerConfigTest() returns error? {
         topics: [topic4],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-test-group",
-        clientId: "test-consumer-30",
+        clientId: "test-consumer-12",
         //pollingTimeout: 10    // throws nullpointer
         pollingInterval: 3
         //concurrentConsumers: 5    // throws nullpointer
@@ -321,7 +321,7 @@ function ListenerConfigErrorTest() returns error? {
         topics: [topic4],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group",
-        clientId: "test-consumer-30",
+        clientId: "test-consumer-13",
         concurrentConsumers: -5    // throws nullpointer
     };
     Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -342,7 +342,7 @@ function consumerFunctionsTest() returns error? {
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-functions-test-group",
-        clientId: "test-consumer-11"
+        clientId: "test-consumer-14"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
@@ -364,7 +364,7 @@ function consumerSeekTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-seek-test-group",
-        clientId: "test-consumer-12",
+        clientId: "test-consumer-15",
         pollingTimeout: 10,
         pollingInterval: 5,
         decoupleProcessing: true,
@@ -402,7 +402,7 @@ function consumerSeekToBeginningTest() returns error? {
         topics: [topic4],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-seek-beginning-test-group",
-        clientId: "test-consumer-13"
+        clientId: "test-consumer-16"
     };
     TopicPartition topicPartition = {
         topic: topic4,
@@ -433,7 +433,7 @@ function consumerSeekToEndTest() returns error? {
         topics: [topic4],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-seek-end-test-group",
-        clientId: "test-consumer-14"
+        clientId: "test-consumer-17"
     };
     TopicPartition topicPartition = {
         topic: topic4,
@@ -466,7 +466,7 @@ function consumerPositionOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-position-offset-test-group",
-        clientId: "test-consumer-15"
+        clientId: "test-consumer-18"
     };
     TopicPartition topicPartition = {
         topic: topic4,
@@ -491,7 +491,7 @@ function consumerPositionOffsetsTest() returns error? {
     consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-position-offset-test-group",
-        clientId: "test-consumer-15",
+        clientId: "test-consumer-19",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     consumer = check new (DEFAULT_URL, consumerConfiguration);
@@ -514,7 +514,7 @@ function consumerBeginningOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-beginning-offsets-test-group",
-        clientId: "test-consumer-16"
+        clientId: "test-consumer-20"
     };
     TopicPartition topic1Partition = {
         topic: topic4,
@@ -546,7 +546,7 @@ function consumerBeginningOffsetsTest() returns error? {
     consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-beginning-offsets-test-group",
-        clientId: "test-consumer-16",
+        clientId: "test-consumer-21",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     consumer = check new (DEFAULT_URL, consumerConfiguration);
@@ -577,7 +577,7 @@ function consumerEndOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-end-offset-test-group",
-        clientId: "test-consumer-17"
+        clientId: "test-consumer-22"
     };
     TopicPartition topic1Partition = {
         topic: topic4,
@@ -607,7 +607,7 @@ function consumerEndOffsetsTest() returns error? {
     consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-end-offset-test-group",
-        clientId: "test-consumer-17",
+        clientId: "test-consumer-23",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     consumer = check new (DEFAULT_URL, consumerConfiguration);
@@ -636,7 +636,7 @@ function consumerTopicPartitionsTest() returns error? {
         topics: [topic1, topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-topic-partitions-test-group",
-        clientId: "test-consumer-18"
+        clientId: "test-consumer-24"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     TopicPartition[]|Error topic1Partitions = consumer->getTopicPartitions(topic1);
@@ -661,7 +661,7 @@ function consumerTopicPartitionsTest() returns error? {
        topics: [topic1, topic2],
        offsetReset: OFFSET_RESET_EARLIEST,
        groupId: "consumer-topic-partitions-test-group",
-       clientId: "test-consumer-18",
+       clientId: "test-consumer-25",
        defaultApiTimeout: DEFAULT_TIMEOUT
     });
     topic1Partitions = consumer->getTopicPartitions(topic1);
@@ -678,7 +678,7 @@ function consumerPauseResumePartitionTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-pause-partition-test-group",
-        clientId: "test-consumer-19"
+        clientId: "test-consumer-26"
     };
     TopicPartition topicPartition = {
         topic: topic1,
@@ -711,7 +711,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-pause-partition-test-group",
-        clientId: "test-consumer-20"
+        clientId: "test-consumer-27"
     };
     string failingPartition = "test-topic-2-0";
     TopicPartition topicPartition1 = {
@@ -751,7 +751,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-get-assigned-partitions-test-group",
-        clientId: "test-consumer-21"
+        clientId: "test-consumer-28"
     };
     TopicPartition topicPartition = {
         topic: topic1,
@@ -776,7 +776,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
 function consumerSubscribeUnsubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-unsubscribe-test-group",
-        clientId: "test-consumer-22",
+        clientId: "test-consumer-29",
         topics: [topic1, topic2]
     });
     string[] subscribedTopics = check consumer->getSubscription();
@@ -795,7 +795,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
-        clientId: "test-consumer-23",
+        clientId: "test-consumer-30",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
@@ -813,7 +813,7 @@ function consumerSubscribeTest() returns error? {
 function consumerTopicsAvailableWithTimeoutTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-timeout-test-group",
-        clientId: "test-consumer-29",
+        clientId: "test-consumer-31",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
@@ -822,7 +822,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
 
     consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-timeout-test-group",
-        clientId: "test-consumer-29",
+        clientId: "test-consumer-32",
         metadataMaxAge: 2,
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
@@ -836,7 +836,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
 }
 function consumerSubscribeErrorTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
-        clientId: "test-consumer-24"
+        clientId: "test-consumer-33"
     });
     (Error|error)? result = trap consumer->subscribe([topic1]);
 
@@ -855,7 +855,7 @@ function manualCommitTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-25",
+        clientId: "test-consumer-34",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -898,7 +898,7 @@ function manualCommitWithDurationTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-with-duration-test-group",
-        clientId: "test-consumer-26",
+        clientId: "test-consumer-35",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -927,7 +927,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-with-default-timeout-test-group",
-        clientId: "test-consumer-26",
+        clientId: "test-consumer-36",
         autoCommit: false,
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
@@ -957,7 +957,7 @@ function nonExistingTopicPartitionTest() returns error? {
         topics: [manualCommitTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-manual-commit-test-group",
-        clientId: "test-consumer-26",
+        clientId: "test-consumer-37",
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
