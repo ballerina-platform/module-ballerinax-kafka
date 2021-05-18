@@ -16,20 +16,21 @@
 
 import ballerina/lang.'string;
 import ballerina/test;
+import ballerina/io;
 
 string MESSAGE_KEY = "KEY";
 
 @test:Config{}
 function producerInitTest() returns error? {
     ProducerConfiguration producerConfiguration1 = {
-        clientId: "basic-producer",
+        clientId: "test-producer-01",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3
     };
     ProducerConfiguration producerConfiguration2 = {
-        clientId: "basic-producer",
+        clientId: "test-producer-02",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -37,7 +38,7 @@ function producerInitTest() returns error? {
         transactionalId: "prod-id-1"
     };
     ProducerConfiguration producerConfiguration3 = {
-        clientId: "basic-producer",
+        clientId: "test-producer-03",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -75,7 +76,7 @@ function producerSendStringTest() returns error? {
         topics: [topic3],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
-        clientId: "test-consumer-34"
+        clientId: "test-producer-04"
     };
     Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
@@ -115,7 +116,7 @@ function producerFlushTest() returns error? {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-flush-test-group",
-        clientId: "test-consumer-35"
+        clientId: "test-producer-05"
     };
     Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
@@ -134,3 +135,36 @@ function producerGetTopicPartitionsTest() returns error? {
     check topicPartitionTestProducer->close();
 }
 
+@test:Config {}
+function producerTransactionalProducerTest() returns error? {
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-06",
+        acks: "all",
+        retryCount: 3,
+        enableIdempotence: true,
+        transactionalId: "test-transactional-id"
+    };
+    Producer transactionalProducer = check new (DEFAULT_URL, producerConfigs);
+    transaction {
+        check transactionalProducer->send({
+            topic: topic3,
+            value: TEST_MESSAGE.toBytes(),
+            partition: 0
+        });
+        var commitResult = commit;
+        if (commitResult is ()) {
+            io:println("Commit successful");
+        } else {
+            test:assertFail(msg = "Commit Failed");
+        }
+    }
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic3],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-transactional-test-group",
+        clientId: "test-consumer-30"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 4, "Expected: 4. Received: " + consumerRecords.length().toString());
+}
