@@ -18,7 +18,7 @@ import ballerina/lang.'string;
 import ballerina/test;
 import ballerina/io;
 
-string MESSAGE_KEY = "KEY";
+string MESSAGE_KEY = "TEST-KEY";
 
 @test:Config{}
 function producerInitTest() returns error? {
