@@ -322,7 +322,7 @@ function ListenerConfigErrorTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group",
         clientId: "test-consumer-13",
-        concurrentConsumers: -5    // throws nullpointer
+        concurrentConsumers: -5
     };
     Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
     (Error|error)? result = trap serviceConsumer.attach(consumerConfigService);
