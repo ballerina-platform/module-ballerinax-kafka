@@ -97,8 +97,8 @@ function consumerServiceCommitTest() returns error? {
         topics: [topic5],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-service-commit-test-group",
-        clientId: "test-consumer-3"
-        //autoCommit: false
+        clientId: "test-consumer-3",
+        autoCommit: false
     };
     TopicPartition topicPartition = {
         topic: topic5,
