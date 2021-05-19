@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/jballerina.java;
+
 # Represents a Kafka caller, which can be used to commit the offsets consumed by the service.
 public client class Caller {
 
@@ -23,18 +25,22 @@ public client class Caller {
     # ```
     #
     # + return - A `kafka:Error` if an error is encountered or else '()'
-    isolated remote function 'commit() returns Error? {
-        return consumerCommit(self);
-    }
+    isolated remote function 'commit() returns Error? =
+    @java:Method {
+        name: "commit",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.Commit"
+    } external;
 
     # Commits the given offsets and partitions for the given topics of the service.
     #
     # + offsets - Offsets to be commited
     # + duration - Timeout duration (in seconds) for the commit operation execution
     # + return - `kafka:Error` if an error is encountered or else nil
-    isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? {
-        return consumerCommitOffset(self, offsets, duration);
-    }
+    isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? =
+    @java:Method {
+        name: "commitOffset",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.Commit"
+    } external;
 }
 
 

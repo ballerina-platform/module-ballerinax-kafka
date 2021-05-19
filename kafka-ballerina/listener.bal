@@ -37,13 +37,23 @@ public client class Listener {
         self.consumerConfig = config;
         self.keyDeserializerType = DES_BYTE_ARRAY;
         self.valueDeserializerType = DES_BYTE_ARRAY;
-        check connect(self);
+        check self.listenerInit();
 
         string[]? topics = config?.topics;
         if (topics is string[]){
-            check self.subscribe(topics);
+            if (self.consumerConfig?.groupId is string) {
+                check self.consumerSubscribe(topics);
+            } else {
+                panic createError("The groupId of the consumer must be set to subscribe to the topics");
+            }
         }
     }
+
+    private isolated function listenerInit() returns Error? =
+    @java:Method {
+        name: "connect",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.BrokerConnection"
+    } external;
 
     # Starts the registered services.
     #
@@ -91,11 +101,9 @@ public client class Listener {
         // not implemented
     }
 
-    private isolated function subscribe(string[] topics) returns Error? {
-        if (self.consumerConfig?.groupId is string) {
-            return consumerSubscribe(self, topics);
-        } else {
-            panic createError("The groupId of the consumer must be set to subscribe to the topics");
-        }
-    }
+    private isolated function consumerSubscribe(string[] topics) returns Error? =
+    @java:Method {
+        name: "subscribe",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
+    } external;
 }

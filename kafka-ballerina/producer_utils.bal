@@ -256,18 +256,6 @@ isolated function sendCustomValues(Producer producer, anydata value, string topi
     }
 }
 
-isolated function producerInit(Producer producer) returns Error? =
-@java:Method {
-    name: "init",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
-isolated function producerClose(Producer producer) returns Error? =
-@java:Method {
-    name: "close",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
 isolated function producerCommitConsumer(Producer producer, Consumer consumer) returns Error? =
 @java:Method {
     name: "commitConsumer",
@@ -278,18 +266,6 @@ isolated function producerCommitConsumerOffsets(Producer producer, PartitionOffs
 returns Error? =
 @java:Method {
     name: "commitConsumerOffsets",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
-isolated function producerFlushRecords(Producer producer) returns Error? =
-@java:Method {
-    name: "flushRecords",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
-isolated function producerGetTopicPartitions(Producer producer, string topic) returns TopicPartition[]|Error =
-@java:Method {
-    name: "getTopicPartitions",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 

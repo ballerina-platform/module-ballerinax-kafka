@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/uuid;
+import ballerina/jballerina.java;
 
 # Represents a Kafka producer endpoint.
 #
@@ -38,10 +39,16 @@ public client class Producer {
         self.keySerializerType = SER_BYTE_ARRAY;
         self.valueSerializerType = SER_BYTE_ARRAY;
 
-        check producerInit(self);
+        check self.producerInit();
     }
 
     string connectorId = uuid:createType4AsString();
+
+    private isolated function producerInit() returns Error? =
+    @java:Method {
+        name: "init",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
+    } external;
 
     # Closes the producer connection to the external Kafka broker.
     # ```ballerina
@@ -49,9 +56,10 @@ public client class Producer {
     # ```
     #
     # + return - A `kafka:Error` if closing the producer failed or else '()'
-    isolated remote function close() returns Error? {
-        return producerClose(self);
-    }
+    isolated remote function close() returns Error? =
+    @java:Method {
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
+    } external;
 
     # Flushes the batch of records already sent to the broker by the producer.
     # ```ballerina
@@ -59,9 +67,11 @@ public client class Producer {
     # ```
     #
     # + return - A `kafka:Error` if records couldn't be flushed or else '()'
-    isolated remote function 'flush() returns Error? {
-        return producerFlushRecords(self);
-    }
+    isolated remote function 'flush() returns Error? =
+    @java:Method {
+        name: "flushRecords",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
+    } external;
 
     # Retrieves the topic partition information for the provided topic.
     # ```ballerina
@@ -70,9 +80,10 @@ public client class Producer {
     #
     # + topic - The specific topic, of which the topic partition information is required
     # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:Error` if the operation fails
-    isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error {
-        return producerGetTopicPartitions(self, topic);
-    }
+    isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error =
+    @java:Method {
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
+    } external;
 
     # Produces records to the Kafka server.
     # ```ballerina
