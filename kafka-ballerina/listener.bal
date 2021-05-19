@@ -15,6 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/jballerina.java;
+
 # Represents a Kafka consumer endpoint.
 #
 # + consumerConfig - Used to store configurations related to a Kafka connection
