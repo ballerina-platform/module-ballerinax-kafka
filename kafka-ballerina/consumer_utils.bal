@@ -160,17 +160,17 @@ isolated function consumerUnsubscribe(Consumer consumer) returns Error? =
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
 } external;
 
-isolated function register(Listener lis, Service serviceType, string[]|string? name) returns Error? =
-@java:Method {
-    'class: "org.ballerinalang.messaging.kafka.service.Register"
-} external;
+//isolated function register(Listener lis, Service serviceType, string[]|string? name) returns Error? =
+//@java:Method {
+//    'class: "org.ballerinalang.messaging.kafka.service.Register"
+//} external;
 
-isolated function 'start(Listener lis) returns Error? =
-@java:Method {
-    'class: "org.ballerinalang.messaging.kafka.service.Start"
-} external;
+//isolated function 'start(Listener lis) returns Error? =
+//@java:Method {
+//    'class: "org.ballerinalang.messaging.kafka.service.Start"
+//} external;
 
-isolated function stop(Listener lis) returns Error? =
-@java:Method {
-    'class: "org.ballerinalang.messaging.kafka.service.Stop"
-} external;
+//isolated function stop(Listener lis) returns Error? =
+//@java:Method {
+//    'class: "org.ballerinalang.messaging.kafka.service.Stop"
+//} external;
