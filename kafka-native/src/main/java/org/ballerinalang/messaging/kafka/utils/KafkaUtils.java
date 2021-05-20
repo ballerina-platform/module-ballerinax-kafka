@@ -27,6 +27,8 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
@@ -838,5 +840,23 @@ public class KafkaUtils {
             throw errorValue[0];
         }
         return result;
+    }
+
+    public static Type getAttachedFunctionReturnType(BObject serviceObject, String functionName, int paramCount) {
+        MethodType function = null;
+        MethodType[] resourceFunctions = serviceObject.getType().getMethods();
+        for (MethodType resourceFunction : resourceFunctions) {
+            if (functionName.equals(resourceFunction.getName())) {
+                function = resourceFunction;
+                Type[] parameterTypes = function.getParameterTypes();
+                if (parameterTypes.length == paramCount) {
+                    Type returnType = function.getReturnType();
+                    return returnType;
+                } else {
+                    throw createKafkaError("invalid " + functionName + " remote function signature");
+                }
+            }
+        }
+        return function;
     }
 }
