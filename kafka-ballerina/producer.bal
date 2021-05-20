@@ -29,7 +29,7 @@ public client class Producer {
 
     # Creates a new Kafka `Producer`.
     #
-    # + bootstrapServers - List of remote server endpoints of kafka brokers
+    # + bootstrapServers - List of remote server endpoints of Kafka brokers
     # + config - Configurations related to initializing a Kafka `Producer`
     # + return - A `kafka:Error` if closing the producer failed or else '()'
     public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error? {
@@ -65,10 +65,10 @@ public client class Producer {
 
     # Retrieves the topic partition information for the provided topic.
     # ```ballerina
-    # kafka:TopicPartition[]|kafka:Error result = producer->getTopicPartitions("kafka-topic");
+    # kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
     # ```
     #
-    # + topic - Topic of which the partition information is given
+    # + topic - The specific topic, of which the topic partition information is required
     # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:Error` if the operation fails
     isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error {
         return producerGetTopicPartitions(self, topic);

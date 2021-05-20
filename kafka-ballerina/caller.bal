@@ -14,11 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents a Kafka caller, which can be used to commit the
-# offsets consumed by the service.
+# Represents a Kafka caller, which can be used to commit the offsets consumed by the service.
 public client class Caller {
 
-    # Commits the current consumed offsets for the service.
+    # Commits the currently consumed offsets of the service.
     # ```ballerina
     # kafka:Error? result = caller->commit();
     # ```
@@ -28,7 +27,7 @@ public client class Caller {
         return consumerCommit(self);
     }
 
-    # Commits given offsets and partitions for the given topics, for service.
+    # Commits the given offsets and partitions for the given topics of the service.
     #
     # + offsets - Offsets to be commited
     # + duration - Timeout duration (in seconds) for the commit operation execution
