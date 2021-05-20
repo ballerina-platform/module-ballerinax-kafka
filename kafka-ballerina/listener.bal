@@ -39,7 +39,7 @@ public client class Listener {
 
         string[]? topics = config?.topics;
         if (topics is string[]){
-            check self.subscribe(topics);
+            check self->subscribe(topics);
         }
     }
 
@@ -81,7 +81,7 @@ public client class Listener {
         // not implemented
     }
 
-    private isolated function subscribe(string[] topics) returns Error? {
+    isolated remote function subscribe(string[] topics) returns Error? {
         if (self.consumerConfig?.groupId is string) {
             return consumerSubscribe(self, topics);
         } else {

@@ -30,5 +30,5 @@ groupId = "org.apache.avro"
 artifactId = "avro"
 version = "1.9.2"
 
-#[build-options]
-#observabilityIncluded=true
+[build-options]
+observabilityIncluded=true
