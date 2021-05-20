@@ -42,7 +42,7 @@ public client class Listener {
         string[]? topics = config?.topics;
         if (topics is string[]){
             if (self.consumerConfig?.groupId is string) {
-                check self.consumerSubscribe(topics);
+                check self->consumerSubscribe(topics);
             } else {
                 panic createError("The groupId of the consumer must be set to subscribe to the topics");
             }
@@ -101,7 +101,7 @@ public client class Listener {
         // not implemented
     }
 
-    private isolated function consumerSubscribe(string[] topics) returns Error? =
+    isolated remote function consumerSubscribe(string[] topics) returns Error? =
     @java:Method {
         name: "subscribe",
         'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
