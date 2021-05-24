@@ -21,12 +21,12 @@ import ballerina/jballerina.java;
 #
 # + connectorId - Unique ID for a particular connector to use in trasactions
 # + producerConfig - Used to store configurations related to a Kafka connection
-public client class Producer {
+public client isolated class Producer {
 
-    public ProducerConfiguration? producerConfig = ();
-    private string keySerializerType;
-    private string valueSerializerType;
-    private string|string[] bootstrapServers;
+    final ProducerConfiguration? & readonly producerConfig;
+    private final string keySerializerType;
+    private final string valueSerializerType;
+    private final string|string[] & readonly bootstrapServers;
 
     # Creates a new Kafka `Producer`.
     #
@@ -34,15 +34,15 @@ public client class Producer {
     # + config - Configurations related to initializing a Kafka `Producer`
     # + return - A `kafka:Error` if closing the producer failed or else '()'
     public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error? {
-        self.bootstrapServers = bootstrapServers;
-        self.producerConfig = config;
+        self.bootstrapServers = bootstrapServers.cloneReadOnly();
+        self.producerConfig = config.cloneReadOnly();
         self.keySerializerType = SER_BYTE_ARRAY;
         self.valueSerializerType = SER_BYTE_ARRAY;
 
         check self.producerInit();
     }
 
-    string connectorId = uuid:createType4AsString();
+    private string connectorId = uuid:createType4AsString();
 
     private isolated function producerInit() returns Error? =
     @java:Method {

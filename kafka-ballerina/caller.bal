@@ -17,7 +17,7 @@
 import ballerina/jballerina.java;
 
 # Represents a Kafka caller, which can be used to commit the offsets consumed by the service.
-public client class Caller {
+public client isolated class Caller {
 
     # Commits the currently consumed offsets of the service.
     # ```ballerina

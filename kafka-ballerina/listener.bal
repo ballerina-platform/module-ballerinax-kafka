@@ -20,12 +20,12 @@ import ballerina/jballerina.java;
 # Represents a Kafka consumer endpoint.
 #
 # + consumerConfig - Used to store configurations related to a Kafka connection
-public client class Listener {
+public isolated client class Listener {
 
-    public ConsumerConfiguration consumerConfig;
-    private string keyDeserializerType;
-    private string valueDeserializerType;
-    private string|string[] bootstrapServers;
+    final ConsumerConfiguration & readonly consumerConfig;
+    private final string keyDeserializerType;
+    private final string valueDeserializerType;
+    private final string|string[] & readonly bootstrapServers;
 
     # Creates a new Kafka `Listener`.
     #
@@ -33,8 +33,8 @@ public client class Listener {
     # + config - Configurations related to the consumer endpoint
     # + return - A `kafka:Error` if an error is encountered or else '()'
     public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
-        self.bootstrapServers = bootstrapServers;
-        self.consumerConfig = config;
+        self.bootstrapServers = bootstrapServers.cloneReadOnly();
+        self.consumerConfig = config.cloneReadOnly();
         self.keyDeserializerType = DES_BYTE_ARRAY;
         self.valueDeserializerType = DES_BYTE_ARRAY;
         check self.listenerInit();
