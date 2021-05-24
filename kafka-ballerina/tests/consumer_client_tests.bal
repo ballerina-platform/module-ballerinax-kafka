@@ -39,6 +39,7 @@ string receivedMessage = "";
 string receivedMessageWithCommit = "";
 string receivedMessageWithCommitOffset = "";
 string receivedConfigMessage = "";
+//string saslMsg = "";
 
 int receivedMsgCount = 0;
 
@@ -977,6 +978,30 @@ function nonExistingTopicPartitionTest() returns error? {
     check consumer->close();
 }
 
+//@test:Config {}
+//function SASLConsumerTest() returns error? {
+//    AuthenticationConfiguration authConfig = {
+//        mechanism: AUTH_SASL_PLAIN,
+//        username: "user",
+//        password: "bitnami"
+//    };
+//
+//    ConsumerConfiguration consumerConfig = {
+//        groupId:"sasl-consumer-test-group",
+//        clientId: "sasl-consumer",
+//        offsetReset: "earliest",
+//        topics: [topic2],
+//        auth: authConfig,
+//        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+//    };
+//
+//    Listener saslListener = check new(DEFAULT_URL, consumerConfig);
+//    check saslListener.attach(saslConsumerService);
+//    check saslListener.'start();
+//    check sendMessage("This is msg".toBytes(), topic2);
+//    test:assertEquals(saslMsg, "This is msg");
+//}
+
 function sendMessage(byte[] message, string topic) returns error? {
     return producer->send({ topic: topic, value: message });
 }
@@ -1047,3 +1072,17 @@ service object {
         }
     }
 };
+
+//Service saslConsumerService =
+//service object {
+//    remote function onConsumerRecord(Caller caller,
+//                                ConsumerRecord[] records) {
+//        foreach var consumerRecord in records {
+//            string|error messageContent = 'string:fromBytes(consumerRecord.value);
+//            if (messageContent is string) {
+//                log:printInfo(messageContent);
+//                saslMsg = messageContent;
+//            }
+//        }
+//    }
+//};

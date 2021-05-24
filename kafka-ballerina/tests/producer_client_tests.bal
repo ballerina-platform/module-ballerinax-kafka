@@ -90,6 +90,19 @@ function producerSendStringTest() returns error? {
     }
 }
 
+@test:Config {}
+function producerKeyTypeMismatchErrorTest() returns error? {
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
+    string message = "Hello, Ballerina";
+    (Error|error)? result = trap sendByteArrayValues(producer, message.toBytes(), topic1, MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
+    if (result is Error) {
+        string expectedErr = "Invalid type found for Kafka key. Expected key type: 'byte[]'.";
+        test:assertEquals(result.message(), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+}
+
 @test:Config {
     dependsOn: [producerSendStringTest]
 }
@@ -136,7 +149,7 @@ function producerGetTopicPartitionsTest() returns error? {
 }
 
 @test:Config {}
-function producerTransactionalProducerTest() returns error? {
+function transactionalProducerTest() returns error? {
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-06",
         acks: "all",

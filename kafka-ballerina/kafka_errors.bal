@@ -16,11 +16,6 @@
 
 public type Error distinct error;
 
-isolated function getValueTypeMismatchError(string expectedType) returns Error {
-    string message = "Invalid type found for Kafka value. Expected value type: '" + expectedType + "'.";
-    return error Error(message);
-}
-
 isolated function getKeyTypeMismatchError(string expectedType) returns Error {
     string message = "Invalid type found for Kafka key. Expected key type: '" + expectedType + "'.";
     return error Error(message);
