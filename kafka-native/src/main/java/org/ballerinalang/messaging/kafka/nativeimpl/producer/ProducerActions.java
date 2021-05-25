@@ -71,7 +71,7 @@ public class ProducerActions {
                     producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {
                 if (!((boolean) producerProperties.get(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG))) {
                     return createKafkaError("configuration enableIdempotence must be set to true to enable " +
-                            "transactional producer");
+                                                            "transactional producer");
                 }
                 createKafkaProducer(producerProperties, producerObject);
                 KafkaTransactionContext transactionContext = createKafkaTransactionContext(producerObject);
@@ -81,7 +81,7 @@ public class ProducerActions {
             }
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject,
-                    KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
+                                                 KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
             return createKafkaError("Failed to initialize the producer: " + e.getMessage());
         }
         return null;
@@ -151,7 +151,7 @@ public class ProducerActions {
             return topicPartitionArray;
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject,
-                    KafkaObservabilityConstants.ERROR_TYPE_TOPIC_PARTITIONS);
+                                                 KafkaObservabilityConstants.ERROR_TYPE_TOPIC_PARTITIONS);
             return createKafkaError("Failed to fetch partitions from the producer " + e.getMessage());
         }
     }

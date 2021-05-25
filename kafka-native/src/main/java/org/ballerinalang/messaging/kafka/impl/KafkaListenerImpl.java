@@ -97,7 +97,7 @@ public class KafkaListenerImpl implements KafkaListener {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, callback,
                                        properties, returnType,
-                                        getResourceParameters(service, this.listener, records));
+                                       getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, callback,
                                        getResourceParameters(service, this.listener, records));
@@ -114,7 +114,7 @@ public class KafkaListenerImpl implements KafkaListener {
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, consumer,
                                        properties, returnType,
-                                        getResourceParameters(service, this.listener, records));
+                                       getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, consumer,
                                        getResourceParameters(service, this.listener, records));
