@@ -29,27 +29,16 @@ isolated function sendByteArrayValues(Producer producer, byte[] value, string to
     }
 }
 
-isolated function producerInit(Producer producer) returns Error? =
+isolated function producerCommitConsumer(Producer producer, Consumer consumer) returns Error? =
 @java:Method {
-    name: "init",
+    name: "commitConsumer",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 
-isolated function producerClose(Producer producer) returns Error? =
+isolated function producerCommitConsumerOffsets(Producer producer, PartitionOffset[] offsets, string groupID)
+returns Error? =
 @java:Method {
-    name: "close",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
-isolated function producerFlushRecords(Producer producer) returns Error? =
-@java:Method {
-    name: "flushRecords",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
-isolated function producerGetTopicPartitions(Producer producer, string topic) returns TopicPartition[]|Error =
-@java:Method {
-    name: "getTopicPartitions",
+    name: "commitConsumerOffsets",
     'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
 } external;
 

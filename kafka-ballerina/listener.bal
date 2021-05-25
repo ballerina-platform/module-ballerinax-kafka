@@ -15,15 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/jballerina.java;
+
 # Represents a Kafka consumer endpoint.
 #
 # + consumerConfig - Used to store configurations related to a Kafka connection
-public client class Listener {
+public isolated client class Listener {
 
-    public ConsumerConfiguration consumerConfig;
-    private string keyDeserializerType;
-    private string valueDeserializerType;
-    private string|string[] bootstrapServers;
+    final ConsumerConfiguration & readonly consumerConfig;
+    private final string keyDeserializerType;
+    private final string valueDeserializerType;
+    private final string|string[] & readonly bootstrapServers;
 
     # Creates a new Kafka `Listener`.
     #
@@ -31,47 +33,65 @@ public client class Listener {
     # + config - Configurations related to the consumer endpoint
     # + return - A `kafka:Error` if an error is encountered or else '()'
     public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
-        self.bootstrapServers = bootstrapServers;
-        self.consumerConfig = config;
+        self.bootstrapServers = bootstrapServers.cloneReadOnly();
+        self.consumerConfig = config.cloneReadOnly();
         self.keyDeserializerType = DES_BYTE_ARRAY;
         self.valueDeserializerType = DES_BYTE_ARRAY;
-        check connect(self);
+        check self.listenerInit();
 
         string[]? topics = config?.topics;
         if (topics is string[]){
-            check self->subscribe(topics);
+            if (self.consumerConfig?.groupId is string) {
+                check self->consumerSubscribe(topics);
+            } else {
+                panic createError("The groupId of the consumer must be set to subscribe to the topics");
+            }
         }
     }
+
+    private isolated function listenerInit() returns Error? =
+    @java:Method {
+        name: "connect",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.BrokerConnection"
+    } external;
 
     # Starts the registered services.
     #
     # + return - An `kafka:Error` if an error is encountered while starting the server or else nil
-    public isolated function 'start() returns error? {
-        return 'start(self);
-    }
+    public isolated function 'start() returns error? =
+    @java:Method {
+        name: "start",
+        'class: "org.ballerinalang.messaging.kafka.service.Start"
+    } external;
 
     # Stops the Kafka listener gracefully.
     #
     # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
-    public isolated function gracefulStop() returns error? {
-        return stop(self);
-    }
+    public isolated function gracefulStop() returns error?  =
+    @java:Method {
+        name: "stop",
+        'class: "org.ballerinalang.messaging.kafka.service.Stop"
+    } external;
 
     # Stops the kafka listener immediately.
     #
     # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
-    public isolated function immediateStop() returns error? {
-        return stop(self);
-    }
+    public isolated function immediateStop() returns error? =
+    @java:Method {
+        name: "stop",
+        'class: "org.ballerinalang.messaging.kafka.service.Stop"
+    } external;
 
     # Attaches a service to the listener.
     #
     # + s - The service to be attached
     # + name - Name of the service
     # + return - An `kafka:Error` if an error is encountered while attaching the service or else nil
-    public isolated function attach(Service s, string[]|string? name = ()) returns error? {
-        return register(self, s, name);
-    }
+    public isolated function attach(Service s, string[]|string? name = ()) returns error? =
+    @java:Method {
+        name: "register",
+        'class: "org.ballerinalang.messaging.kafka.service.Register"
+    } external;
 
     # Detaches a consumer service from the listener.
     #
@@ -81,11 +101,9 @@ public client class Listener {
         // not implemented
     }
 
-    isolated remote function subscribe(string[] topics) returns Error? {
-        if (self.consumerConfig?.groupId is string) {
-            return consumerSubscribe(self, topics);
-        } else {
-            panic createError("The groupId of the consumer must be set to subscribe to the topics");
-        }
-    }
+    isolated remote function consumerSubscribe(string[] topics) returns Error? =
+    @java:Method {
+        name: "subscribe",
+        'class: "org.ballerinalang.messaging.kafka.nativeimpl.consumer.SubscriptionHandler"
+    } external;
 }
