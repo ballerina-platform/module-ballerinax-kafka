@@ -53,7 +53,7 @@ public class Send {
             producer.send(record, (metadata, e) -> {
                 if (Objects.nonNull(e)) {
                     KafkaMetricsUtil.reportProducerError(producerObject,
-                            KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
+                                                         KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
                     balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
                 } else {
                     KafkaMetricsUtil.reportPublish(producerObject, record.topic(), record.value());
