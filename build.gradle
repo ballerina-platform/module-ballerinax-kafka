@@ -39,7 +39,7 @@ ext.stdlibJWTVersion = project.stdlibJWTVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibMimeVersion = project.stdlibMimeVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
-ext.stdlibOauth2Version = project.stdlibOauth2Version
+ext.stdlibOAuth2Version = project.stdlibOAuth2Version
 ext.stdlibOsVersion = project.stdlibOsVersion
 ext.stdlibCacheVersion = project.stdlibCacheVersion
 ext.stdlibAuthVersion = project.stdlibAuthVersion
@@ -239,7 +239,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:jwt-ballerina:${stdlibJWTVersion}"
         ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
         ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
-        ballerinaStdLibs "org.ballerinalang:oauth2-ballerina:${stdlibOauth2Version}"
+        ballerinaStdLibs "org.ballerinalang:oauth2-ballerina:${stdlibOAuth2Version}"
         ballerinaStdLibs "org.ballerinalang:os-ballerina:${stdlibOsVersion}"
         ballerinaStdLibs "org.ballerinalang:cache-ballerina:${stdlibCacheVersion}"
         ballerinaStdLibs "org.ballerinalang:auth-ballerina:${stdlibAuthVersion}"

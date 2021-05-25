@@ -46,21 +46,16 @@ function producerInitTest() returns error? {
         transactionalId: "prod-id-2",
         enableIdempotence: true
     };
-    (Producer|Error|error)? result1 = check new (DEFAULT_URL, producerConfiguration1);
-    (Producer|Error|error)? result2 = trap new (DEFAULT_URL, producerConfiguration2);
-    (Producer|Error|error)? result3 = check new (DEFAULT_URL, producerConfiguration3);
-    if (result1 is Error || result1 is error) {
-        test:assertFail(msg = result1.message());
-    }
-    if (result2 is Error || result2 is error) {
+    Producer result1 = check new (DEFAULT_URL, producerConfiguration1);
+    Producer|Error result2 = new (DEFAULT_URL, producerConfiguration2);
+    Producer result3 = check new (DEFAULT_URL, producerConfiguration3);
+
+    if (result2 is Error) {
         string expectedErr = "configuration enableIdempotence must be set to true to enable " +
             "transactional producer";
          test:assertEquals(result2.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
-    }
-    if (result3 is Error || result3 is error) {
-        test:assertFail(msg = result3.message());
     }
 }
 
@@ -82,20 +77,16 @@ function producerSendStringTest() returns error? {
     ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
     test:assertEquals(consumerRecords.length(), 2);
     byte[] messageValue = consumerRecords[0].value;
-    string|error messageConverted = 'string:fromBytes(messageValue);
-    if (messageConverted is string) {
-        test:assertEquals(messageConverted, TEST_MESSAGE);
-    } else {
-        test:assertFail("Invalid message type received. Expected string");
-    }
+    string messageConverted = check 'string:fromBytes(messageValue);
+    test:assertEquals(messageConverted, TEST_MESSAGE);
 }
 
 @test:Config {}
 function producerKeyTypeMismatchErrorTest() returns error? {
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
-    (Error|error)? result = trap sendByteArrayValues(producer, message.toBytes(), topic1, MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
-    if (result is Error) {
+    error? result = trap sendByteArrayValues(producer, message.toBytes(), topic1, MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
+    if (result is error) {
         string expectedErr = "Invalid type found for Kafka key. Expected key type: 'byte[]'.";
         test:assertEquals(result.message(), expectedErr);
     } else {
@@ -139,12 +130,8 @@ function producerFlushTest() returns error? {
 @test:Config {}
 function producerGetTopicPartitionsTest() returns error? {
     Producer topicPartitionTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    TopicPartition[]|Error topicPartitions = check topicPartitionTestProducer->getTopicPartitions(topic1);
-    if (topicPartitions is error) {
-        test:assertFail(msg = "Invalid result received");
-    } else {
-        test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
-    }
+    TopicPartition[] topicPartitions = check topicPartitionTestProducer->getTopicPartitions(topic1);
+    test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
     check topicPartitionTestProducer->close();
 }
 
