@@ -257,26 +257,26 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
     test:assertEquals(receivedErr.message(), expectedErr);
 }
 
-@test:Config {}
-function consumerConnectErrorTest() returns error? {
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic1],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-close-test-group",
-        clientId: "test-consumer-10"
-    };
-    Consumer connectErrorTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
-    (Error|error)? result = trap connect(connectErrorTestConsumer);
-
-    if (result is Error) {
-        string expectedErr = "Kafka consumer is already connected to external broker. Please close it before " +
-            "re-connecting the external broker again.";
-        test:assertEquals(result.message(), expectedErr);
-    } else {
-        test:assertFail(msg = "Expected an error");
-    }
-    check connectErrorTestConsumer->close();
-}
+//@test:Config {}
+//function consumerConnectErrorTest() returns error? {
+//    ConsumerConfiguration consumerConfiguration = {
+//        topics: [topic1],
+//        offsetReset: OFFSET_RESET_EARLIEST,
+//        groupId: "consumer-close-test-group",
+//        clientId: "test-consumer-10"
+//    };
+//    Consumer connectErrorTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
+//    (Error|error)? result = trap connect(connectErrorTestConsumer);
+//
+//    if (result is Error) {
+//        string expectedErr = "Kafka consumer is already connected to external broker. Please close it before " +
+//            "re-connecting the external broker again.";
+//        test:assertEquals(result.message(), expectedErr);
+//    } else {
+//        test:assertFail(msg = "Expected an error");
+//    }
+//    check connectErrorTestConsumer->close();
+//}
 
 @test:Config {}
 function consumerConfigTest() returns error? {

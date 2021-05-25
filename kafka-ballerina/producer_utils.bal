@@ -29,19 +29,6 @@ isolated function sendByteArrayValues(Producer producer, byte[] value, string to
     }
 }
 
-isolated function producerCommitConsumer(Producer producer, Consumer consumer) returns Error? =
-@java:Method {
-    name: "commitConsumer",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
-isolated function producerCommitConsumerOffsets(Producer producer, PartitionOffset[] offsets, string groupID)
-returns Error? =
-@java:Method {
-    name: "commitConsumerOffsets",
-    'class: "org.ballerinalang.messaging.kafka.nativeimpl.producer.ProducerActions"
-} external;
-
 //////////////////////////////////////////////////////////////////////////////////////
 //              Different send functions to send different types of data            //
 //                  Naming convention: send<ValueType><KeyType>                     //
