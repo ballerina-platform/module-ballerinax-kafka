@@ -29,12 +29,6 @@ isolated function sendByteArrayValues(Producer producer, byte[] value, string to
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-//              Different send functions to send different types of data            //
-//                  Naming convention: send<ValueType><KeyType>                     //
-//   Reason for this naming convention is that the key can be nil but value cannot  //
-//////////////////////////////////////////////////////////////////////////////////////
-
  //Send byte[] values with different types of keys
 isolated function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topic, int? partition = (),
     int? timestamp = ()) returns Error? =

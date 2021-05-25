@@ -85,7 +85,7 @@ public class SubscriptionHandler {
             KafkaMetricsUtil.reportBulkSubscription(consumerObject, topicsList);
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                    KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PATTERN);
+                                                 KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE_PATTERN);
             return createKafkaError("Failed to subscribe to the topics: " + e.getMessage());
         }
         return null;

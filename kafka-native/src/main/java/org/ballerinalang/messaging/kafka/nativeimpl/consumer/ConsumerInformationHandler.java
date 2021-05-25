@@ -159,7 +159,7 @@ public class ConsumerInformationHandler {
             return topicPartitionArray;
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                    KafkaObservabilityConstants.ERROR_TYPE_GET_PAUSED_PARTITIONS);
+                                                 KafkaObservabilityConstants.ERROR_TYPE_GET_PAUSED_PARTITIONS);
             return createKafkaError("Failed to retrieve paused partitions: " + e.getMessage());
         }
     }
@@ -199,9 +199,9 @@ public class ConsumerInformationHandler {
             return topicPartitionArray;
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                    KafkaObservabilityConstants.ERROR_TYPE_GET_TOPIC_PARTITIONS);
+                                                 KafkaObservabilityConstants.ERROR_TYPE_GET_TOPIC_PARTITIONS);
             return KafkaUtils.createKafkaError("Failed to retrieve topic partitions for the consumer: "
-                    + e.getMessage());
+                                                       + e.getMessage());
         }
     }
 
@@ -226,7 +226,7 @@ public class ConsumerInformationHandler {
             return arrayValue;
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                    KafkaObservabilityConstants.ERROR_TYPE_GET_SUBSCRIPTION);
+                                                 KafkaObservabilityConstants.ERROR_TYPE_GET_SUBSCRIPTION);
             return createKafkaError("Failed to retrieve subscribed topics: " + e.getMessage());
         }
     }

@@ -579,28 +579,6 @@ public class KafkaUtils {
             } else {
                 throw createKafkaError("Invalid type - expected: byte[]");
             }
-//        } else if (KafkaConstants.SERDES_STRING.equals(type)) {
-//            if (value instanceof String) {
-//                return StringUtils.fromString((String) value);
-//            } else {
-//                throw createKafkaError("Invalid type - expected: string");
-//            }
-//        } else if (KafkaConstants.SERDES_INT.equals(type)) {
-//            if (value instanceof Long) {
-//                return value;
-//            } else {
-//                throw createKafkaError("Invalid type - expected: int");
-//            }
-//        } else if (KafkaConstants.SERDES_FLOAT.equals(type)) {
-//            if (value instanceof Double) {
-//                return value;
-//            } else {
-//                throw createKafkaError("Invalid type - expected: float");
-//            }
-//        } else if (KafkaConstants.SERDES_AVRO.equals(type)) {
-//            return handleAvroConsumer(value);
-//        } else if (KafkaConstants.SERDES_CUSTOM.equals(type)) {
-//            return value;
         }
         throw createKafkaError("Unexpected type found for consumer record");
     }
