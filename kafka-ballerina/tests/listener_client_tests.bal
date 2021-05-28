@@ -19,6 +19,8 @@ import ballerina/log;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
+string saslMsg = "";
+
 @test:Config {}
 function consumerServiceTest() returns error? {
     string topic = "service-test-topic";
@@ -26,7 +28,7 @@ function consumerServiceTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-service-test-group",
+        groupId: "listener-service-test-group",
         clientId: "test-consumer-1"
     };
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
@@ -104,7 +106,7 @@ function consumerServiceCommitOffsetTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-service-commit-offset-test-group",
+        groupId: "listener-service-commit-offset-test-group",
         clientId: "test-consumer-4",
         autoCommit: false
     };
@@ -137,7 +139,7 @@ function consumerServiceCommitTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-service-commit-test-group",
+        groupId: "listener-service-commit-test-group",
         clientId: "test-consumer-3",
         autoCommit: false
     };
@@ -162,6 +164,32 @@ function consumerServiceCommitTest() returns error? {
     int offsetValue = committedPartitionOffset.offset;
 
     test:assertEquals(offsetValue, messageCount);
+}
+
+@test:Config {}
+function saslListenerTest() returns error? {
+    string topic = "sasl-listener-test-topic";
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+
+    ConsumerConfiguration consumerConfig = {
+        groupId:"listener-sasl-test-group",
+        clientId: "sasl-consumer",
+        offsetReset: "earliest",
+        topics: [topic],
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+
+    Listener saslListener = check new(SASL_URL, consumerConfig);
+    check saslListener.attach(saslConsumerService);
+    check saslListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(7);
+    test:assertEquals(saslMsg, TEST_MESSAGE);
 }
 
 Service consumerService =
@@ -220,6 +248,20 @@ service object {
             string message = check 'string:fromBytes(value);
             log:printInfo("Message received: " + message);
             receivedConfigMessage = <@untainted>message;
+        }
+    }
+};
+
+Service saslConsumerService =
+service object {
+    remote function onConsumerRecord(Caller caller,
+                                ConsumerRecord[] records) {
+        foreach var consumerRecord in records {
+            string|error messageContent = 'string:fromBytes(consumerRecord.value);
+            if (messageContent is string) {
+                log:printInfo(messageContent);
+                saslMsg = messageContent;
+            }
         }
     }
 };

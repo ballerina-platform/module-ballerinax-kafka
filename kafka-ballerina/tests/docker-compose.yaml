@@ -1,23 +1,40 @@
 version: '2'
 
 services:
-    zookeeper-consumer:
-        image: 'bitnami/zookeeper:latest'
+    zookeeper:
+        image: 'confluentinc/cp-zookeeper:latest'
+        hostname: zookeeper
+        container_name: kafka-test-zookeeper
         ports:
             - '2181:2181'
         environment:
-            - ALLOW_ANONYMOUS_LOGIN=yes
-    kafka:
-        image: 'bitnami/kafka:latest'
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+
+    broker:
+        image: 'confluentinc/cp-server:latest'
+        hostname: broker
+        container_name: kafka-test-broker
+        depends_on:
+            - zookeeper
         ports:
             - '9092:9092'
+            - '9093:9093'
         environment:
-            - KAFKA_BROKER_ID=1
-            - KAFKA_CFG_ZOOKEEPER_PROTOCOL=PLAINTEXT
-            - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-consumer:2181
-            - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-            - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-            - ALLOW_PLAINTEXT_LISTENER=yes
-
-        depends_on:
-            - zookeeper-consumer
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+            ZOOKEEPER_SASL_ENABLED: 'FALSE'
+            KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+            KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+            KAFKA_SECURITY_INTER_BROKER_PROTOCOL: PLAINTEXT
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,EX_PLAINTEXT://localhost:9092,EX_SASL_PLAINTEXT://localhost:9093
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EX_PLAINTEXT:PLAINTEXT,EX_SASL_PLAINTEXT:SASL_PLAINTEXT
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+            KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+            KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+            KAFKA_OPTS: '-Djava.security.auth.login.config=/opt/confluentinc/kafka/config/kafka_server_jaas.conf'
+        volumes:
+            - ./kafka_server_jaas.conf:/opt/confluentinc/kafka/config/kafka_server_jaas.conf

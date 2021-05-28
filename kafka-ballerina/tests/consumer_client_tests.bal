@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/lang.'string;
 import ballerina/test;
 
@@ -23,6 +22,10 @@ const EMPTY_MEESAGE = "";
 
 const decimal TIMEOUT_DURATION = 5;
 const decimal DEFAULT_TIMEOUT = 10;
+
+const string SASL_URL = "localhost:9093";
+const string SASL_USER = "admin";
+const string SASL_PASSWORD = "password";
 
 string emptyTopic = "empty-topic";
 string nonExistingTopic = "non-existing-topic";
@@ -58,11 +61,11 @@ function consumerCloseTest() returns error? {
             groupId: "consumer-close-test-group",
             clientId: "test-consumer-7"
         };
-    Consumer closeTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
-    var result = check closeTestConsumer->poll(5);
-    var closeresult = closeTestConsumer->close();
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    var result = check consumer->poll(5);
+    var closeresult = consumer->close();
     test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
-    var newresult = closeTestConsumer->poll(5);
+    var newresult = consumer->poll(5);
     test:assertTrue(newresult is error);
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
@@ -78,11 +81,11 @@ function consumerCloseWithDurationTest() returns error? {
             groupId: "consumer-close-with-duration-test-group",
             clientId: "test-consumer-8"
         };
-    Consumer closeWithDurationTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
-    var result = check closeWithDurationTestConsumer->poll(5);
-    var closeresult = closeWithDurationTestConsumer->close(TIMEOUT_DURATION);
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    var result = check consumer->poll(5);
+    var closeresult = consumer->close(TIMEOUT_DURATION);
     test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
-    var newresult = closeWithDurationTestConsumer->poll(5);
+    var newresult = consumer->poll(5);
     test:assertTrue(newresult is error);
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
@@ -99,11 +102,11 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
             clientId: "test-consumer-9",
             defaultApiTimeout: DEFAULT_TIMEOUT
         };
-    Consumer closeWithDefaultTimeoutTestConsumer = check new(DEFAULT_URL, consumerConfiguration);
-    var result = check closeWithDefaultTimeoutTestConsumer->poll(5);
-    var closeresult = closeWithDefaultTimeoutTestConsumer->close();
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    var result = check consumer->poll(5);
+    var closeresult = consumer->close();
     test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
-    var newresult = closeWithDefaultTimeoutTestConsumer->poll(5);
+    var newresult = consumer->poll(5);
     test:assertTrue(newresult is error);
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
@@ -127,6 +130,7 @@ function consumerConfigTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
 }
 
 @test:Config {}
@@ -298,7 +302,7 @@ function consumerBeginningOffsetsTest() returns error? {
     string topic = "consumer-beginning-offsets-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-beginning-offsets-test-group",
+        groupId: "consumer-beginning-offsets-test-group-1",
         clientId: "test-consumer-20"
     };
     TopicPartition topic1Partition = {
@@ -322,7 +326,7 @@ function consumerBeginningOffsetsTest() returns error? {
     check consumer->close();
     consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-beginning-offsets-test-group",
+        groupId: "consumer-beginning-offsets-test-group-2",
         clientId: "test-consumer-21",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
@@ -350,7 +354,7 @@ function consumerEndOffsetsTest() returns error? {
     string topic = "consumer-end-offsets-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-end-offset-test-group",
+        groupId: "consumer-end-offset-test-group-1",
         clientId: "test-consumer-22"
     };
     TopicPartition topic1Partition = {
@@ -373,7 +377,7 @@ function consumerEndOffsetsTest() returns error? {
     check consumer->close();
     consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-end-offset-test-group",
+        groupId: "consumer-end-offset-test-group-2",
         clientId: "test-consumer-23",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
@@ -400,7 +404,7 @@ function consumerTopicPartitionsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic1, topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-topic-partitions-test-group",
+        groupId: "consumer-topic-partitions-test-group-1",
         clientId: "test-consumer-24"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
@@ -413,7 +417,7 @@ function consumerTopicPartitionsTest() returns error? {
     consumer = check new (DEFAULT_URL, {
        topics: [topic1, topic2],
        offsetReset: OFFSET_RESET_EARLIEST,
-       groupId: "consumer-topic-partitions-test-group",
+       groupId: "consumer-topic-partitions-test-group-2",
        clientId: "test-consumer-25",
        defaultApiTimeout: DEFAULT_TIMEOUT
     });
@@ -459,7 +463,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     string topic2 = "consumer-pause-resume-partition-error-test-topic-2";
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-pause-partition-test-group",
+        groupId: "consumer-pause-partition-error-test-group",
         clientId: "test-consumer-27"
     };
     string failingPartition = topic2 + "-0";
@@ -547,10 +551,7 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 21);
-    foreach var t in availableTopics {
-        io:println(t);
-    }
+    test:assertEquals(availableTopics.length(), 26);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
@@ -563,22 +564,22 @@ function consumerSubscribeTest() returns error? {
 @test:Config {}
 function consumerTopicsAvailableWithTimeoutTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
-        groupId: "consumer-subscriber-timeout-test-group",
+        groupId: "consumer-topics-available-timeout-test-group-1",
         clientId: "test-consumer-31",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 23);
+    test:assertEquals(availableTopics.length(), 28);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
-        groupId: "consumer-subscriber-timeout-test-group",
+        groupId: "consumer-topics-available-timeout-test-group-2",
         clientId: "test-consumer-32",
         metadataMaxAge: 2,
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 23);
+    test:assertEquals(availableTopics.length(), 28);
     check consumer->close();
 }
 
@@ -712,7 +713,7 @@ function nonExistingTopicPartitionTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [existingTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-manual-commit-test-group",
+        groupId: "consumer-non-existing-topic-partitions-test-group",
         clientId: "test-consumer-37",
         autoCommit: false
     };
@@ -726,6 +727,31 @@ function nonExistingTopicPartitionTest() returns error? {
     Error positionOffsetError = <Error>nonExistingPositionOffset;
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
+    check consumer->close();
+}
+
+@test:Config{}
+function saslConsumerTest() returns error? {
+    string topic = "sasl-consumer-test-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-sasl-test-group",
+        clientId: "test-consumer-40",
+        autoCommit: false,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
 

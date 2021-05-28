@@ -116,10 +116,10 @@ task startKafkaServer() {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             def stdOut = new ByteArrayOutputStream()
             exec {
-                commandLine 'sh', '-c', "docker ps --filter name=tests_kafka_1"
+                commandLine 'sh', '-c', "docker ps --filter name=kafka-test"
                 standardOutput = stdOut
             }
-            if (!stdOut.toString().contains("tests_kafka_1")) {
+            if (!stdOut.toString().contains("kafka-test")) {
                 println "Starting Kafka server."
                 exec {
                     commandLine 'sh', '-c', "docker-compose -f tests/docker-compose.yaml up -d"
@@ -139,10 +139,10 @@ task stopKafkaServer() {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             def stdOut = new ByteArrayOutputStream()
             exec {
-                commandLine 'sh', '-c', "docker ps --filter name=tests_kafka_1"
+                commandLine 'sh', '-c', "docker ps --filter name=kafka-test"
                 standardOutput = stdOut
             }
-            if (stdOut.toString().contains("tests_kafka_1")) {
+            if (stdOut.toString().contains("kafka-test")) {
                 println "Stopping Kafka server."
                 exec {
                     commandLine 'sh', '-c', "docker-compose -f tests/docker-compose.yaml rm -svf"

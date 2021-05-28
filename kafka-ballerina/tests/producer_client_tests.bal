@@ -71,15 +71,16 @@ function producerSendStringTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "producer-functions-test-group",
+        groupId: "producer-send-string-test-group",
         clientId: "test-producer-04"
     };
-    Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 2);
     byte[] messageValue = consumerRecords[0].value;
     string messageConverted = check 'string:fromBytes(messageValue);
     test:assertEquals(messageConverted, TEST_MESSAGE);
+    check consumer->close();
 }
 
 @test:Config {}
@@ -126,9 +127,10 @@ function producerFlushTest() returns error? {
         groupId: "producer-flush-test-group",
         clientId: "test-producer-05"
     };
-    Consumer stringConsumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check stringConsumer->poll(3);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals('string:fromBytes(consumerRecords[0].value), TEST_MESSAGE);
+    check consumer->close();
 }
 
 @test:Config {}
@@ -167,10 +169,46 @@ function transactionalProducerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "consumer-transactional-test-group",
+        groupId: "producer-transactional-test-group",
         clientId: "test-consumer-38"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
+
+@test:Config{}
+function saslProducerTest() returns error? {
+    string topic = "sasl-producer-test-topic";
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-07",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+
+    Producer kafkaProducer = check new (SASL_URL, producerConfigs);
+
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "sasl-producer-test-group",
+        clientId: "test-consumer-39"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
 }
