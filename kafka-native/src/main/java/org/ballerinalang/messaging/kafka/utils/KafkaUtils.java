@@ -27,6 +27,8 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
@@ -60,7 +62,6 @@ import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static org.ballerinalang.messaging.kafka.utils.AvroUtils.handleAvroConsumer;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
@@ -578,28 +579,6 @@ public class KafkaUtils {
             } else {
                 throw createKafkaError("Invalid type - expected: byte[]");
             }
-        } else if (KafkaConstants.SERDES_STRING.equals(type)) {
-            if (value instanceof String) {
-                return StringUtils.fromString((String) value);
-            } else {
-                throw createKafkaError("Invalid type - expected: string");
-            }
-        } else if (KafkaConstants.SERDES_INT.equals(type)) {
-            if (value instanceof Long) {
-                return value;
-            } else {
-                throw createKafkaError("Invalid type - expected: int");
-            }
-        } else if (KafkaConstants.SERDES_FLOAT.equals(type)) {
-            if (value instanceof Double) {
-                return value;
-            } else {
-                throw createKafkaError("Invalid type - expected: float");
-            }
-        } else if (KafkaConstants.SERDES_AVRO.equals(type)) {
-            return handleAvroConsumer(value);
-        } else if (KafkaConstants.SERDES_CUSTOM.equals(type)) {
-            return value;
         }
         throw createKafkaError("Unexpected type found for consumer record");
     }
@@ -839,5 +818,23 @@ public class KafkaUtils {
             throw errorValue[0];
         }
         return result;
+    }
+
+    public static Type getAttachedFunctionReturnType(BObject serviceObject, String functionName, int paramCount) {
+        MethodType function = null;
+        MethodType[] resourceFunctions = serviceObject.getType().getMethods();
+        for (MethodType resourceFunction : resourceFunctions) {
+            if (functionName.equals(resourceFunction.getName())) {
+                function = resourceFunction;
+                Type[] parameterTypes = function.getParameterTypes();
+                if (parameterTypes.length == paramCount) {
+                    Type returnType = function.getReturnType();
+                    return returnType;
+                } else {
+                    throw createKafkaError("invalid " + functionName + " remote function signature");
+                }
+            }
+        }
+        return function;
     }
 }

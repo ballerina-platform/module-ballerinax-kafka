@@ -21,6 +21,7 @@ package org.ballerinalang.messaging.kafka.impl;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
@@ -38,6 +39,7 @@ import java.util.Map;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_RECORD;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getResourceParameters;
 
 /**
@@ -91,9 +93,11 @@ public class KafkaListenerImpl implements KafkaListener {
                                                  ModuleUtils.getModule().getName(),
                                                  ModuleUtils.getModule().getVersion(), KAFKA_RESOURCE_ON_RECORD);
         if (ObserveUtils.isTracingEnabled()) {
+            Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD, 2);
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, callback,
-                                       properties, getResourceParameters(service, this.listener, records));
+                                       properties, returnType,
+                                       getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, callback,
                                        getResourceParameters(service, this.listener, records));
@@ -106,9 +110,11 @@ public class KafkaListenerImpl implements KafkaListener {
                                                      ModuleUtils.getModule().getName(),
                                                      ModuleUtils.getModule().getVersion(), KAFKA_RESOURCE_ON_RECORD);
         if (ObserveUtils.isTracingEnabled()) {
+            Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD, 2);
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, consumer,
-                                       properties, getResourceParameters(service, this.listener, records));
+                                       properties, returnType,
+                                       getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, consumer,
                                        getResourceParameters(service, this.listener, records));

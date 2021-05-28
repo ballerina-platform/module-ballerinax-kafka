@@ -202,11 +202,6 @@ public type ProducerRecord record {|
     int partition?;
 |};
 
-# Represents a generic Avro record. This is the type of the value returned from an Avro deserializer consumer.
-public type AvroGenericRecord record {
-    // Left blank intentionally.
-};
-
 // Producer-related records
 # Represents the Kafka Producer configuration.
 #
@@ -284,13 +279,4 @@ public type ProducerConfiguration record {|
     SecureSocket secureSocket?;
     AuthenticationConfiguration auth?;
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
-|};
-
-# Defines a record to send data using Avro serialization.
-#
-# + schemaString - The string, which defines the Avro schema
-# + dataRecord - Records, which should be serialized using Avro
-public type AvroRecord record {|
-    string schemaString;
-    anydata dataRecord;
 |};

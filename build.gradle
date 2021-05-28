@@ -35,6 +35,14 @@ ext.stdlibRegexVersion = project.stdlibRegexVersion
 ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibTimeVersion = project.stdlibTimeVersion
 ext.stdlibTransactionVersion = project.stdlibTransactionVersion
+ext.stdlibJWTVersion = project.stdlibJWTVersion
+ext.stdlibTaskVersion = project.stdlibTaskVersion
+ext.stdlibMimeVersion = project.stdlibMimeVersion
+ext.stdlibHttpVersion = project.stdlibHttpVersion
+ext.stdlibOAuth2Version = project.stdlibOAuth2Version
+ext.stdlibOsVersion = project.stdlibOsVersion
+ext.stdlibCacheVersion = project.stdlibCacheVersion
+ext.stdlibAuthVersion = project.stdlibAuthVersion
 ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 
 allprojects {
@@ -133,6 +141,70 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-task'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-jwt'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-mime'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-http'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-oauth2'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-os'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-cache'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-auth'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
     }
 
     ext {
@@ -163,6 +235,14 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
         ballerinaStdLibs "org.ballerinalang:transaction-ballerina:${stdlibTransactionVersion}"
+        ballerinaStdLibs "org.ballerinalang:task-ballerina:${stdlibTaskVersion}"
+        ballerinaStdLibs "org.ballerinalang:jwt-ballerina:${stdlibJWTVersion}"
+        ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
+        ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
+        ballerinaStdLibs "org.ballerinalang:oauth2-ballerina:${stdlibOAuth2Version}"
+        ballerinaStdLibs "org.ballerinalang:os-ballerina:${stdlibOsVersion}"
+        ballerinaStdLibs "org.ballerinalang:cache-ballerina:${stdlibCacheVersion}"
+        ballerinaStdLibs "org.ballerinalang:auth-ballerina:${stdlibAuthVersion}"
     }
 }
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
