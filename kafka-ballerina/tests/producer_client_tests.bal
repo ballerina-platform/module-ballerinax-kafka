@@ -61,14 +61,15 @@ function producerInitTest() returns error? {
 
 @test:Config {}
 function producerSendStringTest() returns error? {
+    string topic = "send-string-test-topic";
     Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
-    Error? result = stringProducer->send({ topic: topic3, value: message.toBytes() });
+    Error? result = stringProducer->send({ topic: topic, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = stringProducer->send({ topic: topic3, value: message.toBytes(), key: MESSAGE_KEY.toBytes() });
+    result = stringProducer->send({ topic: topic, value: message.toBytes(), key: MESSAGE_KEY.toBytes() });
 
     ConsumerConfiguration consumerConfiguration = {
-        topics: [topic3],
+        topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-functions-test-group",
         clientId: "test-producer-04"
@@ -83,9 +84,10 @@ function producerSendStringTest() returns error? {
 
 @test:Config {}
 function producerKeyTypeMismatchErrorTest() returns error? {
+    string topic = "key-type-mismatch-error-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
-    error? result = trap sendByteArrayValues(producer, message.toBytes(), topic1, MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
+    error? result = trap sendByteArrayValues(producer, message.toBytes(), topic, MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
     if (result is error) {
         string expectedErr = "Invalid type found for Kafka key. Expected key type: 'byte[]'.";
         test:assertEquals(result.message(), expectedErr);
@@ -98,13 +100,14 @@ function producerKeyTypeMismatchErrorTest() returns error? {
     dependsOn: [producerSendStringTest]
 }
 function producerCloseTest() returns error? {
+    string topic = "producer-close-test-topic";
     Producer closeTestProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Test Message";
-    Error? result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
+    Error? result = closeTestProducer->send({ topic: topic, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = closeTestProducer->close();
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->send({ topic: topic3, value: message.toBytes() });
+    result = closeTestProducer->send({ topic: topic, value: message.toBytes() });
     test:assertTrue(result is error);
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
@@ -113,11 +116,12 @@ function producerCloseTest() returns error? {
 
 @test:Config {}
 function producerFlushTest() returns error? {
+    string topic = "producer-flush-test-topic";
     Producer flushTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    check flushTestProducer->send({ topic: topic1, value: TEST_MESSAGE.toBytes() });
+    check flushTestProducer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
     check flushTestProducer->'flush();
     ConsumerConfiguration consumerConfiguration = {
-        topics: [topic1],
+        topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-flush-test-group",
         clientId: "test-producer-05"
@@ -129,14 +133,16 @@ function producerFlushTest() returns error? {
 
 @test:Config {}
 function producerGetTopicPartitionsTest() returns error? {
+    string topic = "get-topic-partitions-test-topic";
     Producer topicPartitionTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    TopicPartition[] topicPartitions = check topicPartitionTestProducer->getTopicPartitions(topic1);
+    TopicPartition[] topicPartitions = check topicPartitionTestProducer->getTopicPartitions(topic);
     test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
     check topicPartitionTestProducer->close();
 }
 
 @test:Config {}
 function transactionalProducerTest() returns error? {
+    string topic = "transactional-producer-test-topic";
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-06",
         acks: "all",
@@ -147,7 +153,7 @@ function transactionalProducerTest() returns error? {
     Producer transactionalProducer = check new (DEFAULT_URL, producerConfigs);
     transaction {
         check transactionalProducer->send({
-            topic: topic3,
+            topic: topic,
             value: TEST_MESSAGE.toBytes(),
             partition: 0
         });
@@ -159,12 +165,12 @@ function transactionalProducerTest() returns error? {
         }
     }
     ConsumerConfiguration consumerConfiguration = {
-        topics: [topic3],
+        topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-transactional-test-group",
         clientId: "test-consumer-38"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 4, "Expected: 4. Received: " + consumerRecords.length().toString());
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 }
