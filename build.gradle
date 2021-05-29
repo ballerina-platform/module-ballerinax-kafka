@@ -35,7 +35,7 @@ ext.stdlibRegexVersion = project.stdlibRegexVersion
 ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibTimeVersion = project.stdlibTimeVersion
 ext.stdlibTransactionVersion = project.stdlibTransactionVersion
-ext.stdlibJWTVersion = project.stdlibJWTVersion
+ext.stdlibJwtVersion = project.stdlibJwtVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibMimeVersion = project.stdlibMimeVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
@@ -236,7 +236,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
         ballerinaStdLibs "org.ballerinalang:transaction-ballerina:${stdlibTransactionVersion}"
         ballerinaStdLibs "org.ballerinalang:task-ballerina:${stdlibTaskVersion}"
-        ballerinaStdLibs "org.ballerinalang:jwt-ballerina:${stdlibJWTVersion}"
+        ballerinaStdLibs "org.ballerinalang:jwt-ballerina:${stdlibJwtVersion}"
         ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
         ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
         ballerinaStdLibs "org.ballerinalang:oauth2-ballerina:${stdlibOAuth2Version}"
