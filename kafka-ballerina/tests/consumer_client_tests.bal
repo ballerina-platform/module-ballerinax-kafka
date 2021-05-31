@@ -501,6 +501,28 @@ function consumerPauseResumePartitionErrorTest() returns error? {
 }
 
 @test:Config {}
+function consumerAssignToEmptyTopicTest() returns error? {
+    ConsumerConfiguration consumerConfiguration = {
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-assign-empty-topic-test-group",
+        clientId: "test-consumer-28"
+    };
+    TopicPartition topicPartition = {
+        topic: "",
+        partition: 0
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    Error? result = consumer->assign([topicPartition]);
+    if (result is Error) {
+        string expectedErr = "Failed to assign topics for the consumer: Topic partitions to assign to cannot have null or empty topic";
+        test:assertEquals(result.message(), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+    check consumer->close();
+}
+
+@test:Config {}
 function consumerGetAssignedPartitionsTest() returns error? {
     string topic = "consumer-assigned-partitions-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -563,10 +585,45 @@ function consumerSubscribeTest() returns error? {
 }
 
 @test:Config {}
+function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
+    Consumer consumer = check new (DEFAULT_URL, {
+        groupId: "consumer-subscribe-closed-consumer-group",
+        clientId: "test-consumer-31",
+        metadataMaxAge: 2
+    });
+    check consumer->close();
+    Error? result = consumer->subscribeWithPattern("consumer.*");
+    if result is Error {
+        string errorMsg = "Failed to subscribe to the topics: This consumer has already been closed.";
+        test:assertEquals(result.message(), errorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+}
+
+@test:Config {}
+function consumerSubscribeToEmptyTopicTest() returns error? {
+    Consumer consumer = check new (DEFAULT_URL, {
+        groupId: "consumer-subscribe-empty-topic-test-group",
+        clientId: "test-consumer-32",
+        metadataMaxAge: 2
+    });
+    Error? result = consumer->subscribe([" "]);
+    if result is Error {
+        string errorMsg = "Failed to subscribe to the provided topics: Topic collection to subscribe to cannot contain " +
+        "null or empty topic";
+        test:assertEquals(result.message(), errorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+    check consumer->close();
+}
+
+@test:Config {}
 function consumerTopicsAvailableWithTimeoutTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-topics-available-timeout-test-group-1",
-        clientId: "test-consumer-31",
+        clientId: "test-consumer-33",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
