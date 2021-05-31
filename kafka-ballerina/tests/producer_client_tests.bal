@@ -19,6 +19,8 @@ import ballerina/test;
 import ballerina/io;
 
 string MESSAGE_KEY = "TEST-KEY";
+const string INVALID_URL = "127.0.0.1.1:9099";
+const string INCORRECT_KAFKA_URL = "localhost:9099";
 
 @test:Config{}
 function producerInitTest() returns error? {
@@ -35,7 +37,8 @@ function producerInitTest() returns error? {
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        transactionalId: "prod-id-1"
+        transactionalId: "prod-id-1",
+        enableIdempotence: true
     };
     ProducerConfiguration producerConfiguration3 = {
         clientId: "test-producer-03",
@@ -43,17 +46,26 @@ function producerInitTest() returns error? {
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        transactionalId: "prod-id-2",
-        enableIdempotence: true
+        transactionalId: "prod-id-2"
     };
     Producer result1 = check new (DEFAULT_URL, producerConfiguration1);
-    Producer|Error result2 = new (DEFAULT_URL, producerConfiguration2);
-    Producer result3 = check new (DEFAULT_URL, producerConfiguration3);
+    Producer result2 = check new (DEFAULT_URL, producerConfiguration2);
+    check result1->close();
+    check result2->close();
 
-    if (result2 is Error) {
+    Producer|Error result3 = new (DEFAULT_URL, producerConfiguration3);
+    if (result3 is Error) {
         string expectedErr = "configuration enableIdempotence must be set to true to enable " +
             "transactional producer";
-         test:assertEquals(result2.message(), expectedErr);
+         test:assertEquals(result3.message(), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+
+    Producer|Error result4 = new (INVALID_URL, producerConfiguration1);
+    if (result4 is Error) {
+        string expectedErr = "Failed to initialize the producer: Failed to construct kafka producer";
+        test:assertEquals(result4.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
     }
@@ -67,6 +79,7 @@ function producerSendStringTest() returns error? {
     Error? result = stringProducer->send({ topic: topic, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     result = stringProducer->send({ topic: topic, value: message.toBytes(), key: MESSAGE_KEY.toBytes() });
+    check stringProducer->close();
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -95,6 +108,7 @@ function producerKeyTypeMismatchErrorTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    check producer->close();
 }
 
 @test:Config {
@@ -120,7 +134,8 @@ function producerFlushTest() returns error? {
     string topic = "producer-flush-test-topic";
     Producer flushTestProducer = check new (DEFAULT_URL, producerConfiguration);
     check flushTestProducer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
-    check flushTestProducer->'flush();
+    check flushTestProducer->close();
+
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -139,6 +154,21 @@ function producerGetTopicPartitionsTest() returns error? {
     Producer topicPartitionTestProducer = check new (DEFAULT_URL, producerConfiguration);
     TopicPartition[] topicPartitions = check topicPartitionTestProducer->getTopicPartitions(topic);
     test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
+    check topicPartitionTestProducer->close();
+}
+
+@test:Config {}
+function producerGetTopicPartitionsErrorTest() returns error? {
+    string topic = "get-topic-partitions-error-test-topic";
+    Producer topicPartitionTestProducer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
+    TopicPartition[]|Error result = topicPartitionTestProducer->getTopicPartitions(topic);
+    if (result is error) {
+        string expectedErr = "Failed to fetch partitions from the producer Topic " +
+                                topic + " not present in metadata after ";
+        test:assertEquals(result.message().substring(0, expectedErr.length()), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
     check topicPartitionTestProducer->close();
 }
 
@@ -166,6 +196,8 @@ function transactionalProducerTest() returns error? {
             test:assertFail(msg = "Commit Failed");
         }
     }
+    check transactionalProducer->close();
+
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -201,6 +233,8 @@ function saslProducerTest() returns error? {
 
     Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    check kafkaProducer->close();
+
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -211,4 +245,35 @@ function saslProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+}
+
+@test:Config{}
+function saslProducerIncorrectCredentialsTest() returns error? {
+    string topic = "sasl-producer-incorrect-credentials-test-topic";
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_INCORRECT_PASSWORD
+    };
+
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-08",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+
+    Producer kafkaProducer = check new (SASL_URL, producerConfigs);
+
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    if result is Error {
+        string errorMsg = "Failed to send data to Kafka server: Authentication failed: Invalid username or password";
+        test:assertEquals(result.message(), errorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+    check kafkaProducer->close();
 }

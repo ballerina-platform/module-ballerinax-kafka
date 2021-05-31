@@ -26,6 +26,7 @@ const decimal DEFAULT_TIMEOUT = 10;
 const string SASL_URL = "localhost:9093";
 const string SASL_USER = "admin";
 const string SASL_PASSWORD = "password";
+const string SASL_INCORRECT_PASSWORD = "incorrect_password";
 
 string emptyTopic = "empty-topic";
 string nonExistingTopic = "non-existing-topic";
@@ -752,6 +753,36 @@ function saslConsumerTest() returns error? {
     Consumer consumer = check new(SASL_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
+
+@test:Config{}
+function saslConsumerIncorrectCredentialsTest() returns error? {
+    string topic = "sasl-consumer-incorrect-credentials-test-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_INCORRECT_PASSWORD
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-sasl-incorrect-credentials-test-group",
+        clientId: "test-consumer-41",
+        autoCommit: false,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    ConsumerRecord[]|Error result = consumer->poll(5);
+    if result is Error {
+        string errorMsg = "Failed to poll from the Kafka server: Authentication failed: Invalid username or password";
+        test:assertEquals(result.message(), errorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
     check consumer->close();
 }
 
