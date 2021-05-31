@@ -94,10 +94,7 @@ public client isolated class Producer {
     # + return -  A `kafka:Error` if send action fails to send data or else '()'
     isolated remote function send(ProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
-        if (self.valueSerializerType == SER_BYTE_ARRAY) {
-            return sendByteArrayValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
-            producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
-        }
-        panic createError("Invalid value serializer configuration");
+        return sendByteArrayValues(self, producerRecord.value, producerRecord.topic, producerRecord?.key,
+        producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
     }
 }

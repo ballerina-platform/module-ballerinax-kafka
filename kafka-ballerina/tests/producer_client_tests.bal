@@ -134,6 +134,7 @@ function producerFlushTest() returns error? {
     string topic = "producer-flush-test-topic";
     Producer flushTestProducer = check new (DEFAULT_URL, producerConfiguration);
     check flushTestProducer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check flushTestProducer->'flush();
     check flushTestProducer->close();
 
     ConsumerConfiguration consumerConfiguration = {
