@@ -257,6 +257,34 @@ function consumerSeekToEndTest() returns error? {
     check consumer->close();
 }
 
+@test:Config {}
+function consumerSeekToNegativeValueTest() returns error? {
+    string topic = "consumer-seek-negative-value-test-topic";
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-seek-negative-value-test-group",
+        clientId: "test-consumer-18"
+    };
+    TopicPartition topicPartition = {
+        topic: topic,
+        partition: 0
+    };
+    PartitionOffset partitionOffset = {
+        partition: topicPartition,
+        offset: -1
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    Error? result = consumer->seek(partitionOffset);
+    if (result is Error) {
+        string expectedErrorMsg = "Failed to seek the consumer: seek offset must not be a negative number";
+        test:assertEquals(result.message(), expectedErrorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
+    check consumer->close();
+}
+
 @test:Config {
     dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
@@ -574,13 +602,13 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 26);
+    test:assertEquals(availableTopics.length(), 27);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
     ConsumerRecord[] pollResult = check consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
-    test:assertEquals(newSubscribedTopics.length(), 9);
+    test:assertEquals(newSubscribedTopics.length(), 10);
     check consumer->close();
 }
 
@@ -627,7 +655,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 28);
+    test:assertEquals(availableTopics.length(), 29);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -637,7 +665,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 28);
+    test:assertEquals(availableTopics.length(), 29);
     check consumer->close();
 }
 
@@ -766,7 +794,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
 }
 
 @test:Config {}
-function nonExistingTopicPartitionTest() returns error? {
+function nonExistingTopicPartitionOffsetsTest() returns error? {
     string existingTopic = "existing-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         topics: [existingTopic],
@@ -840,6 +868,32 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    check consumer->close();
+}
+
+@test:Config{}
+function consumerAdditionalPropertiesTest() returns error? {
+    string topic = "consumer-additional-properties-test-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    map<string> propertyMap = {
+        "enable.auto.commit": "false"
+    };
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-additional-properties-test-group",
+        clientId: "test-consumer-42",
+        additionalProperties: propertyMap
+    };
+    TopicPartition topicPartition = {
+        topic: topic,
+        partition: 0
+    };
+
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] result = check consumer->poll(5);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
+    test:assertEquals(committedOffset, ());
     check consumer->close();
 }
 

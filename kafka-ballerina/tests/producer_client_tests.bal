@@ -278,3 +278,41 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     }
     check kafkaProducer->close();
 }
+
+@test:Config {}
+function producerAdditionalPropertiesTest() returns error? {
+    string topic = "producer-additional-properties-test-topic";
+    map<string> propertyMap = {
+        "security.protocol": PROTOCOL_SASL_PLAINTEXT
+    };
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-09",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        auth: authConfig,
+        additionalProperties: propertyMap
+    };
+
+    Producer kafkaProducer = check new (SASL_URL, producerConfigs);
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    check kafkaProducer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "sasl-producer-test-group",
+        clientId: "test-consumer-39"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}

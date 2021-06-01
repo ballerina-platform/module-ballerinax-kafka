@@ -19,10 +19,7 @@
 package org.ballerinalang.messaging.kafka.utils;
 
 import io.ballerina.runtime.api.PredefinedTypes;
-import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.TypeTags;
-import io.ballerina.runtime.api.async.Callback;
-import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -59,8 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
@@ -791,33 +786,6 @@ public class KafkaUtils {
             // if string
             return ((BString) bootstrapServer).getValue();
         }
-    }
-
-    public static Object invokeMethodSync(Runtime runtime, BObject object, String methodName, String strandName,
-                                          StrandMetadata metadata, int timeout, Object... args) {
-        Semaphore semaphore = new Semaphore(0);
-        final BError[] errorValue = new BError[1];
-        Object result = runtime.invokeMethodAsync(object, methodName, strandName, metadata, new Callback() {
-            @Override
-            public void notifySuccess(Object obj) {
-                semaphore.release();
-            }
-
-            @Override
-            public void notifyFailure(BError error) {
-                errorValue[0] = error;
-                semaphore.release();
-            }
-        }, args);
-        try {
-            semaphore.tryAcquire(timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
-        if (errorValue[0] != null) {
-            throw errorValue[0];
-        }
-        return result;
     }
 
     public static Type getAttachedFunctionReturnType(BObject serviceObject, String functionName, int paramCount) {

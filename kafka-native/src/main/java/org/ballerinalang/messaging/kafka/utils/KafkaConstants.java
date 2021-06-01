@@ -64,7 +64,7 @@ public class KafkaConstants {
 
     public static final String KAFKA_RESOURCE_ON_RECORD = "onConsumerRecord";
 
-    public static final BString ADDITIONAL_PROPERTIES_MAP_FIELD = StringUtils.fromString("properties");
+    public static final BString ADDITIONAL_PROPERTIES_MAP_FIELD = StringUtils.fromString("additionalProperties");
 
     public static final BString ALIAS_CONCURRENT_CONSUMERS = StringUtils.fromString("concurrentConsumers");
     public static final BString ALIAS_TOPICS = StringUtils.fromString("topics");
