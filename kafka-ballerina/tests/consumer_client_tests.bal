@@ -16,6 +16,7 @@
 
 import ballerina/lang.'string;
 import ballerina/test;
+import ballerina/crypto;
 
 const TEST_MESSAGE = "Hello, Ballerina";
 const EMPTY_MEESAGE = "";
@@ -24,9 +25,15 @@ const decimal TIMEOUT_DURATION = 5;
 const decimal DEFAULT_TIMEOUT = 10;
 
 const string SASL_URL = "localhost:9093";
+const string SSL_URL = "localhost:9094";
+
 const string SASL_USER = "admin";
 const string SASL_PASSWORD = "password";
 const string SASL_INCORRECT_PASSWORD = "incorrect_password";
+
+const string SSL_KEYSTORE_PATH = "tests/secrets/kafka.client.keystore.jks";
+const string SSL_TRUSTSTORE_PATH = "tests/secrets/kafka.client.truststore.jks";
+const string SSL_MASTER_PASSWORD = "password";
 
 string emptyTopic = "empty-topic";
 string nonExistingTopic = "non-existing-topic";
@@ -894,6 +901,45 @@ function consumerAdditionalPropertiesTest() returns error? {
     ConsumerRecord[] result = check consumer->poll(5);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertEquals(committedOffset, ());
+    check consumer->close();
+}
+
+@test:Config {}
+function sslConsumerTest() returns error? {
+    string topic = "ssl-consumer-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "ssl-consumer-test-group",
+        clientId: "test-consumer-40",
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Consumer consumer = check new (SSL_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
 

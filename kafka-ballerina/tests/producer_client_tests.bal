@@ -17,6 +17,7 @@
 import ballerina/lang.'string;
 import ballerina/test;
 import ballerina/io;
+import ballerina/crypto;
 
 string MESSAGE_KEY = "TEST-KEY";
 const string INVALID_URL = "127.0.0.1.1:9099";
@@ -310,6 +311,55 @@ function producerAdditionalPropertiesTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "sasl-producer-test-group",
         clientId: "test-consumer-39"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
+
+@test:Config {}
+function sslProducerTest() returns error? {
+    string topic = "ssl-producer-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "basic-producer",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer producer = check new (SSL_URL, producerConfiguration);
+    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "ssl-producer-test-group",
+        clientId: "test-consumer-40"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);

@@ -18,9 +18,11 @@ import ballerina/lang.'string;
 import ballerina/log;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
+import ballerina/crypto;
 
 string saslMsg = "";
 string saslIncorrectCredentialsMsg = "";
+string sslMsg = "";
 
 @test:Config {}
 function consumerServiceTest() returns error? {
@@ -235,6 +237,48 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     test:assertEquals(saslMsg, EMPTY_MEESAGE);
 }
 
+@test:Config {}
+function sslListenerTest() returns error? {
+    string topic = "ssl-listener-test-topic";
+
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ConsumerConfiguration consumerConfig = {
+        groupId:"listener-sasl-test-group",
+        clientId: "sasl-consumer",
+        offsetReset: "earliest",
+        topics: [topic],
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+
+    Listener saslListener = check new(SSL_URL, consumerConfig);
+    check saslListener.attach(sslConsumerService);
+    check saslListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(7);
+    test:assertEquals(sslMsg, TEST_MESSAGE);
+}
+
 Service consumerService =
 service object {
     remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
@@ -242,7 +286,7 @@ service object {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
             log:printInfo("Message received: " + message);
-            receivedMessage = <@untainted>message;
+            receivedMessage = message;
         }
     }
 };
@@ -254,7 +298,7 @@ service object {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
             log:printInfo("Message received: " + message);
-            receivedMessageWithCommit = <@untainted>message;
+            receivedMessageWithCommit = message;
         }
         check caller->'commit();
     }
@@ -269,7 +313,7 @@ service object {
             string message = check 'string:fromBytes(value);
             log:printInfo("Message received: " + message);
             receivedMsgCount = receivedMsgCount + 1;
-            receivedMessageWithCommitOffset = <@untainted>message;
+            receivedMessageWithCommitOffset = message;
         }
         TopicPartition topicPartition = {
             topic: topic,
@@ -290,7 +334,7 @@ service object {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
             log:printInfo("Message received: " + message);
-            receivedConfigMessage = <@untainted>message;
+            receivedConfigMessage = message;
         }
     }
 };
@@ -315,6 +359,18 @@ service object {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
             saslIncorrectCredentialsMsg = messageContent;
+        }
+    }
+};
+
+Service sslConsumerService =
+service object {
+    remote function onConsumerRecord(Caller caller,
+                                ConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            sslMsg = messageContent;
         }
     }
 };
