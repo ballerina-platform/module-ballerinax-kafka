@@ -26,14 +26,14 @@ const string INCORRECT_KAFKA_URL = "localhost:9099";
 @test:Config{}
 function producerInitTest() returns error? {
     ProducerConfiguration producerConfiguration1 = {
-        clientId: "test-producer-01",
+        clientId: "test-producer-02",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3
     };
     ProducerConfiguration producerConfiguration2 = {
-        clientId: "test-producer-02",
+        clientId: "test-producer-03",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -42,7 +42,7 @@ function producerInitTest() returns error? {
         enableIdempotence: true
     };
     ProducerConfiguration producerConfiguration3 = {
-        clientId: "test-producer-03",
+        clientId: "test-producer-04",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -86,7 +86,7 @@ function producerSendStringTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-send-string-test-group",
-        clientId: "test-producer-04"
+        clientId: "test-consumer-46"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(3);
@@ -117,13 +117,13 @@ function producerKeyTypeMismatchErrorTest() returns error? {
 }
 function producerCloseTest() returns error? {
     string topic = "producer-close-test-topic";
-    Producer closeTestProducer = check new (DEFAULT_URL, producerConfiguration);
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Test Message";
-    Error? result = closeTestProducer->send({ topic: topic, value: message.toBytes() });
+    Error? result = producer->send({ topic: topic, value: message.toBytes() });
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->close();
+    result = producer->close();
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = closeTestProducer->send({ topic: topic, value: message.toBytes() });
+    result = producer->send({ topic: topic, value: message.toBytes() });
     test:assertTrue(result is error);
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
@@ -133,16 +133,16 @@ function producerCloseTest() returns error? {
 @test:Config {}
 function producerFlushTest() returns error? {
     string topic = "producer-flush-test-topic";
-    Producer flushTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    check flushTestProducer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
-    check flushTestProducer->'flush();
-    check flushTestProducer->close();
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
+    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->'flush();
+    check producer->close();
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-flush-test-group",
-        clientId: "test-producer-05"
+        clientId: "test-consumer-47"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(3);
@@ -153,17 +153,17 @@ function producerFlushTest() returns error? {
 @test:Config {}
 function producerGetTopicPartitionsTest() returns error? {
     string topic = "get-topic-partitions-test-topic";
-    Producer topicPartitionTestProducer = check new (DEFAULT_URL, producerConfiguration);
-    TopicPartition[] topicPartitions = check topicPartitionTestProducer->getTopicPartitions(topic);
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
+    TopicPartition[] topicPartitions = check producer->getTopicPartitions(topic);
     test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
-    check topicPartitionTestProducer->close();
+    check producer->close();
 }
 
 @test:Config {}
 function producerGetTopicPartitionsErrorTest() returns error? {
     string topic = "get-topic-partitions-error-test-topic";
-    Producer topicPartitionTestProducer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
-    TopicPartition[]|Error result = topicPartitionTestProducer->getTopicPartitions(topic);
+    Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
+    TopicPartition[]|Error result = producer->getTopicPartitions(topic);
     if (result is error) {
         string expectedErr = "Failed to fetch partitions from the producer Topic " +
                                 topic + " not present in metadata after ";
@@ -171,22 +171,22 @@ function producerGetTopicPartitionsErrorTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    check topicPartitionTestProducer->close();
+    check producer->close();
 }
 
 @test:Config {}
 function transactionalProducerTest() returns error? {
     string topic = "transactional-producer-test-topic";
     ProducerConfiguration producerConfigs = {
-        clientId: "test-producer-06",
+        clientId: "test-producer-05",
         acks: "all",
         retryCount: 3,
         enableIdempotence: true,
         transactionalId: "test-transactional-id"
     };
-    Producer transactionalProducer = check new (DEFAULT_URL, producerConfigs);
+    Producer producer = check new (DEFAULT_URL, producerConfigs);
     transaction {
-        check transactionalProducer->send({
+        check producer->send({
             topic: topic,
             value: TEST_MESSAGE.toBytes(),
             partition: 0
@@ -198,13 +198,13 @@ function transactionalProducerTest() returns error? {
             test:assertFail(msg = "Commit Failed");
         }
     }
-    check transactionalProducer->close();
+    check producer->close();
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "producer-transactional-test-group",
-        clientId: "test-consumer-38"
+        clientId: "test-consumer-48"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
@@ -222,7 +222,7 @@ function saslProducerTest() returns error? {
     };
 
     ProducerConfiguration producerConfigs = {
-        clientId: "test-producer-07",
+        clientId: "test-producer-06",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -241,7 +241,7 @@ function saslProducerTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "sasl-producer-test-group",
-        clientId: "test-consumer-39"
+        clientId: "test-consumer-49"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
@@ -259,7 +259,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     };
 
     ProducerConfiguration producerConfigs = {
-        clientId: "test-producer-08",
+        clientId: "test-producer-07",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -292,7 +292,7 @@ function producerAdditionalPropertiesTest() returns error? {
         password: SASL_PASSWORD
     };
     ProducerConfiguration producerConfigs = {
-        clientId: "test-producer-09",
+        clientId: "test-producer-08",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -310,7 +310,7 @@ function producerAdditionalPropertiesTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "sasl-producer-test-group",
-        clientId: "test-consumer-39"
+        clientId: "test-consumer-50"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
@@ -343,7 +343,7 @@ function sslProducerTest() returns error? {
     };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "basic-producer",
+        clientId: "test-producer-9",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -359,7 +359,7 @@ function sslProducerTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "ssl-producer-test-group",
-        clientId: "test-consumer-40"
+        clientId: "test-consumer-51"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);

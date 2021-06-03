@@ -24,6 +24,8 @@ string saslMsg = "";
 string saslIncorrectCredentialsMsg = "";
 string sslMsg = "";
 
+int receivedMsgCount = 0;
+
 @test:Config {}
 function consumerServiceTest() returns error? {
     string topic = "service-test-topic";
@@ -68,7 +70,7 @@ function listenerConfigTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-test-group",
-        clientId: "test-consumer-12",
+        clientId: "test-consumer-3",
         pollingInterval: 3
     };
 
@@ -87,7 +89,7 @@ function listenerConfigErrorTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group-1",
-        clientId: "test-consumer-13",
+        clientId: "test-consumer-4",
         concurrentConsumers: -5
     };
     Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -105,7 +107,7 @@ function listenerConfigErrorTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group-2",
-        clientId: "test-consumer-14",
+        clientId: "test-consumer-5",
         partitionAssignmentStrategy: strategy
     };
     Listener|Error result2 = new(DEFAULT_URL, consumerConfiguration);
@@ -126,7 +128,7 @@ function consumerServiceCommitOffsetTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-service-commit-offset-test-group",
-        clientId: "test-consumer-4",
+        clientId: "test-consumer-6",
         autoCommit: false
     };
     TopicPartition topicPartition = {
@@ -150,6 +152,7 @@ function consumerServiceCommitOffsetTest() returns error? {
     int offsetValue = committedPartitionOffset.offset;
 
     test:assertEquals(offsetValue, messageCount);
+    check consumer->close();
 }
 
 @test:Config {}
@@ -159,7 +162,7 @@ function consumerServiceCommitTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-service-commit-test-group",
-        clientId: "test-consumer-3",
+        clientId: "test-consumer-7",
         autoCommit: false
     };
     TopicPartition topicPartition = {
@@ -183,6 +186,7 @@ function consumerServiceCommitTest() returns error? {
     int offsetValue = committedPartitionOffset.offset;
 
     test:assertEquals(offsetValue, messageCount);
+    check consumer->close();
 }
 
 @test:Config {}
@@ -196,7 +200,7 @@ function saslListenerTest() returns error? {
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
-        clientId: "sasl-consumer",
+        clientId: "test-consumer-8",
         offsetReset: "earliest",
         topics: [topic],
         auth: authConfig,
@@ -222,7 +226,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-incorrect-credentials-test-group",
-        clientId: "sasl-consumer",
+        clientId: "test-consumer-9",
         offsetReset: "earliest",
         topics: [topic],
         auth: authConfig,
@@ -264,7 +268,7 @@ function sslListenerTest() returns error? {
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
-        clientId: "sasl-consumer",
+        clientId: "test-consumer-10",
         offsetReset: "earliest",
         topics: [topic],
         secureSocket: socket,
