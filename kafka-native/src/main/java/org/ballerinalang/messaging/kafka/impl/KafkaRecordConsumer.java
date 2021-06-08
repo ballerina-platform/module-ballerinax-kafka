@@ -167,7 +167,8 @@ public class KafkaRecordConsumer {
         // Make closed true, therefore poll function stops polling, and make stop operation thread-safe
         closed.set(true);
         this.kafkaConsumer.wakeup();
-        this.kafkaConsumer.close();
+        final Runnable stopFunction = () -> this.kafkaConsumer.close();
+        this.executorService.schedule(stopFunction, 0, TimeUnit.MILLISECONDS);
         this.executorService.shutdown();
     }
 }

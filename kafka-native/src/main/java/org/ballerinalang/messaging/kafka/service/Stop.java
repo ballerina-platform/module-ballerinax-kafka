@@ -25,6 +25,7 @@ import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.io.PrintStream;
 
+import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVICE_STOPPED;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getServerUrls;
@@ -46,7 +47,8 @@ public class Stop {
         if (!isStopped) {
             return KafkaUtils.createKafkaError("Failed to stop the kafka service.");
         }
-        console.println(SERVICE_STOPPED + getServerUrls(listener));
+        console.println(SERVICE_STOPPED
+                + getServerUrls(listener.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG)));
         return null;
     }
 }
