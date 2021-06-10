@@ -82,7 +82,7 @@ public class ProducerActions {
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportProducerError(producerObject,
                                                  KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
-            return createKafkaError("Failed to initialize the producer: " + e.getMessage());
+            return createKafkaError("Failed to initialize the producer: " + e.getCause().getMessage());
         }
         return null;
     }

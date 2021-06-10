@@ -65,7 +65,8 @@ function producerInitTest() returns error? {
 
     Producer|Error result4 = new (INVALID_URL, producerConfiguration1);
     if (result4 is Error) {
-        string expectedErr = "Failed to initialize the producer: Failed to construct kafka producer";
+        string expectedErr = "Failed to initialize the producer: " +
+            "No resolvable bootstrap urls given in bootstrap.servers";
         test:assertEquals(result4.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
