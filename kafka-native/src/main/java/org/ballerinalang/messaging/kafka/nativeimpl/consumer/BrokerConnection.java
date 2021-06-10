@@ -34,7 +34,6 @@ import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -63,7 +62,6 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.processKafkaCon
 public class BrokerConnection {
 
     private static final Logger logger = LoggerFactory.getLogger(BrokerConnection.class);
-    private static final PrintStream console = System.out;
 
     /**
      * Closes the connection between ballerina kafka consumer and the kafka broker.
@@ -124,7 +122,9 @@ public class BrokerConnection {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
             return createKafkaError("Cannot connect to the kafka server: " + e.getMessage());
         }
-        console.println(KAFKA_SERVERS + getServerUrls(bootStrapServers));
+        if (logger.isDebugEnabled()) {
+            logger.debug(KAFKA_SERVERS + getServerUrls(bootStrapServers));
+        }
         return null;
     }
 
