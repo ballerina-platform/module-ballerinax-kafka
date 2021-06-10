@@ -24,9 +24,11 @@ import org.ballerinalang.messaging.kafka.impl.KafkaServerConnectorImpl;
 import org.ballerinalang.messaging.kafka.utils.KafkaUtils;
 
 import java.io.PrintStream;
+import java.util.List;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.SERVICE_STARTED;
+import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicNamesString;
 
 /**
  * Start server connector.
@@ -38,7 +40,7 @@ public class Start {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
         try {
             serverConnector.start();
-            console.println(SERVICE_STARTED);
+            console.println(SERVICE_STARTED + getTopicNamesString((List<String>) listener.getNativeData("topics")));
         } catch (KafkaConnectorException e) {
             return KafkaUtils.createKafkaError(e.getMessage());
         }

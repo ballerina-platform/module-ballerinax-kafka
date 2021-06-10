@@ -58,6 +58,7 @@ public class SubscriptionHandler {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<String> topicsList = getStringListFromStringBArray(topics);
+        consumerObject.addNativeData("topics", topicsList);
         try {
             kafkaConsumer.subscribe(topicsList);
             Set<String> subscribedTopics = kafkaConsumer.subscription();
