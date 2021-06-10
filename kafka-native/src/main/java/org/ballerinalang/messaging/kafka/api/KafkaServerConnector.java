@@ -33,11 +33,19 @@ public interface KafkaServerConnector {
     void start() throws KafkaConnectorException;
 
     /**
-     * Stop the server connector which actually closes consumer connection with remote broker.
+     * Gracefully stop the server connector which actually closes consumer connection with remote broker.
      *
      * @return true if stopped successfully, false otherwise
      * @throws KafkaConnectorException if error occurred while stopping the Kafka server connector
      */
-    boolean stop() throws KafkaConnectorException;
+    boolean gracefulStop() throws KafkaConnectorException;
+
+    /**
+     * Immediately stop the server connector which actually closes consumer connection with remote broker.
+     *
+     * @return true if stopped successfully, false otherwise
+     * @throws KafkaConnectorException if error occurred while stopping the Kafka server connector
+     */
+    boolean immediateStop() throws KafkaConnectorException;
 
 }

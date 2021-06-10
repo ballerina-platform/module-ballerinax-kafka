@@ -18,7 +18,12 @@
 <FindBugsFilter>
     <Match>
         <Class name="org.ballerinalang.messaging.kafka.impl.KafkaServerConnectorImpl" />
-        <Method name="stop"/>
+        <Method name="gracefulStop"/>
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="org.ballerinalang.messaging.kafka.impl.KafkaServerConnectorImpl" />
+        <Method name="immediateStop"/>
         <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR" />
     </Match>
     <Match>

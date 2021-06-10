@@ -36,11 +36,27 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getServerUrls;
 public class Stop {
     private static final PrintStream console = System.out;
 
-    public static Object stop(BObject listener) {
+    public static Object gracefulStop(BObject listener) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
         boolean isStopped;
         try {
-            isStopped = serverConnector.stop();
+            isStopped = serverConnector.gracefulStop();
+        } catch (KafkaConnectorException e) {
+            return KafkaUtils.createKafkaError(e.getMessage());
+        }
+        if (!isStopped) {
+            return KafkaUtils.createKafkaError("Failed to stop the kafka service.");
+        }
+        console.println(SERVICE_STOPPED
+                + getServerUrls(listener.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG)));
+        return null;
+    }
+
+    public static Object immediateStop(BObject listener) {
+        KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
+        boolean isStopped;
+        try {
+            isStopped = serverConnector.immediateStop();
         } catch (KafkaConnectorException e) {
             return KafkaUtils.createKafkaError(e.getMessage());
         }

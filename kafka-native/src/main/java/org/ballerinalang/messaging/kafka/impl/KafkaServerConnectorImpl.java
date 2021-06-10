@@ -81,11 +81,35 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
      * {@inheritDoc}
      */
     @Override
-    public boolean stop() throws KafkaConnectorException {
+    public boolean gracefulStop() throws KafkaConnectorException {
         KafkaConnectorException ex = null;
         for (KafkaRecordConsumer consumer : this.messageConsumers) {
             try {
-                consumer.stopConsume();
+                consumer.gracefulStopConsume();
+            } catch (KafkaException e) {
+                if (ex == null) {
+                    ex = new KafkaConnectorException("Error closing the Kafka consumers for service " + serviceId, e);
+                } else {
+                    ex.addSuppressed(e);
+                }
+            }
+        }
+        this.messageConsumers = null;
+        if (ex != null) {
+            throw ex;
+        }
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean immediateStop() throws KafkaConnectorException {
+        KafkaConnectorException ex = null;
+        for (KafkaRecordConsumer consumer : this.messageConsumers) {
+            try {
+                consumer.immediateStopConsume();
             } catch (KafkaException e) {
                 if (ex == null) {
                     ex = new KafkaConnectorException("Error closing the Kafka consumers for service " + serviceId, e);

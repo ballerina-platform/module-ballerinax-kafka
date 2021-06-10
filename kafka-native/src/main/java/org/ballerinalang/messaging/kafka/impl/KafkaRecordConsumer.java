@@ -53,6 +53,7 @@ public class KafkaRecordConsumer {
     private KafkaConsumer kafkaConsumer;
     private Duration pollingTimeout = Duration.ofMillis(1000);
     private int pollingInterval = 1000;
+    private long stopTimeout = 1000;
     private boolean decoupleProcessing = true;
     private String groupId;
     private KafkaListener kafkaListener;
@@ -161,14 +162,34 @@ public class KafkaRecordConsumer {
     }
 
     /**
-     * Stops Kafka consumer polling cycles, shutdowns scheduled thread pool and closes the consumer instance.
+     * Stops Kafka consumer polling cycles, schedules consumer close and shutdowns scheduled thread pool.
      */
-    public void stopConsume() {
+    public void gracefulStopConsume() {
         // Make closed true, therefore poll function stops polling, and make stop operation thread-safe
         closed.set(true);
         this.kafkaConsumer.wakeup();
         final Runnable stopFunction = () -> this.kafkaConsumer.close();
         this.executorService.schedule(stopFunction, 0, TimeUnit.MILLISECONDS);
         this.executorService.shutdown();
+    }
+
+    /**
+     * Stops Kafka consumer polling cycles, forcefully shutdowns scheduled thread pool and closes the consumer instance.
+     */
+    public void immediateStopConsume() {
+        // Make closed true, therefore poll function stops polling, and make stop operation thread-safe
+        closed.set(true);
+        this.kafkaConsumer.wakeup();
+        this.pollTaskFuture.cancel(true);
+        this.executorService.shutdownNow();
+        try {
+            this.executorService.awaitTermination(stopTimeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            // (Re-)Cancel if current thread also interrupted
+            this.executorService.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+        this.kafkaConsumer.close(Duration.ofMillis(0));
     }
 }

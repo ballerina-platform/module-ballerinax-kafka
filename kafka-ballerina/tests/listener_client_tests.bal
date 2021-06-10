@@ -21,6 +21,7 @@ import ballerina/test;
 import ballerina/crypto;
 
 string receivedGracefulStopMessage = "";
+string receivedImmediateStopMessage = "";
 string saslMsg = "";
 string saslIncorrectCredentialsMsg = "";
 string sslMsg = "";
@@ -65,6 +66,28 @@ function consumerServiceGracefulStopTest() returns error? {
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
     runtime:sleep(7);
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
+}
+
+@test:Config {}
+function consumerServiceImmediateStopTest() returns error? {
+    string topic = "service-immediate-stop-test-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "listener-immediate-stop-service-test-group",
+        clientId: "test-consumer-3"
+    };
+    Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
+    check consumer.attach(consumerImmediateStopService);
+    check consumer.'start();
+    runtime:sleep(7);
+    test:assertEquals(receivedImmediateStopMessage, TEST_MESSAGE);
+
+    check consumer.immediateStop();
+    check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
+    runtime:sleep(7);
+    test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
 }
 
 @test:Config {}
@@ -326,6 +349,18 @@ service object {
             string message = check 'string:fromBytes(value);
             log:printInfo("Message received: " + message);
             receivedGracefulStopMessage = message;
+        }
+    }
+};
+
+Service consumerImmediateStopService =
+service object {
+    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+            receivedImmediateStopMessage = message;
         }
     }
 };
