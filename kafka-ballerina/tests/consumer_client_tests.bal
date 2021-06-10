@@ -19,6 +19,7 @@ import ballerina/test;
 import ballerina/crypto;
 
 const TEST_MESSAGE = "Hello, Ballerina";
+const TEST_MESSAGE_II = "Hello, World";
 const EMPTY_MEESAGE = "";
 
 const decimal TIMEOUT_DURATION = 5;
@@ -607,7 +608,7 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 27);
+    test:assertEquals(availableTopics.length(), 28);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
@@ -660,7 +661,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 29);
+    test:assertEquals(availableTopics.length(), 30);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -670,7 +671,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 29);
+    test:assertEquals(availableTopics.length(), 30);
     check consumer->close();
 }
 
