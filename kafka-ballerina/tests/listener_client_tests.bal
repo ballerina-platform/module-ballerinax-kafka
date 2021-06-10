@@ -20,6 +20,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/crypto;
 
+string receivedGracefulStopMessage = "";
 string saslMsg = "";
 string saslIncorrectCredentialsMsg = "";
 string sslMsg = "";
@@ -45,13 +46,35 @@ function consumerServiceTest() returns error? {
 }
 
 @test:Config {}
+function consumerServiceGracefulStopTest() returns error? {
+    string topic = "service-graceful-stop-test-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "listener-graceful-stop-service-test-group",
+        clientId: "test-consumer-2"
+    };
+    Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
+    check consumer.attach(consumerGracefulStopService);
+    check consumer.'start();
+    runtime:sleep(7);
+    test:assertEquals(receivedGracefulStopMessage, TEST_MESSAGE);
+
+    check consumer.gracefulStop();
+    check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
+    runtime:sleep(7);
+    test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
+}
+
+@test:Config {}
 function consumerServiceSubscribeErrorTest() returns error? {
     string topic = "service-subscribe-error-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        clientId: "test-consumer-2"
+        clientId: "test-consumer-3"
     };
     Listener|error result = trap new (DEFAULT_URL, consumerConfiguration);
 
@@ -70,7 +93,7 @@ function listenerConfigTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-test-group",
-        clientId: "test-consumer-3",
+        clientId: "test-consumer-4",
         pollingInterval: 3
     };
 
@@ -89,7 +112,7 @@ function listenerConfigErrorTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group-1",
-        clientId: "test-consumer-4",
+        clientId: "test-consumer-5",
         concurrentConsumers: -5
     };
     Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -107,7 +130,7 @@ function listenerConfigErrorTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group-2",
-        clientId: "test-consumer-5",
+        clientId: "test-consumer-6",
         partitionAssignmentStrategy: strategy
     };
     Listener|Error result2 = new(DEFAULT_URL, consumerConfiguration);
@@ -128,7 +151,7 @@ function consumerServiceCommitOffsetTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-service-commit-offset-test-group",
-        clientId: "test-consumer-6",
+        clientId: "test-consumer-7",
         autoCommit: false
     };
     TopicPartition topicPartition = {
@@ -162,7 +185,7 @@ function consumerServiceCommitTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-service-commit-test-group",
-        clientId: "test-consumer-7",
+        clientId: "test-consumer-8",
         autoCommit: false
     };
     TopicPartition topicPartition = {
@@ -200,7 +223,7 @@ function saslListenerTest() returns error? {
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
-        clientId: "test-consumer-8",
+        clientId: "test-consumer-9",
         offsetReset: "earliest",
         topics: [topic],
         auth: authConfig,
@@ -226,7 +249,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-incorrect-credentials-test-group",
-        clientId: "test-consumer-9",
+        clientId: "test-consumer-10",
         offsetReset: "earliest",
         topics: [topic],
         auth: authConfig,
@@ -268,7 +291,7 @@ function sslListenerTest() returns error? {
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
-        clientId: "test-consumer-10",
+        clientId: "test-consumer-11",
         offsetReset: "earliest",
         topics: [topic],
         secureSocket: socket,
@@ -291,6 +314,18 @@ service object {
             string message = check 'string:fromBytes(value);
             log:printInfo("Message received: " + message);
             receivedMessage = message;
+        }
+    }
+};
+
+Service consumerGracefulStopService =
+service object {
+    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+            receivedGracefulStopMessage = message;
         }
     }
 };
