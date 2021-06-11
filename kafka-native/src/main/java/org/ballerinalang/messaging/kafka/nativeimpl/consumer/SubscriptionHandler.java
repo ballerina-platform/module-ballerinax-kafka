@@ -28,8 +28,9 @@ import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.PrintStream;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -43,7 +44,8 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getTopicNamesSt
  * Native methods to handle subscription of the ballerina kafka consumer.
  */
 public class SubscriptionHandler {
-    private static final PrintStream console = System.out;
+
+    private static final Logger logger = LoggerFactory.getLogger(SubscriptionHandler.class);
 
     /**
      * Subscribe the ballerina kafka consumer to the given array of topics.
@@ -56,6 +58,7 @@ public class SubscriptionHandler {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<String> topicsList = getStringListFromStringBArray(topics);
+        consumerObject.addNativeData("topics", topicsList);
         try {
             kafkaConsumer.subscribe(topicsList);
             Set<String> subscribedTopics = kafkaConsumer.subscription();
@@ -64,7 +67,9 @@ public class SubscriptionHandler {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SUBSCRIBE);
             return createKafkaError("Failed to subscribe to the provided topics: " + e.getMessage());
         }
-        console.println(KafkaConstants.SUBSCRIBED_TOPICS + getTopicNamesString(topicsList));
+        if (logger.isDebugEnabled()) {
+            logger.debug(KafkaConstants.SUBSCRIBED_TOPICS + getTopicNamesString(topicsList));
+        }
         return null;
     }
 
