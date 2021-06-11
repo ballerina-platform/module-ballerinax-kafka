@@ -167,14 +167,14 @@ public class KafkaFunctionValidator {
                             ((UnionTypeSymbol) returnTypeDesc.get()).memberTypeDescriptors();
                     for (TypeSymbol returnType : returnTypeMembers) {
                         if (returnType.typeKind() != TypeDescKind.NIL) {
-                            if (returnType.typeKind() == TypeDescKind.ERROR) {
+                            if (returnType.typeKind() == TypeDescKind.TYPE_REFERENCE) {
                                 if (!returnType.signature().equals(PluginConstants.ERROR) &&
                                         !validateModuleId(returnType.getModule().get())) {
                                     context.reportDiagnostic(PluginUtils.getDiagnostic(
                                             CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL,
                                             DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
                                 }
-                            } else {
+                            } else if (returnType.typeKind() != TypeDescKind.ERROR) {
                                 context.reportDiagnostic(PluginUtils.getDiagnostic(
                                         CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL,
                                         DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
