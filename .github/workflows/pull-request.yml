@@ -17,7 +17,7 @@ jobs:
               uses: actions/setup-java@v2
               with:
                   distribution: 'adopt'
-                  java-version: 11
+                  java-version: '11'
             - name: Build with Gradle
               env:
                   packageUser: ${{ github.actor }}
@@ -43,7 +43,7 @@ jobs:
               uses: actions/setup-java@v2
               with:
                   distribution: 'adopt'
-                  java-version: 11
+                  java-version: '11'
             - name: Build with Gradle
               env:
                   packageUser: ${{ github.actor }}
