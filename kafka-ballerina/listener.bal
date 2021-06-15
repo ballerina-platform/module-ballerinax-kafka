@@ -69,7 +69,6 @@ public isolated client class Listener {
     # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function gracefulStop() returns error?  =
     @java:Method {
-        name: "stop",
         'class: "org.ballerinalang.messaging.kafka.service.Stop"
     } external;
 
@@ -78,7 +77,6 @@ public isolated client class Listener {
     # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function immediateStop() returns error? =
     @java:Method {
-        name: "stop",
         'class: "org.ballerinalang.messaging.kafka.service.Stop"
     } external;
 
