@@ -9,7 +9,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - [Add public certificate and private key support for Kafka `SecureSocket` record.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1469)
 
-
 ## [2.1.0-alpha8] - 2021-04-22
 
 ### Added
