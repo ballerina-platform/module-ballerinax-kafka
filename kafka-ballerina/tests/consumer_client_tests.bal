@@ -32,8 +32,11 @@ const string SASL_USER = "admin";
 const string SASL_PASSWORD = "password";
 const string SASL_INCORRECT_PASSWORD = "incorrect_password";
 
-const string SSL_KEYSTORE_PATH = "tests/secrets/kafka.client.keystore.jks";
-const string SSL_TRUSTSTORE_PATH = "tests/secrets/kafka.client.truststore.jks";
+const string SSL_KEYSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.keystore.jks";
+const string SSL_TRUSTSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.truststore.jks";
+const string SSL_KEY_FILE_PATH = "tests/secrets/certsandkeys/client.pem";
+const string SSL_CERT_FILE_PATH = "tests/secrets/certsandkeys/client.crt";
+const string SSL_TRUSTORE_CERT_FILE_PATH = "tests/secrets/certsandkeys/trustore.crt";
 const string SSL_MASTER_PASSWORD = "password";
 
 string emptyTopic = "empty-topic";
@@ -904,8 +907,8 @@ function consumerAdditionalPropertiesTest() returns error? {
 }
 
 @test:Config {}
-function sslConsumerTest() returns error? {
-    string topic = "ssl-consumer-test-topic";
+function sslKeystoreConsumerTest() returns error? {
+    string topic = "ssl-keystore-consumer-test-topic";
     crypto:TrustStore trustStore = {
         path: SSL_TRUSTSTORE_PATH,
         password: SSL_MASTER_PASSWORD
@@ -931,8 +934,40 @@ function sslConsumerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "ssl-consumer-test-group",
+        groupId: "ssl-keystore-consumer-test-group",
         clientId: "test-consumer-45",
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Consumer consumer = check new (SSL_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
+
+@test:Config {}
+function sslCertKeyConsumerTest() returns error? {
+    string topic = "ssl-cert-key-consumer-test-topic";
+
+    CertKey certKey = {
+        certFile: SSL_CERT_FILE_PATH,
+        keyFile: SSL_KEY_FILE_PATH
+    };
+
+    SecureSocket socket = {
+        cert: SSL_TRUSTORE_CERT_FILE_PATH,
+        key: certKey,
+        protocol: {
+            name: SSL
+        }
+    };
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "ssl-cert-key-consumer-test-group",
+        clientId: "test-consumer-46",
         secureSocket: socket,
         securityProtocol: PROTOCOL_SSL
     };

@@ -38,24 +38,35 @@ public type TopicPartition record {|
 // Security-related records
 # Configurations for secure communication with the Kafka server.
 #
-# + cert - Configurations associated with the `crypto:TrustStore`
-# + key - Configurations associated with the `crypto:KeyStore`
+# + cert - Configurations associated with the `crypto:TrustStore` or the filepath of the trustore certificate
+# + key - Configurations associated with the `crypto:KeyStore` or configuration related to `kafka:CertKey`
 # + protocol - SSL/TLS protocol related options
 # + ciphers - List of ciphers to be used. By default, all the available cipher suites are supported
 # + provider - Name of the security provider used for SSL connections. The default value is the default security provider
 #              of the JVM
 public type SecureSocket record {|
-   crypto:TrustStore cert;
+   crypto:TrustStore|string cert;
    record {|
         crypto:KeyStore keyStore;
         string keyPassword?;
-  |} key?;
+  |}|CertKey key?;
    record {|
         Protocol name;
         string[] versions?;
    |} protocol?;
    string[] ciphers?;
    string provider?;
+|};
+
+# Configurations related to the CertKey record required in `kafka:SecureSocket` record.
+#
+# + certFile - File path of the certificate file
+# + keyFile - File path of the private key file
+# + keyPassword - Password of the private key, if it is encrypted
+public type CertKey record {|
+    string certFile;
+    string keyFile;
+    string keyPassword?;
 |};
 
 # Represents protocol options.

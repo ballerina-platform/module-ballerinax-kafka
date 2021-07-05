@@ -49,7 +49,11 @@ import org.ballerinalang.messaging.kafka.observability.KafkaMetricsUtil;
 import org.ballerinalang.messaging.kafka.observability.KafkaObservabilityConstants;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -289,25 +293,61 @@ public class KafkaUtils {
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)
     private static void processSslProperties(BMap<BString, Object> configurations, Properties configParams) {
-        BMap<BString, Object> secureSocket = (BMap<BString, Object>) configurations.get(
-                KafkaConstants.SECURE_SOCKET);
-        // keystore
+        BMap<BString, Object> secureSocket = (BMap<BString, Object>) configurations.get(KafkaConstants.SECURE_SOCKET);
+
         BMap<BString, Object> keyConfig = (BMap<BString, Object>) secureSocket.get(KafkaConstants.KEY_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
-                                (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
-                                KafkaConstants.LOCATION_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG,
-                                (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
-                                KafkaConstants.PASSWORD_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_KEY_PASSWORD_CONFIG, keyConfig, configParams,
-                                KafkaConstants.SSL_KEY_PASSWORD_CONFIG);
-        // truststore
-        addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
-                                configParams, KafkaConstants.LOCATION_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG,
-                                (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
-                                configParams, KafkaConstants.PASSWORD_CONFIG);
+        if (keyConfig != null) {
+            if (keyConfig.containsKey(KafkaConstants.SSL_CERT_FILE_LOCATION_CONFIG)) {
+                BString certFile = (BString) keyConfig.get(KafkaConstants.SSL_CERT_FILE_LOCATION_CONFIG);
+                BString keyFile = (BString) keyConfig.get(KafkaConstants.SSL_KEY_FILE_LOCATION_CONFIG);
+                BString keyPassword = getBStringValueIfPresent(keyConfig, KafkaConstants.SSL_KEY_PASSWORD_CONFIG);
+                String certValue;
+                String keyValue;
+                try {
+                    certValue = readPasswordValueFromFile(certFile.getValue());
+                } catch (IOException e) {
+                    throw createKafkaError("Error reading certificate file : " + e.getMessage());
+                }
+                try {
+                    keyValue = readPasswordValueFromFile(keyFile.getValue());
+                } catch (IOException e) {
+                    throw createKafkaError("Error reading private key file : " + e.getMessage());
+                }
+                configParams.setProperty(SslConfigs.SSL_KEYSTORE_KEY_CONFIG, keyValue);
+                configParams.setProperty(SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG, certValue);
+                if (keyPassword != null) {
+                    configParams.setProperty(SslConfigs.SSL_KEY_PASSWORD_CONFIG, keyPassword.getValue());
+                }
+                configParams.setProperty(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, KafkaConstants.SSL_STORE_TYPE_CONFIG);
+            } else {
+                addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
+                        (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                        KafkaConstants.LOCATION_CONFIG);
+                addStringParamIfPresent(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG,
+                        (BMap<BString, Object>) keyConfig.get(KafkaConstants.KEYSTORE_CONFIG), configParams,
+                        KafkaConstants.PASSWORD_CONFIG);
+                addStringParamIfPresent(SslConfigs.SSL_KEY_PASSWORD_CONFIG, keyConfig, configParams,
+                        KafkaConstants.SSL_KEY_PASSWORD_CONFIG);
+            }
+        }
+        Object cert = secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG);
+        if (cert instanceof BString) {
+            String trustCertValue;
+            try {
+                trustCertValue = readPasswordValueFromFile(((BString) cert).getValue());
+            } catch (IOException e) {
+                throw createKafkaError("Error reading certificate file : " + e.getMessage());
+            }
+            configParams.setProperty(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, trustCertValue);
+            configParams.setProperty(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, KafkaConstants.SSL_STORE_TYPE_CONFIG);
+        } else {
+            addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
+                    (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
+                    configParams, KafkaConstants.LOCATION_CONFIG);
+            addStringParamIfPresent(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG,
+                    (BMap<BString, Object>) secureSocket.get(KafkaConstants.TRUSTSTORE_CONFIG),
+                    configParams, KafkaConstants.PASSWORD_CONFIG);
+        }
         // ciphers
         addStringArrayAsStringParamIfPresent(SslConfigs.SSL_CIPHER_SUITES_CONFIG, configurations, configParams,
                 KafkaConstants.SSL_CIPHER_SUITES_CONFIG);
@@ -463,6 +503,10 @@ public class KafkaUtils {
     private static String getStringFromStringBArray(BArray stringArray) {
         String[] values = stringArray.getStringArray();
         return String.join(",", values);
+    }
+
+    private static BString getBStringValueIfPresent(BMap<BString, ?> config, BString key) {
+        return config.containsKey(key) ? config.getStringValue(key) : null;
     }
 
     private static void addTimeParamIfPresent(String paramName,
@@ -805,4 +849,10 @@ public class KafkaUtils {
         }
         return function;
     }
+
+    public static String readPasswordValueFromFile(String filePath) throws IOException {
+        String fileContent = new String(Files.readAllBytes(Paths.get(filePath)), Charset.forName("UTF-8"));
+        return fileContent;
+    }
+
 }

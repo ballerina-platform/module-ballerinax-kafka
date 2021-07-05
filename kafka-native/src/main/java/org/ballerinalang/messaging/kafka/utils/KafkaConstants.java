@@ -184,6 +184,8 @@ public class KafkaConstants {
     public static final BString SSL_PROVIDER_CONFIG = StringUtils.fromString("provider");
     public static final BString SSL_KEY_PASSWORD_CONFIG = StringUtils.fromString("keyPassword");
     public static final BString SSL_CIPHER_SUITES_CONFIG = StringUtils.fromString("ciphers");
+    public static final BString SSL_CERT_FILE_LOCATION_CONFIG = StringUtils.fromString("certFile");
+    public static final BString SSL_KEY_FILE_LOCATION_CONFIG = StringUtils.fromString("keyFile");
 
     // SASL Configuration parameters
     public static final BString AUTHENTICATION_CONFIGURATION = StringUtils.fromString("auth");
@@ -229,4 +231,7 @@ public class KafkaConstants {
     public static final String DEFAULT_SER_DES_TYPE = "BYTE_ARRAY";
 
     public static final BigDecimal MILLISECOND_MULTIPLIER = new BigDecimal(1000);
+
+    // SSL keystore/truststore type config
+    public static final String SSL_STORE_TYPE_CONFIG = "PEM";
 }

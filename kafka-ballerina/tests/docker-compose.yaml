@@ -44,9 +44,9 @@ services:
             KAFKA_SSL_TRUSTSTORE_CREDENTIALS: broker_truststore_creds
             KAFKA_OPTS: '-Djava.security.auth.login.config=/opt/confluentinc/kafka/config/kafka_server_jaas.conf'
         volumes:
-            - ./secrets/broker_keystore_creds:/etc/kafka/secrets/broker_keystore_creds
-            - ./secrets/broker_sslkey_creds:/etc/kafka/secrets/broker_sslkey_creds
-            - ./secrets/broker_truststore_creds:/etc/kafka/secrets/broker_truststore_creds
-            - ./secrets/kafka.broker.keystore.jks:/etc/kafka/secrets/kafka.broker.keystore.jks
-            - ./secrets/kafka.broker.truststore.jks:/etc/kafka/secrets/kafka.broker.truststore.jks
+            - ./secrets/trustoresandkeystores/broker_keystore_creds:/etc/kafka/secrets/broker_keystore_creds
+            - ./secrets/trustoresandkeystores/broker_sslkey_creds:/etc/kafka/secrets/broker_sslkey_creds
+            - ./secrets/trustoresandkeystores/broker_truststore_creds:/etc/kafka/secrets/broker_truststore_creds
+            - ./secrets/trustoresandkeystores/kafka.broker.keystore.jks:/etc/kafka/secrets/kafka.broker.keystore.jks
+            - ./secrets/trustoresandkeystores/kafka.broker.truststore.jks:/etc/kafka/secrets/kafka.broker.truststore.jks
             - ./configs/kafka_server_jaas.conf:/opt/confluentinc/kafka/config/kafka_server_jaas.conf

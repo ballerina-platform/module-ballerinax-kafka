@@ -367,3 +367,45 @@ function sslProducerTest() returns error? {
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
+
+@test:Config {}
+function sslCertKeyProducerTest() returns error? {
+    string topic = "ssl-cert-key-producer-test-topic";
+
+    CertKey certKey = {
+        certFile: SSL_CERT_FILE_PATH,
+        keyFile: SSL_KEY_FILE_PATH
+    };
+
+    SecureSocket socket = {
+        cert: SSL_TRUSTORE_CERT_FILE_PATH,
+        key: certKey,
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-10",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer producer = check new (SSL_URL, producerConfiguration);
+    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "ssl-cert-key-producer-test-group",
+        clientId: "test-consumer-52"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
