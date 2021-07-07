@@ -26,11 +26,11 @@ description = 'Ballerina - Kafka Java Utils'
 dependencies {
     checkstyle project(':build-config:checkstyle')
     checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-    compile group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}"
-    compile group: 'org.apache.avro', name: 'avro', version: "${avroVersion}"
-    compile group: 'org.slf4j', name: 'slf4j-api', version:{slf4jVersion}
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    implementation group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}"
+    implementation group: 'org.apache.avro', name: 'avro', version: "${avroVersion}"
+    implementation group: 'org.slf4j', name: 'slf4j-api', version:{slf4jVersion}
 }
 
 checkstyle {
