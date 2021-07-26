@@ -674,7 +674,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 31);
+    test:assertEquals(availableTopics.length(), 32);
     check consumer->close();
 }
 

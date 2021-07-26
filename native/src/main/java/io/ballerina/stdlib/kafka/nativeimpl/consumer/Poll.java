@@ -30,14 +30,17 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
+import io.ballerina.stdlib.kafka.utils.KafkaConstants;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.DEFAULT_SER_DES_TYPE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecord;
@@ -49,36 +52,60 @@ import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
  */
 public class Poll {
 
-    /**
-     * Polls from kafka broker using the ballerina kafka consumer.
-     *
-     * @param consumerObject Kafka consumer object from ballerina.
-     * @param timeout        Duration in milliseconds to try the operation.
-     * @return Ballerina {@code ConsumerRecords[]} after the polling.
-     */
+    // static init
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(1,
+            new KafkaThreadFactory());
+
     public static Object poll(Environment env, BObject consumerObject, BDecimal timeout) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
-        String keyType = DEFAULT_SER_DES_TYPE;
-        String valueType = DEFAULT_SER_DES_TYPE;
-        Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
-        BArray consumerRecordsArray = ValueCreator.createArrayValue(
-                TypeCreator.createArrayType(getConsumerRecord().getType()));
-        try {
-            ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-            if (!recordsRetrieved.isEmpty()) {
-                for (Object record : recordsRetrieved) {
-                    BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record, keyType,
-                                                                                   valueType);
-                    consumerRecordsArray.append(recordValue);
-                }
-            }
-            balFuture.complete(consumerRecordsArray);
-        } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
-            KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-            balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
-        }
+        executorService.submit(new PollTask(kafkaConsumer, balFuture, timeout, consumerObject));
         return null;
+    }
+
+    static class PollTask implements Runnable {
+        private final KafkaConsumer kafkaConsumer;
+        private final Future balFuture;
+        private  final BDecimal timeout;
+        private final BObject consumerObject;
+
+        PollTask(KafkaConsumer kafkaConsumer, Future balFuture, BDecimal timeout, BObject consumerObject) {
+            this.kafkaConsumer = kafkaConsumer;
+            this.balFuture = balFuture;
+            this.timeout = timeout;
+            this.consumerObject = consumerObject;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
+                BArray consumerRecordsArray = ValueCreator.createArrayValue(
+                        TypeCreator.createArrayType(getConsumerRecord().getType()));
+                ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
+                if (!recordsRetrieved.isEmpty()) {
+                    for (Object record : recordsRetrieved) {
+                        BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record,
+                                KafkaConstants.DEFAULT_SER_DES_TYPE, KafkaConstants.DEFAULT_SER_DES_TYPE);
+                        consumerRecordsArray.append(recordValue);
+                    }
+                }
+                balFuture.complete(consumerRecordsArray);
+            } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
+            }
+        }
+    }
+
+    static class KafkaThreadFactory implements ThreadFactory {
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread ballerinaKafka = new Thread(r);
+            ballerinaKafka.setName("ballerinax-kafka-thread");
+            return ballerinaKafka;
+        }
     }
 }
