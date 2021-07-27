@@ -3,6 +3,12 @@ This file contains all the notable changes done to the Ballerina Kafka package t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- [Fix issue in messages received to Kafka consumer services not being ordered.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1698)
+- [Fix issue in Kafka Consumer using Ballerina worker threads to do IO.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1694)
+
 ## [2.1.0-beta.2] - 2021-07-05
 
 ### Added
