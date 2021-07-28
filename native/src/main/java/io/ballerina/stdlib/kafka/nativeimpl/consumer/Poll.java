@@ -60,25 +60,7 @@ public class Poll {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
-        executorService.submit(new PollTask(kafkaConsumer, balFuture, timeout, consumerObject));
-        return null;
-    }
-
-    static class PollTask implements Runnable {
-        private final KafkaConsumer kafkaConsumer;
-        private final Future balFuture;
-        private  final BDecimal timeout;
-        private final BObject consumerObject;
-
-        PollTask(KafkaConsumer kafkaConsumer, Future balFuture, BDecimal timeout, BObject consumerObject) {
-            this.kafkaConsumer = kafkaConsumer;
-            this.balFuture = balFuture;
-            this.timeout = timeout;
-            this.consumerObject = consumerObject;
-        }
-
-        @Override
-        public void run() {
+        executorService.execute(()-> {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
                 BArray consumerRecordsArray = ValueCreator.createArrayValue(
@@ -96,7 +78,8 @@ public class Poll {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             }
-        }
+        });
+        return null;
     }
 
     static class KafkaThreadFactory implements ThreadFactory {
