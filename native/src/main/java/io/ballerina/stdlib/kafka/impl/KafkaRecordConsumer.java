@@ -54,12 +54,11 @@ public class KafkaRecordConsumer {
     private Duration pollingTimeout = Duration.ofMillis(1000);
     private int pollingInterval = 1000;
     private long stopTimeout = 1000;
-    private boolean decoupleProcessing = true;
     private String groupId;
-    private KafkaListener kafkaListener;
-    private String serviceId;
-    private int consumerId;
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private final KafkaListener kafkaListener;
+    private final String serviceId;
+    private final int consumerId;
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private ScheduledFuture pollTaskFuture;
 
     public KafkaRecordConsumer(KafkaListener kafkaListener, Properties configParams, String serviceId, int consumerId,
@@ -81,13 +80,6 @@ public class KafkaRecordConsumer {
         }
         if (configParams.get(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue()) != null) {
             this.pollingInterval = (Integer) configParams.get(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue());
-        }
-        if (configParams.get(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG) != null) {
-            this.decoupleProcessing = (Boolean) configParams.get(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG);
-        }
-        // This is to override default decouple processing setting if required.
-        if (configParams.get(KafkaConstants.ALIAS_DECOUPLE_PROCESSING.getValue()) != null) {
-            this.decoupleProcessing = (Boolean) configParams.get(KafkaConstants.ALIAS_DECOUPLE_PROCESSING);
         }
         this.groupId = (String) configParams.get(ConsumerConfig.GROUP_ID_CONFIG);
     }
@@ -121,24 +113,17 @@ public class KafkaRecordConsumer {
 
     private void processRetrievedRecords(ConsumerRecords consumerRecords) {
         if (Objects.nonNull(consumerRecords) && !consumerRecords.isEmpty()) {
-            // When decoupleProcessing == 'true' Kafka records set will be dispatched and processed in
-            // Parallel threads.
-            // Otherwise dispatching and processing will have single threaded semantics.
-            if (this.decoupleProcessing) {
-                this.kafkaListener.onRecordsReceived(consumerRecords, kafkaConsumer, groupId);
-            } else {
-                Semaphore sem = new Semaphore(0);
-                KafkaPollCycleFutureListener pollCycleListener = new KafkaPollCycleFutureListener(sem, serviceId);
-                this.kafkaListener.onRecordsReceived(consumerRecords, kafkaConsumer, groupId, pollCycleListener);
-                // We suspend execution of poll cycle here before moving to the next cycle.
-                // Once we receive signal from BVM via KafkaPollCycleFutureListener this suspension is removed
-                // We will move to the next polling cycle.
-                try {
-                    sem.acquire();
-                } catch (InterruptedException e) {
-                    this.kafkaListener.onError(e);
-                    this.pollTaskFuture.cancel(false);
-                }
+            Semaphore sem = new Semaphore(0);
+            KafkaPollCycleFutureListener pollCycleListener = new KafkaPollCycleFutureListener(sem, serviceId);
+            this.kafkaListener.onRecordsReceived(consumerRecords, kafkaConsumer, groupId, pollCycleListener);
+            // We suspend execution of poll cycle here before moving to the next cycle.
+            // Once we receive signal from BVM via KafkaPollCycleFutureListener this suspension is removed
+            // We will move to the next polling cycle.
+            try {
+                sem.acquire();
+            } catch (InterruptedException e) {
+                this.kafkaListener.onError(e);
+                this.pollTaskFuture.cancel(false);
             }
         }
     }

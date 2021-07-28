@@ -32,15 +32,6 @@ public interface KafkaListener {
      *
      * @param records       Kafka records
      * @param kafkaConsumer consumer on which poll is called upon
-     * @param groupId       ID of the consumer group in which the consumer belongs
-     */
-    void onRecordsReceived(ConsumerRecords records, KafkaConsumer kafkaConsumer, String groupId);
-
-    /**
-     * For each poll cycle, it will trigger invocation to this method dispatching polled kafka records.
-     *
-     * @param records       Kafka records
-     * @param kafkaConsumer consumer on which poll is called upon
      * @param listener      which control the flow of poll cycle
      * @param groupID       ID of the consumer group in which the consumer belongs
      */
