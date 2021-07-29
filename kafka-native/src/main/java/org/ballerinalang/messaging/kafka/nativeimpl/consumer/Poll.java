@@ -37,6 +37,9 @@ import org.ballerinalang.messaging.kafka.observability.KafkaTracingUtil;
 import org.ballerinalang.messaging.kafka.utils.KafkaConstants;
 
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import static org.ballerinalang.messaging.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.createKafkaError;
@@ -49,36 +52,43 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.populateConsume
  */
 public class Poll {
 
-    /**
-     * Polls from kafka broker using the ballerina kafka consumer.
-     *
-     * @param consumerObject Kafka consumer object from ballerina.
-     * @param timeout        Duration in milliseconds to try the operation.
-     * @return Ballerina {@code ConsumerRecords[]} after the polling.
-     */
+    // static init
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(1,
+            new KafkaThreadFactory());
+
     public static Object poll(Environment env, BObject consumerObject, BDecimal timeout) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
-        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-        Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
-        BArray consumerRecordsArray = ValueCreator.createArrayValue(
-                TypeCreator.createArrayType(getConsumerRecord().getType()));
-        try {
-            ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-            if (!recordsRetrieved.isEmpty()) {
-                for (Object record : recordsRetrieved) {
-                    BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record, keyType,
-                                                                                   valueType);
-                    consumerRecordsArray.append(recordValue);
+        executorService.execute(()-> {
+            try {
+                Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
+                BArray consumerRecordsArray = ValueCreator.createArrayValue(
+                        TypeCreator.createArrayType(getConsumerRecord().getType()));
+                ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
+                if (!recordsRetrieved.isEmpty()) {
+                    for (Object record : recordsRetrieved) {
+                        BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record,
+                                KafkaConstants.DEFAULT_SER_DES_TYPE, KafkaConstants.DEFAULT_SER_DES_TYPE);
+                        consumerRecordsArray.append(recordValue);
+                    }
                 }
+                balFuture.complete(consumerRecordsArray);
+            } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             }
-            balFuture.complete(consumerRecordsArray);
-        } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
-            KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-            balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
-        }
+        });
         return null;
+    }
+
+    static class KafkaThreadFactory implements ThreadFactory {
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread ballerinaKafka = new Thread(r);
+            ballerinaKafka.setName("ballerinax-kafka-thread");
+            return ballerinaKafka;
+        }
     }
 }

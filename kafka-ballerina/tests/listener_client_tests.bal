@@ -20,6 +20,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/crypto;
 
+string messagesReceivedInOrder = "";
 string receivedGracefulStopMessage = "";
 string receivedImmediateStopMessage = "";
 string saslMsg = "";
@@ -328,6 +329,48 @@ function sslListenerTest() returns error? {
     runtime:sleep(7);
     test:assertEquals(sslMsg, TEST_MESSAGE);
 }
+
+@test:Config {}
+function basicMessageOrderTest() returns error? {
+    string topic = "message-order-topic";
+    int i = 0;
+    while (i < 5) {
+        string message = i.toString();
+        check sendMessage(message.toBytes(), topic);
+        i += 1;
+    }
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "message-order-test-group",
+        clientId: "test-consumer-12"
+    };
+    Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
+    check consumer.attach(messageOrderService);
+    check consumer.'start();
+
+    runtime:sleep(7);
+
+    while (i < 10) {
+        string message = i.toString();
+        check sendMessage(message.toBytes(), topic);
+        i += 1;
+    }
+    runtime:sleep(7);
+    string expected = "0123456789";
+    test:assertEquals(messagesReceivedInOrder, expected);
+}
+
+Service messageOrderService =
+service object {
+    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            messagesReceivedInOrder = messagesReceivedInOrder + message;
+        }
+    }
+};
 
 Service consumerService =
 service object {

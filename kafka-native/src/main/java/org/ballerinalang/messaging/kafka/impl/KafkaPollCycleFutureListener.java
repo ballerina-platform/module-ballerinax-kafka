@@ -35,8 +35,8 @@ public class KafkaPollCycleFutureListener implements Callback {
     // Introduced this semaphore to control polling cycle from Ballerina Engine.
     // Semaphore provides a source of communication once the BVM has completed the processing for one polling cycle.
     // This listener get notified and Semaphore is released, so that Kafka connector will move to Next polling cycle.
-    private Semaphore sem;
-    private String serviceId;
+    private final Semaphore sem;
+    private final String serviceId;
 
     /**
      * Future will get notified from the Ballerina engine when the Resource invocation is over or when an error

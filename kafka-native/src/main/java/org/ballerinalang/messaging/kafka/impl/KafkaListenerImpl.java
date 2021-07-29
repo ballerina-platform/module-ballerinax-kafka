@@ -19,7 +19,6 @@
 package org.ballerinalang.messaging.kafka.impl;
 
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BObject;
@@ -47,26 +46,14 @@ import static org.ballerinalang.messaging.kafka.utils.KafkaUtils.getResourcePara
  */
 public class KafkaListenerImpl implements KafkaListener {
 
-    private BObject service;
-    private BObject listener;
-    private ResponseCallback callback;
-    private Runtime bRuntime;
+    private final BObject service;
+    private final BObject listener;
+    private final Runtime bRuntime;
 
     public KafkaListenerImpl(BObject listener, BObject service, Runtime bRuntime) {
         this.bRuntime = bRuntime;
         this.listener = listener;
         this.service = service;
-        callback = new ResponseCallback();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onRecordsReceived(ConsumerRecords records, KafkaConsumer kafkaConsumer, String groupId) {
-        listener.addNativeData(NATIVE_CONSUMER, kafkaConsumer);
-        executeResource(listener, records, groupId);
-        KafkaMetricsUtil.reportConsume(listener, records);
     }
 
     /**
@@ -76,7 +63,7 @@ public class KafkaListenerImpl implements KafkaListener {
     public void onRecordsReceived(ConsumerRecords records, KafkaConsumer kafkaConsumer, String groupId,
                                   KafkaPollCycleFutureListener consumer) {
         listener.addNativeData(NATIVE_CONSUMER, kafkaConsumer);
-        executeResource(listener, consumer, records, groupId);
+        executeResource(listener, consumer, records);
         KafkaMetricsUtil.reportConsume(listener, records);
     }
 
@@ -88,24 +75,7 @@ public class KafkaListenerImpl implements KafkaListener {
         KafkaMetricsUtil.reportConsumerError(listener, KafkaObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
     }
 
-    private void executeResource(BObject listener, ConsumerRecords records, String groupId) {
-    StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
-                                                 ModuleUtils.getModule().getName(),
-                                                 ModuleUtils.getModule().getVersion(), KAFKA_RESOURCE_ON_RECORD);
-        if (ObserveUtils.isTracingEnabled()) {
-            Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD, 2);
-            Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, callback,
-                                       properties, returnType,
-                                       getResourceParameters(service, this.listener, records));
-        } else {
-            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, callback,
-                                       getResourceParameters(service, this.listener, records));
-        }
-    }
-
-    private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records,
-                                 String groupId) {
+    private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records) {
         StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
                                                      ModuleUtils.getModule().getName(),
                                                      ModuleUtils.getModule().getVersion(), KAFKA_RESOURCE_ON_RECORD);
@@ -128,18 +98,5 @@ public class KafkaListenerImpl implements KafkaListener {
                                                                         KafkaUtils.getBootstrapServers(listener));
         properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
         return properties;
-    }
-
-    private static class ResponseCallback implements Callback {
-
-        @Override
-        public void notifySuccess(Object obj) {
-            // do nothing
-        }
-
-        @Override
-        public void notifyFailure(io.ballerina.runtime.api.values.BError error) {
-            // do nothing
-        }
     }
 }
