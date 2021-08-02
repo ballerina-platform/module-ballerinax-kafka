@@ -53,8 +53,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
 public class Poll {
 
     // static init
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(1,
-            new KafkaThreadFactory());
+    private static final ExecutorService executorService = Executors.newCachedThreadPool(new KafkaThreadFactory());
 
     public static Object poll(Environment env, BObject consumerObject, BDecimal timeout) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
@@ -87,7 +86,7 @@ public class Poll {
         @Override
         public Thread newThread(Runnable r) {
             Thread ballerinaKafka = new Thread(r);
-            ballerinaKafka.setName("ballerinax-kafka-thread");
+            ballerinaKafka.setName("balx-kafka-consumer-network-thread");
             return ballerinaKafka;
         }
     }
