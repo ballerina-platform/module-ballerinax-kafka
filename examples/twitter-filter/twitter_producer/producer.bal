@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/io;
 import ballerinax/kafka;
 
 // Topic to publish the filtered tweets.
@@ -40,10 +39,10 @@ public function main() returns error? {
     json[] response = <json[]> check twitterClient->get("/tweets");
 
     // Filters and publishes tweets to Kafka.
-    publishFilteredTweets(response);
+    check publishFilteredTweets(response);
 }
 
-function publishFilteredTweets(json[] tweets) {
+function publishFilteredTweets(json[] tweets) returns error? {
     foreach var t in tweets {
         json jsonTweet = t.cloneReadOnly();
         Tweet tweet = <Tweet> jsonTweet;
