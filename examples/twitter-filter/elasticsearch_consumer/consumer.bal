@@ -61,7 +61,8 @@ public function main() returns error? {
     check kafkaListener.'start();
 }
 
-service kafka:Service on kafkaListener {
+kafka:Service consumerService =
+service object {
     remote function onConsumerRecord(kafka:Caller caller,
                                 kafka:ConsumerRecord[] records) returns error? {
         // The set of tweets received by the service are processed one by one.
@@ -76,7 +77,7 @@ service kafka:Service on kafkaListener {
             log:printError("Error occurred while committing the offsets for the consumer.", 'error = commitResult);
         }
     }
-}
+};
 
 function processKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns error? {
     // The value should be a `byte[]` since the byte[] deserializer is used for the value.
