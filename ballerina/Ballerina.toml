@@ -2,6 +2,7 @@
 org = "ballerinax"
 name = "kafka"
 version = "@toml.version@"
+distribution = "slbeta3"
 
 [[platform.java11.dependency]]
 path = "../native/build/libs/kafka-native-@project.version@.jar"
