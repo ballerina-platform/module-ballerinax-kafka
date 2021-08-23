@@ -36,7 +36,7 @@ public function main() returns error? {
     final http:Client twitterClient = check new ("http://localhost:9090");
 
     // Gets tweets from the mock Twitter server.
-    json[] response = <json[]> check twitterClient->get("/tweets");
+    json[] response = check twitterClient->get("/tweets");
 
     // Filters and publishes tweets to Kafka.
     check publishFilteredTweets(response);

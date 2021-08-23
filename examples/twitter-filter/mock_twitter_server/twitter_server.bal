@@ -29,21 +29,21 @@ type Tweet record {|
 service / on new http:Listener(9090) {
 
     // Responds with an array of tweets to HTTP GET requests.
-    resource function get tweets() returns json {
+    resource function get tweets() returns Tweet[] {
 
         // Creates an array of tweets.
-        json[] jsonResponse = [];
+        Tweet[] response = [];
         int i = 0;
         while(i < 20) {
-            jsonResponse[i] = generateTweet();
+            response[i] = generateTweet();
             i += 1;
         }
-        return jsonResponse;
+        return response;
     }
 }
 
 // Generates a tweet, which has a random integer.
-function generateTweet() returns json {
+function generateTweet() returns Tweet {
     int id = 1;
 
     // Generates a random number between 1(inclusive) and 100000(exclusive).
@@ -68,5 +68,5 @@ function generateTweet() returns json {
         id: id,
         text: text
     };
-    return tweet.toJson();
+    return tweet;
 }
