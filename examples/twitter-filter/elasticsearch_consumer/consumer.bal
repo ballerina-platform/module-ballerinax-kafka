@@ -25,7 +25,7 @@ const TOPIC = "twitter-tweets";
 // The URL of the Elasticsearch instance to use for all your queries.
 string URL = "http://localhost:9200";
 
-// Basic authentication details to connect to Elasticsearch instance.
+// Basic authentication details to connect to the Elasticsearch instance.
 string username = "username";
 string password = "password";
 
@@ -39,7 +39,7 @@ kafka:ConsumerConfiguration consumerConfigs = {
 
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
 
-// Creates a new HTTP client for Elasticsearch node.
+// Creates a new HTTP client for the Elasticsearch node.
 final http:Client twitterClient = check new (URL,
 auth = {
     username: username,
@@ -47,7 +47,7 @@ auth = {
 });
 
 public function main() returns error? {
-    // Creates the Elasticsearch index named twitter.
+    // Creates the Elasticsearch index named `twitter`.
     string indexCreation = check twitterClient->put("/twitter/tweets", ());
     log:printInfo(indexCreation);
 
@@ -55,7 +55,7 @@ public function main() returns error? {
     string resp = check twitterClient->get("/_cat/indices?v");
     log:printInfo(resp);
 
-    // Attaches the `consumerService` to the listener, `kafkaListener`.
+    // Attaches the `consumerService` to the `kafkaListener`.
     check kafkaListener.attach(consumerService);
     // Starts the registered services.
     check kafkaListener.'start();
@@ -87,7 +87,7 @@ function processKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns error? {
     string messageContent = check string:fromBytes(value);
     json content = check value:fromJsonString(messageContent);
 
-    // Send the json value of the tweet to the Elasticsearch index, twitter.
+    // Sends the JSON value of the tweet to the `twitter` Elasticsearch index.
     string response = check twitterClient->post("/twitter/tweets", content);
     log:printInfo(response);
 }

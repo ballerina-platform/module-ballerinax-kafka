@@ -32,10 +32,10 @@ kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 
 public function main() returns error? {
 
-    // Creates a new HTTP client for the mock twitter server.
+    // Creates a new HTTP client for the mock Twitter server.
     final http:Client twitterClient = check new ("http://localhost:9090");
 
-    // Get tweets from the mock twitter server.
+    // Gets tweets from the mock Twitter server.
     json[] response = <json[]> check twitterClient->get("/tweets");
 
     // Filters and publishes tweets to Kafka.
@@ -47,7 +47,7 @@ function publishFilteredTweets(json[] tweets) returns error? {
         json jsonTweet = t.cloneReadOnly();
         Tweet tweet = <Tweet> jsonTweet;
 
-        // Filter tweets with the id greater than 50000.
+        // Filters tweets with the ID greater than 50000.
         if (tweet.id > 50000) {
             string message = jsonTweet.toJsonString();
             check kafkaProducer->send({ topic: TOPIC, value: message.toBytes() });

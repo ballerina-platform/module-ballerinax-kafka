@@ -31,7 +31,7 @@ service / on new http:Listener(9090) {
     // Responds with an array of tweets to HTTP GET requests.
     resource function get tweets() returns json {
 
-        // Create an array of tweets.
+        // Creates an array of tweets.
         json[] jsonResponse = [];
         int i = 0;
         while(i < 20) {
@@ -42,7 +42,7 @@ service / on new http:Listener(9090) {
     }
 }
 
-// Generates a tweet which has a random integer.
+// Generates a tweet, which has a random integer.
 function generateTweet() returns json {
     int id = 1;
 
