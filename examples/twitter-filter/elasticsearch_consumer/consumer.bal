@@ -26,21 +26,11 @@ const TOPIC = "twitter-tweets";
 string URL = "http://localhost:9200";
 
 // Basic authentication details to connect to the Elasticsearch instance.
-string username = "username";
-string password = "password";
-
-kafka:ConsumerConfiguration consumerConfigs = {
-    groupId: "elastic-search",
-    topics: [TOPIC],
-    pollingInterval: 1,
-    // Sets the `autoCommit` to `false` so that the records should be committed manually.
-    autoCommit: false
-};
-
-listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
+configurable string username = "username";
+configurable string password = "password";
 
 // Creates a new HTTP client for the Elasticsearch node.
-final http:Client twitterClient = check new (URL,
+final http:Client elkClient = check new (URL,
 auth = {
     username: username,
     password: password
@@ -48,12 +38,23 @@ auth = {
 
 public function main() returns error? {
     // Creates the Elasticsearch index named `twitter`.
-    string indexCreation = check twitterClient->put("/twitter/tweets", ());
+    string indexCreation = check elkClient->put("/twitter/tweets", ());
     log:printInfo(indexCreation);
 
     // Checks the status of the available indices.
-    string resp = check twitterClient->get("/_cat/indices?v");
+    string resp = check elkClient->get("/_cat/indices?v");
+
     log:printInfo(resp);
+
+    kafka:ConsumerConfiguration consumerConfigs = {
+        groupId: "elastic-search",
+        topics: [TOPIC],
+        pollingInterval: 1,
+        // Sets the `autoCommit` to `false` so that the records should be committed manually.
+        autoCommit: false
+    };
+
+    kafka:Listener kafkaListener = check new (kafka:DEFAULT_URL, consumerConfigs);
 
     // Attaches the `consumerService` to the `kafkaListener`.
     check kafkaListener.attach(consumerService);
@@ -88,6 +89,6 @@ function processKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns error? {
     json content = check value:fromJsonString(messageContent);
 
     // Sends the JSON value of the tweet to the `twitter` Elasticsearch index.
-    string response = check twitterClient->post("/twitter/tweets", content);
+    string response = check elkClient->post("/twitter/tweets", content);
     log:printInfo(response);
 }

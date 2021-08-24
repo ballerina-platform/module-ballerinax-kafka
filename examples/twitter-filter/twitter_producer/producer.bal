@@ -16,16 +16,14 @@
 
 import ballerina/http;
 import ballerinax/kafka;
+import example/twitterProducer.types as types;
 
 // Topic to publish the filtered tweets.
 const TOPIC = "twitter-tweets";
 
-// User-defined tweet record type.
-type Tweet record {|
-    string created_at;
-    int id;
-    string text;
-|};
+// Basic authentication details to connect to the Elasticsearch instance.
+configurable string username = "apiKey";
+configurable string password = "apiSecret";
 
 // Creates a Kafka producer to publish filtered tweets to Kafka.
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
@@ -33,20 +31,24 @@ kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 public function main() returns error? {
 
     // Creates a new HTTP client for the mock Twitter server.
-    final http:Client twitterClient = check new ("http://localhost:9090");
+    final http:Client twitterClient = check new ("http://localhost:9090",
+        auth = {
+            username: username,
+            password: password
+        }
+    );
 
     // Gets tweets from the mock Twitter server.
-    json[] response = check twitterClient->get("/tweets");
+    types:Tweet[] response = check twitterClient->get("/tweets");
 
     // Filters and publishes tweets to Kafka.
     check publishFilteredTweets(response);
 }
 
-function publishFilteredTweets(json[] tweets) returns error? {
+function publishFilteredTweets(types:Tweet[] tweets) returns error? {
     foreach var t in tweets {
-        json jsonTweet = t.cloneReadOnly();
-        Tweet tweet = <Tweet> jsonTweet;
-
+        types:Tweet tweet = t.cloneReadOnly();
+        json jsonTweet = tweet.toJson();
         // Filters tweets with the ID greater than 50000.
         if (tweet.id > 50000) {
             string message = jsonTweet.toJsonString();
