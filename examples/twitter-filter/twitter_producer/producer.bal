@@ -21,7 +21,7 @@ import example/twitterProducer.types as types;
 // Topic to publish the filtered tweets.
 const TOPIC = "twitter-tweets";
 
-// Basic authentication details to connect to the Elasticsearch instance.
+// Basic authentication details to connect to the mock twitter server.
 configurable string username = "apiKey";
 configurable string password = "apiSecret";
 
@@ -46,13 +46,12 @@ public function main() returns error? {
 }
 
 function publishFilteredTweets(types:Tweet[] tweets) returns error? {
-    foreach var t in tweets {
+    // Filters tweets with the ID greater than 50000.
+    types:Tweet[] filteredTweets = from var tweet in tweets where tweet.id > 50000 select tweet;
+    foreach var t in filteredTweets {
         types:Tweet tweet = t.cloneReadOnly();
         json jsonTweet = tweet.toJson();
-        // Filters tweets with the ID greater than 50000.
-        if (tweet.id > 50000) {
-            string message = jsonTweet.toJsonString();
-            check kafkaProducer->send({ topic: TOPIC, value: message.toBytes() });
-        }
+        string message = jsonTweet.toJsonString();
+        check kafkaProducer->send({ topic: TOPIC, value: message.toBytes() });
     }
 }

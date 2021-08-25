@@ -38,7 +38,7 @@ auth = {
 
 public function main() returns error? {
     // Creates the Elasticsearch index named `twitter`.
-    string indexCreation = check elkClient->put("/twitter/tweets", ());
+    string indexCreation = check elkClient->put("/twitter", ());
     log:printInfo(indexCreation);
 
     // Checks the status of the available indices.
