@@ -17,6 +17,7 @@
 import ballerina/http;
 import ballerina/random;
 import ballerina/time;
+import ballerina/lang.runtime as runtime;
 import example/twitterServer.types as types;
 
 @http:ServiceConfig {
@@ -39,6 +40,8 @@ service / on new http:Listener(9090) {
             response[i] = check generateTweet();
             i += 1;
         }
+        decimal sleepTimer = <decimal> check random:createIntInRange(1, 10);
+        runtime:sleep(sleepTimer);
         return response;
     }
 }

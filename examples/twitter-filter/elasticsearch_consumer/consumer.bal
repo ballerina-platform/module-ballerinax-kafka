@@ -18,12 +18,13 @@ import ballerina/http;
 import ballerina/log;
 import ballerinax/kafka;
 import ballerina/lang.value;
+import example/esConsumer.types as types;
 
 // Topic to which the filtered tweets are published.
-const TOPIC = "twitter-tweets";
+configurable string TOPIC = "twitter-tweets";
 
 // The URL of the Elasticsearch instance to use for all your queries.
-string URL = "http://localhost:9200";
+configurable string URL = "http://localhost:9200";
 
 // Basic authentication details to connect to the Elasticsearch instance.
 configurable string username = "username";
@@ -31,10 +32,11 @@ configurable string password = "password";
 
 // Creates a new HTTP client for the Elasticsearch node.
 final http:Client elkClient = check new (URL,
-auth = {
-    username: username,
-    password: password
-});
+    auth = {
+        username: username,
+        password: password
+    }
+);
 
 public function main() returns error? {
     // Creates the Elasticsearch index named `twitter`.
@@ -67,8 +69,15 @@ service object {
     remote function onConsumerRecord(kafka:Caller caller,
                                 kafka:ConsumerRecord[] records) returns error? {
         // The set of tweets received by the service are processed one by one.
-        foreach var kafkaRecord in records {
-            check processKafkaRecord(kafkaRecord);
+        types:Tweet[] convertedTweets =check getTweetsFromConsumerRecords(records);
+
+        // Filters tweets with the ID greater than 50000.
+        types:Tweet[] filteredTweets = from var tweet in convertedTweets where tweet.id > 50000 select tweet;
+
+        foreach var filteredTweet in filteredTweets {
+            // Sends the JSON value of the tweet to the `twitter` Elasticsearch index.
+            string payload = check elkClient->post("/twitter/tweets", filteredTweet.toJson());
+            log:printInfo(payload);
         }
 
         // Commits offsets of the returned records by marking them as consumed.
@@ -80,15 +89,18 @@ service object {
     }
 };
 
-function processKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns error? {
-    // The value should be a `byte[]` since the byte[] deserializer is used for the value.
-    byte[] value = kafkaRecord.value;
+function getTweetsFromConsumerRecords(kafka:ConsumerRecord[] records) returns types:Tweet[]|error {
+    types:Tweet[] tweets = [];
+    foreach int i in 0 ..< records.length() {
+        kafka:ConsumerRecord kafkaRecord = records[i];
+        // The value should be a `byte[]` since the byte[] deserializer is used for the value.
+        byte[] value = kafkaRecord.value;
 
-    // Converts the `byte[]` to a `string`.
-    string messageContent = check string:fromBytes(value);
-    json content = check value:fromJsonString(messageContent);
-
-    // Sends the JSON value of the tweet to the `twitter` Elasticsearch index.
-    string response = check elkClient->post("/twitter/tweets", content);
-    log:printInfo(response);
+        // Converts the `byte[]` to a `string`.
+        string messageContent = check string:fromBytes(value);
+        json content = check value:fromJsonString(messageContent);
+        json jsonTweet = content.cloneReadOnly();
+        tweets[i] = <types:Tweet> jsonTweet;
+    }
+    return tweets;
 }

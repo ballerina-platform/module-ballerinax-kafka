@@ -9,14 +9,15 @@ This tweet analyzer application is implemented using the APIs provided by the `h
 
 ### Mock Twitter Server
 
-As it is strenuous to gain access to a Twitter developer account, a mock Twitter server is used to generate the tweets. Tweets containing random integers in the range 1 and 100000 will be generated.
+As it is strenuous to gain access to a Twitter developer account, a mock Twitter server is used to generate the tweets. Tweets containing random integers in the range 1 and 100000 will be generated. The response is a similar replica of the actual response given by the [Twitter Developer APIs](https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet). 
 
 ### Twitter Client/ Kafka Producer
 
-The Twitter clients can pull tweets by connecting and sending requests to the mock Twitter server. Once the response with the generated tweets is returned, the tweets with numbers greater than 50000 are filtered. Finally, the filtered tweets are published to a Kafka topic using a Kafka producer. 
+The Twitter clients can pull tweets by connecting and sending requests to the mock Twitter server. Once the response with the generated tweets is returned. The tweets are published to a Kafka topic using a Kafka producer. 
+
 ### Elasticsearch Client/ Kafka Consumer
 
-The tweets published to the Kafka topic are consumed using a Ballerina Kafka consumer service. The tweets received are then added to an Elasticsearch index. Elasticsearch is where the indexing, search, and analysis happens. The Elasticsearch client used here is implemented using an HTTP client with basic authentication.
+The tweets published to the Kafka topic are consumed using a Ballerina Kafka consumer service. The received tweets with id numbers greater than 50000 are filtered. Finally, the filtered tweets are added to an Elasticsearch index. Elasticsearch is where the indexing, search, and analysis happens. The Elasticsearch client used here is implemented using an HTTP client with basic authentication.
 
 #### Setting Up Elasticsearch
 1. [Elasticsearch in your local machine](https://www.elastic.co/guide/en/elasticsearch/reference/current/setup.html)

@@ -37,21 +37,14 @@ public function main() returns error? {
             password: password
         }
     );
+    while(true) {
+        // Gets tweets from the mock Twitter server.
+        types:Tweet[] response = check twitterClient->get("/tweets");
 
-    // Gets tweets from the mock Twitter server.
-    types:Tweet[] response = check twitterClient->get("/tweets");
-
-    // Filters and publishes tweets to Kafka.
-    check publishFilteredTweets(response);
-}
-
-function publishFilteredTweets(types:Tweet[] tweets) returns error? {
-    // Filters tweets with the ID greater than 50000.
-    types:Tweet[] filteredTweets = from var tweet in tweets where tweet.id > 50000 select tweet;
-    foreach var t in filteredTweets {
-        types:Tweet tweet = t.cloneReadOnly();
-        json jsonTweet = tweet.toJson();
-        string message = jsonTweet.toJsonString();
-        check kafkaProducer->send({ topic: TOPIC, value: message.toBytes() });
+        foreach var tweet in response {
+            json jsonTweet = tweet.toJson();
+            string message = jsonTweet.toJsonString();
+            check kafkaProducer->send({ topic: TOPIC, value: message.toBytes() });
+        }
     }
 }
