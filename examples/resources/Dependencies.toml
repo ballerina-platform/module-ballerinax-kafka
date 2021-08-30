@@ -1,0 +1,4 @@
+[[dependency]]
+org = "ballerinax"
+name = "kafka"
+version = "@project.version@"

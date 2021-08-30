@@ -1,0 +1,4 @@
+[[ballerina.auth.users]]
+username="apiKey"
+password="apiSecret"
+scopes=["developer"]
