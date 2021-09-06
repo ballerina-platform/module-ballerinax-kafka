@@ -116,6 +116,7 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:url-ballerina:${stdlibUrlVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:cache-ballerina:${stdlibCacheVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:auth-ballerina:${stdlibAuthVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:random-ballerina:${stdlibRandomVersion}"
     }
 }
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
