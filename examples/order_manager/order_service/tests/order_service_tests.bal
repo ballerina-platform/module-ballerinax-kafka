@@ -4,9 +4,17 @@ import ballerinax/kafka;
 import ballerina/lang.value;
 import order_service.types;
 
+string username = "user";
+string password = "password";
+
 @test:Config{}
 function orderServiceTest() returns error? {
-    http:Client orderClient = check new ("http://localhost:9090");
+    http:Client orderClient = check new ("http://localhost:9090",
+        auth = {
+            username: username,
+            password: password
+        }
+    );
 
     string orderName = "PS5";
     string orderStatus = "SUCCESS";

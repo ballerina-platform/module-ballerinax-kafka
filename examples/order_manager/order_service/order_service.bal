@@ -25,14 +25,14 @@ configurable int LISTENER_PORT = 9090;
 
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 
-// @http:ServiceConfig {
-//     auth: [
-//         {
-//             fileUserStoreConfig: {},
-//             scopes: ["developer"]
-//         }
-//     ]
-// }
+@http:ServiceConfig {
+    auth: [
+        {
+            fileUserStoreConfig: {},
+            scopes: ["customer"]
+        }
+    ]
+}
 service /kafka on new http:Listener(LISTENER_PORT) {
 
     resource function get publish(string message, string status) returns string|error? {

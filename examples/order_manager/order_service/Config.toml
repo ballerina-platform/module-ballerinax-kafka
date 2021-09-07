@@ -1,0 +1,4 @@
+[[ballerina.auth.users]]
+username="user"
+password="password"
+scopes=["customer"]
