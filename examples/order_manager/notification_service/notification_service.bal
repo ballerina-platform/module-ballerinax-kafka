@@ -29,13 +29,15 @@ kafka:ConsumerConfiguration consumerConfigs = {
     autoCommit: false
 };
 
-listener kafka:Listener kafkaListener =
-        new (kafka:DEFAULT_URL, consumerConfigs);
+listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
 
 service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns error? {
+
+    // Listens to Kafka topic for any successful orders
+    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
         foreach kafka:ConsumerRecord 'record in records {
+
+            // Convert the byte values in the Kafka record to type Order
             string messageContent = check string:fromBytes('record.value);
             json content = check value:fromJsonString(messageContent);
             json jsonTweet = content.cloneReadOnly();

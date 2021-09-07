@@ -23,6 +23,7 @@ import ballerina/random;
 configurable string TOPIC = "orders";
 configurable int LISTENER_PORT = 9090;
 
+// Creates a Kafka producer with default configurations
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 
 @http:ServiceConfig {
@@ -35,8 +36,12 @@ kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 }
 service /kafka on new http:Listener(LISTENER_PORT) {
 
+    // Listens to new order requests and publishes the order to Kafka topic
     resource function get publish(string message, string status) returns string|error? {
+        // Converts the request parameter status to type PaymentStatus
         types:PaymentStatus paymentStatus = <types:PaymentStatus> status;
+
+        // Create an order with a random id
         types:Order randomOrder = {
             id: check random:createIntInRange(0, 100),
             name: message,
@@ -49,5 +54,7 @@ service /kafka on new http:Listener(LISTENER_PORT) {
 
 function publishOrder(types:Order 'order) returns error? {
     log:printInfo("Publishing order " + 'order.toString());
+
+    // Publish the order to the Kafka topic
     check kafkaProducer->send({ topic: TOPIC, value: 'order.toString().toBytes()});
 }

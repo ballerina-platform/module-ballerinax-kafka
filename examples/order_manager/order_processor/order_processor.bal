@@ -22,6 +22,7 @@ import ballerina/log;
 configurable string LISTENING_TOPIC = "orders";
 configurable string PUBLISH_TOPIC = "success-orders";
 
+// Creates a Kafka producer with default configurations
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 
 kafka:ConsumerConfiguration consumerConfigs = {
@@ -32,18 +33,20 @@ kafka:ConsumerConfiguration consumerConfigs = {
     autoCommit: false
 };
 
-listener kafka:Listener kafkaListener =
-        new (kafka:DEFAULT_URL, consumerConfigs);
+listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
 
 service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns error? {
+
+    // Listens to Kafka topic for any new orders and process them
+    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
         foreach kafka:ConsumerRecord 'record in records {
-            log:printInfo("Received order " + 'record.toString());
+            // Convert the byte values in the Kafka record to type Order
             string messageContent = check string:fromBytes('record.value);
             json jsonContent = check value:fromJsonString(messageContent);
             json jsonClone = jsonContent.cloneReadOnly();
             types:Order receivedOrder = <types:Order> jsonClone;
+            log:printInfo("Received order " + receivedOrder.toString());
+
             check processOrderAndPublish(receivedOrder);
         }
         kafka:Error? commitResult = caller->commit();
@@ -54,6 +57,7 @@ service kafka:Service on kafkaListener {
     }
 }
 
+// Check if the order status is successful and publish to another Kafka topic if successful
 function processOrderAndPublish(types:Order 'order) returns error? {
     if 'order.status is types:SUCCESS {
         log:printInfo("Publishing successful order to topic " + PUBLISH_TOPIC);

@@ -4,8 +4,8 @@ import ballerinax/kafka;
 import ballerina/lang.value;
 import order_service.types;
 
-string username = "user";
-string password = "password";
+configurable string username = "user";
+configurable string password = "password";
 
 @test:Config{}
 function orderServiceTest() returns error? {

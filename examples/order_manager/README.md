@@ -35,6 +35,7 @@ $ bal run
 $ cd examples/order_manager/notification_service
 $ bal run
 ```
-4. Send a request to the order service with order details using `curl` or using the browser.
-   - Using curl - `curl -X GET "http://localhost:9090/kafka/publish?message=PS5&status=SUCCESS"`
-   - Using browser - Launch the browser with the url `http://localhost:9090/kafka/publish?message=PS5&status=SUCCESS` 
+4. Send a request to the order service with order details using `curl`.
+```
+curl -X GET "http://localhost:9090/kafka/publish?message=PS5&status=SUCCESS" -u user:password
+```
