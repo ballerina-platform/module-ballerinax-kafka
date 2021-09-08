@@ -41,8 +41,6 @@ def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/res
 def compilerPluginTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/CompilerPlugin.toml")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaCompilerPluginFile = new File("$project.projectDir/CompilerPlugin.toml")
-def originalConfig = ballerinaConfigFile.text
-def originalCompilerPlugin = ballerinaCompilerPluginFile.text
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -87,6 +85,7 @@ task updateTomlFiles {
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@kafka.version@", kafkaVersion)
+        newConfig = newConfig.replace("@avro.version@", avroVersion)
         ballerinaConfigFile.text = newConfig
 
         def newPluginConfig = compilerPluginTomlFilePlaceHolder.text.replace("@project.version@", project.version)
@@ -99,9 +98,9 @@ task commitTomlFiles {
         project.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "git commit Ballerina.toml CompilerPlugin.toml -m '[Automated] Commit the native jar versions'"
+                commandLine 'cmd', '/c', "git commit Ballerina.toml CompilerPlugin.toml -m '[Automated] Update the native jar versions'"
             } else {
-                commandLine 'sh', '-c', "git commit Ballerina.toml CompilerPlugin.toml -m '[Automated] Commit the native jar versions'"
+                commandLine 'sh', '-c', "git commit Ballerina.toml CompilerPlugin.toml -m '[Automated] Update the native jar versions'"
             }
         }
     }
