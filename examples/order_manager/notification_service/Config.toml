@@ -1,2 +1,2 @@
-[order_processor]
+[notification_service]
 LISTENING_TOPIC = "success-orders"
