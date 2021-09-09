@@ -22,29 +22,6 @@ plugins {
     id "net.researchgate.release" version "2.8.0"
 }
 
-ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.kafkaVersion = project.kafkaVersion
-ext.awaitalityVersion = "3.1.6"
-ext.puppycrawlCheckstyleVersion = "8.18"
-ext.avroVersion = project.avroVersion
-ext.stdlibFileVersion = project.stdlibFileVersion
-ext.stdlibIoVersion = project.stdlibIoVersion
-ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibUuidVersion = project.stdlibUuidVersion
-ext.stdlibRegexVersion = project.stdlibRegexVersion
-ext.stdlibCryptoVersion = project.stdlibCryptoVersion
-ext.stdlibTimeVersion = project.stdlibTimeVersion
-ext.stdlibTransactionVersion = project.stdlibTransactionVersion
-ext.stdlibJwtVersion = project.stdlibJwtVersion
-ext.stdlibTaskVersion = project.stdlibTaskVersion
-ext.stdlibMimeVersion = project.stdlibMimeVersion
-ext.stdlibHttpVersion = project.stdlibHttpVersion
-ext.stdlibOAuth2Version = project.stdlibOAuth2Version
-ext.stdlibOsVersion = project.stdlibOsVersion
-ext.stdlibCacheVersion = project.stdlibCacheVersion
-ext.stdlibAuthVersion = project.stdlibAuthVersion
-ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
-
 allprojects {
     group = project.group
     version = project.version
@@ -137,4 +114,3 @@ release {
 task build {
     dependsOn('kafka-ballerina:build')
 }
-
