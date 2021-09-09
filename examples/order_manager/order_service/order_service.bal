@@ -20,8 +20,8 @@ import ballerina/log;
 import order_service.types;
 import ballerina/random;
 
-configurable string TOPIC = "orders";
-configurable int LISTENER_PORT = 9090;
+configurable string TOPIC = ?;
+configurable int LISTENER_PORT = ?;
 
 // Creates a Kafka producer with default configurations
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);

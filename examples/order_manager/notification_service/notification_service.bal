@@ -19,7 +19,7 @@ import ballerina/lang.value;
 import ballerina/log;
 import notification_service.types;
 
-configurable string LISTENING_TOPIC = "success-orders";
+configurable string LISTENING_TOPIC = ?;
 
 kafka:ConsumerConfiguration consumerConfigs = {
     groupId: "notification-consumer",

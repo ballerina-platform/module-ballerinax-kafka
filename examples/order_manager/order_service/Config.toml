@@ -2,3 +2,7 @@
 username="user"
 password="password"
 scopes=["customer"]
+
+[order_service]
+TOPIC="orders"
+LISTENER_PORT=9090

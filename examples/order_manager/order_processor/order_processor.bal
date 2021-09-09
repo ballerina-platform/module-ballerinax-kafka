@@ -19,8 +19,8 @@ import order_processor.types;
 import ballerina/lang.value;
 import ballerina/log;
 
-configurable string LISTENING_TOPIC = "orders";
-configurable string PUBLISH_TOPIC = "success-orders";
+configurable string LISTENING_TOPIC = ?;
+configurable string PUBLISH_TOPIC = ?;
 
 // Creates a Kafka producer with default configurations
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);

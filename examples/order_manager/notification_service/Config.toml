@@ -1,0 +1,2 @@
+[order_processor]
+LISTENING_TOPIC = "success-orders"
