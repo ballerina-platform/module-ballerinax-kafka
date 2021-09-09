@@ -6,30 +6,15 @@ distribution = "slbeta3"
 
 [[platform.java11.dependency]]
 path = "../native/build/libs/kafka-native-@project.version@.jar"
-groupId = "org.ballerinalang.messaging.kafka"
-artifactId = "kafka"
-version = "@project.version@"
-
 
 [[platform.java11.dependency]]
 path = "./lib/kafka-clients-@kafka.version@.jar"
-groupId = "org.apache.kafka"
-artifactId = "kafka-clients"
-version = "@kafka.version@"
-
 
 [[platform.java11.dependency]]
 path = "./lib/kafka_2.12-@kafka.version@.jar"
-groupId = "org.apache.kafka"
-artifactId = "kafka_2.12"
-version = "@kafka.version@"
-
 
 [[platform.java11.dependency]]
 path = "./lib/avro-@avro.version@.jar"
-groupId = "org.apache.avro"
-artifactId = "avro"
-version = "@avro.version@"
 
 [build-options]
 observabilityIncluded=true
