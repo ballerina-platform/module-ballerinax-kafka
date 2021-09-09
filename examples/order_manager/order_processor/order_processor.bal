@@ -29,8 +29,7 @@ kafka:ConsumerConfiguration consumerConfigs = {
     groupId: "processing-consumer",
     topics: [LISTENING_TOPIC],
     offsetReset: kafka:OFFSET_RESET_EARLIEST,
-    pollingInterval: 1,
-    autoCommit: false
+    pollingInterval: 1
 };
 
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
@@ -44,15 +43,10 @@ service kafka:Service on kafkaListener {
             string messageContent = check string:fromBytes('record.value);
             json jsonContent = check value:fromJsonString(messageContent);
             json jsonClone = jsonContent.cloneReadOnly();
-            types:Order receivedOrder = <types:Order> jsonClone;
+            types:Order receivedOrder = check jsonClone.ensureType(types:Order);
             log:printInfo("Received order " + receivedOrder.toString());
 
             check processOrderAndPublish(receivedOrder);
-        }
-        kafka:Error? commitResult = caller->commit();
-
-        if commitResult is error {
-            log:printError("Error occurred while committing the offsets for the consumer.", 'error = commitResult);
         }
     }
 }

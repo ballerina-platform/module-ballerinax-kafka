@@ -39,7 +39,7 @@ service /kafka on new http:Listener(LISTENER_PORT) {
     // Listens to new order requests and publishes the order to Kafka topic
     resource function get publish(string message, string status) returns string|error? {
         // Converts the request parameter status to type PaymentStatus
-        types:PaymentStatus paymentStatus = <types:PaymentStatus> status;
+        types:PaymentStatus paymentStatus = check status.ensureType(types:PaymentStatus);
 
         // Create an order with a random id
         types:Order randomOrder = {

@@ -41,7 +41,7 @@ service kafka:Service on kafkaListener {
             string messageContent = check string:fromBytes('record.value);
             json content = check value:fromJsonString(messageContent);
             json jsonTweet = content.cloneReadOnly();
-            types:Order neworder = <types:Order> jsonTweet;
+            types:Order neworder = check jsonTweet.ensureType(types:Order);
             log:printInfo("We have successfully ordered and going to send success message: " + neworder.toString());
         }
         kafka:Error? commitResult = caller->commit();
