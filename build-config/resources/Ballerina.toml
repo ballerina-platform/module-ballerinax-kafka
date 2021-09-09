@@ -1,20 +1,20 @@
 [package]
 org = "ballerinax"
 name = "kafka"
-version = "3.0.0"
+version = "@toml.version@"
 distribution = "slbeta3"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/kafka-native-3.0.0-SNAPSHOT.jar"
+path = "../native/build/libs/kafka-native-@project.version@.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/kafka-clients-2.8.0.jar"
+path = "./lib/kafka-clients-@kafka.version@.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/kafka_2.12-2.8.0.jar"
+path = "./lib/kafka_2.12-@kafka.version@.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/avro-1.9.2.jar"
+path = "./lib/avro-@avro.version@.jar"
 
 [build-options]
 observabilityIncluded=true
