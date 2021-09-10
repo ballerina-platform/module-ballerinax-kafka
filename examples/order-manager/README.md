@@ -4,9 +4,9 @@
 This usecase is inspired by the [How Kafka Can Make Microservice Planet a Better Place](https://dzone.com/articles/how-kafka-can-make-microservice-planet-better) article.
 This consists of 3 services.
 
-- **Order Service** - An `http` service with a `kafka' producer which publishes an order to a `kafka` topic when a request is received.
-- **Order Processor** - A `kafka` listener which listens to the `kafka` topic and validates the order. If the order is successful, it is published to a new topic by a `kafka` producer.
-- **Notification Service** - A `kafka` listener which listens to the successful orders and mocks sending a notification.
+- **Order Service** - An Http service with a Kafka producer which publishes an order to a Kafka topic when a request is received.
+- **Order Processor** - A Kafka listener which listens to the Kafka topic and validates the order. If the order is successful, it is published to a new topic by a Kafka producer.
+- **Notification Service** - A Kafka listener which listens to the successful orders and mocks sending a notification.
 
 ## Implementation
 

@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 /*
  * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -18,6 +16,8 @@ import org.apache.tools.ant.taskdefs.condition.Os
  * under the License.
  */
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'java'
 
 description = 'Ballerina - Kafka Examples'
@@ -25,7 +25,7 @@ description = 'Ballerina - Kafka Examples'
 def ballerinaModulePath = "${project.rootDir}/ballerina/"
 def ballerinaDistPath = "${ballerinaModulePath}/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def ballerinaDist = "${buildDir}/target/ballerina-distribution"
-def examples = ["twitter-filter/elasticsearch_consumer", "twitter-filter/mock_twitter_server", "twitter-filter/twitter_producer", "order_manager/order_service", "order_manager/order_processor", "order_manager/notification_service"]
+def examples = ["twitter-filter/elasticsearch_consumer", "twitter-filter/mock_twitter_server", "twitter-filter/twitter_producer", "order-manager/order_service", "order-manager/order_processor", "order-manager/notification_service"]
 def packageName = "kafka"
 
 dependencies {
