@@ -38,25 +38,26 @@ service kafka:Service on kafkaListener {
 
     // Listens to Kafka topic for any new orders and process them
     remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
-        foreach kafka:ConsumerRecord 'record in records {
-            // Convert the byte values in the Kafka record to type Order
-            string messageContent = check string:fromBytes('record.value);
-            json jsonContent = check value:fromJsonString(messageContent);
-            json jsonClone = jsonContent.cloneReadOnly();
-            types:Order receivedOrder = check jsonClone.ensureType(types:Order);
-            log:printInfo("Received order " + receivedOrder.toString());
-
-            check processOrderAndPublish(receivedOrder);
+        // Uses Ballerina query expressions to filter out the successful orders and publish to Kafka topic
+        error? err = from types:Order 'order in check getOrdersFromRecords(records) where 'order.status == types:SUCCESS do {
+            log:printInfo("Sending successful order to " + PUBLISH_TOPIC + " " + 'order.toString());
+            check kafkaProducer->send({ topic: PUBLISH_TOPIC, value: 'order.toString().toBytes()});
+        };
+        if err is error {
+            log:printError("Unknown error occured", err);
         }
     }
 }
 
-// Check if the order status is successful and publish to another Kafka topic if successful
-function processOrderAndPublish(types:Order 'order) returns error? {
-    if 'order.status is types:SUCCESS {
-        log:printInfo("Publishing successful order to topic " + PUBLISH_TOPIC);
-        check kafkaProducer->send({ topic: PUBLISH_TOPIC, value: 'order.toString().toBytes()});
-    } else {
-        log:printInfo("Ignoring unsuccessful order: " + 'order.toString());
+// Convert the byte values in Kafka records to type Order[]
+function getOrdersFromRecords(kafka:ConsumerRecord[] records) returns types:Order[]|error {
+    types:Order[] receivedOrders = [];
+    foreach kafka:ConsumerRecord 'record in records {
+        string messageContent = check string:fromBytes('record.value);
+        json jsonContent = check value:fromJsonString(messageContent);
+        json jsonClone = jsonContent.cloneReadOnly();
+        types:Order receivedOrder = check jsonClone.ensureType(types:Order);
+        receivedOrders.push(receivedOrder);
     }
+    return receivedOrders;
 }
