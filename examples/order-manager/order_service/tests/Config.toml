@@ -4,5 +4,5 @@ password="password"
 scopes=["customer"]
 
 [order_service]
-TOPIC="orders"
+TOPIC="order-service-test-orders"
 LISTENER_PORT=9090
