@@ -1,0 +1,3 @@
+[order_processor]
+LISTENING_TOPIC="orders"
+PUBLISH_TOPIC = "success-orders"
