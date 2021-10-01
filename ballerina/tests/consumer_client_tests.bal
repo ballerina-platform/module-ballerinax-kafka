@@ -61,7 +61,7 @@ ProducerConfiguration producerConfiguration = {
 };
 Producer producer = check new (DEFAULT_URL, producerConfiguration);
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerCloseTest() returns error? {
     string topic = "close-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -82,7 +82,7 @@ function consumerCloseTest() returns error? {
     test:assertEquals(receivedErr.message(), expectedErr);
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerCloseWithDurationTest() returns error? {
     string topic = "close-with-duration-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -102,7 +102,7 @@ function consumerCloseWithDurationTest() returns error? {
     test:assertEquals(receivedErr.message(), expectedErr);
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerCloseWithDefaultTimeoutTest() returns error? {
     string topic = "close-with-default-timeout-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -123,7 +123,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
     test:assertEquals(receivedErr.message(), expectedErr);
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerConfigTest() returns error? {
     string topic = "consumer-config-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -143,7 +143,7 @@ function consumerConfigTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerFunctionsTest() returns error? {
     string topic = "consumer-functions-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -162,7 +162,7 @@ function consumerFunctionsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerSeekTest() returns error? {
     string topic = "consumer-seek-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -201,7 +201,7 @@ function consumerSeekTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerSeekToBeginningTest() returns error? {
     string topic = "consumer-seek-to-beginning-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -233,7 +233,7 @@ function consumerSeekToBeginningTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerSeekToEndTest() returns error? {
     string topic = "consumer-seek-to-end-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -266,7 +266,7 @@ function consumerSeekToEndTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerSeekToNegativeValueTest() returns error? {
     string topic = "consumer-seek-negative-value-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -295,8 +295,7 @@ function consumerSeekToNegativeValueTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest],
-    groups: ["consumer"]
+    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerPositionOffsetsTest() returns error? {
     string topic = "consumer-position-offsets-test-topic";
@@ -335,8 +334,7 @@ function consumerPositionOffsetsTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest],
-    groups: ["consumer"]
+    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerBeginningOffsetsTest() returns error? {
     string topic = "consumer-beginning-offsets-test-topic";
@@ -388,8 +386,7 @@ function consumerBeginningOffsetsTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest],
-    groups: ["consumer"]
+    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerEndOffsetsTest() returns error? {
     string topic = "consumer-end-offsets-test-topic";
@@ -438,7 +435,7 @@ function consumerEndOffsetsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerTopicPartitionsTest() returns error? {
     string topic1 = "consumer-topic-partitions-test-topic-1";
     string topic2 = "consumer-topic-partitions-test-topic-2";
@@ -467,7 +464,7 @@ function consumerTopicPartitionsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerPauseResumePartitionTest() returns error? {
     string topic = "consumer-pause-resume-partition-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -498,7 +495,7 @@ function consumerPauseResumePartitionTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerPauseResumePartitionErrorTest() returns error? {
     string topic1 = "consumer-pause-resume-partition-error-test-topic-1";
     string topic2 = "consumer-pause-resume-partition-error-test-topic-2";
@@ -540,7 +537,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerAssignToEmptyTopicTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -562,7 +559,7 @@ function consumerAssignToEmptyTopicTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerGetAssignedPartitionsTest() returns error? {
     string topic = "consumer-assigned-partitions-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -584,8 +581,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerFunctionsTest],
-    groups: ["consumer"]
+    dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeUnsubscribeTest() returns error? {
     string topic1 = "consumer-subscribe-unsubscribe-test-topic-1";
@@ -605,7 +601,25 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     check consumer->close();
 }
 
-@test:AfterGroups { value:["consumer", "producer", "listener"] }
+@test:Config {
+    dependsOn: [basicMessageOrderTest, consumerAdditionalPropertiesTest, consumerAssignToEmptyTopicTest,
+        consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest, consumerBeginningOffsetsTest,
+        consumerCloseTest, consumerCloseWithDefaultTimeoutTest, consumerCloseWithDurationTest, consumerConfigTest,
+        consumerEndOffsetsTest, consumerGetAssignedPartitionsTest, consumerPauseResumePartitionErrorTest,
+        consumerPauseResumePartitionTest, consumerPositionOffsetsTest, consumerSeekToNegativeValueTest,
+        consumerServiceCommitTest, consumerServiceCommitOffsetTest, consumerServiceGracefulStopTest,
+        consumerServiceSubscribeErrorTest, consumerServiceTest, consumerFunctionsTest, consumerSubscribeErrorTest,
+        consumerSubscribeToEmptyTopicTest, consumerSubscribeUnsubscribeTest,
+        consumerSubscribeWithPatternToClosedConsumerTest, consumerTopicPartitionsTest, listenerConfigErrorTest,
+        listenerConfigTest, manualCommitTest, manualCommitWithDefaultTimeoutTest, manualCommitWithDurationTest,
+        moduleLevelListenerTest, nonExistingTopicPartitionOffsetsTest, producerAdditionalPropertiesTest,
+        producerSendStringTest, producerCloseTest, producerFlushTest, producerGetTopicPartitionsErrorTest,
+        producerGetTopicPartitionsTest, producerInitTest, producerKeyTypeMismatchErrorTest,
+        saslConsumerIncorrectCredentialsTest, saslConsumerTest, saslListenerIncorrectCredentialsTest,
+        saslListenerTest, saslProducerIncorrectCredentialsTest, saslProducerTest, sslCertKeyConsumerTest,
+        sslCertKeyProducerTest, sslCertOnlyConsumerTest, sslCertOnlyProducerTest, sslKeystoreConsumerTest,
+        sslListenerTest, sslProducerTest, transactionalProducerTest]
+}
 function consumerSubscribeTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
@@ -613,7 +627,7 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 53);
+    test:assertEquals(availableTopics.length(), 55);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
@@ -623,7 +637,7 @@ function consumerSubscribeTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscribe-closed-consumer-group",
@@ -640,7 +654,7 @@ function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     }
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function consumerSubscribeToEmptyTopicTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscribe-empty-topic-test-group",
@@ -658,7 +672,9 @@ function consumerSubscribeToEmptyTopicTest() returns error? {
     check consumer->close();
 }
 
-@test:AfterGroups { value:["consumer", "producer", "listener"] }
+@test:Config {
+    dependsOn: [consumerSubscribeTest]
+}
 function consumerTopicsAvailableWithTimeoutTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-topics-available-timeout-test-group-1",
@@ -666,7 +682,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 53);
+    test:assertEquals(availableTopics.length(), 55);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -676,13 +692,12 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 53);
+    test:assertEquals(availableTopics.length(), 55);
     check consumer->close();
 }
 
 @test:Config {
-    dependsOn: [consumerFunctionsTest],
-    groups: ["consumer"]
+    dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeErrorTest() returns error? {
     string topic = "consumer-subsribe-error-test-topic";
@@ -700,7 +715,7 @@ function consumerSubscribeErrorTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function manualCommitTest() returns error? {
     string topic = "manual-commit-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -744,7 +759,7 @@ function manualCommitTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function manualCommitWithDurationTest() returns error? {
     string topic = "manual-commit-with-duration-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -774,7 +789,7 @@ function manualCommitWithDurationTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function manualCommitWithDefaultTimeoutTest() returns error? {
     string topic = "manual-commit-with-default-timeout-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -805,7 +820,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function nonExistingTopicPartitionOffsetsTest() returns error? {
     string existingTopic = "existing-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -909,7 +924,7 @@ function consumerAdditionalPropertiesTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function sslKeystoreConsumerTest() returns error? {
     string topic = "ssl-keystore-consumer-test-topic";
     crypto:TrustStore trustStore = {
@@ -948,7 +963,7 @@ function sslKeystoreConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function sslCertKeyConsumerTest() returns error? {
     string topic = "ssl-cert-key-consumer-test-topic";
 
@@ -980,7 +995,7 @@ function sslCertKeyConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config { groups: ["consumer"] }
+@test:Config {}
 function sslCertOnlyConsumerTest() returns error? {
     string topic = "ssl-cert-only-consumer-test-topic";
 

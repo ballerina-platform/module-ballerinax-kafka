@@ -39,7 +39,7 @@ ConsumerConfiguration moduleLevelConsumerConfiguration = {
 };
 listener Listener moduleLevelListener = check new (DEFAULT_URL, moduleLevelConsumerConfiguration);
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function consumerServiceTest() returns error? {
     string topic = "service-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -58,7 +58,7 @@ function consumerServiceTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function consumerServiceGracefulStopTest() returns error? {
     string topic = "service-graceful-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -80,7 +80,7 @@ function consumerServiceGracefulStopTest() returns error? {
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function consumerServiceImmediateStopTest() returns error? {
     string topic = "service-immediate-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -102,7 +102,7 @@ function consumerServiceImmediateStopTest() returns error? {
     test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function consumerServiceSubscribeErrorTest() returns error? {
     string topic = "service-subscribe-error-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -121,7 +121,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
     }
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function listenerConfigTest() returns error? {
     string topic = "listener-config-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -141,7 +141,7 @@ function listenerConfigTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function listenerConfigErrorTest() returns error? {
     string topic = "listener-config-error-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -179,8 +179,7 @@ function listenerConfigErrorTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerServiceCommitTest],
-    groups: ["listener"]
+    dependsOn: [consumerServiceCommitTest]
 }
 function consumerServiceCommitOffsetTest() returns error? {
     string topic = "service-commit-offset-test-topic";
@@ -216,7 +215,7 @@ function consumerServiceCommitOffsetTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function consumerServiceCommitTest() returns error? {
     string topic = "service-commit-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -251,7 +250,7 @@ function consumerServiceCommitTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function saslListenerTest() returns error? {
     string topic = "sasl-listener-test-topic";
     AuthenticationConfiguration authConfig = {
@@ -278,7 +277,7 @@ function saslListenerTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function saslListenerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-listener-incorrect-credentials-test-topic";
     AuthenticationConfiguration authConfig = {
@@ -305,7 +304,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function sslListenerTest() returns error? {
     string topic = "ssl-listener-test-topic";
 
@@ -348,7 +347,7 @@ function sslListenerTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function basicMessageOrderTest() returns error? {
     string topic = "message-order-topic";
     int i = 0;
@@ -380,7 +379,7 @@ function basicMessageOrderTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config { groups: ["listener"] }
+@test:Config {}
 function moduleLevelListenerTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), moduleLevelListenerTopic);
     check moduleLevelListener.attach(moduleLevelListenerService);
