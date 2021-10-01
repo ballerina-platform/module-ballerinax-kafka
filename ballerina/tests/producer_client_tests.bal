@@ -23,7 +23,7 @@ string MESSAGE_KEY = "TEST-KEY";
 const string INVALID_URL = "127.0.0.1.1:9099";
 const string INCORRECT_KAFKA_URL = "localhost:9099";
 
-@test:Config{}
+@test:Config { groups: ["producer"] }
 function producerInitTest() returns error? {
     ProducerConfiguration producerConfiguration1 = {
         clientId: "test-producer-02",
@@ -73,7 +73,7 @@ function producerInitTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function producerSendStringTest() returns error? {
     string topic = "send-string-test-topic";
     Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
@@ -98,7 +98,7 @@ function producerSendStringTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function producerKeyTypeMismatchErrorTest() returns error? {
     string topic = "key-type-mismatch-error-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
@@ -114,7 +114,8 @@ function producerKeyTypeMismatchErrorTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [producerSendStringTest]
+    dependsOn: [producerSendStringTest],
+    groups: ["producer"]
 }
 function producerCloseTest() returns error? {
     string topic = "producer-close-test-topic";
@@ -131,7 +132,7 @@ function producerCloseTest() returns error? {
     test:assertEquals(receivedErr.message(), expectedErr);
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function producerFlushTest() returns error? {
     string topic = "producer-flush-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
@@ -151,7 +152,7 @@ function producerFlushTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function producerGetTopicPartitionsTest() returns error? {
     string topic = "get-topic-partitions-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
@@ -160,7 +161,7 @@ function producerGetTopicPartitionsTest() returns error? {
     check producer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function producerGetTopicPartitionsErrorTest() returns error? {
     string topic = "get-topic-partitions-error-test-topic";
     Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
@@ -175,7 +176,7 @@ function producerGetTopicPartitionsErrorTest() returns error? {
     check producer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function transactionalProducerTest() returns error? {
     string topic = "transactional-producer-test-topic";
     ProducerConfiguration producerConfigs = {
@@ -213,7 +214,7 @@ function transactionalProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config { groups: ["producer"] }
 function saslProducerTest() returns error? {
     string topic = "sasl-producer-test-topic";
     AuthenticationConfiguration authConfig = {
@@ -250,7 +251,7 @@ function saslProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config { groups: ["producer"] }
 function saslProducerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
     AuthenticationConfiguration authConfig = {
@@ -281,7 +282,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     check kafkaProducer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function producerAdditionalPropertiesTest() returns error? {
     string topic = "producer-additional-properties-test-topic";
     map<string> propertyMap = {
@@ -319,7 +320,7 @@ function producerAdditionalPropertiesTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function sslProducerTest() returns error? {
     string topic = "ssl-producer-test-topic";
     crypto:TrustStore trustStore = {
@@ -368,7 +369,7 @@ function sslProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function sslCertKeyProducerTest() returns error? {
     string topic = "ssl-cert-key-producer-test-topic";
 
@@ -410,7 +411,7 @@ function sslCertKeyProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config { groups: ["producer"] }
 function sslCertOnlyProducerTest() returns error? {
     string topic = "ssl-cert-only-producer-test-topic";
 

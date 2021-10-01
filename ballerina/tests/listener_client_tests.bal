@@ -39,7 +39,7 @@ ConsumerConfiguration moduleLevelConsumerConfiguration = {
 };
 listener Listener moduleLevelListener = check new (DEFAULT_URL, moduleLevelConsumerConfiguration);
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function consumerServiceTest() returns error? {
     string topic = "service-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -53,11 +53,12 @@ function consumerServiceTest() returns error? {
     check consumer.attach(consumerService);
     check consumer.'start();
 
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
+    check consumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function consumerServiceGracefulStopTest() returns error? {
     string topic = "service-graceful-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -70,16 +71,16 @@ function consumerServiceGracefulStopTest() returns error? {
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(consumerGracefulStopService);
     check consumer.'start();
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedGracefulStopMessage, TEST_MESSAGE);
 
     check consumer.gracefulStop();
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function consumerServiceImmediateStopTest() returns error? {
     string topic = "service-immediate-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -92,16 +93,16 @@ function consumerServiceImmediateStopTest() returns error? {
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(consumerImmediateStopService);
     check consumer.'start();
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedImmediateStopMessage, TEST_MESSAGE);
 
     check consumer.immediateStop();
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function consumerServiceSubscribeErrorTest() returns error? {
     string topic = "service-subscribe-error-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -120,7 +121,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function listenerConfigTest() returns error? {
     string topic = "listener-config-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -135,11 +136,12 @@ function listenerConfigTest() returns error? {
     check serviceConsumer.attach(consumerConfigService);
     check serviceConsumer.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedConfigMessage, TEST_MESSAGE);
+    check serviceConsumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function listenerConfigErrorTest() returns error? {
     string topic = "listener-config-error-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -177,7 +179,8 @@ function listenerConfigErrorTest() returns error? {
 }
 
 @test:Config {
-    dependsOn: [consumerServiceCommitTest]
+    dependsOn: [consumerServiceCommitTest],
+    groups: ["listener"]
 }
 function consumerServiceCommitOffsetTest() returns error? {
     string topic = "service-commit-offset-test-topic";
@@ -210,9 +213,10 @@ function consumerServiceCommitOffsetTest() returns error? {
 
     test:assertEquals(offsetValue, messageCount);
     check consumer->close();
+    check serviceConsumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function consumerServiceCommitTest() returns error? {
     string topic = "service-commit-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -244,9 +248,10 @@ function consumerServiceCommitTest() returns error? {
 
     test:assertEquals(offsetValue, messageCount);
     check consumer->close();
+    check serviceConsumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function saslListenerTest() returns error? {
     string topic = "sasl-listener-test-topic";
     AuthenticationConfiguration authConfig = {
@@ -268,11 +273,12 @@ function saslListenerTest() returns error? {
     check saslListener.attach(saslConsumerService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(saslMsg, TEST_MESSAGE);
+    check saslListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function saslListenerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-listener-incorrect-credentials-test-topic";
     AuthenticationConfiguration authConfig = {
@@ -294,11 +300,12 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     check saslListener.attach(saslConsumerIncorrectCredentialsService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(saslMsg, EMPTY_MEESAGE);
+    check saslListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function sslListenerTest() returns error? {
     string topic = "ssl-listener-test-topic";
 
@@ -336,11 +343,12 @@ function sslListenerTest() returns error? {
     check saslListener.attach(sslConsumerService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(sslMsg, TEST_MESSAGE);
+    check saslListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function basicMessageOrderTest() returns error? {
     string topic = "message-order-topic";
     int i = 0;
@@ -359,25 +367,25 @@ function basicMessageOrderTest() returns error? {
     check consumer.attach(messageOrderService);
     check consumer.'start();
 
-    runtime:sleep(7);
+    runtime:sleep(3);
 
     while (i < 10) {
         string message = i.toString();
         check sendMessage(message.toBytes(), topic);
         i += 1;
     }
-    runtime:sleep(7);
+    runtime:sleep(3);
     string expected = "0123456789";
     test:assertEquals(messagesReceivedInOrder, expected);
+    check consumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config { groups: ["listener"] }
 function moduleLevelListenerTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), moduleLevelListenerTopic);
     check moduleLevelListener.attach(moduleLevelListenerService);
     check moduleLevelListener.'start();
-
-    runtime:sleep(7);
+    runtime:sleep(3);
 
     test:assertEquals(moduleLevelListenerMessage, TEST_MESSAGE);
     check moduleLevelListener.gracefulStop();
