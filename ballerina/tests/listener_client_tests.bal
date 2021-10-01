@@ -26,8 +26,18 @@ string receivedImmediateStopMessage = "";
 string saslMsg = "";
 string saslIncorrectCredentialsMsg = "";
 string sslMsg = "";
+string moduleLevelListenerMessage = "";
 
 int receivedMsgCount = 0;
+
+string moduleLevelListenerTopic = "module-level-listener-topic";
+ConsumerConfiguration moduleLevelConsumerConfiguration = {
+    topics: [moduleLevelListenerTopic],
+    offsetReset: OFFSET_RESET_EARLIEST,
+    groupId: "module-level-listener-test-group",
+    clientId: "test-consumer-13"
+};
+listener Listener moduleLevelListener = check new (DEFAULT_URL, moduleLevelConsumerConfiguration);
 
 @test:Config {}
 function consumerServiceTest() returns error? {
@@ -361,6 +371,18 @@ function basicMessageOrderTest() returns error? {
     test:assertEquals(messagesReceivedInOrder, expected);
 }
 
+@test:Config {}
+function moduleLevelListenerTest() returns error? {
+    check sendMessage(TEST_MESSAGE.toBytes(), moduleLevelListenerTopic);
+    check moduleLevelListener.attach(moduleLevelListenerService);
+    check moduleLevelListener.'start();
+
+    runtime:sleep(7);
+
+    test:assertEquals(moduleLevelListenerMessage, TEST_MESSAGE);
+    check moduleLevelListener.gracefulStop();
+}
+
 Service messageOrderService =
 service object {
     remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
@@ -488,6 +510,18 @@ service object {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
             sslMsg = messageContent;
+        }
+    }
+};
+
+Service moduleLevelListenerService =
+service object {
+    remote function onConsumerRecord(Caller caller,
+                                ConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            moduleLevelListenerMessage = messageContent;
         }
     }
 };
