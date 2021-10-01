@@ -38,6 +38,9 @@ public class Start {
 
     public static Object start(BObject listener) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
+        if (serverConnector == null || serverConnector.isStarted()) {
+            return null;
+        }
         try {
             serverConnector.start();
             console.println(SERVICE_STARTED + getTopicNamesString((List<String>) listener.getNativeData("topics")));

@@ -41,6 +41,7 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
     private int numOfConcurrentConsumers = 1;
     private List<KafkaRecordConsumer> messageConsumers;
     private KafkaConsumer kafkaConsumer;
+    private boolean started = false;
 
     public KafkaServerConnectorImpl(String serviceId, Properties configParams, KafkaListener kafkaListener,
                                     KafkaConsumer kafkaConsumer) throws KafkaConnectorException {
@@ -71,6 +72,7 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
                 this.messageConsumers.add(consumer);
                 consumer.consume();
             }
+            this.started = true;
         } catch (KafkaException e) {
             throw new KafkaConnectorException(
                     "Error creating Kafka consumer to connect with remote broker and subscribe to provided topics", e);
@@ -95,6 +97,7 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
             }
         }
         this.messageConsumers = null;
+        this.started = false;
         if (ex != null) {
             throw ex;
         }
@@ -119,9 +122,14 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
             }
         }
         this.messageConsumers = null;
+        this.started = false;
         if (ex != null) {
             throw ex;
         }
         return true;
+    }
+
+    public boolean isStarted() {
+        return started;
     }
 }
