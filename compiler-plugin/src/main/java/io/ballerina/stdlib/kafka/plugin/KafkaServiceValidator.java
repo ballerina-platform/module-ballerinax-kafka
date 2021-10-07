@@ -48,35 +48,24 @@ public class KafkaServiceValidator {
         FunctionDefinitionNode onConsumerRecord = null;
 
         for (Node node : memberNodes) {
-            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
             if (node.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
+                FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
                 MethodSymbol methodSymbol = PluginUtils.getMethodSymbol(context, functionDefinitionNode);
                 Optional<String> functionName = methodSymbol.getName();
                 if (functionName.isPresent()) {
                     if (functionName.get().equals(PluginConstants.ON_RECORDS_FUNC)) {
                         onConsumerRecord = functionDefinitionNode;
-                    } else {
-                        validateNonKafkaFunction(functionDefinitionNode, context);
+                    } else if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
+                        context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
+                                DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
                     }
                 }
-            } else {
-                validateNonKafkaFunction(functionDefinitionNode, context);
+            } else if (node.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_FUNCTION,
+                        DiagnosticSeverity.ERROR, node.location()));
             }
         }
         new KafkaFunctionValidator(context, onConsumerRecord).validate();
-    }
-
-    public void validateNonKafkaFunction(FunctionDefinitionNode functionDefinitionNode,
-                                        SyntaxNodeAnalysisContext context) {
-        if (functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_FUNCTION,
-                    DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
-        } else {
-            if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
-                context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
-                        DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
-            }
-        }
     }
 
     private void validateAnnotation(SyntaxNodeAnalysisContext context) {
