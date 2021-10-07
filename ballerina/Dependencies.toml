@@ -10,7 +10,6 @@ dependencies-toml-version = "2"
 org = "ballerina"
 name = "crypto"
 version = "2.0.0"
-transitive = false
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -22,8 +21,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "jballerina.java"
-version = "0.9.0"
-transitive = false
+version = "0.0.0"
 modules = [
 	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
 ]
@@ -31,8 +29,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "lang.int"
-version = "1.1.0"
-transitive = true
+version = "0.0.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -41,7 +38,6 @@ dependencies = [
 org = "ballerina"
 name = "observe"
 version = "0.9.0"
-transitive = true
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -50,7 +46,6 @@ dependencies = [
 org = "ballerina"
 name = "regex"
 version = "1.0.0"
-transitive = true
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -59,7 +54,6 @@ dependencies = [
 org = "ballerina"
 name = "time"
 version = "2.0.0"
-transitive = true
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -68,7 +62,6 @@ dependencies = [
 org = "ballerina"
 name = "uuid"
 version = "1.0.0"
-transitive = false
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -82,14 +75,27 @@ modules = [
 [[package]]
 org = "ballerinai"
 name = "observe"
-version = "0.9.0"
-transitive = false
+version = "0.0.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "observe"}
 ]
 modules = [
 	{org = "ballerinai", packageName = "observe", moduleName = "observe"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "kafka"
+version = "3.0.0"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "uuid"},
+	{org = "ballerinai", name = "observe"}
+]
+modules = [
+	{org = "ballerinax", packageName = "kafka", moduleName = "kafka"}
 ]
 
 
