@@ -1,11 +1,11 @@
 [package]
 org = "ballerinax"
 name = "kafka"
-version = "3.0.0"
+version = "3.0.1"
 distribution = "slbeta3"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/kafka-native-3.0.0.jar"
+path = "../native/build/libs/kafka-native-3.0.1-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/kafka-clients-2.8.0.jar"
