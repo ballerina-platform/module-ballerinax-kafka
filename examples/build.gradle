@@ -22,9 +22,7 @@ apply plugin: 'java'
 
 description = 'Ballerina - Kafka Examples'
 
-def ballerinaModulePath = "${project.rootDir}/ballerina/"
-def ballerinaDistPath = "${ballerinaModulePath}/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
-def ballerinaDist = "${buildDir}/target/ballerina-distribution"
+def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
 def examples = ["twitter-filter/elasticsearch_consumer", "twitter-filter/mock_twitter_server", "twitter-filter/twitter_producer", "order-manager/order_service", "order-manager/order_processor", "order-manager/notification_service"]
 def packageName = "kafka"
 
@@ -33,30 +31,6 @@ dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
     implementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
-}
-
-task copyDistribution(type: Copy) {
-    from ballerinaDistPath
-    into ballerinaDist
-}
-
-task copyPackageBala {
-    doLast {
-        copy {
-            from "${ballerinaModulePath}/build/cache_parent"
-            into "${ballerinaDist}/repo"
-            copy {
-                into("bala/ballerina") {
-                    from "bala/ballerina"
-                }
-            }
-            copy {
-                into("cache/ballerina/") {
-                    from "cache/ballerina"
-                }
-            }
-        }
-    }
 }
 
 clean {
@@ -149,10 +123,8 @@ task stopKafkaServer() {
     }
 }
 
-copyDistribution.dependsOn ":${packageName}-ballerina:build"
-copyPackageBala.dependsOn copyDistribution
-buildExamples.dependsOn copyPackageBala
-testExamples.dependsOn copyPackageBala
+buildExamples.dependsOn ":${packageName}-ballerina:build"
+testExamples.dependsOn ":${packageName}-ballerina:build"
 build.dependsOn buildExamples
 test.dependsOn testExamples
 build.finalizedBy stopKafkaServer
