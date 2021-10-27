@@ -71,6 +71,7 @@ function producerInitTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    return;
 }
 
 @test:Config {}
@@ -96,6 +97,7 @@ function producerSendStringTest() returns error? {
     string messageConverted = check 'string:fromBytes(messageValue);
     test:assertEquals(messageConverted, TEST_MESSAGE);
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -111,6 +113,7 @@ function producerKeyTypeMismatchErrorTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check producer->close();
+    return;
 }
 
 @test:Config {
@@ -129,6 +132,7 @@ function producerCloseTest() returns error? {
     error receivedErr = <error>result;
     string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
     test:assertEquals(receivedErr.message(), expectedErr);
+    return;
 }
 
 @test:Config {}
@@ -149,6 +153,7 @@ function producerFlushTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals('string:fromBytes(consumerRecords[0].value), TEST_MESSAGE);
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -158,6 +163,7 @@ function producerGetTopicPartitionsTest() returns error? {
     TopicPartition[] topicPartitions = check producer->getTopicPartitions(topic);
     test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
     check producer->close();
+    return;
 }
 
 @test:Config {}
@@ -173,6 +179,7 @@ function producerGetTopicPartitionsErrorTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check producer->close();
+    return;
 }
 
 @test:Config {}
@@ -211,6 +218,7 @@ function transactionalProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config{}
@@ -248,6 +256,7 @@ function saslProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config{}
@@ -279,6 +288,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check kafkaProducer->close();
+    return;
 }
 
 @test:Config {}
@@ -317,6 +327,7 @@ function producerAdditionalPropertiesTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -366,6 +377,7 @@ function sslProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -408,6 +420,7 @@ function sslCertKeyProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -444,4 +457,5 @@ function sslCertOnlyProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }

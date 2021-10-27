@@ -47,6 +47,7 @@ public isolated client class Listener {
                 panic createError("The groupId of the consumer must be set to subscribe to the topics");
             }
         }
+        return;
     }
 
     private isolated function listenerInit() returns Error? =

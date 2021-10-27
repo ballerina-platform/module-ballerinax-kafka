@@ -40,6 +40,7 @@ public client isolated class Producer {
         self.valueSerializerType = SER_BYTE_ARRAY;
 
         check self.producerInit();
+        return;
     }
 
     private string connectorId = uuid:createType4AsString();
