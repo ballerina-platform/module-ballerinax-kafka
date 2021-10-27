@@ -2,6 +2,10 @@
 org = "ballerinax"
 name = "kafka"
 version = "@toml.version@"
+authors = ["Ballerina"]
+keywords = ["Kafka", "Event Streaming"]
+repository = "https://github.com/ballerina-platform/module-ballerinax-kafka"
+license = ["Apache-2.0"]
 distribution = "slbeta3"
 
 [[platform.java11.dependency]]
