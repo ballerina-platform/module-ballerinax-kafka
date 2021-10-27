@@ -57,4 +57,5 @@ function publishOrder(types:Order 'order) returns error? {
 
     // Publish the order to the Kafka topic
     check kafkaProducer->send({ topic: TOPIC, value: 'order.toString().toBytes()});
+    return;
 }

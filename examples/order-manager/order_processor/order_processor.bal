@@ -46,6 +46,7 @@ service kafka:Service on kafkaListener {
         if err is error {
             log:printError("Unknown error occured", err);
         }
+        return;
     }
 }
 

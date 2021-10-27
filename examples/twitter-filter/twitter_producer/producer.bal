@@ -47,4 +47,5 @@ public function main() returns error? {
             check kafkaProducer->send({ topic: TOPIC, value: message.toBytes() });
         }
     }
+    return;
 }
