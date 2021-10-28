@@ -42,6 +42,7 @@ public client isolated class Consumer {
         if (topics is string[]) {
             check self->subscribe(topics);
         }
+        return;
     }
 
     private isolated function consumerInit() returns Error? =

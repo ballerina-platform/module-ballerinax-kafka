@@ -45,6 +45,8 @@ function consumerServiceTest() returns error? {
 
     runtime:sleep(7);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
+    check consumer.gracefulStop();
+    return;
 }
 
 @test:Config {}
@@ -67,6 +69,7 @@ function consumerServiceGracefulStopTest() returns error? {
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
     runtime:sleep(7);
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
+    return;
 }
 
 @test:Config {}
@@ -89,6 +92,7 @@ function consumerServiceImmediateStopTest() returns error? {
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
     runtime:sleep(7);
     test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
+    return;
 }
 
 @test:Config {}
@@ -108,6 +112,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    return;
 }
 
 @test:Config {}
@@ -127,6 +132,8 @@ function listenerConfigTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(7);
     test:assertEquals(receivedConfigMessage, TEST_MESSAGE);
+    check serviceConsumer.gracefulStop();
+    return;
 }
 
 @test:Config {}
@@ -164,6 +171,7 @@ function listenerConfigErrorTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    return;
 }
 
 @test:Config {
@@ -200,6 +208,8 @@ function consumerServiceCommitOffsetTest() returns error? {
 
     test:assertEquals(offsetValue, messageCount);
     check consumer->close();
+    check serviceConsumer.gracefulStop();
+    return;
 }
 
 @test:Config {}
@@ -234,6 +244,8 @@ function consumerServiceCommitTest() returns error? {
 
     test:assertEquals(offsetValue, messageCount);
     check consumer->close();
+    check serviceConsumer.gracefulStop();
+    return;
 }
 
 @test:Config {}
@@ -260,6 +272,8 @@ function saslListenerTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(7);
     test:assertEquals(saslMsg, TEST_MESSAGE);
+    check saslListener.gracefulStop();
+    return;
 }
 
 @test:Config {}
@@ -286,6 +300,8 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(7);
     test:assertEquals(saslMsg, EMPTY_MEESAGE);
+    check saslListener.gracefulStop();
+    return;
 }
 
 @test:Config {}
@@ -328,6 +344,8 @@ function sslListenerTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(7);
     test:assertEquals(sslMsg, TEST_MESSAGE);
+    check saslListener.gracefulStop();
+    return;
 }
 
 @test:Config {}
@@ -359,6 +377,8 @@ function basicMessageOrderTest() returns error? {
     runtime:sleep(7);
     string expected = "0123456789";
     test:assertEquals(messagesReceivedInOrder, expected);
+    check consumer.gracefulStop();
+    return;
 }
 
 Service messageOrderService =
@@ -369,6 +389,7 @@ service object {
             string message = check 'string:fromBytes(value);
             messagesReceivedInOrder = messagesReceivedInOrder + message;
         }
+        return;
     }
 };
 
@@ -381,6 +402,7 @@ service object {
             log:printInfo("Message received: " + message);
             receivedMessage = message;
         }
+        return;
     }
 };
 
@@ -393,6 +415,7 @@ service object {
             log:printInfo("Message received: " + message);
             receivedGracefulStopMessage = message;
         }
+        return;
     }
 };
 
@@ -405,6 +428,7 @@ service object {
             log:printInfo("Message received: " + message);
             receivedImmediateStopMessage = message;
         }
+        return;
     }
 };
 
@@ -418,6 +442,7 @@ service object {
             receivedMessageWithCommit = message;
         }
         check caller->'commit();
+        return;
     }
 };
 
@@ -441,6 +466,7 @@ service object {
             offset: receivedMsgCount
         };
         check caller->commitOffset([partitionOffset]);
+        return;
     }
 };
 
@@ -453,6 +479,7 @@ service object {
             log:printInfo("Message received: " + message);
             receivedConfigMessage = message;
         }
+        return;
     }
 };
 
@@ -465,6 +492,7 @@ service object {
             log:printInfo(messageContent);
             saslMsg = messageContent;
         }
+        return;
     }
 };
 
@@ -477,6 +505,7 @@ service object {
             log:printInfo(messageContent);
             saslIncorrectCredentialsMsg = messageContent;
         }
+        return;
     }
 };
 
@@ -489,5 +518,6 @@ service object {
             log:printInfo(messageContent);
             sslMsg = messageContent;
         }
+        return;
     }
 };

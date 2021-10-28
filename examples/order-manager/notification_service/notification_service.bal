@@ -49,5 +49,6 @@ service kafka:Service on kafkaListener {
         if commitResult is error {
             log:printError("Error occurred while committing the offsets for the consumer.", 'error = commitResult);
         }
+        return;
     }
 }

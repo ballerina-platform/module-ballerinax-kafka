@@ -47,6 +47,7 @@ public isolated client class Listener {
                 panic createError("The groupId of the consumer must be set to subscribe to the topics");
             }
         }
+        return;
     }
 
     private isolated function listenerInit() returns Error? =
@@ -97,6 +98,7 @@ public isolated client class Listener {
     # + return - A `kafka:Error` if an error is encountered while detaching a service or else `()`
     public isolated function detach(Service s) returns error? {
         // not implemented
+        return;
     }
 
     isolated remote function consumerSubscribe(string[] topics) returns Error? =

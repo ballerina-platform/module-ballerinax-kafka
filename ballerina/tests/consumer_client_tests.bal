@@ -80,6 +80,7 @@ function consumerCloseTest() returns error? {
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
     test:assertEquals(receivedErr.message(), expectedErr);
+    return;
 }
 
 @test:Config {}
@@ -100,6 +101,7 @@ function consumerCloseWithDurationTest() returns error? {
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
     test:assertEquals(receivedErr.message(), expectedErr);
+    return;
 }
 
 @test:Config {}
@@ -121,6 +123,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
     test:assertEquals(receivedErr.message(), expectedErr);
+    return;
 }
 
 @test:Config {}
@@ -141,6 +144,7 @@ function consumerConfigTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -160,6 +164,7 @@ function consumerFunctionsTest() returns error? {
     string message = check 'string:fromBytes(value);
     test:assertEquals(message, TEST_MESSAGE);
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -199,6 +204,7 @@ function consumerSeekTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -231,6 +237,7 @@ function consumerSeekToBeginningTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -264,6 +271,7 @@ function consumerSeekToEndTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -292,6 +300,7 @@ function consumerSeekToNegativeValueTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {
@@ -331,6 +340,7 @@ function consumerPositionOffsetsTest() returns error? {
     partitionOffsetAfter = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(partitionOffsetAfter, 3, "Expected: 3. Received: " + partitionOffsetAfter.toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {
@@ -383,6 +393,7 @@ function consumerBeginningOffsetsTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {
@@ -433,6 +444,7 @@ function consumerEndOffsetsTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -462,6 +474,7 @@ function consumerTopicPartitionsTest() returns error? {
     topic1Partitions = check consumer->getTopicPartitions(topic1);
     test:assertEquals(topic1Partitions[0].partition, 0, "Expected: 0. Received: " + topic1Partitions[0].partition.toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -493,6 +506,7 @@ function consumerPauseResumePartitionTest() returns error? {
     consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -535,6 +549,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -557,6 +572,7 @@ function consumerAssignToEmptyTopicTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -578,6 +594,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
     test:assertEquals(result[0].topic, topic, "Expected: " + topic + ". Received: " + result[0].topic);
     test:assertEquals(result[0].partition, 0, "Expected: 0. Received: " + result[0].partition.toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {
@@ -599,6 +616,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     test:assertEquals(subscribedTopics.length(), 0);
 
     check consumer->close();
+    return;
 }
 
 @test:Config {
@@ -619,6 +637,7 @@ function consumerSubscribeTest() returns error? {
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.length(), 10);
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -636,6 +655,7 @@ function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    return;
 }
 
 @test:Config {}
@@ -654,6 +674,7 @@ function consumerSubscribeToEmptyTopicTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -676,6 +697,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
     availableTopics = check consumer->getAvailableTopics();
     test:assertEquals(availableTopics.length(), 32);
     check consumer->close();
+    return;
 }
 
 @test:Config {
@@ -695,6 +717,7 @@ function consumerSubscribeErrorTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -739,6 +762,7 @@ function manualCommitTest() returns error? {
     int positionOffset = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(positionOffset, messageCount);
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -769,6 +793,7 @@ function manualCommitWithDurationTest() returns error? {
     int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, manualCommitOffset);
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -800,6 +825,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
     int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, manualCommitOffset);
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -823,6 +849,7 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
     check consumer->close();
+    return;
 }
 
 @test:Config{}
@@ -848,6 +875,7 @@ function saslConsumerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config{}
@@ -878,6 +906,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
+    return;
 }
 
 @test:Config{}
@@ -904,6 +933,7 @@ function consumerAdditionalPropertiesTest() returns error? {
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertEquals(committedOffset, ());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -943,6 +973,7 @@ function sslKeystoreConsumerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -975,6 +1006,7 @@ function sslCertKeyConsumerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 @test:Config {}
@@ -1001,6 +1033,7 @@ function sslCertOnlyConsumerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
+    return;
 }
 
 function sendMessage(byte[] message, string topic) returns error? {

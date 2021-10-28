@@ -27,6 +27,7 @@ isolated function sendByteArrayValues(Producer producer, byte[] value, string to
         }
         panic getKeyTypeMismatchError(BYTE_ARRAY);
     }
+    return;
 }
 
  //Send byte[] values with different types of keys
