@@ -23,7 +23,7 @@ apply plugin: 'java'
 description = 'Ballerina - Kafka Examples'
 
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
-def examples = ["twitter-filter/elasticsearch_consumer", "twitter-filter/mock_twitter_server", "twitter-filter/twitter_producer", "order-manager/order_service", "order-manager/order_processor", "order-manager/notification_service"]
+def examples = ["twitter-filter/elasticsearch_consumer", "twitter-filter/mock_twitter_server", "twitter-filter/twitter_producer", "order-manager/order_service", "order-manager/order_processor", "order-manager/notification_service", "secured-word-count-calculator/word-count-calculator"]
 def packageName = "kafka"
 
 dependencies {
