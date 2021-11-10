@@ -124,4 +124,25 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
         }
         return true;
     }
+
+    @Override
+    public boolean stopPollingTask() throws KafkaConnectorException {
+        KafkaConnectorException ex = null;
+        for (KafkaRecordConsumer consumer : this.messageConsumers) {
+            try {
+                consumer.stopScheduledPollTask();
+            } catch (KafkaException e) {
+                if (ex == null) {
+                    ex = new KafkaConnectorException("Error closing the Kafka consumers for service " + serviceId, e);
+                } else {
+                    ex.addSuppressed(e);
+                }
+            }
+        }
+        this.messageConsumers = null;
+        if (ex != null) {
+            throw ex;
+        }
+        return true;
+    }
 }

@@ -177,4 +177,21 @@ public class KafkaRecordConsumer {
         }
         this.kafkaConsumer.close(Duration.ofMillis(0));
     }
+
+    /**
+     * Stops Kafka consumer polling cycles and forcefully shutdowns scheduled thread pool.
+     */
+    public void stopScheduledPollTask() {
+        closed.set(true);
+        this.kafkaConsumer.wakeup();
+        this.pollTaskFuture.cancel(true);
+        this.executorService.shutdownNow();
+        try {
+            this.executorService.awaitTermination(stopTimeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            this.executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        this.kafkaConsumer.unsubscribe();
+    }
 }

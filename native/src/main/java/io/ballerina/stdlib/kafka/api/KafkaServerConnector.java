@@ -48,4 +48,12 @@ public interface KafkaServerConnector {
      */
     boolean immediateStop() throws KafkaConnectorException;
 
+    /**
+     * Stops the scheduled poll task.
+     *
+     * @return true if stopped successfully, false otherwise
+     * @throws KafkaConnectorException if error occurred while stopping the Kafka server connector
+     */
+    boolean stopPollingTask() throws KafkaConnectorException;
+
 }
