@@ -17,10 +17,9 @@
 import ballerina/test;
 import ballerinax/kafka;
 import ballerina/lang.runtime;
-import ballerina/io;
 
 @test:Config{}
-function orderProcessorTest() returns error? {
+function wordCountCalculatorTest() returns error? {
     kafka:Producer testProducer = check new (kafka:DEFAULT_URL);
 
     check kafkaProducer->send({ topic: INPUT_TOPIC, value: "Test message for kafka topic in kafka examples".toBytes()});
@@ -51,8 +50,6 @@ function orderProcessorTest() returns error? {
         byte[]? key = 'record["key"];
         if key is byte[] {
             string word = check string:fromBytes(key);
-            io:println(word);
-            io:println(countValue);
             int? actualResult = expectedResults[word];
             if actualResult is int {
                 test:assertEquals(countValue, actualResult.toString());
