@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.kafka.impl;
 
+import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.types.Type;
@@ -82,12 +83,23 @@ public class KafkaListenerImpl implements KafkaListener {
         if (ObserveUtils.isTracingEnabled()) {
             Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD, 2);
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, consumer,
-                                       properties, returnType,
-                                       getResourceParameters(service, this.listener, records));
+            if (service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+                bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                        consumer, properties, returnType, getResourceParameters(service, this.listener, records));
+            } else {
+                bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                        consumer, properties, returnType, getResourceParameters(service, this.listener, records));
+            }
         } else {
-            bRuntime.invokeMethodAsync(service, KAFKA_RESOURCE_ON_RECORD, null, metadata, consumer,
-                                       getResourceParameters(service, this.listener, records));
+            if (service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+                bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                        consumer, null, PredefinedTypes.TYPE_NULL,
+                        getResourceParameters(service, this.listener, records));
+            } else {
+                bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                        consumer, null, PredefinedTypes.TYPE_NULL,
+                        getResourceParameters(service, this.listener, records));
+            }
         }
     }
 
