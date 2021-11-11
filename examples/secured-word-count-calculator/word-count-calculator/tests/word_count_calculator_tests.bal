@@ -17,13 +17,12 @@
 import ballerina/test;
 import ballerinax/kafka;
 import ballerina/lang.runtime;
-import ballerina/io;
 
 @test:Config{}
 function orderProcessorTest() returns error? {
     kafka:Producer testProducer = check new (kafka:DEFAULT_URL);
 
-    // check kafkaProducer->send({ topic: INPUT_TOPIC, value: "Test message for kafka topic in kafka examples".toBytes()});
+    check kafkaProducer->send({ topic: INPUT_TOPIC, value: "Test message for kafka topic in kafka examples".toBytes()});
     runtime:sleep(4);
 
     kafka:ConsumerConfiguration testConsumerConfigs = {
@@ -36,12 +35,27 @@ function orderProcessorTest() returns error? {
 
     test:assertEquals(records.length(), 8);
 
+    map<int> expectedResults = {
+        "Test": 1,
+        "message": 1,
+        "for": 1,
+        "kafka": 2,
+        "topic": 1,
+        "in": 1,
+        "examples": 1
+    };
+
     foreach kafka:ConsumerRecord 'record in records {
         string messageContent = check string:fromBytes('record.value);
-        byte[]? keyValue = 'record["key"];
-        if val is byte[] {
-            string messageKey = check string:fromBytes(keyValue);
-            test:assertEquals(messageKey,);
+        byte[]? countValue = 'record["key"];
+        if countValue is byte[] {
+            string messageKey = check string:fromBytes(countValue);
+            int? actualResult = expectedResults[messageKey];
+            if actualResult is int {
+                test:assertEquals(messageKey, actualResult.toString());
+            } else {
+                test:assertFail("Expected count values in result");
+            }
         } else {
             test:assertFail("Expected key values in result");
         }

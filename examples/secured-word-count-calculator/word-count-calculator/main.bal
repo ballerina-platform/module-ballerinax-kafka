@@ -83,29 +83,39 @@ kafka:Producer kafkaProducer = check new (KAFKA_SECURED_URL, producerConfigs);
 service kafka:Service on kafkaListener {
 
     remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
-        check processRecords(records);
+        map<int> tempWordCountMap = {};
+        foreach kafka:ConsumerRecord 'record in records {
+            string word;
+            int count;
+            [string, int] countResults = check processRecord('record);
+            [word, count] = countResults;
+            tempWordCountMap[word] = count;
+        }
+        foreach string word in tempWordCountMap.keys() {
+            int? count = tempWordCountMap[word];
+            if count is int {
+                publishWordCount(word, count);
+            }
+        }
     }
 }
 
-function processRecords(kafka:ConsumerRecord[] records) returns error? {
-    string sentence;
-    foreach kafka:ConsumerRecord 'record in records {
-        sentence = check string:fromBytes('record.value);
-        _ = check from string word in regex:split(sentence, " ") let int? result = wordCountMap[word] do {
-            if result is () {
-                wordCountMap[word] = 1;
-                future fut = start publishWordCount(word, 1);
-            } else {
-                wordCountMap[word] = result + 1;
-                future fut = start publishWordCount(word, result + 1);
-            }
-        };
-    }
+function processRecord(kafka:ConsumerRecord 'record) returns [string, int]|error {
+    string sentence = check string:fromBytes('record.value);
+    _ = check from string word in regex:split(sentence, " ") let int? result = wordCountMap[word] do {
+        if result is () {
+            wordCountMap[word] = 1;
+            return [word, 1];
+        } else {
+            wordCountMap[word] = result + 1;
+            return [word, result + 1];
+        }
+    };
 }
 
 function publishWordCount(string word, int count) {
     error? result = kafkaProducer->send({ topic: OUTPUT_TOPIC, 'key: word.toBytes(), value: count.toString().toBytes() });
     if result is error {
-        log:printError("Could not send value to kafka", result);
+        log:printError("Could not send word " + word + " with count " + count.toString() + " to kafka", result);
     }
 }
