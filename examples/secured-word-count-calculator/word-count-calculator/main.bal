@@ -25,19 +25,24 @@ configurable string SSL_TRUSTSTORE_PATH = ?;
 configurable string SSL_KEYSTORE_PATH = ?;
 configurable string SSL_MASTER_PASSWORD = ?;
 configurable string KAFKA_SECURED_URL = ?;
+configurable string SASL_USERNAME = ?;
+configurable string SASL_PASSWORD = ?;
 
 map<int> wordCountMap = {};
 
+// Truststore path and password
 crypto:TrustStore trustStore = {
     path: SSL_TRUSTSTORE_PATH,
     password: SSL_MASTER_PASSWORD
 };
 
+// Keystore path and password
 crypto:KeyStore keyStore = {
     path: SSL_KEYSTORE_PATH,
     password: SSL_MASTER_PASSWORD
 };
 
+// Configs related to secure socket record
 kafka:SecureSocket socket = {
     cert: trustStore,
     key: {
@@ -49,10 +54,11 @@ kafka:SecureSocket socket = {
     }
 };
 
+// SASL authentication configurations
 kafka:AuthenticationConfiguration authConfig = {
     mechanism: kafka:AUTH_SASL_PLAIN,
-    username: "admin",
-    password: "password"
+    username: SASL_USERNAME,
+    password: SASL_PASSWORD
 };
 
 kafka:ProducerConfiguration producerConfigs = {
@@ -61,6 +67,7 @@ kafka:ProducerConfiguration producerConfigs = {
     maxBlock: 6,
     requestTimeout: 2,
     retryCount: 3,
+    // Security configs
     auth: authConfig,
     secureSocket: socket,
     securityProtocol: kafka:PROTOCOL_SASL_SSL
@@ -71,9 +78,11 @@ kafka:ConsumerConfiguration consumerConfigs = {
     topics: [INPUT_TOPIC],
     offsetReset: kafka:OFFSET_RESET_EARLIEST,
     pollingInterval: 1,
+    // Security configs
     secureSocket: socket,
     securityProtocol: kafka:PROTOCOL_SASL_SSL,
     auth: authConfig,
+    // Making autocommit false in order to re-evaluate the word counts for every new instance of the listener
     autoCommit: false
 };
 
@@ -86,8 +95,10 @@ service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
         map<int> countResults;
         foreach kafka:ConsumerRecord 'record in records {
+            // Process the input sentences one by one
             countResults = check processRecord('record);
         }
+        // Iterate through the results and publish the word with the appropriate count to the output topic
         foreach string word in countResults.keys() {
             int? count = countResults[word];
             if count is int {
@@ -98,13 +109,17 @@ service kafka:Service on kafkaListener {
 }
 
 function processRecord(kafka:ConsumerRecord 'record) returns map<int>|error {
+    // A temporary word count map is created to count the words in one sentence
     map<int> tempWordCountMap = {};
     string sentence = check string:fromBytes('record.value);
+
     _ = check from string word in regex:split(sentence, " ") let int? result = wordCountMap[word] do {
         if result is () {
+            // Add a new value if the word does not exist in the map
             wordCountMap[word] = 1;
             tempWordCountMap[word] = 1;
         } else {
+            // Increment the count if the word already exists
             wordCountMap[word] = result + 1;
             tempWordCountMap[word] = result + 1;
         }
@@ -113,6 +128,7 @@ function processRecord(kafka:ConsumerRecord 'record) returns map<int>|error {
 }
 
 function publishWordCount(string word, int count) {
+    // Publish the message to the topic with the count as the message value and the word as the message key
     error? result = kafkaProducer->send({ topic: OUTPUT_TOPIC, 'key: word.toBytes(), value: count.toString().toBytes() });
     if result is error {
         log:printError("Could not send word " + word + " with count " + count.toString() + " to kafka", result);

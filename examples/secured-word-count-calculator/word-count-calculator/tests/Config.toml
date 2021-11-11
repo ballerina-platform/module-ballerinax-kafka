@@ -5,3 +5,5 @@ SSL_TRUSTSTORE_PATH = "secured-word-count-calculator/word-count-calculator/secre
 SSL_KEYSTORE_PATH = "secured-word-count-calculator/word-count-calculator/secrets/kafka.client.keystore.jks"
 SSL_MASTER_PASSWORD = "password"
 KAFKA_SECURED_URL = "localhost:9095"
+SASL_USERNAME = "admin"
+SASL_PASSWORD = "password"
