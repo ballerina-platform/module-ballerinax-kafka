@@ -57,13 +57,13 @@ kafka:AuthenticationConfiguration authConfig = {
 
 kafka:ProducerConfiguration producerConfigs = {
     clientId: "word-count-producer",
-    acks: ACKS_ALL,
+    acks: kafka:ACKS_ALL,
     maxBlock: 6,
     requestTimeout: 2,
     retryCount: 3,
     auth: authConfig,
     secureSocket: socket,
-    securityProtocol: kafka:PROTOCOL_SASL_SSL,
+    securityProtocol: kafka:PROTOCOL_SASL_SSL
 };
 
 kafka:ConsumerConfiguration consumerConfigs = {
