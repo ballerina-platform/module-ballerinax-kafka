@@ -73,7 +73,8 @@ kafka:ConsumerConfiguration consumerConfigs = {
     pollingInterval: 1,
     secureSocket: socket,
     securityProtocol: kafka:PROTOCOL_SASL_SSL,
-    auth: authConfig
+    auth: authConfig,
+    autoCommit: false
 };
 
 listener kafka:Listener kafkaListener = new (KAFKA_SECURED_URL, consumerConfigs);
@@ -83,16 +84,12 @@ kafka:Producer kafkaProducer = check new (KAFKA_SECURED_URL, producerConfigs);
 service kafka:Service on kafkaListener {
 
     remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
-        map<int> tempWordCountMap = {};
+        map<int> countResults;
         foreach kafka:ConsumerRecord 'record in records {
-            string word;
-            int count;
-            [string, int] countResults = check processRecord('record);
-            [word, count] = countResults;
-            tempWordCountMap[word] = count;
+            countResults = check processRecord('record);
         }
-        foreach string word in tempWordCountMap.keys() {
-            int? count = tempWordCountMap[word];
+        foreach string word in countResults.keys() {
+            int? count = countResults[word];
             if count is int {
                 publishWordCount(word, count);
             }
@@ -100,17 +97,19 @@ service kafka:Service on kafkaListener {
     }
 }
 
-function processRecord(kafka:ConsumerRecord 'record) returns [string, int]|error {
+function processRecord(kafka:ConsumerRecord 'record) returns map<int>|error {
+    map<int> tempWordCountMap = {};
     string sentence = check string:fromBytes('record.value);
     _ = check from string word in regex:split(sentence, " ") let int? result = wordCountMap[word] do {
         if result is () {
             wordCountMap[word] = 1;
-            return [word, 1];
+            tempWordCountMap[word] = 1;
         } else {
             wordCountMap[word] = result + 1;
-            return [word, result + 1];
+            tempWordCountMap[word] = result + 1;
         }
     };
+    return tempWordCountMap;
 }
 
 function publishWordCount(string word, int count) {

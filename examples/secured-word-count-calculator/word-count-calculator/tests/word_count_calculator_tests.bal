@@ -17,6 +17,7 @@
 import ballerina/test;
 import ballerinax/kafka;
 import ballerina/lang.runtime;
+import ballerina/io;
 
 @test:Config{}
 function orderProcessorTest() returns error? {
@@ -33,7 +34,7 @@ function orderProcessorTest() returns error? {
     kafka:Consumer testConsumer = check new (kafka:DEFAULT_URL, testConsumerConfigs);
     kafka:ConsumerRecord[] records = check testConsumer->poll(3);
 
-    test:assertEquals(records.length(), 8);
+    test:assertEquals(records.length(), 7);
 
     map<int> expectedResults = {
         "Test": 1,
@@ -46,13 +47,15 @@ function orderProcessorTest() returns error? {
     };
 
     foreach kafka:ConsumerRecord 'record in records {
-        string messageContent = check string:fromBytes('record.value);
-        byte[]? countValue = 'record["key"];
-        if countValue is byte[] {
-            string messageKey = check string:fromBytes(countValue);
-            int? actualResult = expectedResults[messageKey];
+        string countValue = check string:fromBytes('record.value);
+        byte[]? key = 'record["key"];
+        if key is byte[] {
+            string word = check string:fromBytes(key);
+            io:println(word);
+            io:println(countValue);
+            int? actualResult = expectedResults[word];
             if actualResult is int {
-                test:assertEquals(messageKey, actualResult.toString());
+                test:assertEquals(countValue, actualResult.toString());
             } else {
                 test:assertFail("Expected count values in result");
             }

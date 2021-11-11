@@ -1,3 +1,7 @@
 [word_count_calculator]
 INPUT_TOPIC = "streams-plaintext-input"
-OUTPUT_TOPIC = "streams-wordcount-outputs"
+OUTPUT_TOPIC = "streams-wordcount-output"
+SSL_TRUSTSTORE_PATH = "secrets/kafka.client.truststore.jks"
+SSL_KEYSTORE_PATH = "secrets/kafka.client.keystore.jks"
+SSL_MASTER_PASSWORD = "password"
+KAFKA_SECURED_URL = "localhost:9095"
