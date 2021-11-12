@@ -2,7 +2,6 @@ package io.ballerina.stdlib.kafka.service;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.stdlib.kafka.api.KafkaServerConnector;
 import io.ballerina.stdlib.kafka.exceptions.KafkaConnectorException;
 import io.ballerina.stdlib.kafka.impl.KafkaServerConnectorImpl;
 import io.ballerina.stdlib.kafka.utils.KafkaUtils;
