@@ -78,8 +78,7 @@ public class KafkaListenerImpl implements KafkaListener {
 
     private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records) {
         StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
-                                                     ModuleUtils.getModule().getName(),
-                                                     ModuleUtils.getModule().getVersion(), KAFKA_RESOURCE_ON_RECORD);
+                ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), KAFKA_RESOURCE_ON_RECORD);
         if (ObserveUtils.isTracingEnabled()) {
             Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD, 2);
             Map<String, Object> properties = getNewObserverContextInProperties(listener);

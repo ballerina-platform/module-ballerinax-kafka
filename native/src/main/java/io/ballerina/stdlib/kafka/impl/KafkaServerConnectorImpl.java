@@ -125,7 +125,12 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
         return true;
     }
 
-    @Override
+    /**
+     * Stops the scheduled poll task.
+     *
+     * @return true if stopped successfully, false otherwise
+     * @throws KafkaConnectorException if error occurred while stopping the poll task
+     */
     public boolean stopPollingTask() throws KafkaConnectorException {
         KafkaConnectorException ex = null;
         for (KafkaRecordConsumer consumer : this.messageConsumers) {

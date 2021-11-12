@@ -16,7 +16,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.UNCHECKED;
 public class Unregister {
     @SuppressWarnings(UNCHECKED)
     public static Object unregister(Environment env, BObject listener, BObject service) {
-        KafkaServerConnector serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
+        KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
         try {
             serverConnector.stopPollingTask();
         } catch (KafkaConnectorException e) {
