@@ -24,11 +24,8 @@ import io.ballerina.stdlib.kafka.impl.KafkaServerConnectorImpl;
 
 import java.io.PrintStream;
 
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERVICE_STOPPED;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getServerUrls;
 
 /**
  * Stop the server connector.
@@ -47,8 +44,6 @@ public class Stop {
         if (!isStopped) {
             return createKafkaError("Failed to stop the kafka service.");
         }
-        console.println(SERVICE_STOPPED
-                + getServerUrls(listener.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG)));
         return null;
     }
 
@@ -63,8 +58,6 @@ public class Stop {
         if (!isStopped) {
             return createKafkaError("Failed to stop the kafka service.");
         }
-        console.println(SERVICE_STOPPED
-                + getServerUrls(listener.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG)));
         return null;
     }
 }
