@@ -23,7 +23,6 @@ import io.ballerina.stdlib.kafka.exceptions.KafkaConnectorException;
 import io.ballerina.stdlib.kafka.impl.KafkaServerConnectorImpl;
 
 import java.io.PrintStream;
-import java.util.List;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
