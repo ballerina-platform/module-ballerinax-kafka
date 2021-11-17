@@ -23,12 +23,9 @@ import io.ballerina.stdlib.kafka.exceptions.KafkaConnectorException;
 import io.ballerina.stdlib.kafka.impl.KafkaServerConnectorImpl;
 
 import java.io.PrintStream;
-import java.util.List;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERVICE_STARTED;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getTopicNamesString;
 
 /**
  * Start server connector.
@@ -40,7 +37,6 @@ public class Start {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
         try {
             serverConnector.start();
-            console.println(SERVICE_STARTED + getTopicNamesString((List<String>) listener.getNativeData("topics")));
         } catch (KafkaConnectorException e) {
             return createKafkaError(e.getMessage());
         }
