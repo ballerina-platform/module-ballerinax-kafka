@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- [Mark Kafka Service type as distinct.](https://github.com/ballerina-platform/ballerina-standard-library/issues/2398)
+
+## [3.0.0] - 2021-10-09
+
 ### Fixed
 - [Fix issue in messages received to Kafka consumer services not being ordered.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1698)
 - [Fix issue in Kafka Consumer using Ballerina worker threads to do IO.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1694)
