@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Changed
-- [Mark Kafka Service type as distinct](https://github.com/ballerina-platform/ballerina-standard-library/issues/2398)
+- [Mark Kafka Service type as distinct.](https://github.com/ballerina-platform/ballerina-standard-library/issues/2398)
 
 ## [3.0.0] - 2021-10-09
 
