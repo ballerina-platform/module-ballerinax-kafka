@@ -82,7 +82,7 @@ public class KafkaListenerImpl implements KafkaListener {
         if (ObserveUtils.isTracingEnabled()) {
             Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD, 2);
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            if (service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+            if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
                 bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
                         consumer, properties, returnType, getResourceParameters(service, this.listener, records));
             } else {
@@ -90,7 +90,7 @@ public class KafkaListenerImpl implements KafkaListener {
                         consumer, properties, returnType, getResourceParameters(service, this.listener, records));
             }
         } else {
-            if (service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+            if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
                 bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
                         consumer, null, PredefinedTypes.TYPE_NULL,
                         getResourceParameters(service, this.listener, records));
