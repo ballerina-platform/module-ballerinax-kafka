@@ -26,6 +26,8 @@ string receivedImmediateStopMessage = "";
 string saslMsg = "";
 string saslIncorrectCredentialsMsg = "";
 string sslMsg = "";
+string detachMsg1 = "";
+string detachMsg2 = "";
 
 int receivedMsgCount = 0;
 
@@ -381,6 +383,64 @@ function basicMessageOrderTest() returns error? {
     return;
 }
 
+@test:Config {}
+function listenerDetachTest() returns error? {
+    string topic1 = "listener-detach-topic";
+    ConsumerConfiguration consumerConfiguration1 = {
+        topics: [topic1],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "listener-detach-test-group",
+        clientId: "test-consumer-13"
+    };
+    Listener listener1 = check new (DEFAULT_URL, consumerConfiguration1);
+    check listener1.attach(listenerDetachService1);
+    check listener1.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic1);
+    runtime:sleep(7);
+    test:assertEquals(detachMsg1, TEST_MESSAGE);
+
+    // detach the listener and check any new messages are processed
+    check listener1.detach(listenerDetachService1);
+    check sendMessage(TEST_MESSAGE_II.toBytes(), topic1);
+    runtime:sleep(7);
+    test:assertEquals(detachMsg1, TEST_MESSAGE);
+
+    // attach the listener and check for new messages
+    check listener1.attach(listenerDetachService1);
+    check listener1.'start();
+    check sendMessage(TEST_MESSAGE_III.toBytes(), topic1);
+    runtime:sleep(7);
+    test:assertEquals(detachMsg1, TEST_MESSAGE_III);
+
+    // detach from the current service and attach to a new service
+    check listener1.detach(listenerDetachService1);
+    check listener1.attach(listenerDetachService2);
+    check listener1.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic1);
+    runtime:sleep(7);
+    test:assertEquals(detachMsg1, TEST_MESSAGE_III);
+    test:assertEquals(detachMsg2, TEST_MESSAGE);
+    check listener1.gracefulStop();
+
+    // Attach a new listener to the same service and test for messages
+    string topic2 = "listener2-detach-topic";
+    ConsumerConfiguration consumerConfiguration2 = {
+        topics: [topic2],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "listener2-detach-test-group",
+        clientId: "test-consumer-14"
+    };
+    Listener listener2 = check new (DEFAULT_URL, consumerConfiguration2);
+    check listener2.attach(listenerDetachService1);
+    check listener2.'start();
+    detachMsg1 = "";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic2);
+    runtime:sleep(7);
+    test:assertEquals(detachMsg1, TEST_MESSAGE);
+    check listener2.gracefulStop();
+    return;
+}
+
 Service messageOrderService =
 service object {
     remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
@@ -517,6 +577,32 @@ service object {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
             sslMsg = messageContent;
+        }
+        return;
+    }
+};
+
+Service listenerDetachService1 =
+service object {
+    remote function onConsumerRecord(Caller caller,
+                                ConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            detachMsg1 = messageContent;
+        }
+        return;
+    }
+};
+
+Service listenerDetachService2 =
+service object {
+    remote function onConsumerRecord(Caller caller,
+                                ConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            detachMsg2 = messageContent;
         }
         return;
     }

@@ -124,4 +124,31 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
         }
         return true;
     }
+
+    /**
+     * Stops the scheduled poll task.
+     *
+     * @return true if stopped successfully, false otherwise
+     * @throws KafkaConnectorException if error occurred while stopping the poll task
+     */
+    public boolean stopPollingTask() throws KafkaConnectorException {
+        KafkaConnectorException kcException = null;
+        for (KafkaRecordConsumer consumer : this.messageConsumers) {
+            try {
+                consumer.stopScheduledPollTask();
+            } catch (KafkaException e) {
+                if (kcException == null) {
+                    kcException = new KafkaConnectorException("Error closing the Kafka consumers for service " +
+                            serviceId, e);
+                } else {
+                    kcException.addSuppressed(e);
+                }
+            }
+        }
+        this.messageConsumers = null;
+        if (kcException != null) {
+            throw kcException;
+        }
+        return true;
+    }
 }

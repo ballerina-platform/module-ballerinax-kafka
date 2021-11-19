@@ -20,6 +20,7 @@ import ballerina/crypto;
 
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
+const TEST_MESSAGE_III = "Hello, Kafka";
 const EMPTY_MEESAGE = "";
 
 const decimal TIMEOUT_DURATION = 5;

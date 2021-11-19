@@ -53,7 +53,7 @@ public class KafkaRecordConsumer {
     private KafkaConsumer kafkaConsumer;
     private Duration pollingTimeout = Duration.ofMillis(1000);
     private int pollingInterval = 1000;
-    private long stopTimeout = 1000;
+    private long stopTimeout = 30000;
     private String groupId;
     private final KafkaListener kafkaListener;
     private final String serviceId;
@@ -176,5 +176,22 @@ public class KafkaRecordConsumer {
             Thread.currentThread().interrupt();
         }
         this.kafkaConsumer.close(Duration.ofMillis(0));
+    }
+
+    /**
+     * Stops Kafka consumer polling cycles and forcefully shutdowns scheduled thread pool.
+     */
+    public void stopScheduledPollTask() {
+        closed.set(true);
+        this.kafkaConsumer.wakeup();
+        this.pollTaskFuture.cancel(true);
+        this.executorService.shutdownNow();
+        try {
+            this.executorService.awaitTermination(stopTimeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            this.executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        this.kafkaConsumer.unsubscribe();
     }
 }
