@@ -34,8 +34,6 @@ public class KafkaConstants {
     public static final int DURATION_UNDEFINED_VALUE = -1;
 
     // Kafka log messages
-    public static final String SERVICE_STARTED = "[ballerinax/kafka] Kafka listener started for topics: ";
-    public static final String SERVICE_STOPPED = "[ballerinax/kafka] Kafka listener stopped ";
     public static final String KAFKA_SERVERS = "[ballerinax/kafka] kafka servers: ";
     public static final String SUBSCRIBED_TOPICS = "[ballerinax/kafka] subscribed topics: ";
 
