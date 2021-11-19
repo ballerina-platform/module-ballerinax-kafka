@@ -53,7 +53,7 @@ public class KafkaRecordConsumer {
     private KafkaConsumer kafkaConsumer;
     private Duration pollingTimeout = Duration.ofMillis(1000);
     private int pollingInterval = 1000;
-    private long stopTimeout = 1000;
+    private long stopTimeout = 30000;
     private String groupId;
     private final KafkaListener kafkaListener;
     private final String serviceId;
