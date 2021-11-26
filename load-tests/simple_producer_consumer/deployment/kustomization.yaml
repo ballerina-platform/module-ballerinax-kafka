@@ -1,0 +1,3 @@
+resources:
+  - simple_producer_consumer.yaml
+  - ingress.yaml
