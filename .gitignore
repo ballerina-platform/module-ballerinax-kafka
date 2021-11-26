@@ -40,4 +40,7 @@ velocity.log*
 *Ballerina.lock
 kafka-ballerina/src/src
 
+# Auto generated Dependencies.toml files
+examples/**/Dependencies.toml
+
 misc
