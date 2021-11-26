@@ -28,8 +28,6 @@ configurable string KAFKA_SECURED_URL = ?;
 configurable string SASL_USERNAME = ?;
 configurable string SASL_PASSWORD = ?;
 
-map<int> wordCountMap = {};
-
 // Truststore path and password
 crypto:TrustStore trustStore = {
     path: SSL_TRUSTSTORE_PATH,
@@ -86,29 +84,32 @@ kafka:ConsumerConfiguration consumerConfigs = {
     autoCommit: false
 };
 
-listener kafka:Listener kafkaListener = new (KAFKA_SECURED_URL, consumerConfigs);
+service kafka:Service on new kafka:Listener(KAFKA_SECURED_URL, consumerConfigs) {
 
-kafka:Producer kafkaProducer = check new (KAFKA_SECURED_URL, producerConfigs);
+    final kafka:Producer kafkaProducer;
+    final map<int> wordCountMap = {};
 
-service kafka:Service on kafkaListener {
+    public function init() returns error? {
+        self.kafkaProducer = check new (KAFKA_SECURED_URL, producerConfigs);
+    }
 
     remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
         map<int> countResults;
         foreach kafka:ConsumerRecord 'record in records {
             // Process the input sentences one by one
-            countResults = check processRecord('record);
+            countResults = check processRecord(self.wordCountMap, 'record);
         }
         // Iterate through the results and publish the word with the appropriate count to the output topic
         foreach string word in countResults.keys() {
             int? count = countResults[word];
             if count is int {
-                publishWordCount(word, count);
+                publishWordCount(self.kafkaProducer, word, count);
             }
         }
     }
 }
 
-function processRecord(kafka:ConsumerRecord 'record) returns map<int>|error {
+function processRecord(map<int> wordCountMap, kafka:ConsumerRecord 'record) returns map<int>|error {
     // A temporary word count map is created to count the words in one sentence
     map<int> tempWordCountMap = {};
     string sentence = check string:fromBytes('record.value);
@@ -127,7 +128,7 @@ function processRecord(kafka:ConsumerRecord 'record) returns map<int>|error {
     return tempWordCountMap;
 }
 
-function publishWordCount(string word, int count) {
+function publishWordCount(kafka:Producer kafkaProducer, string word, int count) {
     // Publish the message to the topic with the count as the message value and the word as the message key
     error? result = kafkaProducer->send({ topic: OUTPUT_TOPIC, 'key: word.toBytes(), value: count.toString().toBytes() });
     if result is error {
