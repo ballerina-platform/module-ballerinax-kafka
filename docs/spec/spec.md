@@ -1,7 +1,7 @@
-# Specification: Ballerina RabbitMQ Library
+# Specification: Ballerina Kafka Library
 
 _Owners_: @shafreenAnfar @dilanSachi @aashikam    
-_Reviewers_: @shafreenAnfar  
+_Reviewers_: @shafreenAnfar @aashikam  
 _Created_: 2020/10/28   
 _Updated_: 2021/12/07  
 _Issue_: [#2186](https://github.com/ballerina-platform/ballerina-standard-library/issues/2186)  
@@ -13,11 +13,18 @@ that makes it easier to use, combine, and create network services.
 
 # Contents
 
-1. [Overview](#1-overview)
-2. [Configurations](#2-configurations)
-3. [Producer](#3-producer)
-4. [Consumer](#4-consumer)
-5. [Listener](#5-listener)
+1. [Overview](#1-overview)  
+2. [Configurations](#2-configurations)  
+   2.1 [Producer Configurations](#21-producer-configurations)   
+   2.2 [Consumer/Listener Configurations](#22-consumerlistener-configurations)    
+   2.3 [Security Configurations](#23-security-configurations)      
+   2.4 [Common Configurations](#24-common-configurations)   
+        2.4.1 [TopicPartition](#241-topicpartition) 
+        2.4.2 [PartitionOffset](#242-partitionoffset)   
+3. [Producer](#3-producer)  
+   3.1 
+4. [Consumer](#4-consumer)  
+5. [Listener](#5-listener)  
 
 ## 1. Overview
 
@@ -137,7 +144,7 @@ public type ConsumerRecord record {|
     PartitionOffset offset;
 |};
 ```
-### 2.4 Security Configurations
+### 2.3 Security Configurations
 - CertKey record represents the combination of certificate, private key and private key password if it is encrypted.
 ```ballerina
 public type CertKey record {|
@@ -170,15 +177,33 @@ public type SecureSocket record {|
    string provider?;
 |};
 ```
-
-## 2. Producer
+### 2.4 Common Configurations
+There are some configurations which are common to Producer, Consumer and Listener.
+#### 2.4.1 TopicPartition
+This record represents a topic partition. A topic partition is the smallest storage unit that holds a subset of 
+records owned by a topic.
+```ballerina
+public type TopicPartition record {|
+    string topic;
+    int partition;
+|};
+```
+#### 2.4.2 PartitionOffset
+This represents the topic partition position in which the consumed record is stored.
+```ballerina
+public type PartitionOffset record {|
+    TopicPartition partition;
+    int offset;
+|};
+```
+## 3. Producer
 The Producer API allows applications to send streams of data to topics in the Kafka cluster.
-### 2.1 Connection
+### 3.1 Connection
 Connection with the Kafka server can be established insecurely or securely. By default, Kafka communicates in
 `PLAINTEXT`, which means that all data is sent in the clear. It is recommended to communicate securely, though this
 may have a performance impact due to encryption overhead.
 
-#### 2.1.1 Insecure Connection
+#### 3.1.1 Insecure Connection
 A simple insecure connection with the Kafka server can be easily established as follows.
 ```ballerina
 kafka:Producer producer = check new (kafka:DEFAULT_URL);
@@ -195,7 +220,7 @@ kafka:ProducerConfiguration producerConfiguration = {
 };
 kafka:Producer producer = check new ("localhost:9190", producerConfiguration);
 ```
-#### 2.1.2 Secure Connection
+#### 3.1.2 Secure Connection
 A secure connection with the Kafka server can be established via SSL as follows using either a `Truststore` or a certificate 
 file. Additionally, a `Keystore` or a key file can also be provided. 
 ```ballerina
@@ -243,24 +268,40 @@ kafka:ProducerConfiguration producerConfigs = {
     securityProtocol: kafka:PROTOCOL_SASL_SSL
 };
 ```
-### 2.2 Produce Messages
+### 3.2 Produce Messages
+Kafka Producer API can be used to send messages to the Kafka server as follows.
+```ballerina
+string message = "Hello World, Ballerina";
+kafka:Error? result = producer->send({topic: "kafka-topic", value: message.toBytes()});
+// Closes the producer
+kafka:Error? result = producer->close();
+```
+To make all the buffered records available to send, `flush()` API can be used after sending a message.
+```ballerina
+kafka:Error? result = producer->'flush();
+```
+When it is needed to send a message to a specific partition, `getTopicPartitions()` can be used to fetch the partitions 
+of a specific topic.
+```ballerina
+kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
+```
 
-## 3. Consumer
+## 4. Consumer
 The Consumer API allows applications to read streams of data from topics in the Kafka cluster.
-### 3.1 Configurations
-### 3.2 Connection
-#### 3.2.1 Insecure Connection
-
-#### 3.2.2 Secure Connection
-
-### 3.3 Consume Messages
-
-## 4. Listener
 ### 4.1 Configurations
 ### 4.2 Connection
 #### 4.2.1 Insecure Connection
 
 #### 4.2.2 Secure Connection
 
-### 4.3 Consumer Messages
+### 4.3 Consume Messages
+
+## 5. Listener
+### 5.1 Configurations
+### 5.2 Connection
+#### 5.2.1 Insecure Connection
+
+#### 5.2.2 Secure Connection
+
+### 5.3 Consumer Messages
 
