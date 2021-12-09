@@ -19,10 +19,13 @@ that makes it easier to use, combine, and create network services.
    2.2 [Consumer/Listener Configurations](#22-consumerlistener-configurations)    
    2.3 [Security Configurations](#23-security-configurations)      
    2.4 [Common Configurations](#24-common-configurations)   
-        2.4.1 [TopicPartition](#241-topicpartition) 
-        2.4.2 [PartitionOffset](#242-partitionoffset)   
+   *   2.4.1 [TopicPartition](#241-topicpartition)     
+   *   2.4.2 [PartitionOffset](#242-partitionoffset)   
 3. [Producer](#3-producer)  
-   3.1 
+   3.1 [Connection](#31-connection)     
+   *    3.1.1 [Insecure Connection](#311-insecure-connection)   
+   *    3.1.2 [Secure Connection](#312-secure-connection)   
+   *    3.2 [Produce Messages](#32-produce-messages) 
 4. [Consumer](#4-consumer)  
 5. [Listener](#5-listener)  
 
@@ -224,6 +227,7 @@ kafka:Producer producer = check new ("localhost:9190", producerConfiguration);
 A secure connection with the Kafka server can be established via SSL as follows using either a `Truststore` or a certificate 
 file. Additionally, a `Keystore` or a key file can also be provided. 
 ```ballerina
+// Using TrustStore and KeyStore
 crypto:TrustStore trustStore = {
     path: "../resource/path/to/truststore",
     password: "truststore password"
@@ -245,11 +249,26 @@ kafka:SecureSocket socket = {
     }
 };
 
+// Using certificate file and CertKey
+kafka:CertKey certKey = {
+    certFile: "../resource/path/to/certFile",
+    keyFile: "../resource/path/to/keyFile"
+};
+
+kafka:SecureSocket socket = {
+    cert: "../resource/path/to/certFile",
+    key: certKey,
+    protocol: {
+        name: kafka:SSL
+    }
+};
+// Provide secureSocket configuration to ProducerConfiguration
 kafka:ProducerConfiguration producerConfiguration = {
     clientId: "secure-producer",
     secureSocket: socket,
     securityProtocol: kafka:PROTOCOL_SSL
 };
+// SSL_URL refers to the secure endpoint of the Kafka server
 Producer producer = check new (SSL_URL, producerConfiguration);
 ```
 In above, SSL encryption already enables 1-way authentication in which the client authenticates the server certificate. 
@@ -268,7 +287,7 @@ kafka:ProducerConfiguration producerConfigs = {
     securityProtocol: kafka:PROTOCOL_SASL_SSL
 };
 ```
-### 3.2 Produce Messages
+### 3.2 Producer Usage
 Kafka Producer API can be used to send messages to the Kafka server as follows.
 ```ballerina
 string message = "Hello World, Ballerina";
@@ -285,16 +304,111 @@ of a specific topic.
 ```ballerina
 kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
 ```
-
 ## 4. Consumer
 The Consumer API allows applications to read streams of data from topics in the Kafka cluster.
-### 4.1 Configurations
-### 4.2 Connection
-#### 4.2.1 Insecure Connection
+### 4.1 Connection
+Connection with the Kafka server can be established insecurely or securely as same as the producer.
 
-#### 4.2.2 Secure Connection
+#### 3.1.1 Insecure Connection
+A simple insecure connection with the Kafka server can be easily established as follows.
+```ballerina
+kafka:ConsumerConfiguration consumerConfiguration = {
+    groupId: "consumer-group",
+    topics: ["kafka-topic"]
+};
+kafka:Consumer consumer = check new(kafka:DEFAULT_URL, consumerConfiguration);
+```
+Here, `kafka:DEFAULT_URL` has the value `localhost:9092`. The default consumer configurations can be changed according
+to the user's need and pass as an argument when initializing the producer.
+```ballerina
+ConsumerConfiguration consumerConfiguration = {
+    topics: ["kafka-topic"],
+    offsetReset: kafka:OFFSET_RESET_EARLIEST,
+    groupId: "consumer-group",
+    clientId: "simple-consumer",
+    autoCommit: false
+};
+kafka:Consumer producer = check new ("localhost:9190", consumerConfiguration);
+```
+#### 3.1.2 Secure Connection
+A secure connection with the Kafka server can be established via SSL as same as the Kafka Producer as follows using 
+either a `Truststore` or a certificate file. Additionally, a `Keystore` or a key file can also be provided.
+```ballerina
+kafka:ConsumerConfiguration consumerConfiguration = {
+    topics: ["kafka-topic"],
+    groupId: "consumer-group",
+    clientId: "secure-consumer",
+    secureSocket: socket,
+    securityProtocol: kafka:PROTOCOL_SSL
+};
+// SSL_URL refers to the secure endpoint of the Kafka server
+Consumer consumer = check new (SSL_URL, consumerConfiguration);
+```
+Consumer can be authenticated with the Kafka server using SASL as follows.
+```ballerina
+kafka:AuthenticationConfiguration authConfig = {
+    mechanism: kafka:AUTH_SASL_PLAIN,
+    username: "username",
+    password: "password"
+};
 
-### 4.3 Consume Messages
+kafka:ConsumerConfiguration consumerConfiguration = {
+    clientId: "secure-consumer",
+    groupId: "consumer-group",
+    auth: authConfig,
+    secureSocket: socket,
+    securityProtocol: kafka:PROTOCOL_SASL_SSL
+};
+```
+### 4.3 Consumer Usage
+Kafka consumer can consumer messages by using the `poll()` method.
+```ballerina
+kafka:ConsumerRecord[] consumerRecords = check consumer->poll(5);
+```
+After consuming messages, the currently consumer offsets can be committed using `commit()`.
+```ballerina
+kafka:Error? result = consumer->commit();
+```
+If it is needed to commit up to a specific offset, `commitOffset()` can be used.
+```ballerina
+TopicPartition topicPartition = {
+    topic: "kafka-topic",
+    partition: 0
+};
+PartitionOffset partitionOffset = {
+    partition: topicPartition,
+    offset: 1
+};
+kafka:Error? result = consumer->commitOffset([partitionOffset]);
+```
+To check the assigned topic partitions for a specific consumer, `getAssignment()` can be used.
+```ballerina
+kafka:TopicPartition[] result = check consumer->getAssignment();
+```
+To get the list of topics currently available (authorized) for the consumer to subscribe, `getAvailableTopics()` can be 
+used.
+```ballerina
+string[] topics = check consumer->getAvailableTopics();
+```
+`getBeginningOffsets()` retrieves the start offsets for a given set of partitions.
+```ballerina
+kafka:PartitionOffset[] partitionOffsets = check consumer->getBeginningOffsets([topicPartition]);
+```
+Last committed offsets can be retrieved using `getCommittedOffset()`.
+```ballerina
+kafka:PartitionOffset result = check consumer->getCommittedOffset(topicPartition);
+```
+The last offset can be retrieved using `getEndOffsets()`.
+```ballerina
+kafka:PartitionOffset[] result = check consumer->getEndOffsets([topicPartition]);
+```
+
+
+
+Consumer can be closed after its usage using `close()` method.
+```ballerina
+kafka:Error? result = consumer->close();
+```
 
 ## 5. Listener
 ### 5.1 Configurations
