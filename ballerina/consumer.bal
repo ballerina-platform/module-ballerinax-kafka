@@ -52,9 +52,6 @@ public client isolated class Consumer {
     } external;
 
     # Assigns consumer to a set of topic partitions.
-    # ```ballerina
-    # kafka:Error? result = consumer->assign([topicPartition1, topicPartition2]);
-    # ```
     #
     # + partitions - Topic partitions to be assigned
     # + return - `kafka:Error` if an error is encountered or else nil
