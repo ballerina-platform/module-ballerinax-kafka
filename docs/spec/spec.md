@@ -25,28 +25,28 @@ that makes it easier to use, combine, and create network services.
    3.1 [Connection](#31-connection)     
    *    3.1.1 [Insecure Connection](#311-insecure-connection)   
    *    3.1.2 [Secure Connection](#312-secure-connection)   
-   3.2 [Producer Usage](#32-producer-usage)
+   3.2 [Producer Usage](#32-producer-usage)     
 4. [Consumer](#4-consumer)  
    4.1 [Connection](#41-connection)  
-   *    4.1.1 [Insecure Connection](#411-insecure-connection)
-   *    4.1.2 [Secure Connection](#412-secure-connection)
+   *    4.1.1 [Insecure Connection](#411-insecure-connection)  
+   *    4.1.2 [Secure Connection](#412-secure-connection)   
    4.2 [Consumer Usage](#42-consumer-usage)    
-   *    4.2.1 [Consume Messages](#421-consume-messages)
+   *    4.2.1 [Consume Messages](#421-consume-messages)  
    *    4.2.2 [Handle Offsets](#422-handle-offsets)    
    *    4.2.3 [Handle Partitions](#423-handle-partitions)    
    *    4.2.4 [Seeking](#424-seeking)    
    *    4.2.5 [Handle subscriptions](#425-handle-subscriptions)   
 5. [Listener](#5-listener)  
    5.1 [Connection](#51-connection)     
-   *    5.1.1 [Insecure Connection](#511-insecure-connection)
-   *    5.1.2 [Secure Connection](#512-secure-connection)
+   *    5.1.1 [Insecure Connection](#511-insecure-connection)  
+   *    5.1.2 [Secure Connection](#512-secure-connection)   
    5.2 [Listener Usage](#52-listener-usage)    
-   *    5.2.1 [Caller](#521-caller)
-6. [Samples](#6-samples)
-   6.1 [Produce Messages](#61-produce-messages)
-   6.2 [Consume Messages](#62-consume-messages)
-   *    6.2.1 [Using Consumer](#621-using-consumer)
-   *    6.2.2 [Using Listener](#622-using-listener)
+   *    5.2.1 [Caller](#521-caller)    
+6. [Samples](#6-samples)      
+   6.1 [Produce Messages](#61-produce-messages)    
+   6.2 [Consume Messages](#62-consume-messages)    
+   *    6.2.1 [Using Consumer](#621-using-consumer)   
+   *    6.2.2 [Using Listener](#622-using-listener)   
 
 ## 1. Overview
 
@@ -57,9 +57,8 @@ microservices that read, write, and process streams of events in parallel, at sc
 manner even in the case of network problems or machine failures.
 
 Ballerina Kafka contains three core apis:
-1. Producer
-2. Consumer
-3. Listener
+* Producer - Used to publish messages to the Kafka server.
+* Consumer & Listener - Used to get the messages from the Kafka server.
 
 ## 2. Configurations
 ### 2.1 Producer Configurations
@@ -100,7 +99,7 @@ public type ProducerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 ```
-A `ProducerRecord` corresponds to a message and other metadata that is sent to the Kafka server.
+A `kafka:ProducerRecord` corresponds to a message and other metadata that is sent to the Kafka server.
 ```ballerina
 public type ProducerRecord record {|
     string topic;
@@ -157,7 +156,7 @@ public type ConsumerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 ```
-A `ConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
+A `kafka:ConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
 ```ballerina
 public type ConsumerRecord record {|
     byte[] key?;
@@ -288,7 +287,7 @@ kafka:ProducerConfiguration producerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SSL
 };
 // SSL_URL refers to the secure endpoint of the Kafka server
-Producer producer = check new (SSL_URL, producerConfiguration);
+kafka:Producer producer = check new (SSL_URL, producerConfiguration);
 ```
 In above, SSL encryption already enables 1-way authentication in which the client authenticates the server certificate. 
 2-way authentication can be achieved using SASL authentication as follows.
@@ -310,16 +309,22 @@ kafka:ProducerConfiguration producerConfigs = {
 Kafka Producer API can be used to send messages to the Kafka server as follows.
 ```ballerina
 string message = "Hello World, Ballerina";
-kafka:Error? result = producer->send({topic: "kafka-topic", value: message.toBytes()});
+
+kafka:ProducerRecord producerRecord = {
+    topic: "kafka-topic",
+    value: message.toBytes()
+};
+kafka:Error? result = producer->send(producerRecord);
 // Closes the producer
 kafka:Error? result = producer->close();
 ```
-To make all the buffered records available to send, `flush()` API can be used after sending a message.
+* If the user wants to ensure the message order or ensure that the message goes to a specific partition, `key` and 
+`partition` configurations can be provided in the `ProducerRecord`;
+* To make all the buffered records available to send, `flush()` API can be used after sending a message.
 ```ballerina
 kafka:Error? result = producer->'flush();
 ```
-When it is needed to send a message to a specific partition, `getTopicPartitions()` can be used to fetch the partitions 
-of a specific topic.
+* `getTopicPartitions()` can be used to fetch the partitions of a specific topic.
 ```ballerina
 kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
 ```
@@ -339,7 +344,7 @@ kafka:Consumer consumer = check new(kafka:DEFAULT_URL, consumerConfiguration);
 Here, `kafka:DEFAULT_URL` has the value `localhost:9092`. The default consumer configurations can be changed according
 to the user's need and pass as an argument when initializing the consumer.
 ```ballerina
-ConsumerConfiguration consumerConfiguration = {
+kafka:ConsumerConfiguration consumerConfiguration = {
     topics: ["kafka-topic"],
     offsetReset: kafka:OFFSET_RESET_EARLIEST,
     groupId: "consumer-group",
@@ -360,7 +365,7 @@ kafka:ConsumerConfiguration consumerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SSL
 };
 // SSL_URL refers to the secure endpoint of the Kafka server
-Consumer consumer = check new (SSL_URL, consumerConfiguration);
+kafka:Consumer consumer = check new (SSL_URL, consumerConfiguration);
 ```
 Consumer can be authenticated with the Kafka server using SASL as follows.
 ```ballerina
@@ -380,112 +385,115 @@ kafka:ConsumerConfiguration consumerConfiguration = {
 ```
 ### 4.2 Consumer Usage
 #### 4.2.1 Consume Messages
-Kafka consumer can consume messages by using the `poll()` method.
+* Kafka consumer can consume messages by using the `poll()` method.
 ```ballerina
 kafka:ConsumerRecord[] consumerRecords = check consumer->poll(5);
 ```
-After consuming messages, the currently consumed offsets can be committed using `commit()`.
+When polling, a timeout value can be specified, and it will be the maximum time that the `poll()` method will block for.
+* After consuming messages, the consumed offsets can be committed to the Kafka server. This can be done automatically by 
+specifying `autoCommit: true` in `kafka:ConsumerConfiguration` or by manually using `commit()`.
 ```ballerina
 kafka:Error? result = consumer->commit();
 ```
-Consumer can be closed after its usage using `close()` method.
+* Consumer can be closed after its usage using `close()` method.
 ```ballerina
 kafka:Error? result = consumer->close();
 ```
 #### 4.2.2 Handle Offsets
-If it is needed to commit up to a specific offset, `commitOffset()` can be used.
+* If it is needed to commit up to a specific offset, `commitOffset()` can be used.
 ```ballerina
-TopicPartition topicPartition = {
+kafka:TopicPartition topicPartition = {
     topic: "kafka-topic",
     partition: 0
 };
-PartitionOffset partitionOffset = {
+kafka:PartitionOffset partitionOffset = {
     partition: topicPartition,
     offset: 1
 };
 kafka:Error? result = consumer->commitOffset([partitionOffset]);
 ```
-`getBeginningOffsets()` retrieves the start offsets for a given set of partitions.
+* `getBeginningOffsets()` retrieves the start offsets for a given set of partitions.
 ```ballerina
 kafka:PartitionOffset[] partitionOffsets = check consumer->getBeginningOffsets([topicPartition]);
 ```
-Last committed offsets can be retrieved using `getCommittedOffset()`.
+* Last committed offsets can be retrieved using `getCommittedOffset()`.
 ```ballerina
 kafka:PartitionOffset result = check consumer->getCommittedOffset(topicPartition);
 ```
-The last offset can be retrieved using `getEndOffsets()`.
+* The last offset can be retrieved using `getEndOffsets()`.
 ```ballerina
 kafka:PartitionOffset[] result = check consumer->getEndOffsets([topicPartition]);
 ```
-To retrieve the offset of the next record that will be fetched if a record exists in that position, `getPositionOffset()` 
+* To retrieve the offset of the next record that will be fetched if a record exists in that position, `getPositionOffset()` 
 can be used.
 ```ballerina
 int result = check consumer->getPositionOffset(topicPartition);
 ```
 #### 4.2.3 Handle Partitions
-To assign a consumer to a set of topic partitions, `assign()` can be used.
+* To assign a consumer to a set of topic partitions, `assign()` can be used.
 ```ballerina
 kafka:Error? result = consumer->assign([topicPartition]);
 ```
-To check the assigned topic partitions for a specific consumer, `getAssignment()` can be used.
+* To check the assigned topic partitions for a specific consumer, `getAssignment()` can be used.
 ```ballerina
 kafka:TopicPartition[] result = check consumer->getAssignment();
 ```
-To pause the message retrieval from a specific set of paritions, `pause()` can be used.
+* To pause the message retrieval from a specific set of paritions, `pause()` can be used.
 ```ballerina
 kafka:Error? result = consumer->pause([topicPartition]);
 ```
-To resume the message retrieval from paused partitions, `resume()` can be used.
+* To resume the message retrieval from paused partitions, `resume()` can be used.
 ```ballerina
 kafka:Error? result = consumer->resume([topicPartition]);
 ```
-To get a list of the partitions that are currently paused from message retrieval, `getPausedPartitions()` can be used.
+* To get a list of the partitions that are currently paused from message retrieval, `getPausedPartitions()` can be used.
 ```ballerina
 kafka:TopicPartition[] result = check consumer->getPausedPartitions();
 ```
-To get the partitions to which a topic belong, `getTopicPartitions()` can be used.
+* To get the partitions to which a topic belong, `getTopicPartitions()` can be used.
 ```ballerina
 kafka:TopicPartition[] result = check consumer->getTopicPartitions("kafka-topic");
 ```
 #### 4.2.4 Seeking
-To seek to a given offset in a topic partition, `seek()` can be used.
+* To seek to a given offset in a topic partition, `seek()` can be used.
 ```ballerina
 kafka:Error? result = consumer->seek(partitionOffset);
 ```
-`seekToBeginning()` can be used to seek to the beginning of the offsets for a given set of topic partitions.
+* `seekToBeginning()` can be used to seek to the beginning of the offsets for a given set of topic partitions.
 ```ballerina
 kafka:Error? result = consumer->seekToBeginning([topicPartition]);
 ```
-`()` can be used to seek to the end of the offsets for a given set of topic partitions.
+* `()` can be used to seek to the end of the offsets for a given set of topic partitions.
 ```ballerina
 kafka:Error? result = consumer->seekToEnd([topicPartition]);
 ```
 #### 4.2.5 Handle subscriptions
-To get the topics that the consumer is currently subscribed, `getSubscription()` can be used.
+* To get the topics that the consumer is currently subscribed, `getSubscription()` can be used.
 ```ballerina
 string[] result = check consumer->getSubscription();
 ```
-To get the list of topics currently available (authorized) for the consumer to subscribe, `getAvailableTopics()` can be 
+* To get the list of topics currently available (authorized) for the consumer to subscribe, `getAvailableTopics()` can be 
 used.
 ```ballerina
 string[] topics = check consumer->getAvailableTopics();
 ```
-To subscribe to a set of topics, `subscribe()` can be used.
+* To subscribe to a set of topics, `subscribe()` can be used.
 ```ballerina
 kafka:Error? result = consumer->subscribe(["kafka-topic-1", "kafka-topic-2"]);
 ```
-To subscribe to a set of topics that match a specific patter, `subscribeWithPattern()` can be used.
+* To subscribe to a set of topics that match a specific patter, `subscribeWithPattern()` can be used.
 ```ballerina
 kafka:Error? result = consumer->subscribeWithPattern("kafka.*");
 ```
-To unsubscribe from all the topics that the consumer is subscribed to, `unsubscribe()` can be used.
+* To unsubscribe from all the topics that the consumer is subscribed to, `unsubscribe()` can be used.
 ```ballerina
 kafka:Error? result = consumer->unsubscribe();
 ```
 ## 5. Listener
 ### 5.1 Connection
 A listener can be initialized as same as the consumer is initialized. The same configurations are used for the listener 
-as well.
+as well. The difference here is that, rather than requesting for the messages explicitly, listener will receive the 
+messages from the Kafka server.
 #### 5.1.1 Insecure Connection
 A simple insecure connection with the Kafka server can be easily established as follows.
 ```ballerina
@@ -537,11 +545,11 @@ The remote function `onConsumerRecord()` is called when the listener receives me
 `autoCommit` configuration of the listener is `false`, the consumed offsets will not be committed. In order to manually 
 control this, the Caller API can be used.
 #### 5.2.1 Caller
-To commit the consumed offsets, `commit()` can be used.
+* To commit the consumed offsets, `commit()` can be used.
 ```ballerina
 kafka:Error? result = caller->commit();
 ```
-To commit a specific offset, `commitOffset()` can be used.
+* To commit a specific offset, `commitOffset()` can be used.
 ```ballerina
 kafka:Error? result = caller->commitOffset([partitionoffset]);
 ```
