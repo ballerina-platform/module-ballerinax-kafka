@@ -32,6 +32,7 @@ const string SSL_URL = "localhost:9094";
 const string SASL_USER = "admin";
 const string SASL_PASSWORD = "password";
 const string SASL_INCORRECT_PASSWORD = "incorrect_password";
+const string SASL_SSL_URL = "localhost:9095";
 
 const string SSL_KEYSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.keystore.jks";
 const string SSL_TRUSTSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.truststore.jks";

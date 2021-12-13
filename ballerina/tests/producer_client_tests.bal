@@ -287,8 +287,16 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    check kafkaProducer->close();
-    return;
+
+    kafkaProducer = check new (SSL_URL, producerConfigs);
+
+    result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    if result is Error {
+        string errorMsg = "Failed to send data to Kafka server: Topic sasl-producer-incorrect-credentials-test-topic not present in metadata after 6000 ms.";
+        test:assertEquals(result.message(), errorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
 }
 
 @test:Config {}
@@ -458,4 +466,112 @@ function sslCertOnlyProducerTest() returns error? {
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
     return;
+}
+
+@test:Config {}
+function SSLWithSASLAuthProducerTest() returns error? {
+    string topic = "ssl-with-sasl-auth-producer-test-topic";
+
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-13",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+
+    Producer producer = check new (SASL_SSL_URL, producerConfigs);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic ssl-with-sasl-auth-producer-test-topic not present in metadata after 6000 ms.");
+    }
+    check producer->close();
+
+    producerConfigs = {
+        clientId: "test-producer-13",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        auth: authConfig,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SASL_SSL
+    };
+
+    producer = check new (SASL_SSL_URL, producerConfigs);
+    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "ssl-cert-only-producer-test-group",
+        clientId: "test-consumer-53"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+    return;
+}
+
+@test:Config {}
+function operationsOnClosedProducerTest() returns error? {
+    string topic = "operations-on-closed-producer";
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-11"
+    };
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
+    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->close();
+
+    TopicPartition[]|Error? result = producer->getTopicPartitions("ssl-cert-only-producer-test-topic");
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to fetch partitions from the producer Requested metadata update after close");
+    }
+}
+
+@test:Config {}
+function producerNegativeCasesOnSecurityTest() returns error? {
+    string topic = "producer-negative-cases-on-security-test-topic";
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-10",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        securityProtocol: PROTOCOL_PLAINTEXT
+    };
+    Producer producer = check new (SSL_URL, producerConfiguration);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-negative-cases-on-security-test-topic not present in metadata after 6000 ms.");
+    }
+
+    producer = check new (SASL_URL, producerConfiguration);
+    result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-negative-cases-on-security-test-topic not present in metadata after 6000 ms.");
+    }
+
 }
