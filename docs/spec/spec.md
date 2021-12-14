@@ -709,7 +709,7 @@ basic configuration.
 # + return - A `kafka:Error` if an error is encountered or else '()'
 public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error?;
 ```
-#### 4.3.1.2. Secure Listener
+##### 4.3.1.2. Secure Listener
 A secure client can be established via SSL as same as the Kafka Producer using either a `crypto:Truststore` or a
 certificate file. Additionally, a `crypto:Keystore` or a key file can also be provided.
 ```ballerina
@@ -794,7 +794,7 @@ public isolated function immediateStop() returns error?;
 ```
 If the `autoCommit` configuration of the listener is `false`, the consumed offsets will not be committed. In order to manually 
 control this, the Caller API can be used.
-##### 4.3.3. Caller
+#### 4.3.3. Caller
 * To commit the consumed offsets, `commit()` can be used.
 ```ballerina
 # Commits the currently consumed offsets of the service.
