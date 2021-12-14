@@ -12,42 +12,39 @@ This library is programmed in the [Ballerina programming language](https://balle
 programming language for the cloud that makes it easier to use, combine, and create network services.
 
 # Contents
-1. [Overview](#1-overview)  
-2. [Configurations](#2-configurations)  
-   2.1 [Producer Configurations](#21-producer-configurations)   
-   2.2 [Consumer/Listener Configurations](#22-consumerlistener-configurations)    
-   2.3 [Common Configurations](#23-common-configurations)   
-   *   2.3.1 [Security Configurations](#231-security-configurations)    
-   *   2.3.2 [TopicPartition](#232-topicpartition)     
-   *   2.3.3 [PartitionOffset](#233-partitionoffset)   
-
-3. [Producer](#3-producer)    
-   3.1 [Client](#31-client)     
-   *    3.1.1 [Insecure Client](#311-insecure-client)   
-   *    3.1.2 [Secure Client](#312-secure-client)        
-
-   3.2 [Producer Functions](#32-producer-functions)   
-4. [Consumer](#4-consumer)    
-   4.1 [Consumer Initialization](#41-consumer-initialization)     
-   *    4.1.1 [Insecure Client](#411-insecure-client)    
-   *    4.1.2 [Secure Client](#412-secure-client)   
-
-   4.2 [Consumer Client](#42-consumer-client)    
-   *    4.2.1 [Consume Messages](#421-consume-messages)  
-   *    4.2.2 [Handle Offsets](#422-handle-offsets)    
-   *    4.2.3 [Handle Partitions](#423-handle-partitions)    
-   *    4.2.4 [Seeking](#424-seeking)    
-   *    4.2.5 [Handle subscriptions](#425-handle-subscriptions)   
-
-   4.3 [Listener](#43-listener)     
-   *    4.3.1 [Listener Usage](#431-listener-usage)      
-   *    4.3.2 [Caller](#432-caller)    
-
-5. [Samples](#5-samples)      
-   5.1 [Produce Messages](#51-produce-messages)    
-   5.2 [Consume Messages](#52-consume-messages)    
-   *    5.2.1 [Using Consumer Client](#521-using-consumer-client)   
-   *    5.2.2 [Using Listener](#522-using-listener)   
+1. [Overview](#1-overview)
+2. [Configurations](#2-configurations)
+   *  2.1. [Security Configurations](#21-security-configurations)
+   *  2.2. [TopicPartition](#22-topicpartition)
+   *  2.3. [PartitionOffset](#23-partitionoffset)
+3. [Producer](#3-producer)
+   *  3.1. [Configurations](#31-configurations)
+   *  3.2. [Initialization](#32-initialization)
+      *    3.2.1. [Insecure Client](#321-insecure-client)
+      *    3.2.2. [Secure Client](#322-secure-client)
+   *  3.3. [Producer Functions](#33-producer-functions)
+4. [Consumer](#4-consumer)
+   *  4.1. [Configurations](#41-configurations)
+   *  4.2. [Consumer Client](#42-consumer-client)
+      *  4.2.1. [Initialization](#421-initialization)
+         *  4.2.1.1. [Insecure Client](#4211-insecure-client)
+         *  4.2.1.2. [Secure Client](#4212-secure-client)
+      *  4.2.2. [Consume Messages](#422-consume-messages)
+      *  4.2.3. [Handle Offsets](#423-handle-offsets)
+      *  4.2.4. [Handle Partitions](#424-handle-partitions)
+      *  4.2.5. [Seeking](#425-seeking)
+      *  4.2.6. [Handle subscriptions](#426-handle-subscriptions)
+   *  4.3. [Listener](#43-listener)
+      *  4.3.1. [Initialization](#431-initialization)
+         *  4.3.1.1. [Insecure Listener](#4311-insecure-listener)
+         *  4.3.1.2. [Secure Listener](#4312-secure-listener)
+      *  4.3.2. [Listener Usage](#432-listener-usage)
+      *  4.3.3. [Caller](#433-caller)
+5. [Samples](#5-samples)
+   *  5.1. [Produce Messages](#51-produce-messages)
+   *  5.2. [Consume Messages](#52-consume-messages)
+      *    5.2.1. [Using Consumer Client](#521-using-consumer-client)
+      *    5.2.2. [Using Listener](#522-using-listener)
 
 ## 1. Overview
 Apache Kafka is an open-source distributed event streaming platform for high-performance data pipelines, 
@@ -61,7 +58,78 @@ Ballerina Kafka contains three core apis:
 * Consumer & Listener - Used to get the messages from the Kafka server.
 
 ## 2. Configurations
-### 2.1 Producer Configurations
+### 2.1. Security Configurations
+* CertKey record represents the combination of certificate, private key and private key password if it is encrypted.
+```ballerina
+public type CertKey record {|
+    # A file containing the certificate
+    string certFile;
+    # A file containing the private key in PKCS8 format
+    string keyFile;
+    # Password of the private key if it is encrypted
+    string keyPassword?;
+|};
+```
+* Authentication record represents the Kafka authentication mechanism configurations.
+```ballerina
+public type AuthenticationConfiguration record {|
+    # Type of the authentication mechanism. Currently, SASL_PLAIN and SCRAM are supported
+    AuthenticationMechanism mechanism = AUTH_SASL_PLAIN;
+    # The username to authenticate the Kafka producer/consumer
+    string username;
+    # The password to authenticate the Kafka producer/consumer
+    string password;
+|};
+```
+* SecureSocket record represents the configurations needed for secure communication with the Kafka server.
+```ballerina
+public type SecureSocket record {|
+   # Configurations associated with crypto:TrustStore or single certificate file that the client trusts
+   crypto:TrustStore|string cert;
+   # Configurations associated with crypto:KeyStore or combination of certificate and private key of the client
+   record {|
+      crypto:KeyStore keyStore;
+      string keyPassword?;
+   |}|CertKey key?;
+   # SSL/TLS protocol related options
+   record {|
+      Protocol name;
+      string[] versions?;
+   |} protocol?;
+   # List of ciphers to be used. By default, all the available cipher suites are supported
+   string[] ciphers?;
+   # Name of the security provider used for SSL connections. The default value is the default security provider
+   # of the JVM
+   string provider?;
+|};
+```
+### 2.2. TopicPartition
+* This record represents a topic partition. A topic partition is the smallest storage unit that holds a subset of 
+records owned by a topic.
+```ballerina
+public type TopicPartition record {|
+    # Topic to which the partition is related
+    string topic;
+    # Index of the specific partition
+    int partition;
+|};
+```
+### 2.3. PartitionOffset
+* This represents the topic partition position in which the consumed record is stored.
+```ballerina
+public type PartitionOffset record {|
+    # The `kafka:TopicPartition` to which the record is related
+    TopicPartition partition;
+    # Offset in which the record is stored in the partition
+    int offset;
+|};
+```
+## 3. Producer
+The Producer client allows applications to send streams of data to topics in the Kafka cluster.
+Connection with the Kafka server can be established insecurely or securely. By default, Kafka communicates in
+`PLAINTEXT`, which means that all data is sent in the clear. It is recommended to communicate securely, though this
+may have a performance impact due to encryption overhead.
+### 3.1. Configurations
 * When initializing the producer, following configurations can be provided.
 ```ballerina
 public type ProducerConfiguration record {|
@@ -149,7 +217,88 @@ public type ProducerRecord record {|
     int partition?;
 |};
 ```
-### 2.2 Consumer/Listener Configurations
+### 3.2. Initialization
+#### 3.2.1. Insecure Client
+A simple insecure client can be initialized by providing the Kafka server url and the `ProducerConfiguration`.
+```ballerina
+# Creates a new Kafka `Producer`.
+#
+# + bootstrapServers - List of remote server endpoints of Kafka brokers
+# + config - Configurations related to initializing a Kafka `Producer`
+# + return - A `kafka:Error` if closing the producer failed or else '()'
+public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error?
+```
+#### 3.2.2. Secure Client
+A secure Kafka client can be initialized by providing either a `crypto:Truststore` or a certificate file to the 
+`ProducerConfiguration`. Additionally, a `crypto:Keystore` or a key file can also be provided. 
+```ballerina
+// Provide secureSocket configuration to ProducerConfiguration
+kafka:ProducerConfiguration producerConfiguration = {
+    clientId: "secure-producer",
+    secureSocket: socket,
+    securityProtocol: kafka:PROTOCOL_SSL
+};
+```
+In above, SSL encryption already enables 1-way authentication in which the client authenticates the server certificate. 
+2-way authentication can be achieved using SASL authentication by providing `kafka:AuthenticationConfiguration` to 
+the `kafka:ProducerConfiguration`.
+```ballerina
+kafka:ProducerConfiguration producerConfigs = {
+    clientId: "secure-producer",
+    auth: authConfig,
+    secureSocket: socket,
+    securityProtocol: kafka:PROTOCOL_SASL_SSL
+};
+```
+### 3.3. Producer Functions
+* Kafka Producer API can be used to send messages to the Kafka server. For this, the `send()` method can be used.
+```ballerina
+# Produces records to the Kafka server.
+# ```ballerina
+# kafka:Error? result = producer->send("Hello World, Ballerina", "kafka-topic");
+# ```
+#
+# + producerRecord - Record to be produced
+# + return -  A `kafka:Error` if send action fails to send data or else '()'
+isolated remote function send(ProducerRecord producerRecord) returns Error?;
+```
+* If the user wants to ensure the message order or ensure that the message goes to a specific partition, `key` and
+  `partition` configurations can be provided in the `ProducerRecord`;
+* To close the producer after the usage, `close()` can be used.
+```ballerina
+# Closes the producer connection to the external Kafka broker.
+# ```ballerina
+# kafka:Error? result = producer->close();
+# ```
+#
+# + return - A `kafka:Error` if closing the producer failed or else '()'
+isolated remote function close() returns Error?;
+```
+* To make all the buffered records available to send, `flush()` API can be used after sending a message.
+```ballerina
+# Flushes the batch of records already sent to the broker by the producer.
+# ```ballerina
+# kafka:Error? result = producer->'flush();
+# ```
+#
+# + return - A `kafka:Error` if records couldn't be flushed or else '()'
+isolated remote function 'flush() returns Error?;
+```
+* `getTopicPartitions()` can be used to fetch the partitions of a specific topic.
+```ballerina
+# Retrieves the topic partition information for the provided topic.
+# ```ballerina
+# kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
+# ```
+#
+# + topic - The specific topic, of which the topic partition information is required
+# + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:Error` if the operation fails
+isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error;
+```
+## 4. Consumer
+The Consumer allows applications to read streams of data from topics in the Kafka cluster. Ballerina Kafka supports
+two types of consumers, Consumer Client and Listener.
+### 4.1. Configurations
 * When initializing the consumer or the listener, following configurations can be provided.
 ```ballerina
 public type ConsumerConfiguration record {|
@@ -255,163 +404,12 @@ public type ConsumerRecord record {|
     PartitionOffset offset;
 |};
 ```
-### 2.3 Common Configurations
-#### 2.3.1 Security Configurations
-* CertKey record represents the combination of certificate, private key and private key password if it is encrypted.
-```ballerina
-public type CertKey record {|
-    # A file containing the certificate
-    string certFile;
-    # A file containing the private key in PKCS8 format
-    string keyFile;
-    # Password of the private key if it is encrypted
-    string keyPassword?;
-|};
-```
-* Authentication record represents the Kafka authentication mechanism configurations.
-```ballerina
-public type AuthenticationConfiguration record {|
-    # Type of the authentication mechanism. Currently, SASL_PLAIN and SCRAM are supported
-    AuthenticationMechanism mechanism = AUTH_SASL_PLAIN;
-    # The username to authenticate the Kafka producer/consumer
-    string username;
-    # The password to authenticate the Kafka producer/consumer
-    string password;
-|};
-```
-* SecureSocket record represents the configurations needed for secure communication with the Kafka server.
-```ballerina
-public type SecureSocket record {|
-   # Configurations associated with crypto:TrustStore or single certificate file that the client trusts
-   crypto:TrustStore|string cert;
-   # Configurations associated with crypto:KeyStore or combination of certificate and private key of the client
-   record {|
-      crypto:KeyStore keyStore;
-      string keyPassword?;
-   |}|CertKey key?;
-   # SSL/TLS protocol related options
-   record {|
-      Protocol name;
-      string[] versions?;
-   |} protocol?;
-   # List of ciphers to be used. By default, all the available cipher suites are supported
-   string[] ciphers?;
-   # Name of the security provider used for SSL connections. The default value is the default security provider
-   # of the JVM
-   string provider?;
-|};
-```
-#### 2.3.2 TopicPartition
-* This record represents a topic partition. A topic partition is the smallest storage unit that holds a subset of 
-records owned by a topic.
-```ballerina
-public type TopicPartition record {|
-    # Topic to which the partition is related
-    string topic;
-    # Index of the specific partition
-    int partition;
-|};
-```
-#### 2.3.3 PartitionOffset
-* This represents the topic partition position in which the consumed record is stored.
-```ballerina
-public type PartitionOffset record {|
-    # The `kafka:TopicPartition` to which the record is related
-    TopicPartition partition;
-    # Offset in which the record is stored in the partition
-    int offset;
-|};
-```
-## 3. Producer
-### 3.1 Client
-The Producer client allows applications to send streams of data to topics in the Kafka cluster.
-Connection with the Kafka server can be established insecurely or securely. By default, Kafka communicates in
-`PLAINTEXT`, which means that all data is sent in the clear. It is recommended to communicate securely, though this
-may have a performance impact due to encryption overhead.
-
-#### 3.1.1 Insecure Client
-A simple insecure client can be initialized by providing the Kafka server url and the `ProducerConfiguration`.
-```ballerina
-# Creates a new Kafka `Producer`.
-#
-# + bootstrapServers - List of remote server endpoints of Kafka brokers
-# + config - Configurations related to initializing a Kafka `Producer`
-# + return - A `kafka:Error` if closing the producer failed or else '()'
-public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error?
-```
-#### 3.1.2 Secure Client
-A secure Kafka client can be initialized by providing either a `crypto:Truststore` or a certificate file to the 
-`ProducerConfiguration`. Additionally, a `crypto:Keystore` or a key file can also be provided. 
-```ballerina
-// Provide secureSocket configuration to ProducerConfiguration
-kafka:ProducerConfiguration producerConfiguration = {
-    clientId: "secure-producer",
-    secureSocket: socket,
-    securityProtocol: kafka:PROTOCOL_SSL
-};
-```
-In above, SSL encryption already enables 1-way authentication in which the client authenticates the server certificate. 
-2-way authentication can be achieved using SASL authentication by providing `kafka:AuthenticationConfiguration` to 
-the `kafka:ProducerConfiguration`.
-```ballerina
-kafka:ProducerConfiguration producerConfigs = {
-    clientId: "secure-producer",
-    auth: authConfig,
-    secureSocket: socket,
-    securityProtocol: kafka:PROTOCOL_SASL_SSL
-};
-```
-### 3.2 Producer Functions
-* Kafka Producer API can be used to send messages to the Kafka server. For this, the `send()` method can be used.
-```ballerina
-# Produces records to the Kafka server.
-# ```ballerina
-# kafka:Error? result = producer->send("Hello World, Ballerina", "kafka-topic");
-# ```
-#
-# + producerRecord - Record to be produced
-# + return -  A `kafka:Error` if send action fails to send data or else '()'
-isolated remote function send(ProducerRecord producerRecord) returns Error?;
-```
-* If the user wants to ensure the message order or ensure that the message goes to a specific partition, `key` and
-  `partition` configurations can be provided in the `ProducerRecord`;
-* To close the producer after the usage, `close()` can be used.
-```ballerina
-# Closes the producer connection to the external Kafka broker.
-# ```ballerina
-# kafka:Error? result = producer->close();
-# ```
-#
-# + return - A `kafka:Error` if closing the producer failed or else '()'
-isolated remote function close() returns Error?;
-```
-* To make all the buffered records available to send, `flush()` API can be used after sending a message.
-```ballerina
-# Flushes the batch of records already sent to the broker by the producer.
-# ```ballerina
-# kafka:Error? result = producer->'flush();
-# ```
-#
-# + return - A `kafka:Error` if records couldn't be flushed or else '()'
-isolated remote function 'flush() returns Error?;
-```
-* `getTopicPartitions()` can be used to fetch the partitions of a specific topic.
-```ballerina
-# Retrieves the topic partition information for the provided topic.
-# ```ballerina
-# kafka:TopicPartition[] result = check producer->getTopicPartitions("kafka-topic");
-# ```
-#
-# + topic - The specific topic, of which the topic partition information is required
-# + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:Error` if the operation fails
-isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error;
-```
-## 4. Consumer
-The Consumer allows applications to read streams of data from topics in the Kafka cluster. Ballerina Kafka supports 
-two types of consumers, Consumer Client and Listener.
-### 4.1 Consumer Initialization
-Client connection with the Kafka server can be established insecurely or securely as same as the producer.
-#### 4.1.1 Insecure Client
+### 4.2. Consumer Client
+The Consumer Client provides the ability to pull messages from the Kafka server anytime the user needs and has 
+APIs to manage subscriptions, topic partitions, offsets etc.
+#### 4.2.1. Initialization
+Connection with the Kafka server can be established insecurely or securely as same as the producer.
+##### 4.2.1.1 Insecure Client
 A simple insecure connection with the Kafka server can be easily established by providing the Kafka server URL and
 basic configuration.
 ```ballerina
@@ -422,7 +420,7 @@ basic configuration.
 # + return - A `kafka:Error` if an error is encountered or else '()'
 public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error?;
 ```
-#### 4.1.2 Secure Client
+##### 4.2.1.2. Secure Client
 A secure client can be established via SSL as same as the Kafka Producer using either a `crypto:Truststore` or a
 certificate file. Additionally, a `crypto:Keystore` or a key file can also be provided.
 ```ballerina
@@ -434,7 +432,7 @@ kafka:ConsumerConfiguration consumerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SSL
 };
 ```
-Consumer can be authenticated with the Kafka server using SASL by providing `kafka:AuthenticationConfiguration`.
+Consumer client can be authenticated with the Kafka server using SASL by providing `kafka:AuthenticationConfiguration`.
 ```ballerina
 kafka:ConsumerConfiguration consumerConfiguration = {
     clientId: "secure-consumer",
@@ -444,10 +442,7 @@ kafka:ConsumerConfiguration consumerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SASL_SSL
 };
 ```
-### 4.2 Consumer Client
-The Consumer Client provides the ability to pull messages from the Kafka server anytime the user needs and has 
-APIs to manage subscriptions, topic partitions, offsets etc.
-#### 4.2.1 Consume Messages
+#### 4.2.2. Consume Messages
 * Kafka consumer can consume messages by using the `poll()` method.
 ```ballerina
 # Polls the external broker to retrieve messages.
@@ -482,7 +477,7 @@ isolated remote function 'commit() returns Error?;
 # + return - A `kafka:Error` if an error is encountered or else '()'
 isolated remote function close(decimal duration = -1) returns Error?;
 ```
-#### 4.2.2 Handle Offsets
+#### 4.2.3. Handle Offsets
 * If it is needed to commit up to a specific offset, `commitOffset()` can be used.
 ```ballerina
 # Commits the given offsets of the specific topic partitions for the consumer.
@@ -546,7 +541,7 @@ can be used.
 #            the operation fails
 isolated remote function getPositionOffset(TopicPartition partition, decimal duration = -1) returns int|Error;
 ```
-#### 4.2.3 Handle Partitions
+#### 4.2.4. Handle Partitions
 * To assign a consumer to a set of topic partitions, `assign()` can be used.
 ```ballerina
 # Assigns consumer to a set of topic partitions.
@@ -609,7 +604,7 @@ isolated remote function getPausedPartitions() returns TopicPartition[]|Error;
 # + return - Array of partitions for the given topic if executes successfully or else a `kafka:Error`
 isolated remote function getTopicPartitions(string topic, decimal duration = -1) returns TopicPartition[]|Error;
 ```
-#### 4.2.4 Seeking
+#### 4.2.5. Seeking
 * To seek to a given offset in a topic partition, `seek()` can be used.
 ```ballerina
 # Seeks for a given offset in a topic partition.
@@ -643,7 +638,7 @@ isolated remote function seekToBeginning(TopicPartition[] partitions) returns Er
 # + return - A `kafka:Error` if an error is encountered or else `()`
 isolated remote function seekToEnd(TopicPartition[] partitions) returns Error?;
 ```
-#### 4.2.5 Handle subscriptions
+#### 4.2.6. Handle subscriptions
 * To get the topics that the consumer is currently subscribed, `getSubscription()` can be used.
 ```ballerina
 # Retrieves the set of topics, which are currently subscribed by the consumer.
@@ -699,9 +694,44 @@ isolated remote function subscribeWithPattern(string regex) returns Error?;
 # + return - A `kafka:Error` if an error is encountered or else '()'
 isolated remote function unsubscribe() returns Error?;
 ```
-### 4.3 Listener
+### 4.3. Listener
 Ballerina Kafka Listener provides the ability to stream messages without manually polling the Kafka server.
-#### 4.3.1 Listener Usage
+#### 4.3.1. Initialization
+Connection with the Kafka server can be established insecurely or securely as same as the producer.
+##### 4.3.1.1. Insecure Listener
+A simple insecure connection with the Kafka server can be easily established by providing the Kafka server URL and
+basic configuration.
+```ballerina
+# Creates a new Kafka `Listener`.
+#
+# + bootstrapServers - List of remote server endpoints of Kafka brokers
+# + config - Configurations related to the consumer endpoint
+# + return - A `kafka:Error` if an error is encountered or else '()'
+public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error?;
+```
+#### 4.3.1.2. Secure Listener
+A secure client can be established via SSL as same as the Kafka Producer using either a `crypto:Truststore` or a
+certificate file. Additionally, a `crypto:Keystore` or a key file can also be provided.
+```ballerina
+kafka:ConsumerConfiguration consumerConfiguration = {
+    topics: ["kafka-topic"],
+    groupId: "listener-group",
+    clientId: "secure-listener",
+    secureSocket: socket,
+    securityProtocol: kafka:PROTOCOL_SSL
+};
+```
+Consumer client can be authenticated with the Kafka server using SASL by providing `kafka:AuthenticationConfiguration`.
+```ballerina
+kafka:ConsumerConfiguration consumerConfiguration = {
+    clientId: "secure-listener",
+    groupId: "listener-group",
+    auth: authConfig,
+    secureSocket: socket,
+    securityProtocol: kafka:PROTOCOL_SASL_SSL
+};
+```
+#### 4.3.2. Listener Usage
 After initializing the listener, a service must be attached to the listener. There are two ways for this. 
 1. Attach the service to the listener directly.
 ```ballerina
@@ -721,30 +751,9 @@ service object {
     }
 };
 ```
-The remote function `onConsumerRecord()` is called when the listener receives messages from the Kafka server. If the 
-`autoCommit` configuration of the listener is `false`, the consumed offsets will not be committed. In order to manually 
-control this, the Caller API can be used.
-##### 4.3.2 Caller
-* To commit the consumed offsets, `commit()` can be used.
-```ballerina
-# Commits the currently consumed offsets of the service.
-# ```ballerina
-# kafka:Error? result = caller->commit();
-# ```
-#
-# + return - A `kafka:Error` if an error is encountered or else '()'
-isolated remote function 'commit() returns Error?;
-```
-* To commit a specific offset, `commitOffset()` can be used.
-```ballerina
-# Commits the given offsets and partitions for the given topics of the service.
-#
-# + offsets - Offsets to be commited
-# + duration - Timeout duration (in seconds) for the commit operation execution
-# + return - `kafka:Error` if an error is encountered or else nil
-isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error?;
-```
-Apart from above, the listener has following functions to manage a service.
+The remote function `onConsumerRecord()` is called when the listener receives messages from the Kafka server.
+
+The Listener has following functions to manage a service.
 * `attach()` - can be used to attach a service to the listener dynamically.
 ```ballerina
 # Attaches a service to the listener.
@@ -783,8 +792,30 @@ public isolated function gracefulStop() returns error?;
 # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
 public isolated function immediateStop() returns error?;
 ```
+If the `autoCommit` configuration of the listener is `false`, the consumed offsets will not be committed. In order to manually 
+control this, the Caller API can be used.
+##### 4.3.3. Caller
+* To commit the consumed offsets, `commit()` can be used.
+```ballerina
+# Commits the currently consumed offsets of the service.
+# ```ballerina
+# kafka:Error? result = caller->commit();
+# ```
+#
+# + return - A `kafka:Error` if an error is encountered or else '()'
+isolated remote function 'commit() returns Error?;
+```
+* To commit a specific offset, `commitOffset()` can be used.
+```ballerina
+# Commits the given offsets and partitions for the given topics of the service.
+#
+# + offsets - Offsets to be commited
+# + duration - Timeout duration (in seconds) for the commit operation execution
+# + return - `kafka:Error` if an error is encountered or else nil
+isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error?;
+```
 ## 5. Samples
-### 5.1 Produce Messages
+### 5.1. Produce Messages
 ```ballerina
 import ballerinax/kafka;
 import ballerina/crypto;
@@ -836,8 +867,8 @@ public function main() returns error? {
     check kafkaProducer->close();
 }
 ```
-### 5.2 Consume Messages
-#### 5.2.1 Using Consumer Client
+### 5.2. Consume Messages
+#### 5.2.1. Using Consumer Client
 ```ballerina
 import ballerina/crypto;
 import ballerina/io;
@@ -865,7 +896,7 @@ public function main() returns error? {
     }
 }
 ```
-#### 5.2.2 Using Listener
+#### 5.2.2. Using Listener
 ```ballerina
 import ballerina/crypto;
 import ballerina/log;
