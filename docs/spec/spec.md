@@ -22,7 +22,7 @@ programming language for the cloud that makes it easier to use, combine, and cre
    *  3.2. [Initialization](#32-initialization)
       *    3.2.1. [Insecure Client](#321-insecure-client)
       *    3.2.2. [Secure Client](#322-secure-client)
-   *  3.3. [Producer Functions](#33-producer-functions)
+   *  3.3. [Functions](#33-functions)
 4. [Consumer](#4-consumer)
    *  4.1. [Configurations](#41-configurations)
    *  4.2. [Consumer Client](#42-consumer-client)
@@ -38,7 +38,7 @@ programming language for the cloud that makes it easier to use, combine, and cre
       *  4.3.1. [Initialization](#431-initialization)
          *  4.3.1.1. [Insecure Listener](#4311-insecure-listener)
          *  4.3.1.2. [Secure Listener](#4312-secure-listener)
-      *  4.3.2. [Listener Usage](#432-listener-usage)
+      *  4.3.2. [Usage](#432-usage)
       *  4.3.3. [Caller](#433-caller)
 5. [Samples](#5-samples)
    *  5.1. [Produce Messages](#51-produce-messages)
@@ -250,7 +250,7 @@ kafka:ProducerConfiguration producerConfigs = {
     securityProtocol: kafka:PROTOCOL_SASL_SSL
 };
 ```
-### 3.3. Producer Functions
+### 3.3. Functions
 * Kafka Producer API can be used to send messages to the Kafka server. For this, the `send()` method can be used.
 ```ballerina
 # Produces records to the Kafka server.
@@ -731,7 +731,7 @@ kafka:ConsumerConfiguration consumerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SASL_SSL
 };
 ```
-#### 4.3.2. Listener Usage
+#### 4.3.2. Usage
 After initializing the listener, a service must be attached to the listener. There are two ways for this. 
 1. Attach the service to the listener directly.
 ```ballerina
