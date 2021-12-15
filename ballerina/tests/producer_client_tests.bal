@@ -549,8 +549,8 @@ function operationsOnClosedProducerTest() returns error? {
 }
 
 @test:Config {}
-function producerNegativeCasesOnSecurityTest() returns error? {
-    string topic = "producer-negative-cases-on-security-test-topic";
+function producerAuthWithoutSecurityConfigsTest() returns error? {
+    string topic = "producer-auth-without-security-configs-test-topic";
 
     ProducerConfiguration producerConfiguration = {
         clientId: "test-producer-10",
@@ -564,14 +564,134 @@ function producerNegativeCasesOnSecurityTest() returns error? {
     Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
     test:assertTrue(result is Error);
     if result is Error {
-        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-negative-cases-on-security-test-topic not present in metadata after 6000 ms.");
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-auth-without-security-configs-test-topic not present in metadata after 6000 ms.");
     }
 
     producer = check new (SASL_URL, producerConfiguration);
     result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
     test:assertTrue(result is Error);
     if result is Error {
-        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-negative-cases-on-security-test-topic not present in metadata after 6000 ms.");
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-auth-without-security-configs-test-topic not present in metadata after 6000 ms.");
     }
+}
 
+@test:Config {}
+function sslIncorrectStoresTest() returns error? {
+    string topic = "ssl-incorrect-stores-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_INCORRECT_TRUSTSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_INCORRECT_KEYSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-9",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer producer = check new (SSL_URL, producerConfiguration);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: SSL handshake failed");
+    }
+}
+
+@test:Config {}
+function sslIncorrectMasterPasswordTest() returns error? {
+    string topic = "ssl-incorrect-master-password-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_PATH,
+        password: INCORRECT_SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_PATH,
+        password: INCORRECT_SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: INCORRECT_SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-9",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer|Error result = new (SSL_URL, producerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to load SSL keystore tests/secrets/trustoresandkeystores/kafka.client.keystore.jks of type JKS");
+    }
+}
+
+@test:Config {}
+function sslIncorrectCertPathTest() returns error? {
+    string topic = "ssl-incorrect-cert-path-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-9",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer|Error result = new (SSL_URL, producerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to load SSL keystore tests/secrets/trustoresa#ndkeystores/kafka.client.keystore.jks of type JKS");
+    }
 }

@@ -36,10 +36,15 @@ const string SASL_SSL_URL = "localhost:9095";
 
 const string SSL_KEYSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.keystore.jks";
 const string SSL_TRUSTSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.truststore.jks";
+const string SSL_KEYSTORE_INCORRECT_PATH = "tests/secrets/trustoresa#ndkeystores/kafka.client.keystore.jks";
+const string SSL_TRUSTSTORE_INCORRECT_PATH = "tests/secrets/trustores#andkeystores/kafka.client.truststore.jks";
+const string SSL_INCORRECT_KEYSTORE_PATH = "tests/secrets/incorrecttrustoresandkeystores/kafka.client.keystore.jks";
+const string SSL_INCORRECT_TRUSTSTORE_PATH = "tests/secrets/incorrecttrustoresandkeystores/kafka.client.truststore.jks";
 const string SSL_CLIENT_PRIVATE_KEY_FILE_PATH = "tests/secrets/certsandkeys/client.private.key";
 const string SSL_CLIENT_PUBLIC_CERT_FILE_PATH = "tests/secrets/certsandkeys/client.public.crt";
 const string SSL_BROKER_PUBLIC_CERT_FILE_PATH = "tests/secrets/certsandkeys/broker.public.crt";
 const string SSL_MASTER_PASSWORD = "password";
+const string INCORRECT_SSL_MASTER_PASSWORD = "PASSWORD";
 
 string emptyTopic = "empty-topic";
 string nonExistingTopic = "non-existing-topic";
@@ -631,7 +636,7 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 30);
+    test:assertEquals(availableTopics.length(), 31);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
@@ -687,7 +692,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 32);
+    test:assertEquals(availableTopics.length(), 33);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -697,7 +702,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 32);
+    test:assertEquals(availableTopics.length(), 33);
     check consumer->close();
     return;
 }

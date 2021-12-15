@@ -390,7 +390,8 @@ function listenerDetachTest() returns error? {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-detach-test-group",
-        clientId: "test-consumer-13"
+        clientId: "test-consumer-13",
+        pollingInterval: 1
     };
     Listener listener1 = check new (DEFAULT_URL, consumerConfiguration1);
     check listener1.attach(listenerDetachService1);
