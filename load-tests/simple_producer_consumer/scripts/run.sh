@@ -20,7 +20,7 @@ set -e
 source base-scenario.sh
 
 echo "----------Downloading Ballerina----------"
-wget https://dist.ballerina.io/downloads/swan-lake-beta3/ballerina-linux-installer-x64-swan-lake-beta6.deb
+wget https://dist.ballerina.io/downloads/swan-lake-beta6/ballerina-linux-installer-x64-swan-lake-beta6.deb
 
 echo "----------Setting Up Ballerina----------"
 sudo dpkg -i ballerina-linux-installer-x64-swan-lake-beta6.deb

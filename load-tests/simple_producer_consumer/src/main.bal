@@ -59,7 +59,7 @@ service /kafka on new http:Listener(9100) {
     }
 }
 
-function publishMessages() returns time:Seconds|error {
+function publishMessages() returns error? {
     startedTime = time:utcNow();
     kafka:Producer producer = check new(KAFKA_CLUSTER);
     foreach int i in 0...MESSAGE_COUNT {
@@ -73,7 +73,6 @@ function publishMessages() returns time:Seconds|error {
             }
         }
     }
-    return time:utcDiffSeconds(endedTime, startedTime);
 }
 
 function startListener() returns error? {
