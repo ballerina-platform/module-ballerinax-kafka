@@ -5,19 +5,15 @@ metadata:
   name: simple-producer-consumer
   annotations:
     kubernetes.io/ingress.class: nginx
-  namespace: default
 spec:
   rules:
-  - host: bal.perf.test
-    http:
-      paths:
-      - path: "/"
-        pathType: Prefix
-        backend:
-          service:
-            name: route-guide-bid
-            port:
-              number: 9092
-  tls:
-  - hosts:
-    - "bal.perf.test"
+    - host: bal.perf.test
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: simple-producer
+                port:
+                  number: 9100
