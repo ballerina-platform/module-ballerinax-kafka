@@ -18,7 +18,6 @@ include 'kafka-native'
 include 'kafka-compiler-plugin'
 include 'kafka-compiler-plugin-tests'
 include ':kafka-examples'
-include ':kafka-load-tests'
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':kafka-native').projectDir = file('native')
@@ -26,7 +25,6 @@ project(':kafka-ballerina').projectDir = file('ballerina')
 project(':kafka-compiler-plugin').projectDir = file('compiler-plugin')
 project(':kafka-compiler-plugin-tests').projectDir = file('compiler-plugin-tests')
 project(':kafka-examples').projectDir = file('examples')
-project(':kafka-load-tests').projectDir = file('load-tests')
 
 gradleEnterprise {
     buildScan {
