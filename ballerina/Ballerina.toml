@@ -1,15 +1,15 @@
 [package]
 org = "ballerinax"
 name = "kafka"
-version = "3.0.1"
+version = "3.2.0"
 authors = ["Ballerina"]
 keywords = ["kafka", "event streaming", "network", "messaging"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-kafka"
 license = ["Apache-2.0"]
-distribution = "slbeta3"
+distribution = "2201.0.0"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/kafka-native-3.0.1.jar"
+path = "../native/build/libs/kafka-native-3.2.0-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/kafka-clients-2.8.0.jar"
