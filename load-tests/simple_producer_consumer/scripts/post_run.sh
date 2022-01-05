@@ -17,3 +17,5 @@
 # Post run script for ballerina performance tests
 # ----------------------------------------------------------------------------
 set -e
+
+echo "This file is kept to skip built in csv processing step"
