@@ -43,7 +43,7 @@ public function main(string label, int users, string output_csv_path) returns er
             finished = true;
             testResults = res;
         }
-        runtime:sleep(2);
+        runtime:sleep(10);
     }
     int errorCount = check int:fromString(testResults.get("errorCount"));
     decimal time = check decimal:fromString(testResults.get("time"));

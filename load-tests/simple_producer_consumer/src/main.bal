@@ -18,14 +18,26 @@ import ballerinax/kafka;
 import ballerina/lang.runtime;
 import ballerina/http;
 import ballerina/time;
+import ballerina/lang.value;
 
-const string MESSAGE = "Hello";
 const string TOPIC = "perf-topic";
 const string KAFKA_CLUSTER = "kafka:9092";
-const int MESSAGE_COUNT = 10000;
+Message SENDING_MESSAGE = {
+    id: 12501,
+    name: "User",
+    content: "This is the message content of the load test.",
+    extra: "This contains the extra content of load test message record."
+};
+Message FINAL_MESSAGE = {
+    id: 12501,
+    name: "User",
+    content: "This is the ending message content of the load test.",
+    extra: "This contains the final extra content of load test message record."
+};
 
 int errorCount = 0;
-int msgCount = 0;
+int sentCount = 0;
+int receivedCount = 0;
 time:Utc startedTime = time:utcNow();
 time:Utc endedTime = time:utcNow();
 boolean finished = false;
@@ -38,7 +50,8 @@ service /kafka on new http:Listener(9100) {
             return false;
         }
         errorCount = 0;
-        msgCount = 0;
+        sentCount = 0;
+        receivedCount = 0;
         startedTime = time:utcNow();
         endedTime = time:utcNow();
         finished = false;
@@ -51,8 +64,8 @@ service /kafka on new http:Listener(9100) {
             return {
                 errorCount: errorCount.toString(),
                 time: time:utcDiffSeconds(endedTime, startedTime).toString(),
-                sentCount: MESSAGE_COUNT.toString(),
-                receivedCount: msgCount.toString()
+                sentCount: sentCount.toString(),
+                receivedCount: receivedCount.toString()
             };
         }
         return false;
@@ -61,17 +74,33 @@ service /kafka on new http:Listener(9100) {
 
 function publishMessages() returns error? {
     startedTime = time:utcNow();
+    // Sending messages for only 2 minutes to test the setup
+    int endingTimeInSecs = startedTime[0] + 120;
     kafka:Producer producer = check new(KAFKA_CLUSTER);
-    foreach int i in 0...MESSAGE_COUNT {
+    while time:utcNow()[0] <= endingTimeInSecs {
         error? result = producer->send({
-            value: MESSAGE.toBytes(),
+            value: SENDING_MESSAGE.toString().toBytes(),
             topic: TOPIC
         });
         if result is error {
             lock {
                 errorCount += 1;
             }
+        } else {
+            sentCount +=1;
         }
+        runtime:sleep(0.1);
+    }
+    error? result = producer->send({
+        value: FINAL_MESSAGE.toString().toBytes(),
+        topic: TOPIC
+    });
+    if result is error {
+        lock {
+            errorCount += 1;
+        }
+    } else {
+        sentCount +=1;
     }
 }
 
@@ -93,17 +122,43 @@ service object {
     remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string|error messageContent = 'string:fromBytes(consumerRecord.value);
-            if messageContent !is string || messageContent != MESSAGE {
+            if messageContent is error {
                 lock {
                     errorCount += 1;
                 }
             } else {
-                msgCount += 1;
+                json|error jsonContent = value:fromJsonString(messageContent);
+                if jsonContent is error {
+                    lock {
+                        errorCount += 1;
+                    }
+                } else {
+                    Message|error receivedMessage = jsonContent.cloneReadOnly().ensureType(Message);
+                    if receivedMessage is error {
+                        lock {
+                            errorCount += 1;
+                        }
+                    } else {
+                        if receivedMessage == SENDING_MESSAGE {
+                            receivedCount += 1;
+                        } else if receivedMessage == FINAL_MESSAGE {
+                            finished = true;
+                            endedTime = time:utcNow();
+                        } else {
+                            lock {
+                                errorCount += 1;
+                            }
+                        }
+                    }
+                }
             }
-        }
-        if errorCount + msgCount >= MESSAGE_COUNT {
-            finished = true;
-            endedTime = time:utcNow();
         }
     }
 };
+
+public type Message record {|
+    int id;
+    string name;
+    string content;
+    string extra;
+|};
