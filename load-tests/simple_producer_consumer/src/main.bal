@@ -74,7 +74,7 @@ service /kafka on new http:Listener(9100) {
 
 function publishMessages() returns error? {
     startedTime = time:utcNow();
-    // Running the load test for 1 hour
+    // Publishing messages for 1 hour
     int endingTimeInSecs = startedTime[0] + 3600;
     kafka:Producer producer = check new(KAFKA_CLUSTER);
     while time:utcNow()[0] <= endingTimeInSecs {
