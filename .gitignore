@@ -42,5 +42,6 @@ kafka-ballerina/src/src
 
 # Auto generated Dependencies.toml files
 examples/**/Dependencies.toml
+load-tests/**/Dependencies.toml
 
 misc
