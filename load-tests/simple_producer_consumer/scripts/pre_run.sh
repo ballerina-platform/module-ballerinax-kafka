@@ -14,10 +14,12 @@
 # limitations under the License.
 #
 # ----------------------------------------------------------------------------
-# Execution script for ballerina performance tests
+# Pre run script for ballerina performance tests
 # ----------------------------------------------------------------------------
 set -e
-source base-scenario.sh
 
-echo "----------Running Load Test----------"
-bal run $scriptsDir/load_test/ -- "Kafka Simple Producer Consumer" "$resultsDir/summary.csv"
+echo "----------Downloading Ballerina----------"
+wget https://dist.ballerina.io/downloads/swan-lake-beta6/ballerina-linux-installer-x64-swan-lake-beta6.deb
+
+echo "----------Setting Up Ballerina----------"
+sudo dpkg -i ballerina-linux-installer-x64-swan-lake-beta6.deb
