@@ -5,6 +5,7 @@ version = "@toml.version@"
 authors = ["Ballerina"]
 keywords = ["kafka", "event streaming", "network", "messaging"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-kafka"
+icon = "icon.png"
 license = ["Apache-2.0"]
 distribution = "2201.0.0"
 
