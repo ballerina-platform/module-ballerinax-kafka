@@ -20,7 +20,7 @@ import ballerina/lang.runtime;
 import ballerina/io;
 import ballerina/time;
 
-public function main(string label, int users, string output_csv_path) returns error? {
+public function main(string label, string output_csv_path) returns error? {
     http:Client loadTestClient = check new ("http://bal.perf.test");
 
     boolean response = check loadTestClient->get("/kafka/publish");
@@ -50,7 +50,7 @@ public function main(string label, int users, string output_csv_path) returns er
     int sentCount = check int:fromString(testResults.get("sentCount"));
     int receivedCount = check int:fromString(testResults.get("receivedCount"));
     any[] results = [label, sentCount, <float>time/<float>receivedCount, 0, 0, 0, 0, 0, 0, <float>errorCount/<float>sentCount, 
-        <float>receivedCount/<float>time, 0, 0, time:utcNow()[0], 0, users];
+        <float>receivedCount/<float>time, 0, 0, time:utcNow()[0], 0, 1];
     check writeResultsToCsv(results, output_csv_path);
 }
 
