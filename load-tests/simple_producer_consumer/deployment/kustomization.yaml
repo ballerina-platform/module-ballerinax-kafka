@@ -1,0 +1,6 @@
+resources:
+  - zookeeper-deployment.yml
+  - zookeeper-service.yml
+  - kafka-broker-deployment.yml
+  - simple_producer_consumer.yaml
+  - ingress.yaml

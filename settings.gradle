@@ -13,7 +13,11 @@ plugins {
 
 rootProject.name = 'kafka'
 include(':checkstyle')
-include ':kafka-ballerina', 'kafka-native', 'kafka-compiler-plugin', 'kafka-compiler-plugin-tests', ':kafka-examples'
+include ':kafka-ballerina'
+include 'kafka-native'
+include 'kafka-compiler-plugin'
+include 'kafka-compiler-plugin-tests'
+include ':kafka-examples'
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':kafka-native').projectDir = file('native')
