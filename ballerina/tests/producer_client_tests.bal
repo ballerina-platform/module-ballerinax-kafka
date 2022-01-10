@@ -222,11 +222,6 @@ function transactionalProducerTest() returns error? {
 @test:Config{}
 function saslProducerTest() returns error? {
     string topic = "sasl-producer-test-topic";
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
 
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-06",
@@ -260,7 +255,7 @@ function saslProducerTest() returns error? {
 @test:Config{}
 function saslProducerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
-    AuthenticationConfiguration authConfig = {
+    AuthenticationConfiguration invalidAuthConfig = {
         mechanism: AUTH_SASL_PLAIN,
         username: SASL_USER,
         password: SASL_INCORRECT_PASSWORD
@@ -272,7 +267,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        auth: authConfig,
+        auth: invalidAuthConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
 
@@ -287,7 +282,6 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     }
 
     kafkaProducer = check new (SSL_URL, producerConfigs);
-
     result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
     if result is Error {
         string errorMsg = "Failed to send data to Kafka server: Topic sasl-producer-incorrect-credentials-test-topic not present in metadata after 6000 ms.";
@@ -303,11 +297,7 @@ function producerAdditionalPropertiesTest() returns error? {
     map<string> propertyMap = {
         "security.protocol": PROTOCOL_SASL_PLAINTEXT
     };
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
+
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-08",
         acks: ACKS_ALL,
@@ -339,29 +329,9 @@ function producerAdditionalPropertiesTest() returns error? {
 @test:Config {}
 function sslProducerTest() returns error? {
     string topic = "ssl-producer-test-topic";
-    crypto:TrustStore trustStore = {
-        path: SSL_TRUSTSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    crypto:KeyStore keyStore = {
-        path: SSL_KEYSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    SecureSocket socket = {
-        cert: trustStore,
-        key: {
-            keyStore: keyStore,
-            keyPassword: SSL_MASTER_PASSWORD
-        },
-        protocol: {
-            name: SSL
-        }
-    };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-9",
+        clientId: "test-producer-09",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -395,7 +365,7 @@ function sslCertKeyProducerTest() returns error? {
         keyFile: SSL_CLIENT_PRIVATE_KEY_FILE_PATH
     };
 
-    SecureSocket socket = {
+    SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
         key: certKey,
         protocol: {
@@ -409,7 +379,7 @@ function sslCertKeyProducerTest() returns error? {
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: certSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
@@ -433,7 +403,7 @@ function sslCertKeyProducerTest() returns error? {
 function sslCertOnlyProducerTest() returns error? {
     string topic = "ssl-cert-only-producer-test-topic";
 
-    SecureSocket socket = {
+    SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
         protocol: {
             name: SSL
@@ -441,12 +411,12 @@ function sslCertOnlyProducerTest() returns error? {
     };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-10",
+        clientId: "test-producer-11",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: certSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
@@ -470,26 +440,19 @@ function sslCertOnlyProducerTest() returns error? {
 function SSLWithSASLAuthProducerTest() returns error? {
     string topic = "ssl-with-sasl-auth-producer-test-topic";
 
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
-
-    SecureSocket socket = {
+    SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
         protocol: {
             name: SSL
         }
     };
-
     ProducerConfiguration producerConfigs = {
-        clientId: "test-producer-14",
+        clientId: "test-producer-12",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: certSocket,
         securityProtocol: PROTOCOL_SASL_SSL
     };
 
@@ -498,7 +461,6 @@ function SSLWithSASLAuthProducerTest() returns error? {
     if res is Error {
         test:assertEquals(res.message(), "Failed to initialize the producer: Could not find a 'KafkaClient' entry in the JAAS configuration. System property 'java.security.auth.login.config' is not set");
     }
-
     producerConfigs = {
         clientId: "test-producer-13",
         acks: ACKS_ALL,
@@ -518,7 +480,7 @@ function SSLWithSASLAuthProducerTest() returns error? {
     check producer->close();
 
     producerConfigs = {
-        clientId: "test-producer-15",
+        clientId: "test-producer-14",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -548,14 +510,8 @@ function SSLWithSASLAuthProducerTest() returns error? {
 function SASLOnSSLEndpointProducerTest() returns error? {
     string topic = "sasl-on-ssl-endpoint-producer-test-topic";
 
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
-
     ProducerConfiguration producerConfigs = {
-        clientId: "test-producer-14",
+        clientId: "test-producer-15",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -577,7 +533,7 @@ function SASLOnSSLEndpointProducerTest() returns error? {
 function operationsOnClosedProducerTest() returns error? {
     string topic = "operations-on-closed-producer";
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-11"
+        clientId: "test-producer-16"
     };
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
@@ -595,7 +551,7 @@ function producerAuthWithoutSecurityConfigsTest() returns error? {
     string topic = "producer-auth-without-security-configs-test-topic";
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-10",
+        clientId: "test-producer-17",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -620,20 +576,20 @@ function producerAuthWithoutSecurityConfigsTest() returns error? {
 @test:Config {}
 function sslIncorrectStoresTest() returns error? {
     string topic = "ssl-incorrect-stores-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_INCORRECT_TRUSTSTORE_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_INCORRECT_KEYSTORE_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -642,12 +598,12 @@ function sslIncorrectStoresTest() returns error? {
     };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-9",
+        clientId: "test-producer-17",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
@@ -661,20 +617,20 @@ function sslIncorrectStoresTest() returns error? {
 @test:Config {}
 function sslIncorrectMasterPasswordTest() returns error? {
     string topic = "ssl-incorrect-master-password-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: INCORRECT_SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -683,12 +639,12 @@ function sslIncorrectMasterPasswordTest() returns error? {
     };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-9",
+        clientId: "test-producer-18",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Producer|Error result = new (SSL_URL, producerConfiguration);
@@ -701,20 +657,20 @@ function sslIncorrectMasterPasswordTest() returns error? {
 @test:Config {}
 function sslIncorrectCertPathTest() returns error? {
     string topic = "ssl-incorrect-cert-path-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -723,12 +679,12 @@ function sslIncorrectCertPathTest() returns error? {
     };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-9",
+        clientId: "test-producer-19",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Producer|Error result = new (SSL_URL, producerConfiguration);

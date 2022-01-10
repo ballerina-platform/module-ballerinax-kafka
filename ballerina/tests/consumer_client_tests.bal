@@ -21,7 +21,7 @@ import ballerina/crypto;
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
 const TEST_MESSAGE_III = "Hello, Kafka";
-const EMPTY_MEESAGE = "";
+const EMPTY_MESSAGE = "";
 
 const decimal TIMEOUT_DURATION = 5;
 const decimal DEFAULT_TIMEOUT = 10;
@@ -57,6 +57,33 @@ string receivedMessageWithCommit = "";
 string receivedMessageWithCommitOffset = "";
 string receivedConfigMessage = "";
 
+AuthenticationConfiguration authConfig = {
+    mechanism: AUTH_SASL_PLAIN,
+    username: SASL_USER,
+    password: SASL_PASSWORD
+};
+
+crypto:TrustStore trustStore = {
+    path: SSL_TRUSTSTORE_PATH,
+    password: SSL_MASTER_PASSWORD
+};
+
+crypto:KeyStore keyStore = {
+    path: SSL_KEYSTORE_PATH,
+    password: SSL_MASTER_PASSWORD
+};
+
+SecureSocket socket = {
+    cert: trustStore,
+    key: {
+        keyStore: keyStore,
+        keyPassword: SSL_MASTER_PASSWORD
+    },
+    protocol: {
+        name: SSL
+    }
+};
+
 TopicPartition nonExistingPartition = {
     topic: nonExistingTopic,
     partition: 999
@@ -90,7 +117,6 @@ function consumerCloseTest() returns error? {
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
     test:assertEquals(receivedErr.message(), expectedErr);
-    return;
 }
 
 @test:Config {}
@@ -111,7 +137,6 @@ function consumerCloseWithDurationTest() returns error? {
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
     test:assertEquals(receivedErr.message(), expectedErr);
-    return;
 }
 
 @test:Config {}
@@ -133,7 +158,6 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
     error receivedErr = <error>newresult;
     string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
     test:assertEquals(receivedErr.message(), expectedErr);
-    return;
 }
 
 @test:Config {}
@@ -154,7 +178,6 @@ function consumerConfigTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -174,7 +197,6 @@ function consumerFunctionsTest() returns error? {
     string message = check 'string:fromBytes(value);
     test:assertEquals(message, TEST_MESSAGE);
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -214,7 +236,6 @@ function consumerSeekTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -247,7 +268,6 @@ function consumerSeekToBeginningTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -281,7 +301,6 @@ function consumerSeekToEndTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -310,7 +329,6 @@ function consumerSeekToNegativeValueTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {
@@ -340,7 +358,7 @@ function consumerPositionOffsetsTest() returns error? {
     consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-position-offset-test-group",
-        clientId: "test-consumer-19",
+        clientId: "test-consumer-21",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     consumer = check new (DEFAULT_URL, consumerConfiguration);
@@ -350,7 +368,6 @@ function consumerPositionOffsetsTest() returns error? {
     partitionOffsetAfter = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(partitionOffsetAfter, 3, "Expected: 3. Received: " + partitionOffsetAfter.toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {
@@ -361,7 +378,7 @@ function consumerBeginningOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-beginning-offsets-test-group-1",
-        clientId: "test-consumer-21"
+        clientId: "test-consumer-22"
     };
     TopicPartition topic1Partition = {
         topic: topic,
@@ -385,7 +402,7 @@ function consumerBeginningOffsetsTest() returns error? {
     consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-beginning-offsets-test-group-2",
-        clientId: "test-consumer-22",
+        clientId: "test-consumer-23",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     consumer = check new (DEFAULT_URL, consumerConfiguration);
@@ -403,7 +420,6 @@ function consumerBeginningOffsetsTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {
@@ -414,7 +430,7 @@ function consumerEndOffsetsTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-end-offset-test-group-1",
-        clientId: "test-consumer-23"
+        clientId: "test-consumer-24"
     };
     TopicPartition topic1Partition = {
         topic: topic,
@@ -454,7 +470,6 @@ function consumerEndOffsetsTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -484,7 +499,6 @@ function consumerTopicPartitionsTest() returns error? {
     topic1Partitions = check consumer->getTopicPartitions(topic1);
     test:assertEquals(topic1Partitions[0].partition, 0, "Expected: 0. Received: " + topic1Partitions[0].partition.toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -559,7 +573,6 @@ function consumerPauseResumePartitionErrorTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -624,7 +637,6 @@ function consumerSubscribeUnsubscribeTest() returns error? {
     test:assertEquals(subscribedTopics.length(), 0);
 
     check consumer->close();
-    return;
 }
 
 @test:Config {
@@ -645,7 +657,6 @@ function consumerSubscribeTest() returns error? {
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.length(), 11);
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -663,7 +674,6 @@ function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    return;
 }
 
 @test:Config {}
@@ -712,7 +722,6 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
     availableTopics = check consumer->getAvailableTopics();
     test:assertEquals(availableTopics.length(), 35);
     check consumer->close();
-    return;
 }
 
 @test:Config {
@@ -732,7 +741,6 @@ function consumerSubscribeErrorTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -777,7 +785,6 @@ function manualCommitTest() returns error? {
     int positionOffset = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(positionOffset, messageCount);
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -808,7 +815,6 @@ function manualCommitWithDurationTest() returns error? {
     int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, manualCommitOffset);
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -840,7 +846,6 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
     int offsetValue = committedPartitionOffset.offset;
     test:assertEquals(offsetValue, manualCommitOffset);
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -864,18 +869,12 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
     string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
     test:assertEquals(expectedError, positionOffsetError.message());
     check consumer->close();
-    return;
 }
 
 @test:Config{}
 function saslConsumerTest() returns error? {
     string topic = "sasl-consumer-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -890,14 +889,13 @@ function saslConsumerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config{}
 function saslConsumerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-consumer-incorrect-credentials-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    AuthenticationConfiguration authConfig = {
+    AuthenticationConfiguration invalidAuthConfig = {
         mechanism: AUTH_SASL_PLAIN,
         username: SASL_USER,
         password: SASL_INCORRECT_PASSWORD
@@ -909,7 +907,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
         groupId: "consumer-sasl-incorrect-credentials-test-group",
         clientId: "test-consumer-43",
         autoCommit: false,
-        auth: authConfig,
+        auth: invalidAuthConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
     Consumer consumer = check new(SASL_URL, consumerConfiguration);
@@ -921,7 +919,6 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check consumer->close();
-    return;
 }
 
 @test:Config{}
@@ -948,32 +945,11 @@ function consumerAdditionalPropertiesTest() returns error? {
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertEquals(committedOffset, ());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
 function sslKeystoreConsumerTest() returns error? {
     string topic = "ssl-keystore-consumer-test-topic";
-    crypto:TrustStore trustStore = {
-        path: SSL_TRUSTSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    crypto:KeyStore keyStore = {
-        path: SSL_KEYSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    SecureSocket socket = {
-        cert: trustStore,
-        key: {
-            keyStore: keyStore,
-            keyPassword: SSL_MASTER_PASSWORD
-        },
-        protocol: {
-            name: SSL
-        }
-    };
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     ConsumerConfiguration consumerConfiguration = {
@@ -999,7 +975,7 @@ function sslCertKeyConsumerTest() returns error? {
         keyFile: SSL_CLIENT_PRIVATE_KEY_FILE_PATH
     };
 
-    SecureSocket socket = {
+    SecureSocket certKeySocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
         key: certKey,
         protocol: {
@@ -1013,21 +989,20 @@ function sslCertKeyConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "ssl-cert-key-consumer-test-group",
         clientId: "test-consumer-46",
-        secureSocket: socket,
+        secureSocket: certKeySocket,
         securityProtocol: PROTOCOL_SSL
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
 function sslCertOnlyConsumerTest() returns error? {
     string topic = "ssl-cert-only-consumer-test-topic";
 
-    SecureSocket socket = {
+    SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
         protocol: {
             name: SSL
@@ -1040,53 +1015,25 @@ function sslCertOnlyConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "ssl-cert-only-consumer-test-group",
         clientId: "test-consumer-47",
-        secureSocket: socket,
+        secureSocket: certSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
 function saslSslConsumerTest() returns error? {
     string topic = "sasl-ssl-consumer-test-topic";
-
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
-
-    crypto:TrustStore trustStore = {
-        path: SSL_TRUSTSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    crypto:KeyStore keyStore = {
-        path: SSL_KEYSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    SecureSocket socket = {
-        cert: trustStore,
-        key: {
-             keyStore: keyStore,
-             keyPassword: SSL_MASTER_PASSWORD
-        },
-        protocol: {
-            name: SSL
-        }
-    };
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "ssl-cert-only-consumer-test-group",
-        clientId: "test-consumer-47",
+        groupId: "sasl-ssl-consumer-test-group",
+        clientId: "test-consumer-48",
         secureSocket: socket,
         auth: authConfig,
         securityProtocol: PROTOCOL_SASL_SSL
@@ -1105,7 +1052,7 @@ function incorrectKafkaUrlTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "incorrect-kafka-url-test-group",
-        clientId: "test-consumer-48"
+        clientId: "test-consumer-49"
     };
     Consumer consumer = check new (INCORRECT_KAFKA_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
@@ -1121,7 +1068,7 @@ function plaintextToSecuredEndpointsConsumerTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "plaintext-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-49"
+        clientId: "test-consumer-50"
     };
 
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1148,38 +1095,11 @@ function invalidSecuredEndpointsConsumerTest() returns error? {
 
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
-
-    crypto:TrustStore trustStore = {
-        path: SSL_TRUSTSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    crypto:KeyStore keyStore = {
-        path: SSL_KEYSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    SecureSocket socket = {
-        cert: trustStore,
-        key: {
-            keyStore: keyStore,
-            keyPassword: SSL_MASTER_PASSWORD
-        },
-        protocol: {
-            name: SSL
-        }
-    };
-
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-50",
+        clientId: "test-consumer-51",
         auth: authConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
@@ -1197,7 +1117,7 @@ function invalidSecuredEndpointsConsumerTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-51",
+        clientId: "test-consumer-52",
         secureSocket: socket,
         securityProtocol: PROTOCOL_SSL
     };
@@ -1216,20 +1136,20 @@ function invalidSecuredEndpointsConsumerTest() returns error? {
 @test:Config {}
 function sslIncorrectStoresConsumerTest() returns error? {
     string topic = "ssl-incorrect-stores-consumer-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_INCORRECT_TRUSTSTORE_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_INCORRECT_KEYSTORE_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -1240,9 +1160,9 @@ function sslIncorrectStoresConsumerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-51",
-        secureSocket: socket,
+        groupId: "ssl-incorrect-stores-consumer-test-group",
+        clientId: "test-consumer-53",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
@@ -1257,20 +1177,20 @@ function sslIncorrectStoresConsumerTest() returns error? {
 @test:Config {}
 function sslIncorrectMasterPasswordConsumerTest() returns error? {
     string topic = "ssl-incorrect-master-password-consumer-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: INCORRECT_SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -1281,9 +1201,9 @@ function sslIncorrectMasterPasswordConsumerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-52",
-        secureSocket: socket,
+        groupId: "ssl-incorrect-master-password-consumer-test-group",
+        clientId: "test-consumer-54",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Consumer|Error result = new (SSL_URL, consumerConfiguration);
@@ -1296,20 +1216,20 @@ function sslIncorrectMasterPasswordConsumerTest() returns error? {
 @test:Config {}
 function sslIncorrectCertPathConsumerTest() returns error? {
     string topic = "ssl-incorrect-cert-path-consumer-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -1320,9 +1240,9 @@ function sslIncorrectCertPathConsumerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-52",
-        secureSocket: socket,
+        groupId: "ssl-incorrect-cert-path-consumer-test-group",
+        clientId: "test-consumer-55",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Consumer|Error result = new (SSL_URL, consumerConfiguration);
@@ -1336,26 +1256,20 @@ function sslIncorrectCertPathConsumerTest() returns error? {
 function invalidSecurityProtocolConsumerTest() returns error? {
     string topic = "invalid-security-protocol-consumer-test-topic";
 
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
-
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -1366,9 +1280,9 @@ function invalidSecurityProtocolConsumerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-52",
-        secureSocket: socket,
+        groupId: "invalid-security-protocol-consumer-test-group",
+        clientId: "test-consumer-56",
+        secureSocket: invalidSocket,
         auth: authConfig,
         securityProtocol: PROTOCOL_SSL
     };
@@ -1381,9 +1295,9 @@ function invalidSecurityProtocolConsumerTest() returns error? {
     consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-52",
-        secureSocket: socket,
+        groupId: "invalid-security-protocol-consumer-test-group",
+        clientId: "test-consumer-57",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SASL_SSL
     };
     result = new (SSL_URL, consumerConfiguration);
@@ -1395,9 +1309,9 @@ function invalidSecurityProtocolConsumerTest() returns error? {
     consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-52",
-        secureSocket: socket,
+        groupId: "invalid-security-protocol-consumer-test-group",
+        clientId: "test-consumer-58",
+        secureSocket: invalidSocket,
         auth: authConfig,
         securityProtocol: PROTOCOL_SASL_SSL
     };

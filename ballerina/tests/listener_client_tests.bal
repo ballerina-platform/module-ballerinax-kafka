@@ -39,8 +39,8 @@ function consumerServiceTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "listener-service-test-group",
-        clientId: "test-consumer-1"
+        groupId: "listener-test-group",
+        clientId: "test-listener-01"
     };
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(consumerService);
@@ -59,15 +59,15 @@ function consumerServiceInvalidUrlTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "listener-service-invalid-test-group",
-        clientId: "test-listener-1"
+        groupId: "listener-invalid-url-test-group",
+        clientId: "test-listener-02"
     };
     Listener consumer = check new (INCORRECT_KAFKA_URL, consumerConfiguration);
     check consumer.attach(incorrectEndpointsService);
     check consumer.'start();
 
     runtime:sleep(3);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check consumer.gracefulStop();
     return;
 }
@@ -79,8 +79,8 @@ function attachDetachToClosedListenerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "listener-service-invalid-test-group",
-        clientId: "test-listener-1"
+        groupId: "listener-invalid-test-group",
+        clientId: "test-listener-03"
     };
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     error? result = consumer.gracefulStop();
@@ -109,13 +109,13 @@ function attachDetachToClosedListenerTest() returns error? {
 
 @test:Config {}
 function consumerServiceGracefulStopTest() returns error? {
-    string topic = "service-graceful-stop-test-topic";
+    string topic = "listener-graceful-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-graceful-stop-service-test-group",
-        clientId: "test-consumer-2"
+        clientId: "test-listener-04"
     };
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(consumerGracefulStopService);
@@ -132,13 +132,13 @@ function consumerServiceGracefulStopTest() returns error? {
 
 @test:Config {}
 function consumerServiceImmediateStopTest() returns error? {
-    string topic = "service-immediate-stop-test-topic";
+    string topic = "listener-immediate-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-immediate-stop-service-test-group",
-        clientId: "test-consumer-3"
+        clientId: "test-listener-05"
     };
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(consumerImmediateStopService);
@@ -155,12 +155,12 @@ function consumerServiceImmediateStopTest() returns error? {
 
 @test:Config {}
 function consumerServiceSubscribeErrorTest() returns error? {
-    string topic = "service-subscribe-error-test-topic";
+    string topic = "listener-subscribe-error-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        clientId: "test-consumer-3"
+        clientId: "test-listener-06"
     };
     Listener|error result = trap new (DEFAULT_URL, consumerConfiguration);
 
@@ -174,7 +174,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
         topics: [" "],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-immediate-stop-service-test-group",
-        clientId: "test-consumer-3"
+        clientId: "test-listener-07"
     };
     result = new (DEFAULT_URL, consumerConfiguration);
 
@@ -194,7 +194,7 @@ function listenerConfigTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-test-group",
-        clientId: "test-consumer-4",
+        clientId: "test-listener-08",
         pollingInterval: 3
     };
 
@@ -215,7 +215,7 @@ function listenerConfigErrorTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group-1",
-        clientId: "test-consumer-5",
+        clientId: "test-listener-09",
         concurrentConsumers: -5
     };
     Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
@@ -233,7 +233,7 @@ function listenerConfigErrorTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-config-error-test-group-2",
-        clientId: "test-consumer-6",
+        clientId: "test-listener-10",
         partitionAssignmentStrategy: strategy
     };
     Listener|Error result2 = new(DEFAULT_URL, consumerConfiguration);
@@ -250,12 +250,12 @@ function listenerConfigErrorTest() returns error? {
     dependsOn: [consumerServiceCommitTest]
 }
 function consumerServiceCommitOffsetTest() returns error? {
-    string topic = "service-commit-offset-test-topic";
+    string topic = "listener-commit-offset-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "listener-service-commit-offset-test-group",
-        clientId: "test-consumer-7",
+        groupId: "listener-commit-offset-test-group",
+        clientId: "test-listener-11",
         autoCommit: false
     };
     TopicPartition topicPartition = {
@@ -286,12 +286,12 @@ function consumerServiceCommitOffsetTest() returns error? {
 
 @test:Config {}
 function consumerServiceCommitTest() returns error? {
-    string topic = "service-commit-test-topic";
+    string topic = "listener-commit-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "listener-service-commit-test-group",
-        clientId: "test-consumer-8",
+        groupId: "listener-commit-test-group",
+        clientId: "test-listener-12",
         autoCommit: false
     };
     TopicPartition topicPartition = {
@@ -323,15 +323,10 @@ function consumerServiceCommitTest() returns error? {
 @test:Config {}
 function saslListenerTest() returns error? {
     string topic = "sasl-listener-test-topic";
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
-        clientId: "test-consumer-9",
+        clientId: "test-listener-13",
         offsetReset: "earliest",
         topics: [topic],
         auth: authConfig,
@@ -351,7 +346,7 @@ function saslListenerTest() returns error? {
 @test:Config {}
 function saslListenerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-listener-incorrect-credentials-test-topic";
-    AuthenticationConfiguration authConfig = {
+    AuthenticationConfiguration invalidAuthConfig = {
         mechanism: AUTH_SASL_PLAIN,
         username: SASL_USER,
         password: SASL_INCORRECT_PASSWORD
@@ -359,10 +354,10 @@ function saslListenerIncorrectCredentialsTest() returns error? {
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-incorrect-credentials-test-group",
-        clientId: "test-consumer-10",
+        clientId: "test-listener-14",
         offsetReset: "earliest",
         topics: [topic],
-        auth: authConfig,
+        auth: invalidAuthConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
 
@@ -371,7 +366,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(3);
-    test:assertEquals(saslMsg, EMPTY_MEESAGE);
+    test:assertEquals(saslMsg, EMPTY_MESSAGE);
     check saslListener.gracefulStop();
     return;
 }
@@ -380,30 +375,9 @@ function saslListenerIncorrectCredentialsTest() returns error? {
 function sslListenerTest() returns error? {
     string topic = "ssl-listener-test-topic";
 
-    crypto:TrustStore trustStore = {
-        path: SSL_TRUSTSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    crypto:KeyStore keyStore = {
-        path: SSL_KEYSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    SecureSocket socket = {
-        cert: trustStore,
-        key: {
-            keyStore: keyStore,
-            keyPassword: SSL_MASTER_PASSWORD
-        },
-        protocol: {
-            name: SSL
-        }
-    };
-
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
-        clientId: "test-consumer-11",
+        clientId: "test-listener-15",
         offsetReset: "earliest",
         topics: [topic],
         secureSocket: socket,
@@ -422,7 +396,7 @@ function sslListenerTest() returns error? {
 
 @test:Config {}
 function basicMessageOrderTest() returns error? {
-    string topic = "message-order-topic";
+    string topic = "message-order-test-topic";
     int i = 0;
     while (i < 5) {
         string message = i.toString();
@@ -433,7 +407,7 @@ function basicMessageOrderTest() returns error? {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "message-order-test-group",
-        clientId: "test-consumer-12"
+        clientId: "test-listener-16"
     };
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(messageOrderService);
@@ -455,12 +429,12 @@ function basicMessageOrderTest() returns error? {
 
 @test:Config {}
 function listenerDetachTest() returns error? {
-    string topic1 = "listener-detach-topic";
+    string topic1 = "listener-detach-test-topic";
     ConsumerConfiguration consumerConfiguration1 = {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-detach-test-group",
-        clientId: "test-consumer-13",
+        clientId: "test-listener-17",
         pollingInterval: 1
     };
     Listener listener1 = check new (DEFAULT_URL, consumerConfiguration1);
@@ -494,12 +468,12 @@ function listenerDetachTest() returns error? {
     check listener1.gracefulStop();
 
     // Attach a new listener to the same service and test for messages
-    string topic2 = "listener2-detach-topic";
+    string topic2 = "listener2-detach-test-topic";
     ConsumerConfiguration consumerConfiguration2 = {
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener2-detach-test-group",
-        clientId: "test-consumer-14"
+        clientId: "test-listener-18"
     };
     Listener listener2 = check new (DEFAULT_URL, consumerConfiguration2);
     check listener2.attach(listenerDetachService1);
@@ -514,13 +488,13 @@ function listenerDetachTest() returns error? {
 
 @test:Config {}
 function plaintextToSecuredEndpointsListenerTest() returns error? {
-    string topic = "plaintext-secured-endpoints-consumer-test-topic";
+    string topic = "plaintext-secured-endpoints-listener-test-topic";
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "plaintext-secured-endpoints-consumer-test-group",
-        clientId: "test-listener-49"
+        groupId: "plaintext-secured-endpoints-listener-test-group",
+        clientId: "test-listener-19"
     };
 
     Listener testListener = check new (SSL_URL, consumerConfiguration);
@@ -528,7 +502,7 @@ function plaintextToSecuredEndpointsListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 
     testListener = check new (SASL_URL, consumerConfiguration);
@@ -536,7 +510,7 @@ function plaintextToSecuredEndpointsListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 
     testListener = check new (SASL_SSL_URL, consumerConfiguration);
@@ -544,48 +518,21 @@ function plaintextToSecuredEndpointsListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 }
 
 @test:Config {}
 function invalidSecuredEndpointsListenerTest() returns error? {
-    string topic = "invalid-secured-endpoints-consumer-test-topic";
+    string topic = "invalid-secured-endpoints-listener-test-topic";
 
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
-
-    crypto:TrustStore trustStore = {
-        path: SSL_TRUSTSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    crypto:KeyStore keyStore = {
-        path: SSL_KEYSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    SecureSocket socket = {
-        cert: trustStore,
-        key: {
-            keyStore: keyStore,
-            keyPassword: SSL_MASTER_PASSWORD
-        },
-        protocol: {
-            name: SSL
-        }
-    };
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-50",
+        groupId: "invalid-secured-endpoints-listener-test-group",
+        clientId: "test-listener-20",
         auth: authConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
@@ -594,7 +541,7 @@ function invalidSecuredEndpointsListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 
     testListener = check new (SASL_SSL_URL, consumerConfiguration);
@@ -602,14 +549,14 @@ function invalidSecuredEndpointsListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 
     consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-consumer-51",
+        groupId: "invalid-secured-endpoints-listener-test-group",
+        clientId: "test-listener-21",
         secureSocket: socket,
         securityProtocol: PROTOCOL_SSL
     };
@@ -619,7 +566,7 @@ function invalidSecuredEndpointsListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 
     testListener = check new (SASL_SSL_URL, consumerConfiguration);
@@ -627,27 +574,27 @@ function invalidSecuredEndpointsListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 }
 
 @test:Config {}
 function sslIncorrectStoresListenerTest() returns error? {
     string topic = "ssl-incorrect-stores-listener-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_INCORRECT_TRUSTSTORE_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_INCORRECT_KEYSTORE_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -658,9 +605,9 @@ function sslIncorrectStoresListenerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-listener-test-group",
-        clientId: "test-listener-51",
-        secureSocket: socket,
+        groupId: "ssl-incorrect-stores-listener-test-group",
+        clientId: "test-listener-22",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Listener testListener = check new (SASL_SSL_URL, consumerConfiguration);
@@ -668,27 +615,27 @@ function sslIncorrectStoresListenerTest() returns error? {
     check testListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(2);
-    test:assertEquals(incorrectEndpointMsg, "");
+    test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check testListener.gracefulStop();
 }
 
 @test:Config {}
 function sslIncorrectMasterPasswordListenerTest() returns error? {
     string topic = "ssl-incorrect-master-password-listener-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: INCORRECT_SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -699,9 +646,9 @@ function sslIncorrectMasterPasswordListenerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-listener-test-group",
-        clientId: "test-listener-52",
-        secureSocket: socket,
+        groupId: "ssl-incorrect-master-password-listener-test-group",
+        clientId: "test-listener-23",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Listener|Error result = new (SSL_URL, consumerConfiguration);
@@ -714,20 +661,20 @@ function sslIncorrectMasterPasswordListenerTest() returns error? {
 @test:Config {}
 function sslIncorrectCertPathListenerTest() returns error? {
     string topic = "ssl-incorrect-cert-path-listener-test-topic";
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -738,9 +685,9 @@ function sslIncorrectCertPathListenerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-listener-test-group",
-        clientId: "test-listener-52",
-        secureSocket: socket,
+        groupId: "ssl-incorrect-cert-path-listener-test-group",
+        clientId: "test-listener-24",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Listener|Error result = new (SSL_URL, consumerConfiguration);
@@ -754,26 +701,20 @@ function sslIncorrectCertPathListenerTest() returns error? {
 function invalidSecurityProtocolListenerTest() returns error? {
     string topic = "invalid-security-protocol-listener-test-topic";
 
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
-
-    crypto:TrustStore trustStore = {
+    crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    crypto:KeyStore keyStore = {
+    crypto:KeyStore invalidKeyStore = {
         path: SSL_KEYSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
     };
 
-    SecureSocket socket = {
-        cert: trustStore,
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
         key: {
-            keyStore: keyStore,
+            keyStore: invalidKeyStore,
             keyPassword: SSL_MASTER_PASSWORD
         },
         protocol: {
@@ -784,9 +725,9 @@ function invalidSecurityProtocolListenerTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-listener-test-group",
-        clientId: "test-listener-52",
-        secureSocket: socket,
+        groupId: "invalid-security-protocol-listener-test-group",
+        clientId: "test-listener-25",
+        secureSocket: invalidSocket,
         auth: authConfig,
         securityProtocol: PROTOCOL_SSL
     };
@@ -799,9 +740,9 @@ function invalidSecurityProtocolListenerTest() returns error? {
     consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-listener-test-group",
-        clientId: "test-listener-52",
-        secureSocket: socket,
+        groupId: "invalid-security-protocol-listener-test-group",
+        clientId: "test-listener-26",
+        secureSocket: invalidSocket,
         securityProtocol: PROTOCOL_SASL_SSL
     };
     result = new (SSL_URL, consumerConfiguration);
@@ -813,9 +754,9 @@ function invalidSecurityProtocolListenerTest() returns error? {
     consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "invalid-secured-endpoints-consumer-test-group",
-        clientId: "test-listener-52",
-        secureSocket: socket,
+        groupId: "invalid-security-protocol-consumer-test-group",
+        clientId: "test-listener-27",
+        secureSocket: invalidSocket,
         auth: authConfig,
         securityProtocol: PROTOCOL_SASL_SSL
     };
