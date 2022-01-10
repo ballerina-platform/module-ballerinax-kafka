@@ -20,8 +20,6 @@ import ballerina/io;
 import ballerina/crypto;
 
 string MESSAGE_KEY = "TEST-KEY";
-const string INVALID_URL = "127.0.0.1.1:9099";
-const string INCORRECT_KAFKA_URL = "localhost:9099";
 
 @test:Config{}
 function producerInitTest() returns error? {
@@ -486,6 +484,22 @@ function SSLWithSASLAuthProducerTest() returns error? {
     };
 
     ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-14",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SASL_SSL
+    };
+
+    Producer|Error res = new (SASL_SSL_URL, producerConfigs);
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), "Failed to initialize the producer: Could not find a 'KafkaClient' entry in the JAAS configuration. System property 'java.security.auth.login.config' is not set");
+    }
+
+    producerConfigs = {
         clientId: "test-producer-13",
         acks: ACKS_ALL,
         maxBlock: 6,
@@ -504,7 +518,7 @@ function SSLWithSASLAuthProducerTest() returns error? {
     check producer->close();
 
     producerConfigs = {
-        clientId: "test-producer-13",
+        clientId: "test-producer-15",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -528,7 +542,35 @@ function SSLWithSASLAuthProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
+}
+
+@test:Config {}
+function SASLOnSSLEndpointProducerTest() returns error? {
+    string topic = "sasl-on-ssl-endpoint-producer-test-topic";
+
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-14",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+
+    Producer producer = check new (SSL_URL, producerConfigs);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic sasl-on-ssl-endpoint-producer-test-topic not present in metadata after 6000 ms.");
+    }
+    check producer->close();
 }
 
 @test:Config {}
