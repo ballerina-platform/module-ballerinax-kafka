@@ -28,6 +28,7 @@ string saslIncorrectCredentialsMsg = "";
 string sslMsg = "";
 string detachMsg1 = "";
 string detachMsg2 = "";
+string incorrectEndpointMsg = "";
 
 int receivedMsgCount = 0;
 
@@ -45,10 +46,65 @@ function consumerServiceTest() returns error? {
     check consumer.attach(consumerService);
     check consumer.'start();
 
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
     check consumer.gracefulStop();
     return;
+}
+
+@test:Config {}
+function consumerServiceInvalidUrlTest() returns error? {
+    string topic = "consumer-service-invalid-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "listener-service-invalid-test-group",
+        clientId: "test-listener-1"
+    };
+    Listener consumer = check new (INCORRECT_KAFKA_URL, consumerConfiguration);
+    check consumer.attach(incorrectEndpointsService);
+    check consumer.'start();
+
+    runtime:sleep(3);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check consumer.gracefulStop();
+    return;
+}
+
+@test:Config {}
+function attachDetachToClosedListenerTest() returns error? {
+    string topic = "attach-detach-closed-listener-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "listener-service-invalid-test-group",
+        clientId: "test-listener-1"
+    };
+    Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
+    error? result = consumer.gracefulStop();
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "A service must be attached to the listener before stopping");
+    }
+
+    check consumer.attach(incorrectEndpointsService);
+    check consumer.'start();
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, TEST_MESSAGE);
+    check consumer.immediateStop();
+    check consumer.attach(incorrectEndpointsService);
+    check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, TEST_MESSAGE);
+
+    error? res = consumer.detach(incorrectEndpointsService);
+    test:assertTrue(res is error);
+    if res is error {
+        test:assertEquals(res.message(), "Error closing the Kafka consumers for service");
+    }
+    incorrectEndpointMsg = "";
 }
 
 @test:Config {}
@@ -64,12 +120,12 @@ function consumerServiceGracefulStopTest() returns error? {
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(consumerGracefulStopService);
     check consumer.'start();
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedGracefulStopMessage, TEST_MESSAGE);
 
     check consumer.gracefulStop();
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
     return;
 }
@@ -87,12 +143,12 @@ function consumerServiceImmediateStopTest() returns error? {
     Listener consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer.attach(consumerImmediateStopService);
     check consumer.'start();
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedImmediateStopMessage, TEST_MESSAGE);
 
     check consumer.immediateStop();
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
     return;
 }
@@ -108,13 +164,27 @@ function consumerServiceSubscribeErrorTest() returns error? {
     };
     Listener|error result = trap new (DEFAULT_URL, consumerConfiguration);
 
-    if (result is error) {
+    if result is error {
         string expectedErr = "The groupId of the consumer must be set to subscribe to the topics";
         test:assertEquals(result.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    return;
+    consumerConfiguration = {
+        topics: [" "],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "listener-immediate-stop-service-test-group",
+        clientId: "test-consumer-3"
+    };
+    result = new (DEFAULT_URL, consumerConfiguration);
+
+    if result is error {
+        string expectedErr = "Failed to subscribe to the provided topics: Topic collection to subscribe to " +
+        "cannot contain null or empty topic";
+        test:assertEquals(result.message(), expectedErr);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
 }
 
 @test:Config {}
@@ -132,7 +202,7 @@ function listenerConfigTest() returns error? {
     check serviceConsumer.attach(consumerConfigService);
     check serviceConsumer.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(receivedConfigMessage, TEST_MESSAGE);
     check serviceConsumer.gracefulStop();
     return;
@@ -272,7 +342,7 @@ function saslListenerTest() returns error? {
     check saslListener.attach(saslConsumerService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(saslMsg, TEST_MESSAGE);
     check saslListener.gracefulStop();
     return;
@@ -300,7 +370,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     check saslListener.attach(saslConsumerIncorrectCredentialsService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(saslMsg, EMPTY_MEESAGE);
     check saslListener.gracefulStop();
     return;
@@ -344,7 +414,7 @@ function sslListenerTest() returns error? {
     check saslListener.attach(sslConsumerService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(sslMsg, TEST_MESSAGE);
     check saslListener.gracefulStop();
     return;
@@ -369,14 +439,14 @@ function basicMessageOrderTest() returns error? {
     check consumer.attach(messageOrderService);
     check consumer.'start();
 
-    runtime:sleep(7);
+    runtime:sleep(3);
 
     while (i < 10) {
         string message = i.toString();
         check sendMessage(message.toBytes(), topic);
         i += 1;
     }
-    runtime:sleep(7);
+    runtime:sleep(3);
     string expected = "0123456789";
     test:assertEquals(messagesReceivedInOrder, expected);
     check consumer.gracefulStop();
@@ -397,20 +467,20 @@ function listenerDetachTest() returns error? {
     check listener1.attach(listenerDetachService1);
     check listener1.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic1);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(detachMsg1, TEST_MESSAGE);
 
     // detach the listener and check any new messages are processed
     check listener1.detach(listenerDetachService1);
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic1);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(detachMsg1, TEST_MESSAGE);
 
     // attach the listener and check for new messages
     check listener1.attach(listenerDetachService1);
     check listener1.'start();
     check sendMessage(TEST_MESSAGE_III.toBytes(), topic1);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(detachMsg1, TEST_MESSAGE_III);
 
     // detach from the current service and attach to a new service
@@ -418,7 +488,7 @@ function listenerDetachTest() returns error? {
     check listener1.attach(listenerDetachService2);
     check listener1.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic1);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(detachMsg1, TEST_MESSAGE_III);
     test:assertEquals(detachMsg2, TEST_MESSAGE);
     check listener1.gracefulStop();
@@ -436,11 +506,326 @@ function listenerDetachTest() returns error? {
     check listener2.'start();
     detachMsg1 = "";
     check sendMessage(TEST_MESSAGE.toBytes(), topic2);
-    runtime:sleep(7);
+    runtime:sleep(3);
     test:assertEquals(detachMsg1, TEST_MESSAGE);
     check listener2.gracefulStop();
     return;
 }
+
+@test:Config {}
+function plaintextToSecuredEndpointsListenerTest() returns error? {
+    string topic = "plaintext-secured-endpoints-consumer-test-topic";
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "plaintext-secured-endpoints-consumer-test-group",
+        clientId: "test-listener-49"
+    };
+
+    Listener testListener = check new (SSL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+
+    testListener = check new (SASL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+
+    testListener = check new (SASL_SSL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+}
+
+@test:Config {}
+function invalidSecuredEndpointsListenerTest() returns error? {
+    string topic = "invalid-secured-endpoints-consumer-test-topic";
+
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-consumer-test-group",
+        clientId: "test-consumer-50",
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+    Listener testListener = check new (SSL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+
+    testListener = check new (SASL_SSL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+
+    consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-consumer-test-group",
+        clientId: "test-consumer-51",
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+
+    testListener = check new (SASL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+
+    testListener = check new (SASL_SSL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+}
+
+@test:Config {}
+function sslIncorrectStoresListenerTest() returns error? {
+    string topic = "ssl-incorrect-stores-listener-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_INCORRECT_TRUSTSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_INCORRECT_KEYSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-listener-test-group",
+        clientId: "test-listener-51",
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Listener testListener = check new (SASL_SSL_URL, consumerConfiguration);
+    check testListener.attach(incorrectEndpointsService);
+    check testListener.'start();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    runtime:sleep(2);
+    test:assertEquals(incorrectEndpointMsg, "");
+    check testListener.gracefulStop();
+}
+
+@test:Config {}
+function sslIncorrectMasterPasswordListenerTest() returns error? {
+    string topic = "ssl-incorrect-master-password-listener-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_PATH,
+        password: INCORRECT_SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_PATH,
+        password: INCORRECT_SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: INCORRECT_SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-listener-test-group",
+        clientId: "test-listener-52",
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Listener|Error result = new (SSL_URL, consumerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
+    }
+}
+
+@test:Config {}
+function sslIncorrectCertPathListenerTest() returns error? {
+    string topic = "ssl-incorrect-cert-path-listener-test-topic";
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-listener-test-group",
+        clientId: "test-listener-52",
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Listener|Error result = new (SSL_URL, consumerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
+    }
+}
+
+@test:Config {}
+function invalidSecurityProtocolListenerTest() returns error? {
+    string topic = "invalid-security-protocol-listener-test-topic";
+
+    AuthenticationConfiguration authConfig = {
+        mechanism: AUTH_SASL_PLAIN,
+        username: SASL_USER,
+        password: SASL_PASSWORD
+    };
+
+    crypto:TrustStore trustStore = {
+        path: SSL_TRUSTSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore keyStore = {
+        path: SSL_KEYSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket socket = {
+        cert: trustStore,
+        key: {
+            keyStore: keyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-listener-test-group",
+        clientId: "test-listener-52",
+        secureSocket: socket,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Listener|Error result = new (SSL_URL, consumerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
+    }
+
+    consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-listener-test-group",
+        clientId: "test-listener-52",
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SASL_SSL
+    };
+    result = new (SSL_URL, consumerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
+    }
+
+    consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "invalid-secured-endpoints-consumer-test-group",
+        clientId: "test-listener-52",
+        secureSocket: socket,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_SSL
+    };
+    result = new (SSL_URL, consumerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
+    }
+}
+
 
 Service messageOrderService =
 service object {
@@ -450,7 +835,6 @@ service object {
             string message = check 'string:fromBytes(value);
             messagesReceivedInOrder = messagesReceivedInOrder + message;
         }
-        return;
     }
 };
 
@@ -463,7 +847,6 @@ service object {
             log:printInfo("Message received: " + message);
             receivedMessage = message;
         }
-        return;
     }
 };
 
@@ -476,7 +859,6 @@ service object {
             log:printInfo("Message received: " + message);
             receivedGracefulStopMessage = message;
         }
-        return;
     }
 };
 
@@ -489,7 +871,6 @@ service object {
             log:printInfo("Message received: " + message);
             receivedImmediateStopMessage = message;
         }
-        return;
     }
 };
 
@@ -503,7 +884,6 @@ service object {
             receivedMessageWithCommit = message;
         }
         check caller->'commit();
-        return;
     }
 };
 
@@ -527,7 +907,6 @@ service object {
             offset: receivedMsgCount
         };
         check caller->commitOffset([partitionOffset]);
-        return;
     }
 };
 
@@ -540,7 +919,6 @@ service object {
             log:printInfo("Message received: " + message);
             receivedConfigMessage = message;
         }
-        return;
     }
 };
 
@@ -553,7 +931,6 @@ service object {
             log:printInfo(messageContent);
             saslMsg = messageContent;
         }
-        return;
     }
 };
 
@@ -566,7 +943,6 @@ service object {
             log:printInfo(messageContent);
             saslIncorrectCredentialsMsg = messageContent;
         }
-        return;
     }
 };
 
@@ -579,7 +955,6 @@ service object {
             log:printInfo(messageContent);
             sslMsg = messageContent;
         }
-        return;
     }
 };
 
@@ -592,7 +967,6 @@ service object {
             log:printInfo(messageContent);
             detachMsg1 = messageContent;
         }
-        return;
     }
 };
 
@@ -605,6 +979,17 @@ service object {
             log:printInfo(messageContent);
             detachMsg2 = messageContent;
         }
-        return;
+    }
+};
+
+Service incorrectEndpointsService =
+service object {
+    remote function onConsumerRecord(Caller caller,
+                                ConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            incorrectEndpointMsg = messageContent;
+        }
     }
 };
