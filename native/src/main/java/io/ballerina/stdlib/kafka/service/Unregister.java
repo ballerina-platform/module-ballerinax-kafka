@@ -26,6 +26,7 @@ import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.UNCHECKED;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 
 /**
  * This is used to unregister a listener to the kafka service.
@@ -34,6 +35,9 @@ public class Unregister {
     @SuppressWarnings(UNCHECKED)
     public static Object unregister(Environment env, BObject listener, BObject service) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
+        if (serverConnector == null) {
+            return createKafkaError("A service must be attached before detaching the listener");
+        }
         try {
             serverConnector.stopPollingTask();
         } catch (KafkaConnectorException e) {

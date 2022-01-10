@@ -35,6 +35,9 @@ public class Stop {
 
     public static Object gracefulStop(BObject listener) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
+        if (serverConnector == null) {
+            return createKafkaError("A service must be attached to the listener before stopping");
+        }
         boolean isStopped;
         try {
             isStopped = serverConnector.gracefulStop();
@@ -49,6 +52,9 @@ public class Stop {
 
     public static Object immediateStop(BObject listener) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
+        if (serverConnector == null) {
+            return createKafkaError("A service must be attached before stopping the listener");
+        }
         boolean isStopped;
         try {
             isStopped = serverConnector.immediateStop();
