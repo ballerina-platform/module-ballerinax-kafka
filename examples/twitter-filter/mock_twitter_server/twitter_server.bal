@@ -36,7 +36,7 @@ service / on new http:Listener(9090) {
         // Creates an array of tweets.
         types:Tweet[] response = [];
         int i = 0;
-        while(i < 20) {
+        while i < 20 {
             response[i] = check generateTweet();
             i += 1;
         }

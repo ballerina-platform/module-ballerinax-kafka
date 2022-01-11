@@ -48,5 +48,4 @@ function orderProcessorTest() returns error? {
     types:Order neworder = <types:Order> jsonTweet;
 
     test:assertEquals(neworder, 'order);
-    return;
 }
