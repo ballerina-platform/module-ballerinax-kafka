@@ -39,17 +39,10 @@ public client isolated class Consumer {
         check self.consumerInit();
 
         string[]? topics = config?.topics;
-        if (topics is string[]) {
+        if topics is string[] {
             check self->subscribe(topics);
         }
-        return;
     }
-
-    private isolated function consumerInit() returns Error? =
-    @java:Method {
-        name: "connect",
-        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.BrokerConnection"
-    } external;
 
     # Assigns consumer to a set of topic partitions.
     #
@@ -242,7 +235,7 @@ public client isolated class Consumer {
 
     # Polls the external broker to retrieve messages.
     # ```ballerina
-    # kafka:ConsumerRecord[] result = check consumer->poll(1000);
+    # kafka:ConsumerRecord[] result = check consumer->poll(10);
     # ```
     #
     # + timeout - Polling time in seconds
@@ -314,7 +307,7 @@ public client isolated class Consumer {
     # + return - A `kafka:Error` if an error is encountered or else '()'
     isolated remote function subscribe(string[] topics) returns Error? {
         if (self.consumerConfig?.groupId is string) {
-            return self->consumerSubscribe(topics);
+            return self.consumerSubscribe(topics);
         } else {
             panic createError("The groupId of the consumer must be set to subscribe to the topics");
         }
@@ -345,7 +338,13 @@ public client isolated class Consumer {
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
     } external;
 
-    isolated remote function consumerSubscribe(string[] topics) returns Error? =
+    private isolated function consumerInit() returns Error? =
+    @java:Method {
+        name: "connect",
+        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.BrokerConnection"
+    } external;
+
+    private isolated function consumerSubscribe(string[] topics) returns Error? =
     @java:Method {
         name: "subscribe",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"

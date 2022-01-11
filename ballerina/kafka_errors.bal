@@ -24,4 +24,3 @@ isolated function getKeyTypeMismatchError(string expectedType) returns Error {
 isolated function createError(string message) returns Error {
     return error Error(message);
 }
-

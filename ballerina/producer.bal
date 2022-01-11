@@ -28,6 +28,8 @@ public client isolated class Producer {
     private final string valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
 
+    private string connectorId = uuid:createType4AsString();
+
     # Creates a new Kafka `Producer`.
     #
     # + bootstrapServers - List of remote server endpoints of Kafka brokers
@@ -40,10 +42,7 @@ public client isolated class Producer {
         self.valueSerializerType = SER_BYTE_ARRAY;
 
         check self.producerInit();
-        return;
     }
-
-    private string connectorId = uuid:createType4AsString();
 
     private isolated function producerInit() returns Error? =
     @java:Method {
@@ -88,7 +87,7 @@ public client isolated class Producer {
 
     # Produces records to the Kafka server.
     # ```ballerina
-    # kafka:Error? result = producer->send("Hello World, Ballerina", "kafka-topic");
+    # kafka:Error? result = producer->send({value: "Hello World, Ballerina", topic: "kafka-topic"});
     # ```
     #
     # + producerRecord - Record to be produced
