@@ -36,7 +36,7 @@ public class Stop {
     public static Object gracefulStop(BObject listener) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
         if (serverConnector == null) {
-            return createKafkaError("A service must be attached to the listener before stopping");
+            return createKafkaError("A service must be attached before stopping the listener");
         }
         boolean isStopped;
         try {
