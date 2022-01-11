@@ -57,8 +57,7 @@ public class PluginConstants {
                 "KAFKA_109"),
         INVALID_MULTIPLE_LISTENERS("Multiple listener attachments. Only one kafka:Listener is allowed.",
                 "KAFKA_110"),
-        INVALID_ANNOTATION_NUMBER("No annotations are allowed for kafka services.",
-                "KAFKA_111");
+        INVALID_ANNOTATION_NUMBER("No annotations are allowed for kafka services.", "KAFKA_111");
 
         private final String error;
         private final String errorCode;

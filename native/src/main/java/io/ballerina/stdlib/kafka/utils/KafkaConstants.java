@@ -46,8 +46,6 @@ public class KafkaConstants {
     public static final String TRANSACTION_CONTEXT = "TransactionInitiated";
 
     public static final String TOPIC_PARTITION_STRUCT_NAME = "TopicPartition";
-    public static final BString AVRO_DATA_RECORD_NAME = StringUtils.fromString("dataRecord");
-    public static final BString AVRO_SCHEMA_STRING_NAME = StringUtils.fromString("schemaString");
     public static final String OFFSET_STRUCT_NAME = "PartitionOffset";
 
     public static final String KAFKA_ERROR = "Error";
@@ -73,7 +71,6 @@ public class KafkaConstants {
     public static final BString ALIAS_PARTITION = StringUtils.fromString("partition");
     public static final BString ALIAS_OFFSET = StringUtils.fromString("offset");
     public static final String ALIAS_DURATION = "duration";
-    public static final BString ALIAS_VALUE = StringUtils.fromString("value");
 
     // Consumer Configuration.
     public static final BString CONSUMER_BOOTSTRAP_SERVERS_CONFIG = StringUtils.fromString("bootstrapServers");
@@ -88,9 +85,6 @@ public class KafkaConstants {
     public static final BString CONSUMER_CLIENT_ID_CONFIG = StringUtils.fromString("clientId");
     public static final BString CONSUMER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
     public static final BString CONSUMER_ISOLATION_LEVEL_CONFIG = StringUtils.fromString("isolationLevel");
-    public static final BString CONSUMER_KEY_DESERIALIZER_CONFIG = StringUtils.fromString("keyDeserializer");
-    public static final BString CONSUMER_VALUE_DESERIALIZER_CONFIG = StringUtils.fromString("valueDeserializer");
-    public static final String BALLERINA_STRAND = "ballerina.strand";
     public static final BString CONSUMER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
 
     public static final BString CONSUMER_SESSION_TIMEOUT_MS_CONFIG = StringUtils.fromString("sessionTimeout");
@@ -138,8 +132,6 @@ public class KafkaConstants {
     public static final BString PRODUCER_PARTITIONER_CLASS_CONFIG = StringUtils.fromString("partitionerClass");
     public static final BString PRODUCER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
     public static final BString PRODUCER_TRANSACTIONAL_ID_CONFIG = StringUtils.fromString("transactionalId");
-    public static final BString PRODUCER_KEY_SERIALIZER_CONFIG = StringUtils.fromString("keySerializer");
-    public static final BString PRODUCER_VALUE_SERIALIZER_CONFIG = StringUtils.fromString("valueSerializer");
     public static final BString PRODUCER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
     public static final BString PRODUCER_BUFFER_MEMORY_CONFIG = StringUtils.fromString("bufferMemory");
     public static final BString PRODUCER_RETRIES_CONFIG = StringUtils.fromString("retryCount");
@@ -177,7 +169,6 @@ public class KafkaConstants {
     public static final BString PASSWORD_CONFIG = StringUtils.fromString("password");
     public static final BString SSL_PROTOCOL_VERSIONS = StringUtils.fromString("versions");
     public static final BString SECURITY_PROTOCOL_CONFIG = StringUtils.fromString("securityProtocol");
-    public static final BString SSL_PROTOCOL_CONFIG = StringUtils.fromString("protocol");
     public static final BString SSL_PROTOCOL_NAME = StringUtils.fromString("name");
     public static final BString SSL_PROVIDER_CONFIG = StringUtils.fromString("provider");
     public static final BString SSL_KEY_PASSWORD_CONFIG = StringUtils.fromString("keyPassword");
@@ -197,11 +188,6 @@ public class KafkaConstants {
     // Serializer - Deserializer names
     // Ballerina String Names
     public static final String SERDES_BYTE_ARRAY = "BYTE_ARRAY";
-    public static final String SERDES_STRING = "STRING";
-    public static final String SERDES_INT = "INT";
-    public static final String SERDES_FLOAT = "FLOAT";
-    public static final String SERDES_AVRO = "AVRO";
-    public static final String SERDES_CUSTOM = "CUSTOM";
 
     // Default class names
     // Serializers
@@ -209,15 +195,6 @@ public class KafkaConstants {
 
     // Deserializers
     public static final String BYTE_ARRAY_DESERIALIZER = "org.apache.kafka.common.serialization.ByteArrayDeserializer";
-
-    // Serializer / Deserializer function names
-    public static final String FUNCTION_SERIALIZE = "serialize";
-    public static final String FUNCTION_DESERIALIZE = "deserialize";
-    public static final String FUNCTION_CLOSE = "close";
-
-    // Subscription handler function names
-    public static final String FUNCTION_ON_PARTITION_REVOKED = "onPartitionsRevoked";
-    public static final String FUNCTION_ON_PARTITION_ASSIGNED = "onPartitionsAssigned";
 
     // Warning suppression
     public static final String UNCHECKED = "unchecked";
