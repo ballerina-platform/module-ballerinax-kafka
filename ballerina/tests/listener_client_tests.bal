@@ -86,7 +86,25 @@ function attachDetachToClosedListenerTest() returns error? {
     error? result = consumer.gracefulStop();
     test:assertTrue(result is Error);
     if result is Error {
-        test:assertEquals(result.message(), "A service must be attached to the listener before stopping");
+        test:assertEquals(result.message(), "A service must be attached before stopping the listener");
+    }
+
+    result = consumer.immediateStop();
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "A service must be attached before stopping the listener");
+    }
+
+    result = consumer.detach(incorrectEndpointsService);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "A service must be attached before detaching the listener");
+    }
+
+    result = consumer.'start();
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "A service must be attached before starting the listener");
     }
 
     check consumer.attach(incorrectEndpointsService);
@@ -831,7 +849,7 @@ service object {
 Service consumerServiceWithCommitOffset =
 service object {
     remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
-        string topic = "service-commit-offset-test-topic";
+        string topic = "listener-commit-offset-test-topic";
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
