@@ -133,6 +133,10 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
      */
     public boolean stopPollingTask() throws KafkaConnectorException {
         KafkaConnectorException kcException = null;
+        if (this.messageConsumers == null) {
+            kcException = new KafkaConnectorException("Error closing the Kafka consumers for service");
+            throw kcException;
+        }
         for (KafkaRecordConsumer consumer : this.messageConsumers) {
             try {
                 consumer.stopScheduledPollTask();

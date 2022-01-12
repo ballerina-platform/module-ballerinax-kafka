@@ -32,6 +32,9 @@ public class Start {
 
     public static Object start(BObject listener) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);
+        if (serverConnector == null) {
+            return createKafkaError("A service must be attached before starting the listener");
+        }
         try {
             serverConnector.start();
         } catch (KafkaConnectorException e) {

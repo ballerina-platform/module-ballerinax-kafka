@@ -20,8 +20,6 @@ import ballerina/io;
 import ballerina/crypto;
 
 string MESSAGE_KEY = "TEST-KEY";
-const string INVALID_URL = "127.0.0.1.1:9099";
-const string INCORRECT_KAFKA_URL = "localhost:9099";
 
 @test:Config{}
 function producerInitTest() returns error? {
@@ -224,11 +222,6 @@ function transactionalProducerTest() returns error? {
 @test:Config{}
 function saslProducerTest() returns error? {
     string topic = "sasl-producer-test-topic";
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
 
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-06",
@@ -262,7 +255,7 @@ function saslProducerTest() returns error? {
 @test:Config{}
 function saslProducerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
-    AuthenticationConfiguration authConfig = {
+    AuthenticationConfiguration invalidAuthConfig = {
         mechanism: AUTH_SASL_PLAIN,
         username: SASL_USER,
         password: SASL_INCORRECT_PASSWORD
@@ -274,7 +267,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        auth: authConfig,
+        auth: invalidAuthConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
 
@@ -287,8 +280,15 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    check kafkaProducer->close();
-    return;
+
+    kafkaProducer = check new (SSL_URL, producerConfigs);
+    result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    if result is Error {
+        string errorMsg = "Failed to send data to Kafka server: Topic sasl-producer-incorrect-credentials-test-topic not present in metadata after 6000 ms.";
+        test:assertEquals(result.message(), errorMsg);
+    } else {
+        test:assertFail(msg = "Expected an error");
+    }
 }
 
 @test:Config {}
@@ -297,11 +297,7 @@ function producerAdditionalPropertiesTest() returns error? {
     map<string> propertyMap = {
         "security.protocol": PROTOCOL_SASL_PLAINTEXT
     };
-    AuthenticationConfiguration authConfig = {
-        mechanism: AUTH_SASL_PLAIN,
-        username: SASL_USER,
-        password: SASL_PASSWORD
-    };
+
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-08",
         acks: ACKS_ALL,
@@ -333,29 +329,9 @@ function producerAdditionalPropertiesTest() returns error? {
 @test:Config {}
 function sslProducerTest() returns error? {
     string topic = "ssl-producer-test-topic";
-    crypto:TrustStore trustStore = {
-        path: SSL_TRUSTSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    crypto:KeyStore keyStore = {
-        path: SSL_KEYSTORE_PATH,
-        password: SSL_MASTER_PASSWORD
-    };
-
-    SecureSocket socket = {
-        cert: trustStore,
-        key: {
-            keyStore: keyStore,
-            keyPassword: SSL_MASTER_PASSWORD
-        },
-        protocol: {
-            name: SSL
-        }
-    };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-9",
+        clientId: "test-producer-09",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
@@ -389,7 +365,7 @@ function sslCertKeyProducerTest() returns error? {
         keyFile: SSL_CLIENT_PRIVATE_KEY_FILE_PATH
     };
 
-    SecureSocket socket = {
+    SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
         key: certKey,
         protocol: {
@@ -403,7 +379,7 @@ function sslCertKeyProducerTest() returns error? {
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: certSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
@@ -427,7 +403,7 @@ function sslCertKeyProducerTest() returns error? {
 function sslCertOnlyProducerTest() returns error? {
     string topic = "ssl-cert-only-producer-test-topic";
 
-    SecureSocket socket = {
+    SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
         protocol: {
             name: SSL
@@ -435,12 +411,12 @@ function sslCertOnlyProducerTest() returns error? {
     };
 
     ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-10",
+        clientId: "test-producer-11",
         acks: ACKS_ALL,
         maxBlock: 6,
         requestTimeout: 2,
         retryCount: 3,
-        secureSocket: socket,
+        secureSocket: certSocket,
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
@@ -458,4 +434,262 @@ function sslCertOnlyProducerTest() returns error? {
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
     return;
+}
+
+@test:Config {}
+function SSLWithSASLAuthProducerTest() returns error? {
+    string topic = "ssl-with-sasl-auth-producer-test-topic";
+
+    SecureSocket certSocket = {
+        cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
+        protocol: {
+            name: SSL
+        }
+    };
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-12",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: certSocket,
+        securityProtocol: PROTOCOL_SASL_SSL
+    };
+
+    Producer|Error res = new (SASL_SSL_URL, producerConfigs);
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), "Failed to initialize the producer: Could not find a 'KafkaClient' entry in the JAAS configuration. System property 'java.security.auth.login.config' is not set");
+    }
+    producerConfigs = {
+        clientId: "test-producer-13",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SSL
+    };
+
+    Producer producer = check new (SASL_SSL_URL, producerConfigs);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic ssl-with-sasl-auth-producer-test-topic not present in metadata after 6000 ms.");
+    }
+    check producer->close();
+
+    producerConfigs = {
+        clientId: "test-producer-14",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        auth: authConfig,
+        secureSocket: socket,
+        securityProtocol: PROTOCOL_SASL_SSL
+    };
+
+    producer = check new (SASL_SSL_URL, producerConfigs);
+    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "ssl-cert-only-producer-test-group",
+        clientId: "test-consumer-53"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
+
+@test:Config {}
+function SASLOnSSLEndpointProducerTest() returns error? {
+    string topic = "sasl-on-ssl-endpoint-producer-test-topic";
+
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-15",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        auth: authConfig,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+
+    Producer producer = check new (SSL_URL, producerConfigs);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic sasl-on-ssl-endpoint-producer-test-topic not present in metadata after 6000 ms.");
+    }
+    check producer->close();
+}
+
+@test:Config {}
+function operationsOnClosedProducerTest() returns error? {
+    string topic = "operations-on-closed-producer";
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-16"
+    };
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
+    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->close();
+
+    TopicPartition[]|Error? result = producer->getTopicPartitions("ssl-cert-only-producer-test-topic");
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to fetch partitions from the producer Requested metadata update after close");
+    }
+}
+
+@test:Config {}
+function producerAuthWithoutSecurityConfigsTest() returns error? {
+    string topic = "producer-auth-without-security-configs-test-topic";
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-17",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        securityProtocol: PROTOCOL_PLAINTEXT
+    };
+    Producer producer = check new (SSL_URL, producerConfiguration);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-auth-without-security-configs-test-topic not present in metadata after 6000 ms.");
+    }
+
+    producer = check new (SASL_URL, producerConfiguration);
+    result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-auth-without-security-configs-test-topic not present in metadata after 6000 ms.");
+    }
+}
+
+@test:Config {}
+function sslIncorrectStoresTest() returns error? {
+    string topic = "ssl-incorrect-stores-test-topic";
+    crypto:TrustStore invalidTrustStore = {
+        path: SSL_INCORRECT_TRUSTSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore invalidKeyStore = {
+        path: SSL_INCORRECT_KEYSTORE_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
+        key: {
+            keyStore: invalidKeyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-17",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: invalidSocket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer producer = check new (SSL_URL, producerConfiguration);
+    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to send data to Kafka server: SSL handshake failed");
+    }
+}
+
+@test:Config {}
+function sslIncorrectMasterPasswordTest() returns error? {
+    string topic = "ssl-incorrect-master-password-test-topic";
+    crypto:TrustStore invalidTrustStore = {
+        path: SSL_TRUSTSTORE_PATH,
+        password: INCORRECT_SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore invalidKeyStore = {
+        path: SSL_KEYSTORE_PATH,
+        password: INCORRECT_SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
+        key: {
+            keyStore: invalidKeyStore,
+            keyPassword: INCORRECT_SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-18",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: invalidSocket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer|Error result = new (SSL_URL, producerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to load SSL keystore tests/secrets/trustoresandkeystores/kafka.client.keystore.jks of type JKS");
+    }
+}
+
+@test:Config {}
+function sslIncorrectCertPathTest() returns error? {
+    string topic = "ssl-incorrect-cert-path-test-topic";
+    crypto:TrustStore invalidTrustStore = {
+        path: SSL_TRUSTSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    crypto:KeyStore invalidKeyStore = {
+        path: SSL_KEYSTORE_INCORRECT_PATH,
+        password: SSL_MASTER_PASSWORD
+    };
+
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore,
+        key: {
+            keyStore: invalidKeyStore,
+            keyPassword: SSL_MASTER_PASSWORD
+        },
+        protocol: {
+            name: SSL
+        }
+    };
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-19",
+        acks: ACKS_ALL,
+        maxBlock: 6,
+        requestTimeout: 2,
+        retryCount: 3,
+        secureSocket: invalidSocket,
+        securityProtocol: PROTOCOL_SSL
+    };
+    Producer|Error result = new (SSL_URL, producerConfiguration);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to load SSL keystore tests/secrets/trustoresa#ndkeystores/kafka.client.keystore.jks of type JKS");
+    }
 }
