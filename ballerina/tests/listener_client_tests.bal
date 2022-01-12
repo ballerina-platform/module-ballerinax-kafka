@@ -176,7 +176,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         clientId: "test-listener-06"
     };
-    Listener|Error result = trap new (DEFAULT_URL, consumerConfiguration);
+    Listener|error result = trap new (DEFAULT_URL, consumerConfiguration);
 
     if result is Error {
         string expectedErr = "The groupId of the consumer must be set to subscribe to the topics";
@@ -285,7 +285,7 @@ function consumerServiceCommitOffsetTest() returns error? {
         count += 1;
     }
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertTrue(committedOffset is PartitionOffset);
     if committedOffset is PartitionOffset {
@@ -320,7 +320,7 @@ function consumerServiceCommitTest() returns error? {
         count += 1;
     }
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertTrue(committedOffset is PartitionOffset);
     if committedOffset is PartitionOffset {

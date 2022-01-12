@@ -126,7 +126,7 @@ function producerCloseTest() returns error? {
     test:assertTrue(result is Error);
     if result is Error {
         string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
-        test:assertEquals(receivedErr.message(), expectedErr);
+        test:assertEquals(result.message(), expectedErr);
     }
     check producer->close();
 }
@@ -605,7 +605,6 @@ function sslIncorrectStoresTest() returns error? {
 
 @test:Config {}
 function sslIncorrectMasterPasswordTest() returns error? {
-    string topic = "ssl-incorrect-master-password-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
@@ -645,7 +644,6 @@ function sslIncorrectMasterPasswordTest() returns error? {
 
 @test:Config {}
 function sslIncorrectCertPathTest() returns error? {
-    string topic = "ssl-incorrect-cert-path-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
