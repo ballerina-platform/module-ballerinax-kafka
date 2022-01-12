@@ -53,7 +53,7 @@ function producerInitTest() returns error? {
     check result2->close();
 
     Producer|Error result3 = new (DEFAULT_URL, producerConfiguration3);
-    if (result3 is Error) {
+    if result3 is Error {
         string expectedErr = "configuration enableIdempotence must be set to true to enable " +
             "transactional producer";
          test:assertEquals(result3.message(), expectedErr);
@@ -62,14 +62,13 @@ function producerInitTest() returns error? {
     }
 
     Producer|Error result4 = new (INVALID_URL, producerConfiguration1);
-    if (result4 is Error) {
+    if result4 is Error {
         string expectedErr = "Failed to initialize the producer: " +
             "No resolvable bootstrap urls given in bootstrap.servers";
         test:assertEquals(result4.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    return;
 }
 
 @test:Config {}
@@ -95,7 +94,6 @@ function producerSendStringTest() returns error? {
     string messageConverted = check 'string:fromBytes(messageValue);
     test:assertEquals(messageConverted, TEST_MESSAGE);
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -104,14 +102,13 @@ function producerKeyTypeMismatchErrorTest() returns error? {
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
     error? result = trap sendByteArrayValues(producer, message.toBytes(), topic, MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
-    if (result is error) {
+    if result is error {
         string expectedErr = "Invalid type found for Kafka key. Expected key type: 'byte[]'.";
         test:assertEquals(result.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
     }
     check producer->close();
-    return;
 }
 
 @test:Config {
@@ -122,15 +119,16 @@ function producerCloseTest() returns error? {
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Test Message";
     Error? result = producer->send({ topic: topic, value: message.toBytes() });
-    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    test:assertFalse(result is Error, result is Error ? result.toString() : result.toString());
     result = producer->close();
-    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    test:assertFalse(result is Error, result is Error ? result.toString() : result.toString());
     result = producer->send({ topic: topic, value: message.toBytes() });
-    test:assertTrue(result is error);
-    error receivedErr = <error>result;
-    string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
-    test:assertEquals(receivedErr.message(), expectedErr);
-    return;
+    test:assertTrue(result is Error);
+    if result is Error {
+        string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
+        test:assertEquals(receivedErr.message(), expectedErr);
+    }
+    check producer->close();
 }
 
 @test:Config {}
@@ -151,7 +149,6 @@ function producerFlushTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals('string:fromBytes(consumerRecords[0].value), TEST_MESSAGE);
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -161,7 +158,6 @@ function producerGetTopicPartitionsTest() returns error? {
     TopicPartition[] topicPartitions = check producer->getTopicPartitions(topic);
     test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
     check producer->close();
-    return;
 }
 
 @test:Config {}
@@ -169,7 +165,7 @@ function producerGetTopicPartitionsErrorTest() returns error? {
     string topic = "get-topic-partitions-error-test-topic";
     Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
     TopicPartition[]|Error result = producer->getTopicPartitions(topic);
-    if (result is error) {
+    if result is error {
         string expectedErr = "Failed to fetch partitions from the producer Topic " +
                                 topic + " not present in metadata after ";
         test:assertEquals(result.message().substring(0, expectedErr.length()), expectedErr);
@@ -177,7 +173,6 @@ function producerGetTopicPartitionsErrorTest() returns error? {
         test:assertFail(msg = "Expected an error");
     }
     check producer->close();
-    return;
 }
 
 @test:Config {}
@@ -198,7 +193,7 @@ function transactionalProducerTest() returns error? {
             partition: 0
         });
         var commitResult = commit;
-        if (commitResult is ()) {
+        if commitResult is () {
             io:println("Commit successful");
         } else {
             test:assertFail(msg = "Commit Failed");
@@ -216,7 +211,6 @@ function transactionalProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config{}
@@ -249,7 +243,6 @@ function saslProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config{}
@@ -323,7 +316,6 @@ function producerAdditionalPropertiesTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -353,7 +345,6 @@ function sslProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -396,7 +387,6 @@ function sslCertKeyProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}
@@ -433,7 +423,6 @@ function sslCertOnlyProducerTest() returns error? {
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
-    return;
 }
 
 @test:Config {}

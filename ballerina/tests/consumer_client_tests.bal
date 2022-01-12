@@ -109,14 +109,15 @@ function consumerCloseTest() returns error? {
         clientId: "test-consumer-11"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    var result = check consumer->poll(5);
-    var closeresult = consumer->close();
-    test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
-    var newresult = consumer->poll(5);
-    test:assertTrue(newresult is error);
-    error receivedErr = <error>newresult;
-    string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
-    test:assertEquals(receivedErr.message(), expectedErr);
+    ConsumerRecord[] records = check consumer->poll(5);
+    error? closeresult = consumer->close();
+    test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
+    ConsumerRecord[]|Error result = consumer->poll(5);
+    test:assertTrue(result is Error);
+    if result is Error {
+        string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
+        test:assertEquals(result.message(), expectedErr);
+    }
 }
 
 @test:Config {}
@@ -129,14 +130,15 @@ function consumerCloseWithDurationTest() returns error? {
         clientId: "test-consumer-12"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    var result = check consumer->poll(5);
-    var closeresult = consumer->close(TIMEOUT_DURATION);
-    test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
-    var newresult = consumer->poll(5);
-    test:assertTrue(newresult is error);
-    error receivedErr = <error>newresult;
-    string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
-    test:assertEquals(receivedErr.message(), expectedErr);
+    ConsumerRecord[] records = check consumer->poll(5);
+    Error? closeresult = consumer->close(TIMEOUT_DURATION);
+    test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
+    ConsumerRecord[]|Error result = consumer->poll(5);
+    test:assertTrue(result is Error);
+    if result is Error {
+        string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
+        test:assertEquals(result.message(), expectedErr);
+    }
 }
 
 @test:Config {}
@@ -150,14 +152,15 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    var result = check consumer->poll(5);
-    var closeresult = consumer->close();
-    test:assertFalse(closeresult is error, closeresult is error ? closeresult.toString() : closeresult.toString());
-    var newresult = consumer->poll(5);
-    test:assertTrue(newresult is error);
-    error receivedErr = <error>newresult;
-    string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
-    test:assertEquals(receivedErr.message(), expectedErr);
+    ConsumerRecord[] result = check consumer->poll(5);
+    Error? closeresult = consumer->close();
+    test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
+    ConsumerRecord[]|Error result = consumer->poll(5);
+    test:assertTrue(result is Error);
+    if result is Error {
+        string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
+        test:assertEquals(result.message(), expectedErr);
+    }
 }
 
 @test:Config {}
@@ -228,7 +231,7 @@ function consumerSeekTest() returns error? {
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 
     Error? result = consumer->seekToBeginning([nonExistingPartition]);
-    if (result is Error) {
+    if result is Error {
         string expectedErrorMsg = "Failed to seek the consumer to the beginning: No current " +
             "assignment for partition non-existing-topic-999";
         test:assertEquals(result.message(), expectedErrorMsg);
@@ -260,7 +263,7 @@ function consumerSeekToBeginningTest() returns error? {
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 
     Error? result = consumer->seekToBeginning([nonExistingPartition]);
-    if (result is Error) {
+    if result is Error {
         string expectedErrorMsg = "Failed to seek the consumer to the beginning: No current " +
             "assignment for partition non-existing-topic-999";
         test:assertEquals(result.message(), expectedErrorMsg);
@@ -293,7 +296,7 @@ function consumerSeekToEndTest() returns error? {
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
 
     Error? result = consumer->seekToEnd([nonExistingPartition]);
-    if (result is Error) {
+    if result is Error {
         string expectedErrorMsg = "Failed to seek the consumer to the end: No current " +
             "assignment for partition non-existing-topic-999";
         test:assertEquals(result.message(), expectedErrorMsg);
@@ -322,7 +325,7 @@ function consumerSeekToNegativeValueTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     Error? result = consumer->seek(partitionOffset);
-    if (result is Error) {
+    if result is Error {
         string expectedErrorMsg = "Failed to seek the consumer: seek offset must not be a negative number";
         test:assertEquals(result.message(), expectedErrorMsg);
     } else {
@@ -412,7 +415,7 @@ function consumerBeginningOffsetsTest() returns error? {
     test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
     PartitionOffset[]|Error result = consumer->getBeginningOffsets([nonExistingPartition]);
-    if (result is Error) {
+    if result is Error {
         string expectedErrorMsg = "Failed to retrieve offsets for the topic " +
             "partitions: Failed to get offsets by times in ";
         test:assertEquals(result.message().substring(0, 87), expectedErrorMsg);
@@ -462,7 +465,7 @@ function consumerEndOffsetsTest() returns error? {
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
 
     PartitionOffset[]|Error result = consumer->getEndOffsets([nonExistingPartition]);
-    if (result is Error) {
+    if result is Error {
         string expectedErrorMsg = "Failed to retrieve end offsets for the " +
         "consumer: Failed to get offsets by times in ";
         test:assertEquals(result.message().substring(0, 83), expectedErrorMsg);
@@ -555,7 +558,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topicPartition1]);
     Error? result = consumer->pause([topicPartition2]);
-    if (result is Error) {
+    if result is Error {
         string expectedErr = "Failed to pause topic partitions for the consumer: No current assignment for " +
             "partition " + failingPartition;
         test:assertEquals(result.message(), expectedErr);
@@ -565,7 +568,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     result = consumer->pause([topicPartition1]);
 
     result = consumer->resume([topicPartition2]);
-    if (result is Error) {
+    if result is Error {
         string expectedErr = "Failed to resume topic partitions for the consumer: No current assignment for " +
             "partition " + failingPartition;
         test:assertEquals(result.message(), expectedErr);
@@ -588,7 +591,7 @@ function consumerAssignToEmptyTopicTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     Error? result = consumer->assign([topicPartition]);
-    if (result is Error) {
+    if result is Error {
         string expectedErr = "Failed to assign topics for the consumer: Topic partitions to assign to cannot have null or empty topic";
         test:assertEquals(result.message(), expectedErr);
     } else {
@@ -734,7 +737,7 @@ function consumerSubscribeErrorTest() returns error? {
     });
     error? result = trap consumer->subscribe([topic]);
 
-    if (result is error) {
+    if result is error {
         string expectedErr = "The groupId of the consumer must be set to subscribe to the topics";
         test:assertEquals(result.message(), expectedErr);
     } else {
@@ -756,7 +759,7 @@ function manualCommitTest() returns error? {
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
     int messageCount = 10;
     int count = 0;
-    while (count < messageCount) {
+    while count < messageCount {
         check sendMessage(count.toString().toBytes(), topic);
         count += 1;
     }
@@ -863,11 +866,12 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(nonExistingPartition);
     test:assertEquals(committedOffset, ());
 
-    int|Error nonExistingPositionOffset = consumer->getPositionOffset(nonExistingPartition);
-    test:assertTrue(nonExistingPositionOffset is Error);
-    Error positionOffsetError = <Error>nonExistingPositionOffset;
-    string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
-    test:assertEquals(expectedError, positionOffsetError.message());
+    int|Error result = consumer->getPositionOffset(nonExistingPartition);
+    test:assertTrue(result is Error);
+    if result is Error {
+        string expectedError = "Failed to retrieve position offset: You can only check the position for partitions assigned to this consumer.";
+        test:assertEquals(result.message(), expectedError);
+    }
     check consumer->close();
 }
 
