@@ -29,7 +29,7 @@ isolated function sendByteArrayValues(Producer producer, byte[] value, string to
     }
 }
 
- //Send byte[] values with different types of keys
+//Send byte[] values with different types of keys
 isolated function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topic, int? partition = (),
     int? timestamp = ()) returns Error? =
 @java:Method {

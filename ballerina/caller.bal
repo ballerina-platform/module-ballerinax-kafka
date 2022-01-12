@@ -32,6 +32,9 @@ public client isolated class Caller {
     } external;
 
     # Commits the given offsets and partitions for the given topics of the service.
+    # ```ballerina
+    # kafka:Error? result = caller->commitOffset([partitionOffset1, partitionOffset2]);
+    # ```
     #
     # + offsets - Offsets to be commited
     # + duration - Timeout duration (in seconds) for the commit operation execution

@@ -87,7 +87,7 @@ public client isolated class Producer {
 
     # Produces records to the Kafka server.
     # ```ballerina
-    # kafka:Error? result = producer->send({value: "Hello World, Ballerina", topic: "kafka-topic"});
+    # kafka:Error? result = producer->send({value: "Hello World".toBytes(), topic: "kafka-topic"});
     # ```
     #
     # + producerRecord - Record to be produced

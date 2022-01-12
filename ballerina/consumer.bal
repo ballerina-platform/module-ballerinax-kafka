@@ -44,7 +44,22 @@ public client isolated class Consumer {
         }
     }
 
+    private isolated function consumerInit() returns Error? =
+    @java:Method {
+        name: "connect",
+        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.BrokerConnection"
+    } external;
+
+    private isolated function consumerSubscribe(string[] topics) returns Error? =
+    @java:Method {
+        name: "subscribe",
+        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
+    } external;
+
     # Assigns consumer to a set of topic partitions.
+    # ```ballerina
+    # kafka:Error? result = consumer->assign([topicPartition1, topicPartition2]);
+    # ```
     #
     # + partitions - Topic partitions to be assigned
     # + return - `kafka:Error` if an error is encountered or else nil
@@ -136,7 +151,7 @@ public client isolated class Consumer {
 
     # Retrieves the lastly committed offset for the given topic partition.
     # ```ballerina
-    # kafka:PartitionOffset result = check consumer->getCommittedOffset(topicPartition);
+    # kafka:PartitionOffset? result = check consumer->getCommittedOffset(topicPartition);
     # ```
     #
     # + partition - The `TopicPartition` in which the committed offset is returned to the consumer
@@ -335,18 +350,6 @@ public client isolated class Consumer {
     isolated remote function unsubscribe() returns Error? =
     @java:Method {
         name: "unsubscribe",
-        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
-    } external;
-
-    private isolated function consumerInit() returns Error? =
-    @java:Method {
-        name: "connect",
-        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.BrokerConnection"
-    } external;
-
-    private isolated function consumerSubscribe(string[] topics) returns Error? =
-    @java:Method {
-        name: "subscribe",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
     } external;
 }
