@@ -84,7 +84,7 @@ function attachDetachToClosedListenerTest() returns error? {
     error? result = consumer.gracefulStop();
     test:assertTrue(result is Error);
     if result is Error {
-        test:assertEquals(result.message(), "A service must be attaced before stopping the listener");
+        test:assertEquals(result.message(), "A service must be attached before stopping the listener");
     }
 
     result = consumer.immediateStop();
@@ -178,7 +178,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
     };
     Listener|error result = trap new (DEFAULT_URL, consumerConfiguration);
 
-    if result is Error {
+    if result is error {
         string expectedErr = "The groupId of the consumer must be set to subscribe to the topics";
         test:assertEquals(result.message(), expectedErr);
     } else {
@@ -190,15 +190,17 @@ function consumerServiceSubscribeErrorTest() returns error? {
         groupId: "listener-immediate-stop-service-test-group",
         clientId: "test-listener-07"
     };
-    result = new (DEFAULT_URL, consumerConfiguration);
-
-    if result is Error {
-        string expectedErr = "Failed to subscribe to the provided topics: Topic collection to subscribe to " +
-        "cannot contain null or empty topic";
-        test:assertEquals(result.message(), expectedErr);
+    Listener 'listener = check new (DEFAULT_URL, consumerConfiguration);
+    check 'listener.attach(incorrectEndpointsService);
+    error? res = 'listener.'start();
+    if res is error {
+        string expectedErr = "Error creating Kafka consumer to connect with remote broker and subscribe to " +
+        "provided topics";
+        test:assertEquals(res.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    check 'listener.detach(incorrectEndpointsService);
 }
 
 @test:Config {}
@@ -771,7 +773,6 @@ function invalidSecurityProtocolListenerTest() returns error? {
         test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
     }
 }
-
 
 Service messageOrderService =
 service object {
