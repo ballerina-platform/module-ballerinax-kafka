@@ -71,7 +71,7 @@ public class KafkaServerConnectorImpl implements KafkaServerConnector {
                 this.messageConsumers.add(consumer);
                 consumer.consume();
             }
-        } catch (KafkaException e) {
+        } catch (KafkaException | IllegalArgumentException | IllegalStateException e) {
             throw new KafkaConnectorException(
                     "Error creating Kafka consumer to connect with remote broker and subscribe to provided topics", e);
         }
