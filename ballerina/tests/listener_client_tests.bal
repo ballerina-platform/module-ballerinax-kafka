@@ -190,6 +190,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
         groupId: "listener-immediate-stop-service-test-group",
         clientId: "test-listener-07"
     };
+    
     Listener 'listener = check new (DEFAULT_URL, consumerConfiguration);
     check 'listener.attach(incorrectEndpointsService);
     error? res = 'listener.'start();
