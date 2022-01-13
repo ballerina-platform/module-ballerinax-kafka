@@ -194,15 +194,18 @@ function consumerServiceSubscribeErrorTest() returns error? {
         groupId: "listener-immediate-stop-service-test-group",
         clientId: "test-listener-07"
     };
-    result = new (DEFAULT_URL, consumerConfiguration);
 
-    if result is error {
-        string expectedErr = "Failed to subscribe to the provided topics: Topic collection to subscribe to " +
-        "cannot contain null or empty topic";
-        test:assertEquals(result.message(), expectedErr);
+    Listener 'listener = check new (DEFAULT_URL, consumerConfiguration);
+    check 'listener.attach(incorrectEndpointsService);
+    error? res = 'listener.'start();
+    if res is error {
+        string expectedErr = "Error creating Kafka consumer to connect with remote broker and subscribe to " +
+        "provided topics";
+        test:assertEquals(res.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
     }
+    check 'listener.detach(incorrectEndpointsService);
 }
 
 @test:Config {}
