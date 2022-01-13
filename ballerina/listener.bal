@@ -40,10 +40,8 @@ public isolated client class Listener {
         check self.listenerInit();
 
         string[]? topics = config?.topics;
-        if (topics is string[]){
-            if (self.consumerConfig?.groupId is string) {
-                check self->consumerSubscribe(topics);
-            } else {
+        if topics is string[] {
+            if self.consumerConfig?.groupId !is string {
                 panic createError("The groupId of the consumer must be set to subscribe to the topics");
             }
         }
@@ -100,11 +98,5 @@ public isolated client class Listener {
     @java:Method {
         name: "unregister",
         'class: "io.ballerina.stdlib.kafka.service.Unregister"
-    } external;
-
-    isolated remote function consumerSubscribe(string[] topics) returns Error? =
-    @java:Method {
-        name: "subscribe",
-        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
     } external;
 }
