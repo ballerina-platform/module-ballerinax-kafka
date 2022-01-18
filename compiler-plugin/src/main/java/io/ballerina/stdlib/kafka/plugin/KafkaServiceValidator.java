@@ -30,6 +30,8 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors;
+import io.ballerina.tools.diagnostics.DiagnosticFactory;
+import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.util.List;
@@ -43,6 +45,18 @@ public class KafkaServiceValidator {
     public void validate(SyntaxNodeAnalysisContext context) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) context.node();
         NodeList<Node> memberNodes = serviceDeclarationNode.members();
+
+        boolean hasRemoteService = serviceDeclarationNode.members().stream().anyMatch(child ->
+                child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION);
+
+        if (serviceDeclarationNode.members().isEmpty() || !hasRemoteService) {
+            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
+                    PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode(),
+                    PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getError(),
+                    DiagnosticSeverity.INTERNAL);
+            context.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                    serviceDeclarationNode.location()));
+        }
 
         validateAnnotation(context);
         FunctionDefinitionNode onConsumerRecord = null;

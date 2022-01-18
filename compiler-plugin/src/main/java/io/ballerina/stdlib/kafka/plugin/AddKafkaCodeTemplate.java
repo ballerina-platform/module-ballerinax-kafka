@@ -48,8 +48,8 @@ public class AddKafkaCodeTemplate implements CodeAction {
 
     public static final String NODE_LOCATION = "node.location";
     public static final String LS = System.lineSeparator();
-    public static final String RESOURCE_TEXT = LS + "\tremote function onConsumerRecord(kafka:Caller caller, " +
-            "kafka:ConsumerRecord[] records) returns kafka:Error?{" + LS + LS + "\t}" + LS;
+    public static final String REMOTE_FUNCTION_TEXT = LS + "\tremote function onConsumerRecord(kafka:Caller caller, " +
+            "kafka:ConsumerRecord[] records) returns kafka:Error? {" + LS + LS + "\t}" + LS;
 
     @Override
     public List<String> supportedDiagnosticCodes() {
@@ -62,8 +62,7 @@ public class AddKafkaCodeTemplate implements CodeAction {
         if (diagnostic.location() == null) {
             return Optional.empty();
         }
-        CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION,
-                diagnostic.location().lineRange());
+        CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION, diagnostic.location().lineRange());
         return Optional.of(CodeActionInfo.from("Insert service template", List.of(locationArg)));
     }
 
@@ -100,9 +99,7 @@ public class AddKafkaCodeTemplate implements CodeAction {
                     serviceDeclarationNode.closeBraceToken().textRange().startOffset() -
                             lastMember.textRange().endOffset());
         }
-        TextRange insertWsServiceTextRange = TextRange.from(serviceDeclarationNode.closeBraceToken().textRange()
-                .endOffset(), 0);
-        textEdits.add(TextEdit.from(resourceTextRange, RESOURCE_TEXT));
+        textEdits.add(TextEdit.from(resourceTextRange, REMOTE_FUNCTION_TEXT));
         TextDocumentChange change = TextDocumentChange.from(textEdits.toArray(new TextEdit[0]));
         return Collections.singletonList(new DocumentEdit(codeActionExecutionContext.fileUri(),
                 SyntaxTree.from(syntaxTree, change)));
@@ -110,7 +107,7 @@ public class AddKafkaCodeTemplate implements CodeAction {
 
     @Override
     public String name() {
-        return "ADD_RESOURCE_CODE_SNIPPET";
+        return "ADD_REMOTE_FUNCTION_CODE_SNIPPET";
     }
 
     public static NonTerminalNode findNode(SyntaxTree syntaxTree, LineRange lineRange) {

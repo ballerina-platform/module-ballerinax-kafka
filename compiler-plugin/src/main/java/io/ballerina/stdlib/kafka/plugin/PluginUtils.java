@@ -30,6 +30,8 @@ import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
+import io.ballerina.tools.text.LinePosition;
+import io.ballerina.tools.text.LineRange;
 
 import java.util.Optional;
 
@@ -72,5 +74,19 @@ public class PluginUtils {
                     orgName.equals(PluginConstants.PACKAGE_ORG);
         }
         return false;
+    }
+
+    public static boolean isWithinRange(LineRange lineRange, LinePosition pos) {
+        int sLine = lineRange.startLine().line();
+        int sCol = lineRange.startLine().offset();
+        int eLine = lineRange.endLine().line();
+        int eCol = lineRange.endLine().offset();
+
+        return ((sLine == eLine && pos.line() == sLine) &&
+                (pos.offset() >= sCol && pos.offset() <= eCol)
+        ) || ((sLine != eLine) && (pos.line() > sLine && pos.line() < eLine ||
+                pos.line() == eLine && pos.offset() <= eCol ||
+                pos.line() == sLine && pos.offset() >= sCol
+        ));
     }
 }
