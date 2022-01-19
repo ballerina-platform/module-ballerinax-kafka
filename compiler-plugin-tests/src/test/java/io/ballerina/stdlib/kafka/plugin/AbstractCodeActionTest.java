@@ -48,7 +48,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Abstract implementation of codeaction tests.
+ * Abstract implementation of code action tests.
  */
 public abstract class AbstractCodeActionTest {
 
@@ -72,7 +72,6 @@ public abstract class AbstractCodeActionTest {
         Optional<CodeActionInfo> found = codeActions.stream()
                 .filter(codeActionInfo -> {
                     JsonObject actualCodeAction = GSON.toJsonTree(codeActionInfo).getAsJsonObject();
-//                    Assert.assertEquals("a", actualCodeAction.toString());
                     return actualCodeAction.equals(expectedCodeAction);
                 })
                 .findFirst();
