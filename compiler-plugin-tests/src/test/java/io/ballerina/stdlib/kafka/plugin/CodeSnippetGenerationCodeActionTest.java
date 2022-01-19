@@ -36,37 +36,30 @@ import static io.ballerina.stdlib.kafka.plugin.KafkaCodeTemplate.NODE_LOCATION;
  */
 public class CodeSnippetGenerationCodeActionTest extends AbstractCodeActionTest {
 
-    @Test(dataProvider = "testDataProvider")
-    public void testEmptyServiceCodeAction(String srcFile, int line, int offset, String resultFile)
+    @Test
+    public void testEmptyServiceCodeAction()
             throws IOException {
         Path filePath = RESOURCE_PATH.resolve("ballerina_sources")
                 .resolve("snippet_gen_service_1")
-                .resolve(srcFile);
+                .resolve("service.bal");
         Path resultPath = RESOURCE_PATH.resolve("expected_sources")
                 .resolve("service_1")
-                .resolve(resultFile);
-        performTest(filePath, LinePosition.from(line, offset),
+                .resolve("result.bal");
+        performTest(filePath, LinePosition.from(2, 0),
                 getExpectedCodeAction("service.bal", 2, 64), resultPath);
     }
 
-    @Test(dataProvider = "testDataProvider")
-    public void testServiceWithVariablesCodeAction(String srcFile, int line, int offset, String resultFile)
+    @Test
+    public void testServiceWithVariablesCodeAction()
             throws IOException {
         Path filePath = RESOURCE_PATH.resolve("ballerina_sources")
                 .resolve("snippet_gen_service_2")
-                .resolve(srcFile);
+                .resolve("service.bal");
         Path resultPath = RESOURCE_PATH.resolve("expected_sources")
                 .resolve("service_2")
-                .resolve(resultFile);
-        performTest(filePath, LinePosition.from(line, offset),
+                .resolve("result.bal");
+        performTest(filePath, LinePosition.from(2, 0),
                 getExpectedCodeAction("service.bal", 5, 1), resultPath);
-    }
-
-    @DataProvider
-    private Object[][] testDataProvider() {
-        return new Object[][]{
-                {"service.bal", 2, 0, "result.bal"}
-        };
     }
 
     private CodeActionInfo getExpectedCodeAction(String filePath, int line, int offset) {
