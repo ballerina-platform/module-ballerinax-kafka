@@ -46,10 +46,11 @@ public class KafkaServiceValidator {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) context.node();
         NodeList<Node> memberNodes = serviceDeclarationNode.members();
 
-        boolean hasRemoteService = serviceDeclarationNode.members().stream().anyMatch(child ->
-                child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION);
+        boolean hasRemoteFunction = serviceDeclarationNode.members().stream().anyMatch(child ->
+                child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION &&
+                        PluginUtils.isRemoteFunction(context, (FunctionDefinitionNode) child));
 
-        if (serviceDeclarationNode.members().isEmpty() || !hasRemoteService) {
+        if (serviceDeclarationNode.members().isEmpty() || !hasRemoteFunction) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode(),
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getError(),
