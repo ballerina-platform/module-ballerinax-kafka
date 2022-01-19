@@ -75,18 +75,4 @@ public class PluginUtils {
         }
         return false;
     }
-
-    public static boolean isWithinRange(LineRange lineRange, LinePosition pos) {
-        int sLine = lineRange.startLine().line();
-        int sCol = lineRange.startLine().offset();
-        int eLine = lineRange.endLine().line();
-        int eCol = lineRange.endLine().offset();
-
-        return ((sLine == eLine && pos.line() == sLine) &&
-                (pos.offset() >= sCol && pos.offset() <= eCol)
-        ) || ((sLine != eLine) && (pos.line() > sLine && pos.line() < eLine ||
-                pos.line() == eLine && pos.offset() <= eCol ||
-                pos.line() == sLine && pos.offset() >= sCol
-        ));
-    }
 }

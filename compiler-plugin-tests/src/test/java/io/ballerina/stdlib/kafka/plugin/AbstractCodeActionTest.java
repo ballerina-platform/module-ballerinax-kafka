@@ -26,10 +26,7 @@ import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
-import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.ProjectLoader;
-import io.ballerina.projects.environment.Environment;
-import io.ballerina.projects.environment.EnvironmentBuilder;
 import io.ballerina.projects.plugins.codeaction.CodeActionArgument;
 import io.ballerina.projects.plugins.codeaction.CodeActionContextImpl;
 import io.ballerina.projects.plugins.codeaction.CodeActionExecutionContext;
@@ -42,25 +39,18 @@ import org.testng.Assert;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static io.ballerina.stdlib.kafka.plugin.CompilerPluginTestUtils.getEnvironmentBuilder;
 
 /**
  * Abstract implementation of code action tests.
  */
 public abstract class AbstractCodeActionTest {
 
-    protected static final Path RESOURCE_PATH = Paths.get("src", "test", "resources");
-    protected static final Path DISTRIBUTION_PATH = Paths.get("../", "target", "ballerina-runtime");
-
     private static final Gson GSON = new Gson();
-
-    private static ProjectEnvironmentBuilder getEnvironmentBuilder() {
-        Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
-        return ProjectEnvironmentBuilder.getBuilder(environment);
-    }
 
     protected void performTest(Path filePath, LinePosition cursorPos, CodeActionInfo expected, Path expectedSrc)
             throws IOException {
@@ -103,7 +93,7 @@ public abstract class AbstractCodeActionTest {
         Document document = currentPackage.getDefaultModule().document(documentId);
 
         return compilation.diagnosticResult().diagnostics().stream()
-                .filter(diagnostic -> PluginUtils.isWithinRange(diagnostic.location().lineRange(), cursorPos) &&
+                .filter(diagnostic -> CompilerPluginTestUtils.isWithinRange(diagnostic.location().lineRange(), cursorPos) &&
                         filePath.endsWith(diagnostic.location().lineRange().filePath()))
                 .flatMap(diagnostic -> {
                     CodeActionContextImpl context = CodeActionContextImpl.from(
