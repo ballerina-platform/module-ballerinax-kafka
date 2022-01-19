@@ -30,8 +30,8 @@ import java.util.List;
 
 import static io.ballerina.stdlib.kafka.plugin.CompilerPluginTestUtils.BALLERINA_SOURCES;
 import static io.ballerina.stdlib.kafka.plugin.CompilerPluginTestUtils.EXPECTED_SOURCES;
-import static io.ballerina.stdlib.kafka.plugin.KafkaCodeTemplate.NODE_LOCATION;
 import static io.ballerina.stdlib.kafka.plugin.CompilerPluginTestUtils.RESOURCE_DIRECTORY;
+import static io.ballerina.stdlib.kafka.plugin.KafkaCodeTemplate.NODE_LOCATION;
 
 /**
  * A class for testing code actions.

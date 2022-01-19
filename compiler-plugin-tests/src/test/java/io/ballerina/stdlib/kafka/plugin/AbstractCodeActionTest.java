@@ -93,8 +93,8 @@ public abstract class AbstractCodeActionTest {
         Document document = currentPackage.getDefaultModule().document(documentId);
 
         return compilation.diagnosticResult().diagnostics().stream()
-                .filter(diagnostic -> CompilerPluginTestUtils.isWithinRange(diagnostic.location().lineRange(), cursorPos) &&
-                        filePath.endsWith(diagnostic.location().lineRange().filePath()))
+                .filter(diagnostic -> CompilerPluginTestUtils.isWithinRange(diagnostic.location().lineRange(),
+                        cursorPos) && filePath.endsWith(diagnostic.location().lineRange().filePath()))
                 .flatMap(diagnostic -> {
                     CodeActionContextImpl context = CodeActionContextImpl.from(
                             filePath.toUri().toString(),

@@ -27,6 +27,9 @@ import io.ballerina.tools.text.LineRange;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * A class containing the utilities related for compiler plugin tests.
+ */
 public class CompilerPluginTestUtils {
 
     public static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources").toAbsolutePath();
