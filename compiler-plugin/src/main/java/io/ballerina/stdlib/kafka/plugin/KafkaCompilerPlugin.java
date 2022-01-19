@@ -29,6 +29,6 @@ public class KafkaCompilerPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
         compilerPluginContext.addCodeAnalyzer(new KafkaCodeAnalyzer());
-        compilerPluginContext.addCodeAction(new AddKafkaCodeTemplate());
+        compilerPluginContext.addCodeAction(new KafkaCodeTemplate());
     }
 }

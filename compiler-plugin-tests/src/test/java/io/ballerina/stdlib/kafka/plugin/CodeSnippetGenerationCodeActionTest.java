@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import static io.ballerina.stdlib.kafka.plugin.AddKafkaCodeTemplate.NODE_LOCATION;
+import static io.ballerina.stdlib.kafka.plugin.KafkaCodeTemplate.NODE_LOCATION;
 
 /**
  * A class for testing code actions.

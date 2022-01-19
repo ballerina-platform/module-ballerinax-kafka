@@ -44,7 +44,7 @@ import java.util.Optional;
 /**
  * Code action to add resource code snippet.
  */
-public class AddKafkaCodeTemplate implements CodeAction {
+public class KafkaCodeTemplate implements CodeAction {
 
     public static final String NODE_LOCATION = "node.location";
     public static final String LS = System.lineSeparator();
