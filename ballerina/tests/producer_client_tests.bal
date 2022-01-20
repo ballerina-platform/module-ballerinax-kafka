@@ -217,10 +217,6 @@ function transactionalProducerTest() returns error? {
     return;
 }
 
-isolated function failTransaction() returns error {
-    return error("Fail!");
-}
-
 @test:Config{}
 function saslProducerTest() returns error? {
     string topic = "sasl-producer-test-topic";
