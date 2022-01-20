@@ -61,5 +61,8 @@ public class TransactionUtils {
                                                        KafkaTransactionContext transactionContext, String connectorId) {
         TransactionLocalContext transactionLocalContext = trxResourceManager.getCurrentTransactionContext();
         transactionLocalContext.registerTransactionContext(connectorId, transactionContext);
+        String globalTxId = transactionLocalContext.getGlobalTransactionId();
+        String currentTxBlockId = transactionLocalContext.getCurrentTransactionBlockId();
+        TransactionResourceManager.getInstance().register(globalTxId, currentTxBlockId, transactionContext);
     }
 }
