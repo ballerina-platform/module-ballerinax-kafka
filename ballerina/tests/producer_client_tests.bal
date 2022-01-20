@@ -192,11 +192,9 @@ function transactionalProducerTest() returns error? {
     };
     Producer producer = check new (DEFAULT_URL, producerConfigs);
     transaction {
-        check producer->send({
-            topic: topic,
-            value: TEST_MESSAGE.toBytes(),
-            partition: 0
-        });
+        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
         var commitResult = commit;
         if (commitResult is ()) {
             io:println("Commit successful");
@@ -214,7 +212,7 @@ function transactionalProducerTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    test:assertEquals(consumerRecords.length(), 3, "Expected: 3. Received: " + consumerRecords.length().toString());
     check consumer->close();
     return;
 }
