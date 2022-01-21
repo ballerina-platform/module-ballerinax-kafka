@@ -934,8 +934,7 @@ service object {
 
 Service listenerDetachService2 =
 service object {
-    remote function onConsumerRecord(Caller caller,
-                                ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(ConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
@@ -946,8 +945,7 @@ service object {
 
 Service incorrectEndpointsService =
 service object {
-    remote function onConsumerRecord(Caller caller,
-                                ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(ConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
