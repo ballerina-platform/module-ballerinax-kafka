@@ -39,11 +39,15 @@ public class TransactionUtils {
     }
 
     public static void handleTransactions(BObject producer) {
-        if (Objects.nonNull(producer.getNativeData(TRANSACTION_CONTEXT))) {
-            KafkaTransactionContext transactionContext = (KafkaTransactionContext) producer
-                    .getNativeData(TRANSACTION_CONTEXT);
-            transactionContext.beginTransaction();
-            registerKafkaTransactionContext(producer, transactionContext);
+        KafkaTransactionContext transactionContext = (KafkaTransactionContext) producer
+                .getNativeData(TRANSACTION_CONTEXT);
+        if (Objects.nonNull(transactionContext)) {
+            String connectorId = producer.getStringValue(CONNECTOR_ID).getValue();
+            TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
+            if (Objects.isNull(trxResourceManager.getCurrentTransactionContext().getTransactionContext(connectorId))) {
+                transactionContext.beginTransaction();
+                registerKafkaTransactionContext(trxResourceManager, transactionContext, connectorId);
+            }
         }
         // Do nothing if this is non-transactional producer.
     }
@@ -53,13 +57,12 @@ public class TransactionUtils {
         return new KafkaTransactionContext(kafkaProducer);
     }
 
-    public static void registerKafkaTransactionContext(BObject producer,
-                                                       KafkaTransactionContext transactionContext) {
-        String connectorId = producer.getStringValue(CONNECTOR_ID).getValue();
-        TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
-        if (Objects.isNull(trxResourceManager.getCurrentTransactionContext().getTransactionContext(connectorId))) {
-            TransactionLocalContext transactionLocalContext = trxResourceManager.getCurrentTransactionContext();
-            transactionLocalContext.registerTransactionContext(connectorId, transactionContext);
-        }
+    public static void registerKafkaTransactionContext(TransactionResourceManager trxResourceManager,
+                                                       KafkaTransactionContext transactionContext, String connectorId) {
+        TransactionLocalContext transactionLocalContext = trxResourceManager.getCurrentTransactionContext();
+        transactionLocalContext.registerTransactionContext(connectorId, transactionContext);
+        String globalTxId = transactionLocalContext.getGlobalTransactionId();
+        String currentTxBlockId = transactionLocalContext.getCurrentTransactionBlockId();
+        TransactionResourceManager.getInstance().register(globalTxId, currentTxBlockId, transactionContext);
     }
 }
