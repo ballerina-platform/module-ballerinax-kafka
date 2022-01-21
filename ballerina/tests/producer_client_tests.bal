@@ -192,11 +192,9 @@ function transactionalProducerTest() returns error? {
     };
     Producer producer = check new (DEFAULT_URL, producerConfigs);
     transaction {
-        check producer->send({
-            topic: topic,
-            value: TEST_MESSAGE.toBytes(),
-            partition: 0
-        });
+        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
         var commitResult = commit;
         if (commitResult is ()) {
             io:println("Commit successful");
@@ -214,9 +212,62 @@ function transactionalProducerTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     ConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    test:assertEquals(consumerRecords.length(), 3, "Expected: 3. Received: " + consumerRecords.length().toString());
     check consumer->close();
     return;
+}
+
+@test:Config {}
+function transactionalProducerWithAbortTest() returns error? {
+    string topic = "rollback-producer-test-topic";
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-05",
+        acks: "all",
+        retryCount: 3,
+        enableIdempotence: true,
+        transactionalId: "producer-abort-transactional-id"
+    };
+    Producer producer = check new (DEFAULT_URL, producerConfigs);
+    do {
+        transaction {
+            check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+            check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+            check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+            check failTransaction();
+            check commit;
+        }
+    } on fail var e {
+        io:println(e.toString());
+    }
+    check producer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "committed-transactional-test-group",
+        clientId: "test-consumer-49",
+        isolationLevel: ISOLATION_COMMITTED
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+
+    consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "uncommitted-transactional-test-group",
+        clientId: "test-consumer-50",
+        isolationLevel: ISOLATION_UNCOMMITTED
+    };
+    consumer = check new (DEFAULT_URL, consumerConfiguration);
+    consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 3, "Expected: 3. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
+
+isolated function failTransaction() returns error {
+    return error("Fail!");
 }
 
 @test:Config{}
