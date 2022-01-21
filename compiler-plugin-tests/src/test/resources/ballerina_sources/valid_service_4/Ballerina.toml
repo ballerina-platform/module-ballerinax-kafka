@@ -1,4 +1,4 @@
 [package]
 org = "kafka_test"
-name = "valid_service_3"
+name = "valid_service_4"
 version = "0.1.0"
