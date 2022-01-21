@@ -94,7 +94,7 @@ public class KafkaFunctionValidator {
     private void validateFunctionParameters(SeparatedNodeList<ParameterNode> parameters,
                                             FunctionDefinitionNode functionDefinitionNode) {
         if (parameters.size() == 1) {
-            validateConsumerRecordsParam(parameters.get(0), INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
+            validateConsumerRecordsParam(parameters.get(0), MUST_HAVE_CALLER_AND_RECORDS);
         } else if (parameters.size() == 2) {
             validateCallerParam(parameters.get(0));
             validateConsumerRecordsParam(parameters.get(1), INVALID_FUNCTION_PARAM_RECORDS);
