@@ -61,6 +61,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
@@ -73,15 +75,16 @@ public class KafkaUtils {
     private KafkaUtils() {
     }
 
-    public static Object[] getResourceParameters(BObject service, BObject listener,
-                                                 ConsumerRecords records) {
+    public static Object[] getResourceParameters(BObject service, BObject listener, ConsumerRecords records) {
 
         BArray consumerRecordsArray = ValueCreator.createArrayValue(
                 TypeCreator.createArrayType(getConsumerRecord().getType()));
         String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
         String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
 
-        if (service.getType().getMethods()[0].getParameterTypes().length == 2) {
+        Type[] parameterTypes = service.getType().getMethods()[0].getParameterTypes();
+        if (parameterTypes.length == 2 &&
+                (parameterTypes[0].getTag() == OBJECT_TYPE_TAG && parameterTypes[1].getTag() == ARRAY_TAG)) {
             for (Object record : records) {
                 BMap<BString, Object> consumerRecord = populateConsumerRecord(
                         (ConsumerRecord) record, keyType, valueType);
@@ -94,6 +97,13 @@ public class KafkaUtils {
             caller.addNativeData(NATIVE_CONSUMER, consumer);
             caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
             return new Object[]{caller, true, consumerRecordsArray, true};
+        } else if (parameterTypes.length == 1 && parameterTypes[0].getTag() == ARRAY_TAG) {
+            for (Object record : records) {
+                BMap<BString, Object> consumerRecord = populateConsumerRecord(
+                        (ConsumerRecord) record, keyType, valueType);
+                consumerRecordsArray.append(consumerRecord);
+            }
+            return new Object[]{consumerRecordsArray, true};
         } else {
             throw KafkaUtils.createKafkaError("Invalid remote function signature");
         }
@@ -832,19 +842,14 @@ public class KafkaUtils {
         }
     }
 
-    public static Type getAttachedFunctionReturnType(BObject serviceObject, String functionName, int paramCount) {
+    public static Type getAttachedFunctionReturnType(BObject serviceObject, String functionName) {
         MethodType function = null;
         MethodType[] resourceFunctions = serviceObject.getType().getMethods();
         for (MethodType resourceFunction : resourceFunctions) {
             if (functionName.equals(resourceFunction.getName())) {
                 function = resourceFunction;
-                Type[] parameterTypes = function.getParameterTypes();
-                if (parameterTypes.length == paramCount) {
-                    Type returnType = function.getReturnType();
-                    return returnType;
-                } else {
-                    throw createKafkaError("invalid " + functionName + " remote function signature");
-                }
+                Type returnType = function.getReturnType();
+                return returnType;
             }
         }
         return function;
