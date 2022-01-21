@@ -802,7 +802,7 @@ service object {
 
 Service consumerService =
 service object {
-    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(ConsumerRecord[] records) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
