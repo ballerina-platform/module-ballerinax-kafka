@@ -43,7 +43,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE;
-import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_CALLER;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants
+        .CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD;
@@ -93,7 +94,7 @@ public class KafkaFunctionValidator {
     private void validateFunctionParameters(SeparatedNodeList<ParameterNode> parameters,
                                             FunctionDefinitionNode functionDefinitionNode) {
         if (parameters.size() == 1) {
-            validateConsumerRecordsParam(parameters.get(0), INVALID_FUNCTION_PARAM_CALLER);
+            validateConsumerRecordsParam(parameters.get(0), INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
         } else if (parameters.size() == 2) {
             validateCallerParam(parameters.get(0));
             validateConsumerRecordsParam(parameters.get(1), INVALID_FUNCTION_PARAM_RECORDS);
@@ -121,12 +122,12 @@ public class KafkaFunctionValidator {
                 if (!validateModuleId(moduleSymbol.get()) ||
                         !paramName.equals(PluginConstants.CALLER)) {
                     context.reportDiagnostic(PluginUtils.getDiagnostic(
-                            INVALID_FUNCTION_PARAM_CALLER,
+                            INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
                             DiagnosticSeverity.ERROR, requiredParameterNode.location()));
                 }
             } else {
                 context.reportDiagnostic(PluginUtils.getDiagnostic(
-                        INVALID_FUNCTION_PARAM_CALLER,
+                        INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
                         DiagnosticSeverity.ERROR, requiredParameterNode.location()));
             }
         }

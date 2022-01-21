@@ -119,7 +119,7 @@ public class KafkaServiceValidationTest {
         Object[] diagnostics = diagnosticResult.errors().toArray();
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
-            assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_CALLER);
+            assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
         }
     }
 
@@ -140,7 +140,7 @@ public class KafkaServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errors().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_CALLER);
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
     }
 
     @Test
