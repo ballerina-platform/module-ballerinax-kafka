@@ -45,10 +45,10 @@ public class PluginConstants {
         INVALID_REMOTE_FUNCTION("Invalid remote method.", "KAFKA_102"),
         INVALID_FUNCTION("Invalid remote method.", "KAFKA_103"),
         FUNCTION_SHOULD_BE_REMOTE("Method must have the remote qualifier.", "KAFKA_104"),
-        MUST_HAVE_CALLER_AND_RECORDS("Must have the method parameters kafka:Caller and kafka:ConsumerRecord[].",
-                "KAFKA_105"),
-        INVALID_FUNCTION_PARAM_CALLER("Invalid method parameter. Only kafka:Caller is allowed.",
-                "KAFKA_106"),
+        MUST_HAVE_CALLER_AND_RECORDS("Must have the required parameter kafka:ConsumerRecord[] and optional " +
+                "parameter kafka:Caller.", "KAFKA_105"),
+        INVALID_FUNCTION_PARAM_CALLER("Invalid method parameter. Only kafka:Caller or kafka:ConsumerRecord[] " +
+                "is allowed.", "KAFKA_106"),
         INVALID_FUNCTION_PARAM_RECORDS("Invalid method parameter. Only kafka:ConsumerRecord[] is allowed.",
                 "KAFKA_107"),
         ONLY_PARAMS_ALLOWED("Invalid method parameter count. " +
