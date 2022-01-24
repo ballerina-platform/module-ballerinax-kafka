@@ -45,7 +45,7 @@ import static io.ballerina.stdlib.kafka.plugin.PluginConstants.NODE_LOCATION;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.findNode;
 
 /**
- * Code action to add resource code snippet.
+ * Code action to add code snippet of remote function without the caller.
  */
 public class KafkaCodeTemplateWithoutCallerParameter implements CodeAction {
 
