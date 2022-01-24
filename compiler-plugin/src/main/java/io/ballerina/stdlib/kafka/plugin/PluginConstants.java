@@ -36,6 +36,12 @@ public class PluginConstants {
     // return types error or nil
     public static final String ERROR = "error";
 
+    // Code template related constants
+    public static final String NODE_LOCATION = "node.location";
+    public static final String LS = System.lineSeparator();
+    public static final String CODE_TEMPLATE_NAME_WITH_CALLER = "ADD_REMOTE_FUNCTION_CODE_SNIPPET_WITH_CALLER";
+    public static final String CODE_TEMPLATE_NAME_WITHOUT_CALLER = "ADD_REMOTE_FUNCTION_CODE_SNIPPET_WITHOUT_CALLER";
+
     /**
      * Compilation errors.
      */
@@ -45,10 +51,10 @@ public class PluginConstants {
         INVALID_REMOTE_FUNCTION("Invalid remote method.", "KAFKA_102"),
         INVALID_FUNCTION("Invalid remote method.", "KAFKA_103"),
         FUNCTION_SHOULD_BE_REMOTE("Method must have the remote qualifier.", "KAFKA_104"),
-        MUST_HAVE_CALLER_AND_RECORDS("Must have the method parameters kafka:Caller and kafka:ConsumerRecord[].",
-                "KAFKA_105"),
-        INVALID_FUNCTION_PARAM_CALLER("Invalid method parameter. Only kafka:Caller is allowed.",
-                "KAFKA_106"),
+        MUST_HAVE_CALLER_AND_RECORDS("Must have the required parameter kafka:ConsumerRecord[] and optional " +
+                "parameter kafka:Caller.", "KAFKA_105"),
+        INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS("Invalid method parameter. Only kafka:Caller or " +
+                "kafka:ConsumerRecord[] is allowed.", "KAFKA_106"),
         INVALID_FUNCTION_PARAM_RECORDS("Invalid method parameter. Only kafka:ConsumerRecord[] is allowed.",
                 "KAFKA_107"),
         ONLY_PARAMS_ALLOWED("Invalid method parameter count. " +

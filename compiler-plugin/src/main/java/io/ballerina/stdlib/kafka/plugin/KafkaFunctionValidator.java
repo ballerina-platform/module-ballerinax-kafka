@@ -42,6 +42,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants
+        .CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_PARAMS_ALLOWED;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.getMethodSymbol;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.validateModuleId;
 
@@ -69,15 +75,14 @@ public class KafkaFunctionValidator {
 
     private void validateMandatoryFunction() {
         if (Objects.isNull(onConsumerRecord)) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.NO_ON_CONSUMER_RECORD,
+            context.reportDiagnostic(PluginUtils.getDiagnostic(NO_ON_CONSUMER_RECORD,
                     DiagnosticSeverity.ERROR, serviceDeclarationNode.location()));
         }
     }
 
     private void validateOnConsumerRecord() {
         if (!PluginUtils.isRemoteFunction(context, onConsumerRecord)) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(
-                    PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE,
+            context.reportDiagnostic(PluginUtils.getDiagnostic(FUNCTION_SHOULD_BE_REMOTE,
                     DiagnosticSeverity.ERROR, onConsumerRecord.functionSignature().location()));
         }
         SeparatedNodeList<ParameterNode> parameters = onConsumerRecord.functionSignature().parameters();
@@ -87,21 +92,42 @@ public class KafkaFunctionValidator {
 
     private void validateFunctionParameters(SeparatedNodeList<ParameterNode> parameters,
                                             FunctionDefinitionNode functionDefinitionNode) {
-        if (parameters.size() > 1) {
-            validateFirstParam(parameters.get(0));
-            validateSecondParam(parameters.get(1));
-        }
-        if (parameters.size() > 2) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.ONLY_PARAMS_ALLOWED,
+        if (parameters.size() == 1) {
+            if (!((RequiredParameterNode) parameters.get(0)).typeName().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(
+                        CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS,
+                        DiagnosticSeverity.ERROR, functionDefinitionNode.functionSignature().location()));
+            } else {
+                validateConsumerRecordsParam(parameters.get(0), MUST_HAVE_CALLER_AND_RECORDS);
+            }
+        } else if (parameters.size() == 2) {
+            ParameterNode firstParamNode = parameters.get(0);
+            ParameterNode secondParamNode = parameters.get(1);
+            SyntaxKind firstParamSyntaxKind = ((RequiredParameterNode) firstParamNode).typeName().kind();
+            SyntaxKind secondParamSyntaxKind = ((RequiredParameterNode) secondParamNode).typeName().kind();
+            if (firstParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC) &&
+                    secondParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+                validateConsumerRecordsParam(firstParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
+                validateCallerParam(secondParamNode);
+            } else if (firstParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE) &&
+                    secondParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+                validateCallerParam(firstParamNode);
+                validateConsumerRecordsParam(secondParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
+            } else {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(
+                        CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
+                        DiagnosticSeverity.ERROR, functionDefinitionNode.functionSignature().location()));
+            }
+        } else if (parameters.size() > 2) {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(ONLY_PARAMS_ALLOWED,
                     DiagnosticSeverity.ERROR, functionDefinitionNode.functionSignature().location()));
-        }
-        if (parameters.size() < 2) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS,
+        } else {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(MUST_HAVE_CALLER_AND_RECORDS,
                     DiagnosticSeverity.ERROR, functionDefinitionNode.functionSignature().location()));
         }
     }
 
-    private void validateFirstParam(ParameterNode parameterNode) {
+    private void validateCallerParam(ParameterNode parameterNode) {
         RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
         Node parameterTypeNode = requiredParameterNode.typeName();
         SemanticModel semanticModel = context.semanticModel();
@@ -114,45 +140,37 @@ public class KafkaFunctionValidator {
                 if (!validateModuleId(moduleSymbol.get()) ||
                         !paramName.equals(PluginConstants.CALLER)) {
                     context.reportDiagnostic(PluginUtils.getDiagnostic(
-                            CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
+                            INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
                             DiagnosticSeverity.ERROR, requiredParameterNode.location()));
                 }
             } else {
                 context.reportDiagnostic(PluginUtils.getDiagnostic(
-                        CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
+                        INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
                         DiagnosticSeverity.ERROR, requiredParameterNode.location()));
             }
         }
     }
 
-    private void validateSecondParam(ParameterNode parameterNode) {
+    private void validateConsumerRecordsParam(ParameterNode parameterNode, CompilationErrors errorToThrow) {
         RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
         Node parameterTypeNode = requiredParameterNode.typeName();
-        if (!parameterTypeNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(
-                    CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
-                    DiagnosticSeverity.ERROR, parameterNode.location()));
-        } else {
-            ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) parameterTypeNode;
-            TypeDescriptorNode memberType = arrayTypeDescriptorNode.memberTypeDesc();
-            SemanticModel semanticModel = context.semanticModel();
-            Optional<Symbol> paramSymbol = semanticModel.symbol(memberType);
-            if (paramSymbol.isPresent()) {
-                Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
-                if (moduleSymbol.isPresent()) {
-                    String paramName = paramSymbol.get().getName().isPresent() ?
-                            paramSymbol.get().getName().get() : "";
-                    if (!validateModuleId(moduleSymbol.get()) ||
-                            !paramName.equals(PluginConstants.RECORD_PARAM)) {
-                        context.reportDiagnostic(PluginUtils.getDiagnostic(
-                                CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
-                                DiagnosticSeverity.ERROR, requiredParameterNode.location()));
-                    }
-                } else {
-                    context.reportDiagnostic(PluginUtils.getDiagnostic(
-                            CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS,
+        ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) parameterTypeNode;
+        TypeDescriptorNode memberType = arrayTypeDescriptorNode.memberTypeDesc();
+        SemanticModel semanticModel = context.semanticModel();
+        Optional<Symbol> paramSymbol = semanticModel.symbol(memberType);
+        if (paramSymbol.isPresent()) {
+            Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
+            if (moduleSymbol.isPresent()) {
+                String paramName = paramSymbol.get().getName().isPresent() ?
+                        paramSymbol.get().getName().get() : "";
+                if (!validateModuleId(moduleSymbol.get()) ||
+                        !paramName.equals(PluginConstants.RECORD_PARAM)) {
+                    context.reportDiagnostic(PluginUtils.getDiagnostic(errorToThrow,
                             DiagnosticSeverity.ERROR, requiredParameterNode.location()));
                 }
+            } else {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(errorToThrow,
+                        DiagnosticSeverity.ERROR, requiredParameterNode.location()));
             }
         }
     }

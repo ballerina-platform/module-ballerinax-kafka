@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- [Make kafka:Caller optional in onConsumerRecord method in kafka:Service.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1661)
+
+## [3.1.0] - 2021-10-09
+
 ### Added
 
 - [Add Kafka listener detach functionality.](https://github.com/ballerina-platform/ballerina-standard-library/issues/2211)

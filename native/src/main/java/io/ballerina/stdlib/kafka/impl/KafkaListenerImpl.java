@@ -80,7 +80,7 @@ public class KafkaListenerImpl implements KafkaListener {
         StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
                 ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), KAFKA_RESOURCE_ON_RECORD);
         if (ObserveUtils.isTracingEnabled()) {
-            Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD, 2);
+            Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
             Map<String, Object> properties = getNewObserverContextInProperties(listener);
             if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
                 bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,

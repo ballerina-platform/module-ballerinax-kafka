@@ -56,7 +56,7 @@ public abstract class AbstractCodeActionTest {
             throws IOException {
         Project project = ProjectLoader.loadProject(filePath, getEnvironmentBuilder());
         List<CodeActionInfo> codeActions = getCodeActions(filePath, cursorPos, project);
-        Assert.assertTrue(codeActions.size() > 0, "Expect at least 1 code action");
+        Assert.assertTrue(codeActions.size() > 1, "Expect at least 2 code actions");
 
         JsonObject expectedCodeAction = GSON.toJsonTree(expected).getAsJsonObject();
         Optional<CodeActionInfo> found = codeActions.stream()
