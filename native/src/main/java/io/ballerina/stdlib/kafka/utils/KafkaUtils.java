@@ -76,33 +76,33 @@ public class KafkaUtils {
     }
 
     public static Object[] getResourceParameters(BObject service, BObject listener, ConsumerRecords records) {
-
-        BArray consumerRecordsArray = ValueCreator.createArrayValue(
-                TypeCreator.createArrayType(getConsumerRecord().getType()));
         String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
         String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
 
+        BArray consumerRecordsArray = ValueCreator.createArrayValue(
+                TypeCreator.createArrayType(getConsumerRecord().getType()));
+        for (Object record : records) {
+            BMap<BString, Object> consumerRecord = populateConsumerRecord(
+                    (ConsumerRecord) record, keyType, valueType);
+            consumerRecordsArray.append(consumerRecord);
+        }
+
         Type[] parameterTypes = service.getType().getMethods()[0].getParameterTypes();
-        if (parameterTypes.length == 2 &&
-                (parameterTypes[0].getTag() == OBJECT_TYPE_TAG && parameterTypes[1].getTag() == ARRAY_TAG)) {
-            for (Object record : records) {
-                BMap<BString, Object> consumerRecord = populateConsumerRecord(
-                        (ConsumerRecord) record, keyType, valueType);
-                consumerRecordsArray.append(consumerRecord);
-            }
+        if (parameterTypes.length == 2) {
             BObject caller =
                     ValueCreator.createObjectValue(ModuleUtils.getModule(), KafkaConstants.CALLER_STRUCT_NAME);
             KafkaConsumer consumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
             Properties consumerProperties = (Properties) listener.getNativeData(NATIVE_CONSUMER_CONFIG);
             caller.addNativeData(NATIVE_CONSUMER, consumer);
             caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
-            return new Object[]{caller, true, consumerRecordsArray, true};
-        } else if (parameterTypes.length == 1 && parameterTypes[0].getTag() == ARRAY_TAG) {
-            for (Object record : records) {
-                BMap<BString, Object> consumerRecord = populateConsumerRecord(
-                        (ConsumerRecord) record, keyType, valueType);
-                consumerRecordsArray.append(consumerRecord);
+            if (parameterTypes[0].getTag() == OBJECT_TYPE_TAG && parameterTypes[1].getTag() == ARRAY_TAG) {
+                return new Object[]{caller, true, consumerRecordsArray, true};
+            } else if (parameterTypes[0].getTag() == ARRAY_TAG && parameterTypes[1].getTag() == OBJECT_TYPE_TAG) {
+                return new Object[]{consumerRecordsArray, true, caller, true};
+            } else {
+                throw KafkaUtils.createKafkaError("Invalid remote function signature");
             }
+        } else if (parameterTypes.length == 1 && parameterTypes[0].getTag() == ARRAY_TAG) {
             return new Object[]{consumerRecordsArray, true};
         } else {
             throw KafkaUtils.createKafkaError("Invalid remote function signature");
