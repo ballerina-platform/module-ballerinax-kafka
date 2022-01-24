@@ -36,6 +36,12 @@ public class PluginConstants {
     // return types error or nil
     public static final String ERROR = "error";
 
+    // Code template related constants
+    public static final String NODE_LOCATION = "node.location";
+    public static final String LS = System.lineSeparator();
+    public static final String CODE_TEMPLATE_NAME_WITH_CALLER = "ADD_REMOTE_FUNCTION_CODE_SNIPPET_WITH_CALLER";
+    public static final String CODE_TEMPLATE_NAME_WITHOUT_CALLER = "ADD_REMOTE_FUNCTION_CODE_SNIPPET_WITHOUT_CALLER";
+
     /**
      * Compilation errors.
      */

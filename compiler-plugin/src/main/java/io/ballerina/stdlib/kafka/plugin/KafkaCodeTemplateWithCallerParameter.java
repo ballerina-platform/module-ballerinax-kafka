@@ -18,7 +18,6 @@
 
 package io.ballerina.stdlib.kafka.plugin;
 
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -31,7 +30,6 @@ import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
 import io.ballerina.projects.plugins.codeaction.DocumentEdit;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.LineRange;
-import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocumentChange;
 import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
@@ -41,14 +39,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CODE_TEMPLATE_NAME_WITH_CALLER;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.LS;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.NODE_LOCATION;
+import static io.ballerina.stdlib.kafka.plugin.PluginUtils.findNode;
+
 /**
  * Code action to add resource code snippet.
  */
-public class KafkaCodeTemplate implements CodeAction {
+public class KafkaCodeTemplateWithCallerParameter implements CodeAction {
 
-    public static final String NODE_LOCATION = "node.location";
-    public static final String LS = System.lineSeparator();
-    public static final String REMOTE_FUNCTION_TEXT = LS + "\tremote function onConsumerRecord(kafka:Caller caller, " +
+    private static final String REMOTE_FUNCTION_TEXT = LS + "\tremote function onConsumerRecord(kafka:Caller caller, " +
             "kafka:ConsumerRecord[] records) returns kafka:Error? {" + LS + LS + "\t}" + LS;
 
     @Override
@@ -63,7 +64,7 @@ public class KafkaCodeTemplate implements CodeAction {
             return Optional.empty();
         }
         CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION, diagnostic.location().lineRange());
-        return Optional.of(CodeActionInfo.from("Insert service template", List.of(locationArg)));
+        return Optional.of(CodeActionInfo.from("Insert service template with caller", List.of(locationArg)));
     }
 
     @Override
@@ -107,17 +108,6 @@ public class KafkaCodeTemplate implements CodeAction {
 
     @Override
     public String name() {
-        return "ADD_REMOTE_FUNCTION_CODE_SNIPPET";
-    }
-
-    public static NonTerminalNode findNode(SyntaxTree syntaxTree, LineRange lineRange) {
-        if (lineRange == null) {
-            return null;
-        }
-
-        TextDocument textDocument = syntaxTree.textDocument();
-        int start = textDocument.textPositionFrom(lineRange.startLine());
-        int end = textDocument.textPositionFrom(lineRange.endLine());
-        return ((ModulePartNode) syntaxTree.rootNode()).findNode(TextRange.from(start, end - start), true);
+        return CODE_TEMPLATE_NAME_WITH_CALLER;
     }
 }
