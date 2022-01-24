@@ -79,6 +79,14 @@ public class KafkaServiceValidationTest {
     }
 
     @Test
+    public void testValidService6() {
+        Package currentPackage = loadPackage("valid_service_6");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
     public void testInvalidService1() {
         Package currentPackage = loadPackage("invalid_service_1");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -113,9 +121,12 @@ public class KafkaServiceValidationTest {
         Package currentPackage = loadPackage("invalid_service_4");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 1);
-        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic, CompilationErrors.ONLY_PARAMS_ALLOWED);
+        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, CompilationErrors.ONLY_PARAMS_ALLOWED);
+        }
     }
 
     @Test
@@ -192,6 +203,32 @@ public class KafkaServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic, CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS);
+    }
+
+    @Test
+    public void testInvalidService12() {
+        Package currentPackage = loadPackage("invalid_service_12");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
+        }
+    }
+
+    @Test
+    public void testInvalidService13() {
+        Package currentPackage = loadPackage("invalid_service_13");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 3);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS);
+        }
     }
 
     private Package loadPackage(String path) {

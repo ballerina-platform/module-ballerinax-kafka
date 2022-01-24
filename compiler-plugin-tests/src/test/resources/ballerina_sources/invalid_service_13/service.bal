@@ -1,4 +1,4 @@
-// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -23,17 +23,29 @@ kafka:ConsumerConfiguration consumerConfigs = {
     autoCommit: false
 };
 
-listener kafka:Listener kafkaListener =
-        new (kafka:DEFAULT_URL, consumerConfigs);
+listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
 
 service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records, string data) {
+    remote function onConsumerRecord(kafka:Caller caller, string & readonly records) {
     }
 }
 
 service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] & readonly records, string data) {
+    remote function onConsumerRecord(kafka:Caller caller, readonly & kafka:Caller caller2) {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    remote function onConsumerRecord(kafka:Caller caller, readonly & int caller2) {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    remote function onConsumerRecord(readonly & int caller) {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    remote function onConsumerRecord(readonly & kafka:Caller caller) {
     }
 }
