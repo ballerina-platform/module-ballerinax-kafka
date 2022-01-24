@@ -838,7 +838,7 @@ service object {
 
 Service consumerServiceWithCommit =
 service object {
-    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(ConsumerRecord[] records, Caller caller) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
