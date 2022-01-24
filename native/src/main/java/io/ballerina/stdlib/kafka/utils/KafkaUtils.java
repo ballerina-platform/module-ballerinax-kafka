@@ -107,7 +107,7 @@ public class KafkaUtils {
         }
     }
 
-    public static BArray getConsumerRecords(ConsumerRecords records, boolean readOnly) {
+    private static BArray getConsumerRecords(ConsumerRecords records, boolean readOnly) {
         String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
         String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
         List<BMap<BString, Object>> recordMapList = new ArrayList();
