@@ -814,7 +814,7 @@ service object {
 
 Service consumerGracefulStopService =
 service object {
-    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(readonly & ConsumerRecord[] records) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
@@ -851,7 +851,7 @@ service object {
 
 Service consumerServiceWithCommitOffset =
 service object {
-    remote function onConsumerRecord(Caller caller, readonly & ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(readonly & ConsumerRecord[] records, Caller caller) returns error? {
         string topic = "listener-commit-offset-test-topic";
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
