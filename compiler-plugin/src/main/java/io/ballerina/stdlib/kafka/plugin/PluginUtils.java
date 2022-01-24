@@ -80,8 +80,6 @@ public class PluginUtils {
         return false;
     }
 
-
-
     public static NonTerminalNode findNode(SyntaxTree syntaxTree, LineRange lineRange) {
         if (lineRange == null) {
             return null;
