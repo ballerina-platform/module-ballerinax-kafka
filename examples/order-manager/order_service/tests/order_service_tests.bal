@@ -58,5 +58,4 @@ function orderServiceTest() returns error? {
 
     test:assertEquals(neworder.name, orderName);
     test:assertEquals(neworder.status, orderStatus);
-    return;
 }

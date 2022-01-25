@@ -1,4 +1,3 @@
-
 // Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -45,7 +44,6 @@ public isolated client class Listener {
                 panic createError("The groupId of the consumer must be set to subscribe to the topics");
             }
         }
-        return;
     }
 
     private isolated function listenerInit() returns Error? =
@@ -55,8 +53,11 @@ public isolated client class Listener {
     } external;
 
     # Starts the registered services.
+    # ```ballerina
+    # error? result = listener.'start();
+    # ```
     #
-    # + return - An `kafka:Error` if an error is encountered while starting the server or else nil
+    # + return - A `kafka:Error` if an error is encountered while starting the server or else nil
     public isolated function 'start() returns error? =
     @java:Method {
         name: "start",
@@ -64,6 +65,9 @@ public isolated client class Listener {
     } external;
 
     # Stops the Kafka listener gracefully.
+    # ```ballerina
+    # error? result = listener.gracefulStop();
+    # ```
     #
     # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function gracefulStop() returns error?  =
@@ -72,6 +76,9 @@ public isolated client class Listener {
     } external;
 
     # Stops the kafka listener immediately.
+    # ```ballerina
+    # error? result = listener.immediateStop();
+    # ```
     #
     # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function immediateStop() returns error? =
@@ -80,6 +87,9 @@ public isolated client class Listener {
     } external;
 
     # Attaches a service to the listener.
+    # ```ballerina
+    # error? result = listener.attach(kafkaService);
+    # ```
     #
     # + s - The service to be attached
     # + name - Name of the service
@@ -91,6 +101,9 @@ public isolated client class Listener {
     } external;
 
     # Detaches a consumer service from the listener.
+    # ```ballerina
+    # error? result = listener.detach(kafkaService);
+    # ```
     #
     # + s - The service to be detached
     # + return - A `kafka:Error` if an error is encountered while detaching a service or else `()`

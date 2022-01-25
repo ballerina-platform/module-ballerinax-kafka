@@ -59,8 +59,7 @@ public class SendByteArrayValues extends Send {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
         ProducerRecord<byte[], byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                timestampValue, key.getBytes(),
-                value.getBytes());
+                timestampValue, key.getBytes(), value.getBytes());
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 }

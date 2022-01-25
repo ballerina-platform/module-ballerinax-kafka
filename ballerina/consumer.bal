@@ -39,10 +39,9 @@ public client isolated class Consumer {
         check self.consumerInit();
 
         string[]? topics = config?.topics;
-        if (topics is string[]) {
+        if topics is string[] {
             check self->subscribe(topics);
         }
-        return;
     }
 
     private isolated function consumerInit() returns Error? =
@@ -51,7 +50,16 @@ public client isolated class Consumer {
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.BrokerConnection"
     } external;
 
+    private isolated function consumerSubscribe(string[] topics) returns Error? =
+    @java:Method {
+        name: "subscribe",
+        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
+    } external;
+
     # Assigns consumer to a set of topic partitions.
+    # ```ballerina
+    # kafka:Error? result = consumer->assign([topicPartition1, topicPartition2]);
+    # ```
     #
     # + partitions - Topic partitions to be assigned
     # + return - `kafka:Error` if an error is encountered or else nil
@@ -143,7 +151,7 @@ public client isolated class Consumer {
 
     # Retrieves the lastly committed offset for the given topic partition.
     # ```ballerina
-    # kafka:PartitionOffset result = check consumer->getCommittedOffset(topicPartition);
+    # kafka:PartitionOffset? result = check consumer->getCommittedOffset(topicPartition);
     # ```
     #
     # + partition - The `TopicPartition` in which the committed offset is returned to the consumer
@@ -242,7 +250,7 @@ public client isolated class Consumer {
 
     # Polls the external broker to retrieve messages.
     # ```ballerina
-    # kafka:ConsumerRecord[] result = check consumer->poll(1000);
+    # kafka:ConsumerRecord[] result = check consumer->poll(10);
     # ```
     #
     # + timeout - Polling time in seconds
@@ -314,7 +322,7 @@ public client isolated class Consumer {
     # + return - A `kafka:Error` if an error is encountered or else '()'
     isolated remote function subscribe(string[] topics) returns Error? {
         if (self.consumerConfig?.groupId is string) {
-            return self->consumerSubscribe(topics);
+            return self.consumerSubscribe(topics);
         } else {
             panic createError("The groupId of the consumer must be set to subscribe to the topics");
         }
@@ -342,12 +350,6 @@ public client isolated class Consumer {
     isolated remote function unsubscribe() returns Error? =
     @java:Method {
         name: "unsubscribe",
-        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
-    } external;
-
-    isolated remote function consumerSubscribe(string[] topics) returns Error? =
-    @java:Method {
-        name: "subscribe",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.SubscriptionHandler"
     } external;
 }

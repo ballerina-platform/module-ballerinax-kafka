@@ -29,7 +29,7 @@ function orderProcessorTest() returns error? {
         name: "Test Order",
         status: types:SUCCESS
     };
-    check kafkaProducer->send({ topic: LISTENING_TOPIC, value: 'order.toString().toBytes()});
+    check testProducer->send({ topic: LISTENING_TOPIC, value: 'order.toString().toBytes()});
     runtime:sleep(4);
 
     kafka:ConsumerConfiguration testConsumerConfigs = {
@@ -48,5 +48,4 @@ function orderProcessorTest() returns error? {
     types:Order neworder = <types:Order> jsonTweet;
 
     test:assertEquals(neworder, 'order);
-    return;
 }

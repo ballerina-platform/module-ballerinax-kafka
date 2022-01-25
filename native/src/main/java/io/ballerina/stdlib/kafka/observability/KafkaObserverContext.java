@@ -28,12 +28,12 @@ import io.ballerina.runtime.observability.ObserverContext;
 public class KafkaObserverContext extends ObserverContext {
 
     private KafkaObserverContext() {
-        setObjectName(KafkaObservabilityConstants.CONNECTOR_NAME);
+        addTag(KafkaObservabilityConstants.TAG_LISTENER_NAME, KafkaObservabilityConstants.CONNECTOR_NAME);
     }
 
     KafkaObserverContext(String context) {
         this();
-        setObjectName(KafkaObservabilityConstants.CONNECTOR_NAME);
+        addTag(KafkaObservabilityConstants.TAG_LISTENER_NAME, KafkaObservabilityConstants.CONNECTOR_NAME);
         addTag(KafkaObservabilityConstants.TAG_CONTEXT, context);
     }
 

@@ -27,27 +27,21 @@ public class KafkaObservabilityConstants {
 
     static final String CONNECTOR_NAME = "kafka";
 
-    static final String[] METRIC_CONNECTIONS = {"connections", "Number of currently active connections"};
     static final String[] METRIC_PUBLISHERS = {"publishers", "Number of currently active publishers"};
     static final String[] METRIC_CONSUMERS = {"consumers", "Number of currently active consumers"};
     static final String[] METRIC_PUBLISHED = {"published", "Number of messages published"};
     static final String[] METRIC_PUBLISHED_SIZE = {"published_size", "Total size in bytes of messages published"};
     static final String[] METRIC_ERRORS = {"errors", "Number of errors"};
-    static final String[] METRIC_REQUEST = {"requests", "Number of requests sent"};
-    static final String[] METRIC_RESPONSE = {"responses", "Number of responses_received"};
     static final String[] METRIC_SUBSCRIPTION = {"subscriptions", "Number of subscriptions"};
     static final String[] METRIC_CONSUMED = {"consumed", "Number of messages consumed"};
-    static final String[] METRIC_DELIVERED = {"delivered", "Number of messages successfully received by consumer"};
     static final String[] METRIC_CONSUMED_SIZE = {"consumed_size", "Total size in bytes of messages consumed"};
-    static final String[] METRIC_ACK = {"acknowledgements", "Total number of acknowledgements received"};
 
     static final String TAG_URL = "url";
     static final String TAG_TOPIC = "topic";
     static final String TAG_ERROR_TYPE = "error_type";
     static final String TAG_CONTEXT = "context";
     static final String TAG_CLIENT_ID = "client_id";
-    static final String TAG_PRODUCER_ID = "producer_id";
-    static final String TAG_CONSUMER_ID = "consumer_id";
+    static final String TAG_LISTENER_NAME = "listener.name";
 
     public static final String ERROR_TYPE_CONNECTION = "connection";
     public static final String ERROR_TYPE_PUBLISH = "publish";
@@ -75,7 +69,6 @@ public class KafkaObservabilityConstants {
     public static final String ERROR_TYPE_SEEK_END = "seek_to_end";
     public static final String ERROR_TYPE_SUBSCRIBE = "subscribe";
     public static final String ERROR_TYPE_SUBSCRIBE_PATTERN = "subscribe_to_pattern";
-    public static final String ERROR_TYPE_SUBSCRIBE_PARTITION_REBALANCE = "subscribe_with_partition_rebalance";
     public static final String ERROR_TYPE_UNSUBSCRIBE = "unsubscribe";
 
     public static final String CONTEXT_PRODUCER = "producer";

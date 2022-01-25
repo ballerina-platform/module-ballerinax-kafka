@@ -18,19 +18,18 @@ import ballerina/jballerina.java;
 
 isolated function sendByteArrayValues(Producer producer, byte[] value, string topic, anydata? key, int? partition,
     int? timestamp, string keySerializerType) returns Error? {
-    if (key is ()) {
+    if key is () {
         return sendByteArrayValuesNilKeys(producer, value, topic, partition, timestamp);
     }
-    if (keySerializerType == SER_BYTE_ARRAY) {
-        if (key is byte[]) {
+    if keySerializerType == SER_BYTE_ARRAY {
+        if key is byte[] {
             return sendByteArrayValuesByteArrayKeys(producer, value, topic, key, partition, timestamp);
         }
         panic getKeyTypeMismatchError(BYTE_ARRAY);
     }
-    return;
 }
 
- //Send byte[] values with different types of keys
+//Send byte[] values with different types of keys
 isolated function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topic, int? partition = (),
     int? timestamp = ()) returns Error? =
 @java:Method {

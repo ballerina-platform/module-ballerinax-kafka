@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -217,7 +218,9 @@ public class GetOffsets {
     private static OffsetAndMetadata getOffsetAndMetadataWithDuration(KafkaConsumer kafkaConsumer,
                                                                       TopicPartition topicPartition, long timeout) {
         Duration duration = Duration.ofMillis(timeout);
-        return kafkaConsumer.committed(topicPartition, duration);
+        HashSet<TopicPartition> topicPartitionSet = new HashSet<>();
+        topicPartitionSet.add(topicPartition);
+        return (OffsetAndMetadata) kafkaConsumer.committed(topicPartitionSet, duration).get(topicPartition);
     }
 
     private static Map<TopicPartition, Long> getEndOffsetsWithDuration(KafkaConsumer consumer,

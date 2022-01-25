@@ -67,8 +67,7 @@ public class ProducerActions {
         BMap<BString, Object> configs = producerObject.getMapValue(PRODUCER_CONFIG_FIELD_NAME);
         Properties producerProperties = processKafkaProducerConfig(bootstrapServer, configs);
         try {
-            if (Objects.nonNull(
-                    producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {
+            if (Objects.nonNull(producerProperties.get(ProducerConfig.TRANSACTIONAL_ID_CONFIG))) {
                 if (!((boolean) producerProperties.get(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG))) {
                     return createKafkaError("configuration enableIdempotence must be set to true to enable " +
                                                             "transactional producer");

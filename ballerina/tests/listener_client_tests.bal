@@ -49,7 +49,6 @@ function consumerServiceTest() returns error? {
     runtime:sleep(3);
     test:assertEquals(receivedMessage, TEST_MESSAGE);
     check consumer.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -69,7 +68,6 @@ function consumerServiceInvalidUrlTest() returns error? {
     runtime:sleep(3);
     test:assertEquals(incorrectEndpointMsg, EMPTY_MESSAGE);
     check consumer.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -145,7 +143,6 @@ function consumerServiceGracefulStopTest() returns error? {
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
     runtime:sleep(3);
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
-    return;
 }
 
 @test:Config {}
@@ -168,7 +165,6 @@ function consumerServiceImmediateStopTest() returns error? {
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic);
     runtime:sleep(3);
     test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
-    return;
 }
 
 @test:Config {}
@@ -194,7 +190,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
         groupId: "listener-immediate-stop-service-test-group",
         clientId: "test-listener-07"
     };
-
+    
     Listener 'listener = check new (DEFAULT_URL, consumerConfiguration);
     check 'listener.attach(incorrectEndpointsService);
     error? res = 'listener.'start();
@@ -226,7 +222,6 @@ function listenerConfigTest() returns error? {
     runtime:sleep(3);
     test:assertEquals(receivedConfigMessage, TEST_MESSAGE);
     check serviceConsumer.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -241,7 +236,7 @@ function listenerConfigErrorTest() returns error? {
     };
     Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
     error? result = serviceConsumer.attach(consumerConfigService);
-    if (result is error) {
+    if result is Error {
         string expectedErrorMsg = "Number of Concurrent consumers should be a positive integer" +
                 " value greater than zero.";
         test:assertEquals(result.message(), expectedErrorMsg);
@@ -258,13 +253,12 @@ function listenerConfigErrorTest() returns error? {
         partitionAssignmentStrategy: strategy
     };
     Listener|Error result2 = new(DEFAULT_URL, consumerConfiguration);
-    if (result2 is error) {
+    if (result2 is Error) {
         string expectedErrorMsg = "Cannot connect to the kafka server: Failed to construct kafka consumer";
         test:assertEquals(result2.message(), expectedErrorMsg);
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    return;
 }
 
 @test:Config {
@@ -289,20 +283,19 @@ function consumerServiceCommitOffsetTest() returns error? {
 
     int messageCount = 10;
     int count = 0;
-    while (count < messageCount) {
+    while count < messageCount {
         check sendMessage(count.toString().toBytes(), topic);
         count += 1;
     }
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
-    PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
-    int offsetValue = committedPartitionOffset.offset;
-
-    test:assertEquals(offsetValue, messageCount);
+    test:assertTrue(committedOffset is PartitionOffset);
+    if committedOffset is PartitionOffset {
+        test:assertEquals(committedOffset.offset, messageCount);
+    }
     check consumer->close();
     check serviceConsumer.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -325,20 +318,19 @@ function consumerServiceCommitTest() returns error? {
 
     int messageCount = 10;
     int count = 0;
-    while (count < messageCount) {
+    while count < messageCount {
         check sendMessage(count.toString().toBytes(), topic);
         count += 1;
     }
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
-    PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
-    int offsetValue = committedPartitionOffset.offset;
-
-    test:assertEquals(offsetValue, messageCount);
+    test:assertTrue(committedOffset is PartitionOffset);
+    if committedOffset is PartitionOffset {
+        test:assertEquals(committedOffset.offset, messageCount);
+    }
     check consumer->close();
     check serviceConsumer.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -361,7 +353,6 @@ function saslListenerTest() returns error? {
     runtime:sleep(3);
     test:assertEquals(saslMsg, TEST_MESSAGE);
     check saslListener.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -389,7 +380,6 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     runtime:sleep(3);
     test:assertEquals(saslMsg, EMPTY_MESSAGE);
     check saslListener.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -412,7 +402,6 @@ function sslListenerTest() returns error? {
     runtime:sleep(3);
     test:assertEquals(sslMsg, TEST_MESSAGE);
     check saslListener.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -445,7 +434,6 @@ function basicMessageOrderTest() returns error? {
     string expected = "0123456789";
     test:assertEquals(messagesReceivedInOrder, expected);
     check consumer.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -504,7 +492,6 @@ function listenerDetachTest() returns error? {
     runtime:sleep(3);
     test:assertEquals(detachMsg1, TEST_MESSAGE);
     check listener2.gracefulStop();
-    return;
 }
 
 @test:Config {}
@@ -787,7 +774,6 @@ function invalidSecurityProtocolListenerTest() returns error? {
         test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
     }
 }
-
 
 Service messageOrderService =
 service object {

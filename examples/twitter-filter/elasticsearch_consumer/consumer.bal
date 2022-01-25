@@ -62,7 +62,6 @@ public function main() returns error? {
     check kafkaListener.attach(consumerService);
     // Starts the registered services.
     check kafkaListener.'start();
-    return;
 }
 
 kafka:Service consumerService =
@@ -87,7 +86,6 @@ service object {
         if commitResult is error {
             log:printError("Error occurred while committing the offsets for the consumer.", 'error = commitResult);
         }
-        return;
     }
 };
 

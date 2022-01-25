@@ -22,8 +22,6 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.kafka.exceptions.KafkaConnectorException;
 import io.ballerina.stdlib.kafka.impl.KafkaServerConnectorImpl;
 
-import java.io.PrintStream;
-
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERVER_CONNECTOR;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 
@@ -31,7 +29,6 @@ import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
  * Start server connector.
  */
 public class Start {
-    private static final PrintStream console = System.out;
 
     public static Object start(BObject listener) {
         KafkaServerConnectorImpl serverConnector = (KafkaServerConnectorImpl) listener.getNativeData(SERVER_CONNECTOR);

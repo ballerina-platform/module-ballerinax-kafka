@@ -37,7 +37,7 @@ public function main() returns error? {
             password: password
         }
     );
-    while(true) {
+    while true {
         // Gets tweets from the mock Twitter server.
         types:Tweet[] response = check twitterClient->get("/tweets");
 
