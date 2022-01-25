@@ -19,8 +19,11 @@
 package io.ballerina.stdlib.kafka.plugin;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -45,6 +48,7 @@ import java.util.Optional;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants
         .CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_PARAMS_ALLOWED;
@@ -92,27 +96,63 @@ public class KafkaFunctionValidator {
 
     private void validateFunctionParameters(SeparatedNodeList<ParameterNode> parameters,
                                             FunctionDefinitionNode functionDefinitionNode) {
+        // Here there can be caller and consumerRecords scenario + consumerRecords only scenario
+        // If the param count is 1, checks are done for array_type and intersection_type
+        // (kafka:ConsumerRecords[]/ kafka:ConsumerRecords[] & readonly)
         if (parameters.size() == 1) {
-            if (!((RequiredParameterNode) parameters.get(0)).typeName().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+            ParameterNode paramNode = parameters.get(0);
+            SyntaxKind paramSyntaxKind = ((RequiredParameterNode) paramNode).typeName().kind();
+            if (paramSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+                validateConsumerRecordsParam(paramNode, MUST_HAVE_CALLER_AND_RECORDS);
+            } else if (paramSyntaxKind.equals(SyntaxKind.INTERSECTION_TYPE_DESC)) {
+                validateIntersectionParam(paramNode);
+            } else {
                 context.reportDiagnostic(PluginUtils.getDiagnostic(
                         CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS,
-                        DiagnosticSeverity.ERROR, functionDefinitionNode.functionSignature().location()));
-            } else {
-                validateConsumerRecordsParam(parameters.get(0), MUST_HAVE_CALLER_AND_RECORDS);
+                        DiagnosticSeverity.ERROR, paramNode.location()));
             }
         } else if (parameters.size() == 2) {
             ParameterNode firstParamNode = parameters.get(0);
             ParameterNode secondParamNode = parameters.get(1);
             SyntaxKind firstParamSyntaxKind = ((RequiredParameterNode) firstParamNode).typeName().kind();
             SyntaxKind secondParamSyntaxKind = ((RequiredParameterNode) secondParamNode).typeName().kind();
-            if (firstParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC) &&
-                    secondParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-                validateConsumerRecordsParam(firstParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
-                validateCallerParam(secondParamNode);
-            } else if (firstParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE) &&
-                    secondParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
-                validateCallerParam(firstParamNode);
-                validateConsumerRecordsParam(secondParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
+            // If the second parameter is a qualified_name_ref, try to validate it for caller and try to validate
+            // first param for kafka:ConsumerRecords
+            if (secondParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+                boolean callerResult = validateCallerParam(secondParamNode);
+                if (firstParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+                    validateConsumerRecordsParam(firstParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
+                } else if (firstParamSyntaxKind.equals(SyntaxKind.INTERSECTION_TYPE_DESC)) {
+                    validateIntersectionParam(firstParamNode);
+                } else {
+                    // If the second parameter is not a caller type and first param is not ConsumerRecords,
+                    // the first parameter may be a caller type
+                    // (eg: (kafka:Caller caller, kafka:Consumer records))
+                    if (!callerResult) {
+                        validateCallerParam(firstParamNode);
+                    } else {
+                        context.reportDiagnostic(PluginUtils.getDiagnostic(
+                                CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
+                                DiagnosticSeverity.ERROR, firstParamNode.location()));
+                    }
+                }
+            // If the first parameter is a qualified_name_ref, try to validate it for caller and try to validate
+            // second param for kafka:ConsumerRecords
+            } else if (firstParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+                boolean callerResult = validateCallerParam(firstParamNode);
+                if (secondParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+                    validateConsumerRecordsParam(secondParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
+                } else if (secondParamSyntaxKind.equals(SyntaxKind.INTERSECTION_TYPE_DESC)) {
+                    validateIntersectionParam(secondParamNode);
+                } else {
+                    if (!callerResult) {
+                        validateCallerParam(secondParamNode);
+                    } else {
+                        context.reportDiagnostic(PluginUtils.getDiagnostic(
+                                CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
+                                DiagnosticSeverity.ERROR, secondParamNode.location()));
+                    }
+                }
             } else {
                 context.reportDiagnostic(PluginUtils.getDiagnostic(
                         CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
@@ -127,7 +167,7 @@ public class KafkaFunctionValidator {
         }
     }
 
-    private void validateCallerParam(ParameterNode parameterNode) {
+    private boolean validateCallerParam(ParameterNode parameterNode) {
         RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
         Node parameterTypeNode = requiredParameterNode.typeName();
         SemanticModel semanticModel = context.semanticModel();
@@ -142,13 +182,15 @@ public class KafkaFunctionValidator {
                     context.reportDiagnostic(PluginUtils.getDiagnostic(
                             INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
                             DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                    return false;
                 }
-            } else {
-                context.reportDiagnostic(PluginUtils.getDiagnostic(
-                        INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
-                        DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                return true;
             }
         }
+        context.reportDiagnostic(PluginUtils.getDiagnostic(
+                INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS,
+                DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+        return false;
     }
 
     private void validateConsumerRecordsParam(ParameterNode parameterNode, CompilationErrors errorToThrow) {
@@ -172,6 +214,44 @@ public class KafkaFunctionValidator {
                 context.reportDiagnostic(PluginUtils.getDiagnostic(errorToThrow,
                         DiagnosticSeverity.ERROR, requiredParameterNode.location()));
             }
+        }
+    }
+
+    private void validateIntersectionParam(ParameterNode parameterNode) {
+        RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
+        SemanticModel semanticModel = context.semanticModel();
+        Optional<Symbol> symbol = semanticModel.symbol(requiredParameterNode);
+        if (symbol.isPresent()) {
+            ParameterSymbol parameterSymbol = (ParameterSymbol) symbol.get();
+            if (parameterSymbol.typeDescriptor() instanceof  IntersectionTypeSymbol) {
+                IntersectionTypeSymbol intersectionTypeSymbol =
+                        (IntersectionTypeSymbol) parameterSymbol.typeDescriptor();
+                List<TypeSymbol> intersectionMembers = intersectionTypeSymbol.memberTypeDescriptors();
+                ArrayTypeSymbol typeReferenceTypeSymbol = null;
+                for (TypeSymbol typeSymbol : intersectionMembers) {
+                    if (typeSymbol.typeKind() == TypeDescKind.ARRAY) {
+                        typeReferenceTypeSymbol = (ArrayTypeSymbol) typeSymbol;
+                    }
+                }
+                if (typeReferenceTypeSymbol != null) {
+                    String paramName = typeReferenceTypeSymbol.memberTypeDescriptor().getName().isPresent() ?
+                            typeReferenceTypeSymbol.memberTypeDescriptor().getName().get() : "";
+                    if (!validateModuleId(typeReferenceTypeSymbol.memberTypeDescriptor().getModule().get()) ||
+                            !paramName.equals(PluginConstants.RECORD_PARAM)) {
+                        context.reportDiagnostic(PluginUtils.getDiagnostic(INVALID_FUNCTION_PARAM_RECORDS,
+                                DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                    }
+                } else {
+                    context.reportDiagnostic(PluginUtils.getDiagnostic(INVALID_FUNCTION_PARAM_RECORDS,
+                            DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                }
+            } else {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(INVALID_FUNCTION_PARAM_RECORDS,
+                        DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+            }
+        } else {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(INVALID_FUNCTION_PARAM_RECORDS,
+                    DiagnosticSeverity.ERROR, requiredParameterNode.location()));
         }
     }
 

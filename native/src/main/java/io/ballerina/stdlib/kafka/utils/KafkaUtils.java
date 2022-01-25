@@ -62,6 +62,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
@@ -76,17 +77,6 @@ public class KafkaUtils {
     }
 
     public static Object[] getResourceParameters(BObject service, BObject listener, ConsumerRecords records) {
-        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-
-        BArray consumerRecordsArray = ValueCreator.createArrayValue(
-                TypeCreator.createArrayType(getConsumerRecord().getType()));
-        for (Object record : records) {
-            BMap<BString, Object> consumerRecord = populateConsumerRecord(
-                    (ConsumerRecord) record, keyType, valueType);
-            consumerRecordsArray.append(consumerRecord);
-        }
-
         Type[] parameterTypes = service.getType().getMethods()[0].getParameterTypes();
         if (parameterTypes.length == 2) {
             BObject caller =
@@ -96,17 +86,39 @@ public class KafkaUtils {
             caller.addNativeData(NATIVE_CONSUMER, consumer);
             caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
             if (parameterTypes[0].getTag() == OBJECT_TYPE_TAG && parameterTypes[1].getTag() == ARRAY_TAG) {
-                return new Object[]{caller, true, consumerRecordsArray, true};
+                return new Object[]{caller, true, getConsumerRecords(records, false), true};
             } else if (parameterTypes[0].getTag() == ARRAY_TAG && parameterTypes[1].getTag() == OBJECT_TYPE_TAG) {
-                return new Object[]{consumerRecordsArray, true, caller, true};
+                return new Object[]{getConsumerRecords(records, false), true, caller, true};
+            } else if (parameterTypes[0].getTag() == OBJECT_TYPE_TAG
+                    && parameterTypes[1].getTag() == INTERSECTION_TAG) {
+                return new Object[]{caller, true, getConsumerRecords(records, true), true};
+            } else if (parameterTypes[0].getTag() == INTERSECTION_TAG
+                    && parameterTypes[1].getTag() == OBJECT_TYPE_TAG) {
+                return new Object[]{getConsumerRecords(records, true), true, caller, true};
             } else {
                 throw KafkaUtils.createKafkaError("Invalid remote function signature");
             }
         } else if (parameterTypes.length == 1 && parameterTypes[0].getTag() == ARRAY_TAG) {
-            return new Object[]{consumerRecordsArray, true};
+            return new Object[]{getConsumerRecords(records, false), true};
+        } else if (parameterTypes.length == 1 && parameterTypes[0].getTag() == INTERSECTION_TAG) {
+            return new Object[]{getConsumerRecords(records, true), true};
         } else {
             throw KafkaUtils.createKafkaError("Invalid remote function signature");
         }
+    }
+
+    private static BArray getConsumerRecords(ConsumerRecords records, boolean readOnly) {
+        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
+        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
+        List<BMap<BString, Object>> recordMapList = new ArrayList();
+        for (Object record : records) {
+            BMap<BString, Object> consumerRecord = populateConsumerRecord(
+                    (ConsumerRecord) record, keyType, valueType);
+            recordMapList.add(consumerRecord);
+        }
+        BArray consumerRecordsArray = ValueCreator.createArrayValue(recordMapList.toArray(),
+                TypeCreator.createArrayType(getConsumerRecord().getType(), readOnly));
+        return consumerRecordsArray;
     }
 
     public static Properties processKafkaConsumerConfig(Object bootStrapServers, BMap<BString, Object> configurations) {
