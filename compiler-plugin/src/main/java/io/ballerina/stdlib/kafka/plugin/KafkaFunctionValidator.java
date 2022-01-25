@@ -96,6 +96,9 @@ public class KafkaFunctionValidator {
 
     private void validateFunctionParameters(SeparatedNodeList<ParameterNode> parameters,
                                             FunctionDefinitionNode functionDefinitionNode) {
+        // Here there can be caller and consumerRecords scenario + consumerRecords only scenario
+        // If the param count is 1, checks are done for array_type and intersection_type
+        // (kafka:ConsumerRecords[]/ kafka:ConsumerRecords[] & readonly)
         if (parameters.size() == 1) {
             ParameterNode paramNode = parameters.get(0);
             SyntaxKind paramSyntaxKind = ((RequiredParameterNode) paramNode).typeName().kind();
@@ -113,6 +116,8 @@ public class KafkaFunctionValidator {
             ParameterNode secondParamNode = parameters.get(1);
             SyntaxKind firstParamSyntaxKind = ((RequiredParameterNode) firstParamNode).typeName().kind();
             SyntaxKind secondParamSyntaxKind = ((RequiredParameterNode) secondParamNode).typeName().kind();
+            // If the second parameter is a qualified_name_ref, try to validate it for caller and try to validate
+            // first param for kafka:ConsumerRecords
             if (secondParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
                 boolean callerResult = validateCallerParam(secondParamNode);
                 if (firstParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
@@ -120,7 +125,8 @@ public class KafkaFunctionValidator {
                 } else if (firstParamSyntaxKind.equals(SyntaxKind.INTERSECTION_TYPE_DESC)) {
                     validateIntersectionParam(firstParamNode);
                 } else {
-                    // If the second parameter is not a caller type, the first parameter may be a caller type
+                    // If the second parameter is not a caller type and first param is not ConsumerRecords,
+                    // the first parameter may be a caller type
                     // (eg: (kafka:Caller caller, kafka:Consumer records))
                     if (!callerResult) {
                         validateCallerParam(firstParamNode);
@@ -130,6 +136,8 @@ public class KafkaFunctionValidator {
                                 DiagnosticSeverity.ERROR, firstParamNode.location()));
                     }
                 }
+            // If the first parameter is a qualified_name_ref, try to validate it for caller and try to validate
+            // second param for kafka:ConsumerRecords
             } else if (firstParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
                 boolean callerResult = validateCallerParam(firstParamNode);
                 if (secondParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
