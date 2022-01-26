@@ -38,7 +38,7 @@ public client isolated class Caller {
     #
     # + offsets - Offsets to be commited
     # + duration - Timeout duration (in seconds) for the commit operation execution
-    # + return - `kafka:Error` if an error is encountered or else nil
+    # + return - A `kafka:Error` if an error is encountered or else `()`
     isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? =
     @java:Method {
         name: "commitOffset",

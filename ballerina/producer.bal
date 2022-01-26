@@ -20,7 +20,7 @@ import ballerina/jballerina.java;
 # Represents a Kafka producer endpoint.
 #
 # + connectorId - Unique ID for a particular connector to use in trasactions
-# + producerConfig - Used to store configurations related to a Kafka connection
+# + producerConfig - Stores configurations related to a Kafka connection
 public client isolated class Producer {
 
     final ProducerConfiguration? & readonly producerConfig;
@@ -30,10 +30,10 @@ public client isolated class Producer {
 
     private string connectorId = uuid:createType4AsString();
 
-    # Creates a new Kafka `Producer`.
+    # Creates a new `kafka:Producer`.
     #
     # + bootstrapServers - List of remote server endpoints of Kafka brokers
-    # + config - Configurations related to initializing a Kafka `Producer`
+    # + config - Configurations related to initializing a `kafka:Producer`
     # + return - A `kafka:Error` if closing the producer failed or else '()'
     public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers.cloneReadOnly();

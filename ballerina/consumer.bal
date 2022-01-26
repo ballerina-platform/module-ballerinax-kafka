@@ -18,7 +18,7 @@ import ballerina/jballerina.java;
 
 # Represents a Kafka consumer endpoint.
 #
-# + consumerConfig - Used to store configurations related to a Kafka connection
+# + consumerConfig - Stores configurations related to a Kafka connection
 public client isolated class Consumer {
 
     final ConsumerConfiguration & readonly consumerConfig;
@@ -26,7 +26,7 @@ public client isolated class Consumer {
     private final string valueDeserializerType;
     private final string|string[] & readonly bootstrapServers;
 
-    # Creates a new Kafka `Consumer`.
+    # Creates a new `kafka:Consumer`.
     #
     # + bootstrapServers - List of remote server endpoints of Kafka brokers
     # + config - Configurations related to the consumer endpoint
@@ -62,7 +62,7 @@ public client isolated class Consumer {
     # ```
     #
     # + partitions - Topic partitions to be assigned
-    # + return - `kafka:Error` if an error is encountered or else nil
+    # + return - A `kafka:Error` if an error is encountered or else `()`
     isolated remote function assign(TopicPartition[] partitions) returns Error? =
     @java:Method {
         name: "assign",
@@ -101,7 +101,7 @@ public client isolated class Consumer {
     #
     # + offsets - Offsets to be commited
     # + duration - Timeout duration (in seconds) for the commit operation execution
-    # + return - `kafka:Error` if an error is encountered or else `()`
+    # + return - A `kafka:Error` if an error is encountered or else `()`
     isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? =
     @java:Method {
         name: "commitOffset",

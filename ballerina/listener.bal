@@ -18,7 +18,7 @@ import ballerina/jballerina.java;
 
 # Represents a Kafka consumer endpoint.
 #
-# + consumerConfig - Used to store configurations related to a Kafka connection
+# + consumerConfig - Stores configurations related to a Kafka connection
 public isolated client class Listener {
 
     final ConsumerConfiguration & readonly consumerConfig;
@@ -26,7 +26,7 @@ public isolated client class Listener {
     private final string valueDeserializerType;
     private final string|string[] & readonly bootstrapServers;
 
-    # Creates a new Kafka `Listener`.
+    # Creates a new `kafka:Listener`.
     #
     # + bootstrapServers - List of remote server endpoints of Kafka brokers
     # + config - Configurations related to the consumer endpoint
@@ -57,7 +57,7 @@ public isolated client class Listener {
     # error? result = listener.'start();
     # ```
     #
-    # + return - A `kafka:Error` if an error is encountered while starting the server or else nil
+    # + return - A `kafka:Error` if an error is encountered while starting the server or else `()`
     public isolated function 'start() returns error? =
     @java:Method {
         name: "start",
@@ -91,10 +91,10 @@ public isolated client class Listener {
     # error? result = listener.attach(kafkaService);
     # ```
     #
-    # + s - The service to be attached
+    # + 'service - The service to be attached
     # + name - Name of the service
-    # + return - An `kafka:Error` if an error is encountered while attaching the service or else nil
-    public isolated function attach(Service s, string[]|string? name = ()) returns error? =
+    # + return - A `kafka:Error` if an error is encountered while attaching the service or else `()`
+    public isolated function attach(Service 'service, string[]|string? name = ()) returns error? =
     @java:Method {
         name: "register",
         'class: "io.ballerina.stdlib.kafka.service.Register"
@@ -105,9 +105,9 @@ public isolated client class Listener {
     # error? result = listener.detach(kafkaService);
     # ```
     #
-    # + s - The service to be detached
+    # + 'service - The service to be detached
     # + return - A `kafka:Error` if an error is encountered while detaching a service or else `()`
-    public isolated function detach(Service s) returns error? =
+    public isolated function detach(Service 'service) returns error? =
     @java:Method {
         name: "unregister",
         'class: "io.ballerina.stdlib.kafka.service.Unregister"

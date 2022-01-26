@@ -58,7 +58,7 @@ public type SecureSocket record {|
    string provider?;
 |};
 
-# Represents combination of certificate, private key and private key password if encrypted.
+# Represents a combination of certificate, private key, and private key password if encrypted.
 #
 # + certFile - A file containing the certificate
 # + keyFile - A file containing the private key in PKCS8 format
@@ -78,7 +78,7 @@ public enum Protocol {
 
 # Configurations related to Kafka authentication mechanisms.
 #
-# + mechanism - Type of the authentication mechanism. Currently, SASL_PLAIN and SCRAM are supported
+# + mechanism - Type of the authentication mechanism. Currently only SASL_PLAIN is supported
 # + username - The username to authenticate the Kafka producer/consumer
 # + password - The password to authenticate the Kafka producer/consumer
 public type AuthenticationConfiguration record {|
@@ -128,13 +128,13 @@ public type AuthenticationConfiguration record {|
 # + concurrentConsumers - Number of concurrent consumers
 # + defaultApiTimeout - Default API timeout value (in seconds) for APIs with duration
 # + autoCommit - Enables auto committing offsets
-# + checkCRCS - Check the CRC32 of the records consumed. This ensures that no on-the-wire or on-disk corruption to
-#               the messages occurred. This may add some overhead, and might needed set to `false` if extreme
+# + checkCRCS - Checks the CRC32 of the records consumed. This ensures that no on-the-wire or on-disk corruption to
+#               the messages occurred. This may add some overhead, and might need to set to `false` if extreme
 #               performance is required
 # + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
 # + decoupleProcessing - Decouples processing
 # + secureSocket - Configurations related to SSL/TLS encryption
-# + auth - Authentication-related configurations for the Kafka consumer
+# + auth - Authentication-related configurations for the `kafka:Consumer`
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ConsumerConfiguration record {|
     string groupId?;
@@ -214,7 +214,7 @@ public type ProducerRecord record {|
 |};
 
 // Producer-related records
-# Represents the Kafka Producer configuration.
+# Represents the `kafaka:Producer` configuration.
 #
 # + acks - Number of acknowledgments
 # + compressionType - Compression type to be used for messages
@@ -250,7 +250,7 @@ public type ProducerRecord record {|
 # + transactionTimeout - Timeout (in seconds) for transaction status update from the producer
 # + enableIdempotence - Exactly one copy of each message is written to the stream when enabled
 # + secureSocket - Configurations related to SSL/TLS encryption
-# + auth - Authentication-related configurations for the Kafka producer
+# + auth - Authentication-related configurations for the `kafka:Producer`
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ProducerConfiguration record {|
     ProducerAcks acks = ACKS_SINGLE;
