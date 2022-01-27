@@ -33,17 +33,17 @@ First, clone this repository, and then, run the following commands in the given 
 
 1. Run the mock Twitter server. 
 ```sh
-$ cd examples/twitter-filter/mock_twitter_server
+$ cd examples/twitter-filter/mock-twitter-server
 $ bal run
 ```
 2. Run the Elasticsearch Client / Kafka consumer.
 ```sh
-$ cd examples/twitter-filter/elasticsearch_consumer
+$ cd examples/twitter-filter/elasticsearch-consumer
 $ bal run
 ```
 3. Run the Twitter Client / Kafka producer. 
 ```sh
-$ cd examples/twitter-filter/twitter_producer
+$ cd examples/twitter-filter/twitter-producer
 $ bal run
 ```
 

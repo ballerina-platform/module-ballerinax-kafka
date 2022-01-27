@@ -23,7 +23,7 @@ apply plugin: 'java'
 description = 'Ballerina - Kafka Examples'
 
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
-def examples = ["twitter-filter/elasticsearch_consumer", "twitter-filter/mock_twitter_server", "twitter-filter/twitter_producer", "order-manager/order_service", "order-manager/order_processor", "order-manager/notification_service", "secured-word-count-calculator/word-count-calculator"]
+def examples = ["twitter-filter/elasticsearch-consumer", "twitter-filter/mock-twitter-server", "twitter-filter/twitter-producer", "order-manager/order-service", "order-manager/order-processor", "order-manager/notification-service", "secured-word-count-calculator/word-count-calculator"]
 def packageName = "kafka"
 
 dependencies {
@@ -43,7 +43,7 @@ task testExamples {
     doLast {
         def moduleVersion = "${project.version}".replace("-SNAPSHOT", "")
         examples.each { example ->
-            def dependenciesTomlFile = new File("${project.projectDir}/resources/Dependencies.toml")
+            def dependenciesTomlFile = new File("${project.projectDir}/_resources/Dependencies.toml")
             def dependenciesTomlFileInExample = new File("${project.projectDir}/${example}/Dependencies.toml")
             def newDependenciesTomlText = dependenciesTomlFile.text.replace("@project.version@", moduleVersion)
             dependenciesTomlFileInExample.text = newDependenciesTomlText
@@ -77,7 +77,7 @@ task buildExamples {
     doLast {
         def moduleVersion = "${project.version}".replace("-SNAPSHOT", "")
         examples.each { example ->
-            def dependenciesTomlFile = new File("${project.projectDir}/resources/Dependencies.toml")
+            def dependenciesTomlFile = new File("${project.projectDir}/_resources/Dependencies.toml")
             def dependenciesTomlFileInExample = new File("${project.projectDir}/${example}/Dependencies.toml")
             def newDependenciesTomlText = dependenciesTomlFile.text.replace("@project.version@", moduleVersion)
             dependenciesTomlFileInExample.text = newDependenciesTomlText
