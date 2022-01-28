@@ -58,7 +58,7 @@ service kafka:Service on kafkaListener {
         // commits the offsets manually
         kafka:Error? commitResult = caller->commit();
 
-        if (commitResult is kafka:Error) {
+        if commitResult is kafka:Error {
             log:printError("Error occurred while committing the offsets for the consumer ", 'error = commitResult);
         }
     }
