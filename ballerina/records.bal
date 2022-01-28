@@ -78,7 +78,7 @@ public enum Protocol {
 
 # Configurations related to Kafka authentication mechanisms.
 #
-# + mechanism - Type of the authentication mechanism. Currently only SASL_PLAIN is supported
+# + mechanism - Type of the authentication mechanism. Currently only `SASL_PLAIN` is supported
 # + username - The username to authenticate the Kafka producer/consumer
 # + password - The password to authenticate the Kafka producer/consumer
 public type AuthenticationConfiguration record {|
@@ -128,8 +128,8 @@ public type AuthenticationConfiguration record {|
 # + concurrentConsumers - Number of concurrent consumers
 # + defaultApiTimeout - Default API timeout value (in seconds) for APIs with duration
 # + autoCommit - Enables auto committing offsets
-# + checkCRCS - Checks the CRC32 of the records consumed. This ensures that no on-the-wire or on-disk corruption to
-#               the messages occurred. This may add some overhead, and might need to set to `false` if extreme
+# + checkCRCS - Checks the CRC32 of the records consumed. This ensures that no on-the-wire or on-disk corruption occurred
+#               to the messages. This may add some overhead and might need to be set to `false` if extreme
 #               performance is required
 # + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
 # + decoupleProcessing - Decouples processing

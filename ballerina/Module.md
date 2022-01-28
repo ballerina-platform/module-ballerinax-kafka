@@ -93,7 +93,7 @@ compromising the correctness of the results and lays the foundation for parallel
 using multiple consumers within the same group each reading and processing data from a subset of topic partitions and 
 running in a single thread.
 
-Topic partitions are assigned to consumers automatically, or you can manually assign topic partitions.
+Topic partitions are assigned to consumers automatically or you can manually assign topic partitions.
 
 The following code snippet joins a consumer to the `consumer-group` and assigns it to a topic partition manually.
 ```ballerina
