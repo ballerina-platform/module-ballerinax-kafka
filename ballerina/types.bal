@@ -21,11 +21,11 @@ public type OffsetResetMethod OFFSET_RESET_EARLIEST|OFFSET_RESET_LATEST|OFFSET_R
 # Kafka in-built deserializer type.
 public type DeserializerType DES_BYTE_ARRAY;
 
-# Kafka consumer isolation level type.
+# `kafka:Consumer` isolation level type.
 public type IsolationLevel ISOLATION_COMMITTED|ISOLATION_UNCOMMITTED;
 
 // Producer-related types
-# Kafka producer acknowledgement types.
+# `kafka:Producer` acknowledgement types.
 public type ProducerAcks ACKS_ALL|ACKS_NONE|ACKS_SINGLE;
 
 # Kafka in-built serializer types.
