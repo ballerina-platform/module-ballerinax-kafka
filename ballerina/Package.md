@@ -1,9 +1,9 @@
 ## Overview
-This library provides an implementation to interact with Kafka Brokers via Kafka Consumer and Kafka Producer clients.
+This package provides an implementation to interact with Kafka Brokers via Kafka Consumer and Kafka Producer clients.
 
 Apache Kafka is an open-source distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
 
-This library supports Kafka 1.x.x and 2.0.0 versions.
+This package supports Kafka 1.x.x and 2.0.0 versions.
 
 ### Consumer and Producer
 #### Kafka Producer
@@ -68,7 +68,7 @@ Serialization is the process of converting data into a stream of bytes that is u
 stores and transmits these bytes of arrays in its queue. Deserialization does the opposite of serialization
 in which bytes of arrays are converted into the desired data type.
 
-Currently, this library only supports the `byte array` data type for both the keys and values. The following code snippets
+Currently, this package only supports the `byte array` data type for both the keys and values. The following code snippets
 show how to produce and read a message from Kafka.
 ```ballerina
 string message = "Hello World, Ballerina";
