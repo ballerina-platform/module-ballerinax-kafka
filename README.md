@@ -149,7 +149,7 @@ Execute the commands below to build from the source.
    ./gradlew clean build
    ```
 
-2. To run the integration tests:
+2. To run the tests:
    ```
    ./gradlew clean test
    ```
@@ -157,7 +157,7 @@ Execute the commands below to build from the source.
    ```
    ./gradlew clean build -x test
    ```
-4. To debug package implementation:
+4. To debug library implementation:
    ```
    ./gradlew clean build -Pdebug=<port>
    ```
