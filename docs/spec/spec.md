@@ -3,13 +3,18 @@
 _Owners_: @shafreenAnfar @dilanSachi @aashikam    
 _Reviewers_: @shafreenAnfar @aashikam  
 _Created_: 2020/10/28   
-_Updated_: 2021/12/07  
+_Updated_: 2022/02/08   
+_Edition_: Swan Lake 
 _Issue_: [#2186](https://github.com/ballerina-platform/ballerina-standard-library/issues/2186)  
 
 # Introduction
-This is the specification for Kafka standard library which can send and receive messages by connecting to a Kafka server.
-This library is programmed in the [Ballerina programming language](https://ballerina.io/), which is an open-source 
-programming language for the cloud that makes it easier to use, combine, and create network services.
+This is the specification for the Kafka standard library of [Ballerina language](https://ballerina.io/), which can send and receive messages by connecting to a Kafka server.
+
+The Kafka library specification has evolved and may continue to evolve in the future. Released versions of the specification can be found under the relevant GitHub tag.
+
+If you have any feedback or suggestions about the library, start a discussion via a [GitHub issue](https://github.com/ballerina-platform/ballerina-standard-library/issues) or in the [Slack channel](https://ballerina.io/community/). Based on the outcome of the discussion, specification and implementation can be updated. Community feedback is always welcome. Any accepted proposal which affects the specification is stored under `/docs/proposals`. Proposals under discussion can be found with the label `type/proposal` in GitHub.
+
+Conforming implementation of the specification is released to Ballerina central. Any deviation from the specification is considered a bug.
 
 # Contents
 1. [Overview](#1-overview)
