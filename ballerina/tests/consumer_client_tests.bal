@@ -17,6 +17,7 @@
 import ballerina/lang.'string;
 import ballerina/test;
 import ballerina/crypto;
+import ballerina/io;
 
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
@@ -528,7 +529,7 @@ function consumerPauseResumePartitionTest() returns error? {
     TopicPartition[] pausedPartitions = check consumer->getPausedPartitions();
     test:assertEquals(pausedPartitions[0].topic, topic, "Expected: consumer-pause-resume-partition-test-topic. Received: " + pausedPartitions[0].topic);
 
-    result = consumer->resume([topicPartition]);
+    result = consumer->resume(pausedPartitions);
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     consumerRecords = check consumer->poll(5);
@@ -873,6 +874,73 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
         test:assertEquals(result.message(), expectedError);
     }
     check consumer->close();
+}
+
+@test:Config {}
+function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
+    string topic = "operations-with-received-topic-partitions-test-topic-7";
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "operations-with-received-topic-partitions-test-group-7",
+        clientId: "test-consumer-51"
+    };
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    io:println("1");
+    _ = check consumer->poll(1);
+    TopicPartition[] partitions = check consumer->getAssignment();
+    check consumer->unsubscribe();
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check consumer->assign(partitions);
+
+    check consumer->seekToEnd(partitions);
+    io:println("2");
+    ConsumerRecord[] consumerRecords = check consumer->poll(1);
+    test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    io:println("3");
+    consumerRecords = check consumer->poll(1);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+
+    check consumer->seekToBeginning(partitions);
+    io:println("4");
+    consumerRecords = check consumer->poll(1);
+    test:assertEquals(consumerRecords.length(), 2, "Expected: 2. Received: " + consumerRecords.length().toString());
+
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    PartitionOffset[] offsets = check consumer->getEndOffsets(partitions);
+    foreach var offset in offsets {
+        check consumer->seek(offset);
+    }
+    io:println("5");
+    consumerRecords = check consumer->poll(1);
+    test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    io:println("6");
+    consumerRecords = check consumer->poll(1);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+
+    check consumer->commitOffset(offsets);
+    int offsetCount = 0;
+    foreach var partition in partitions {
+        PartitionOffset? pOffset = check consumer->getCommittedOffset(partition);
+        offsetCount += pOffset is PartitionOffset ? pOffset.offset: -10;
+    }
+    test:assertEquals(offsetCount, 4, "Expected: 4. Received: " + offsetCount.toString());
+
+    check consumer->pause(partitions);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    io:println("7");
+
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    consumerRecords = check consumer->poll(1);
+    test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
+
+    check consumer->resume(partitions);
+    io:println("8");
+    consumerRecords = check consumer->poll(1);
+    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 }
 
 @test:Config{}
