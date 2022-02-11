@@ -17,7 +17,6 @@
 import ballerina/lang.'string;
 import ballerina/test;
 import ballerina/crypto;
-import ballerina/io;
 
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
@@ -653,7 +652,7 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 33);
+    test:assertEquals(availableTopics.length(), 34);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
@@ -714,7 +713,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 35);
+    test:assertEquals(availableTopics.length(), 36);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -724,7 +723,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 35);
+    test:assertEquals(availableTopics.length(), 36);
     check consumer->close();
 }
 
@@ -886,7 +885,6 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
         clientId: "test-consumer-51"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    io:println("1");
     _ = check consumer->poll(1);
     TopicPartition[] partitions = check consumer->getAssignment();
     check consumer->unsubscribe();
@@ -894,16 +892,13 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     check consumer->assign(partitions);
 
     check consumer->seekToEnd(partitions);
-    io:println("2");
     ConsumerRecord[] consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    io:println("3");
     consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 
     check consumer->seekToBeginning(partitions);
-    io:println("4");
     consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 2, "Expected: 2. Received: " + consumerRecords.length().toString());
 
@@ -913,11 +908,9 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     foreach var offset in offsets {
         check consumer->seek(offset);
     }
-    io:println("5");
     consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    io:println("6");
     consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 
@@ -931,14 +924,12 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
 
     check consumer->pause(partitions);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    io:println("7");
 
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
 
     check consumer->resume(partitions);
-    io:println("8");
     consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 }
