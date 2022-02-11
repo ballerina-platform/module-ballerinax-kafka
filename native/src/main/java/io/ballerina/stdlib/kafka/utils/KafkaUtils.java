@@ -606,7 +606,7 @@ public class KafkaUtils {
      * @param partition value of the partition offset
      * @return {@code BMap} of the record
      */
-    public static BMap<BString, Object> populateTopicPartitionRecord(String topic, int partition) {
+    public static BMap<BString, Object> populateTopicPartitionRecord(String topic, long partition) {
         return ValueCreator.createRecordValue(getTopicPartitionRecord(), topic, partition);
     }
 
@@ -742,7 +742,7 @@ public class KafkaUtils {
      * @param longValue {@code long} value, which we want to convert
      * @param logger    {@code Logger} instance, to log the error if there's an error
      * @param name      parameter name, which will be converted. This is required for logging purposes
-     * @return {@code int} value of the {@code long} value, if possible, {@code Integer.MAX_VALUE} is the number is too
+     * @return {@code int} value of the {@code long} value, if possible, {@code Integer.MAX_VALUE} if the number is too
      * large
      */
     public static int getIntFromLong(long longValue, Logger logger, String name) {
@@ -755,9 +755,18 @@ public class KafkaUtils {
         }
     }
 
+    /**
+     * Get the {@code int} value from a {@code BDecimal} value.
+     *
+     * @param bDecimal {@code BDecimal} value, which we want to convert
+     * @param logger   {@code Logger} instance, to log the error if there's an error
+     * @param name     parameter name, which will be converted. This is required for logging purposes
+     * @return {@code int} value of the {@code BDecimal} value, if possible, {@code Integer.MAX_VALUE} if the number
+     * is too large
+     */
     public static int getIntFromBDecimal(BDecimal bDecimal, Logger logger, String name) {
         try {
-            return  getMilliSeconds(bDecimal);
+            return getMilliSeconds(bDecimal);
         } catch (ArithmeticException e) {
             logger.warn("The value set for {} needs to be less than {}. The {} value is set to {}", name,
                     Integer.MAX_VALUE, name, Integer.MAX_VALUE);
@@ -765,9 +774,15 @@ public class KafkaUtils {
         }
     }
 
+    /**
+     * Get the millisecond value from a {@code BDecimal}.
+     *
+     * @param longValue BDecimal from which we want to get the milliseconds
+     * @return millisecond value of the longValue in {@code int}
+     */
     public static int getMilliSeconds(BDecimal longValue) {
         BigDecimal valueInSeconds = longValue.decimalValue();
-        return  (valueInSeconds).multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
+        return valueInSeconds.multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
     }
 
     /**
