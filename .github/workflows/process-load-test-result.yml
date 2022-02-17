@@ -55,7 +55,7 @@ jobs:
           while [ "$checkCount" != "3" ]
           do
             sleep 20
-            checkCount=$(gh pr status --jq '[.currentBranch .statusCheckRollup[] | select((.conclusion=="SUCCESS") and ((.name=="Build on Ubuntu") or (.name=="Build on Windows") or (.name=="codecov/project")))] | select(.context!="license/cla") | length' --json statusCheckRollup)
+            checkCount=$(gh pr status --jq '[.currentBranch .statusCheckRollup[] | select((.conclusion=="SUCCESS") and ((.name=="Build on Ubuntu") or (.name=="Build on Windows") or (.name=="codecov/project")))] | length' --json statusCheckRollup)
           done
           sleep 20
           gh pr merge --merge --delete-branch
