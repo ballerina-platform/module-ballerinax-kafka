@@ -51,11 +51,11 @@ jobs:
       - name: Merge PR
         if: ${{ steps.processResults.outputs.hasPassed }}
         run: |
-          status="NOT COMPLETED"
-          while [ ! -z "$status" ]
+          checkCount="0"
+          while [ "$checkCount" != "3" ]
           do
             sleep 20
-            status=$(gh pr status --jq '.currentBranch .statusCheckRollup[] | select(.status!="COMPLETED") | select(.context!="license/cla")' --json statusCheckRollup)
+            checkCount=$(gh pr status --jq '[.currentBranch .statusCheckRollup[] | select((.conclusion=="SUCCESS") and ((.name=="Build on Ubuntu") or (.name=="Build on Windows") or (.name=="codecov/project")))] | select(.context!="license/cla") | length' --json statusCheckRollup)
           done
           sleep 20
           gh pr merge --merge --delete-branch
