@@ -66,4 +66,5 @@ jobs:
         run: |
           echo "One or more load tests have been failed"
           echo '${{ toJson(github.event.client_payload.results) }}'
+          git push origin :load-test-results
           exit 1
