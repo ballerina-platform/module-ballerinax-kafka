@@ -2,85 +2,107 @@
 
 _Owners_: @shafreenAnfar @dilanSachi @aashikam     
 _Reviewers_: @shafreenAnfar @aashikam  
-_Created_: 2022/03/10  
-_Issues_: [#2751](https://github.com/ballerina-platform/ballerina-standard-library/issues/2751)
+_Created_: 2022/03/14  
+_Issues_: [#2751](https://github.com/ballerina-platform/ballerina-standard-library/issues/2751) [#2783](https://github.com/ballerina-platform/ballerina-standard-library/issues/2783)
 
 ## Summary
-Data binding helps to access the incoming and outgoing message data in the user's desired type. Similar to the Ballerina HTTP package, subtypes of `json`, `xml` will be the supported parameter types. This proposal discusses ways to provide data binding for both on listener side, and the client side.
+Data binding helps to access the incoming and outgoing message data in the user's desired type. Similar to the Ballerina HTTP package, subtypes of `json`, `xml` will be the supported types. This proposal discusses ways to provide data binding for both on producer side, and the consumer side.
 
 ## Goals
 - Improve user experience by adding data binding support for `kafka:Service`, `kafka:Producer` and `Kafka:Consumer`.
 
 ## Motivation
-
-As of now, the Ballerina Kafka package does not provide direct data binding for sending and receiving messages. Only `kafka:ProducerRecord[]` is supported and `kafka:ConsumerRecord[]` are the supported data types. Therefore, users have to do data manipulations by themselves. With this new feature, user experience can be improved by introducing data binding to reduce the burden of developers converting string data to the desired format as discussed in the next section.
+As of now, the Ballerina Kafka package does not provide direct data binding for sending and receiving messages. Only `kafka:ProducerRecord[]` and `kafka:ConsumerRecord[]` are the supported data types to send and receive messages which only support `byte[]` as the message value type. Therefore, users have to do data manipulations by themselves. With this new feature, user experience can be improved by introducing data binding to reduce the burden of developers converting byte data to the desired format as discussed in the next section.
 
 ## Description
-
-Data binding support will be added to the text messages as the serialization is text-based and will be supported in both the client-side and the listener side. `json`, `xml` and their subtypes are the data types to be supported.
-
-### Listener
-
-On the listener side, the function signature will be updated to accept the above-mentioned parameter types. The user can state the required data type as a parameter in the remote function signature. So the received data will be converted to the requested type and dispatched to the relevant remote function. WebSocket services have two remote functions to accept incoming data(`onTextMessage` and `onBinaryMessage`). As mentioned above data binding is supported only for text messages, `onTextMessage` signature will be updated as follows,
-
-Ex:
-
-**onTextMessage**
-
+Currently, when sending a message, user has to convert the message to `byte[]`.
 ```ballerina
-service class WsService { 
-    *websocket:Service;
-    remote isolated function onTextMessage(xml data) returns websocket:Error? { 
-    } 
+type Person record {|
+    string name;
+    int age;
+|};
+
+Person person = {
+    age: 10,
+    name: "Bob"
+};
+check producer->send({ topic: TOPIC, value: person.toString().toBytes()});
+```
+When receiving the same message,
+```ballerina
+kafka:ConsumerRecord[] records = check consumer->poll(2);
+foreach kafka:ConsumerRecord 'record in records {
+    string messageContent = check string:fromBytes('record.value);
+    Person person = check value:fromJsonStringWithType(messageContent);
 }
 ```
-
-If the data binding fails, the connection will get terminated by sending a close frame with the 1003 error code(1003 indicates that an endpoint is terminating the connection because it has received a type of data it cannot accept ) and will print an error log at the listener side.
-
-### Client
-
-#### Send data
-
-The WebSocket client has `writeTextMessage`  API to write text data to the connection. As of now `writeTextMessage` API only accepts `string` as a parameter.
-
-This API will be extended to accept  `json` and `xml` types as well.
-
-**writeTextMessage**
-
+Instead of this, if data binding support is introduced, user can easily send and receive the messages in the desired format.
 ```ballerina
-remote isolated function writeTextMessage(xml|json data) returns Error?
-```
-Whatever the data type given as the input parameter will be converted to a `string` internally and sent as text data.
+check producer->send({ topic: TOPIC, value: person});
 
-If the data binding fails, a `websocket:Error` will be returned from the API.
-
-#### Receive data
-
-To receive data, the WebSocket client has `readTextMessage`, `readBinaryMessage` and `readMessage`. `readMessage` API was introduced because of a limitation for a scenario like a reverse proxy where the client does not have prior knowledge of the data. And it is a rarely used API.  As mentioned earlier, we support binding for sub-protocols of text messages and this API supports both text and binary data types, data binding support will be added only to `readTextMessage` API.
-
-The contextually-expected data type is inferred from the LHS variable type. Allowed data types would be sub types of `xml|json`
-
-Ex:
-```ballerina
-string result = check readTextMessage();
-json data = check readTextMessage();
+Person[] persons = check consumer->poll(2);
 ```
 
-If the data binding fails, a `websocket:Error` will be returned from the API.
-
-### Caller
-
-Caller APIs will also be extended similar to the Client's `writeTextMessage` API. That behaves the same as the Client's `writeTextMessage` API.
-
-**writeTextMessage**
-
+### Listener
+`kafka:Listener` receive messages in the `onConsumerRecord` method of the `kafka:Service`.
 ```ballerina
-remote isolated function writeTextMessage(xml|json data) returns Error?
+remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns kafka:Error?;
+```
+This will be updated to accept the above-mentioned parameter types. The user can state the required data type as a parameter in the remote function signature. So the received data will be converted to the requested type and dispatched to the remote function.
+```ballerina
+remote function onConsumerRecord(kafka:Caller caller, json|xml[] records) returns kafka:Error?;
+```
+### Producer
+The `kafka:Producer` client has `send(kafka:ProducerRecord record)` API to send data to the Kafka server. Currently, `kafka:ProducerRecord` is as follows.
+```ballerina
+# Details related to the producer record.
+#
+# + topic - Topic to which the record will be appended
+# + key - Key that is included in the record
+# + value - Record content
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + partition - Partition to which the record should be sent
+public type ProducerRecord record {|
+    string topic;
+    byte[] key?;
+    byte[] value;
+    int timestamp?;
+    int partition?;
+|};
+```
+This will be updated as,
+```ballerina
+# Details related to the producer record.
+#
+# + topic - Topic to which the record will be appended
+# + key - Key that is included in the record
+# + value - Record content
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + partition - Partition to which the record should be sent
+public type ProducerRecord record {|
+    string topic;
+    byte[] key?;
+    json|xml value;
+    int timestamp?;
+    int partition?;
+|};
+```
+Whatever the data type given as the value will be converted to a `byte[]` internally and sent to the Kafka server. If the data binding fails, a `kafka:Error` will be returned from the API.
+### Consumer
+To consume messages, the consumer client has `poll()` API which returns `kafka:ConsumerRecord[]`.
+```ballerina
+# Polls the external broker to retrieve messages.
+#
+# + timeout - Polling time in seconds
+# + return - Array of consumer records if executed successfully or else a `kafka:Error`
+isolated remote function poll(decimal timeout) returns ConsumerRecord[]|Error;
+```
+This will be updated to return the user's desired type,
+```ballerina
+isolated remote function poll(decimal timeout, typedesc<json|xml[]> T = <>) returns T|Error;
 ```
 
-If the data binding fails, a `websocket:Error` will be returned from the API.
-
+With this new data binding improvement, the compiler plugin validation for `onConsumerRecord` function will also be updated to allow types other than `kafka:ConsumerRecord`.
 ## Testing
-
+- Testing the runtime data type conversions on the producer, consumer & listener.
 - Testing compiler plugin validation to accept new data types.
-- Testing the data type conversions on the client-side and server-side.
