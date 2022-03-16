@@ -6,8 +6,8 @@ Apache Kafka is an open-source distributed event streaming platform used for hig
 
 This module supports Kafka 1.x.x and 2.0.0 versions.
 
-### Consumer and Producer
-#### Kafka Producer
+### Consumer and producer
+#### Kafka producer
 A Kafka producer is a Kafka client that publishes records to the Kafka cluster. The producer is thread-safe and sharing a single producer instance across threads will generally be faster than having multiple instances. When working with a Kafka producer, the first thing to do is to initialize the producer.
 For the producer to execute successfully, an active Kafka broker should be available.
 
@@ -23,7 +23,7 @@ kafka:ProducerConfiguration producerConfiguration = {
 
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL, producerConfiguration);
 ```
-#### Kafka Consumer
+#### Kafka consumer
 A Kafka consumer is a subscriber responsible for reading records from one or more topics and one or more partitions of a topic. When working with a Kafka consumer, the first thing to do is initialize the consumer.
 For the consumer to execute successfully, an active Kafka broker should be available.
 
@@ -64,7 +64,7 @@ service kafka:Service on kafkaListener {
     }
 }
 ```
-### Data Serialization
+### Data serialization
 Serialization is the process of converting data into a stream of bytes that is used for transmission. Kafka
 stores and transmits these bytes of arrays in its queue. Deserialization does the opposite of serialization
 in which bytes of arrays are converted into the desired data type.
