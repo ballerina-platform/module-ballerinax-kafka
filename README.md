@@ -126,9 +126,9 @@ Issues and Projects tabs are disabled for this repository as this is part of the
 
 This repository only contains the source code for the library.
 
-## Building from the source
+## Build from the source
 
-### Setting up the prerequisites
+### Set up the prerequisites
 
 * Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
 
@@ -140,7 +140,7 @@ This repository only contains the source code for the library.
 
 2. Download and install [Docker](https://www.docker.com/). This is required to run the tests.
 
-### Building the source
+### Build the source
 
 Execute the commands below to build from the source.
 
@@ -178,7 +178,7 @@ Execute the commands below to build from the source.
    ./gradlew clean build -PpublishToCentral=true
    ```
 
-## Contributing to Ballerina
+## Contribute to Ballerina
 
 As an open source project, Ballerina welcomes contributions from the community. 
 
