@@ -254,8 +254,9 @@ public client isolated class Consumer {
     # ```
     #
     # + timeout - Polling time in seconds
+    # + T - Optional type description of the required data type
     # + return - Array of consumer records if executed successfully or else a `kafka:Error`
-    isolated remote function poll(decimal timeout) returns ConsumerRecord[]|Error =
+    isolated remote function poll(decimal timeout, typedesc<json|xml[]> T = <>) returns T|Error =
     @java:Method {
         name: "poll",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.Poll"

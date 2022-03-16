@@ -27,6 +27,7 @@ import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
@@ -55,7 +56,7 @@ public class Poll {
     // static init
     private static final ExecutorService executorService = Executors.newCachedThreadPool(new KafkaThreadFactory());
 
-    public static Object poll(Environment env, BObject consumerObject, BDecimal timeout) {
+    public static Object poll(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
