@@ -40,7 +40,7 @@ Instead of this, if data binding support is introduced, user can easily send and
 ```ballerina
 check producer->send({ topic: TOPIC, value: person});
 
-Person[] persons = check consumer->poll(2);
+PersonRecord[] personRecords = check consumer->poll(2);
 ```
 
 ### Listener
@@ -49,8 +49,12 @@ Person[] persons = check consumer->poll(2);
 remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns kafka:Error?;
 ```
 This will be updated to accept the above-mentioned parameter types. The user can state the required data type as a parameter in the remote function signature. So the received data will be converted to the requested type and dispatched to the remote function.
+Therefore, following scenarios will be available for the user.
 ```ballerina
-remote function onConsumerRecord(kafka:Caller caller, json|xml[] records) returns kafka:Error?;
+remote function onConsumerRecord(kafka:Caller caller, json|xml[]|byte[] data, kafka:ConsumerRecord[] records) returns kafka:Error?;
+```
+```ballerina
+remote function onConsumerRecord(kafka:Caller caller, json|xml|byte[] data) returns kafka:Error?;
 ```
 ### Producer
 The `kafka:Producer` client has `send(kafka:ProducerRecord record)` API to send data to the Kafka server. Currently, `kafka:ProducerRecord` is as follows.
@@ -72,17 +76,10 @@ public type ProducerRecord record {|
 ```
 This will be updated as,
 ```ballerina
-# Details related to the producer record.
-#
-# + topic - Topic to which the record will be appended
-# + key - Key that is included in the record
-# + value - Record content
-# + timestamp - Timestamp of the record, in milliseconds since epoch
-# + partition - Partition to which the record should be sent
 public type ProducerRecord record {|
     string topic;
     byte[] key?;
-    json|xml value;
+    json|xml|byte[] value;
     int timestamp?;
     int partition?;
 |};
@@ -97,11 +94,41 @@ To consume messages, the consumer client has `poll()` API which returns `kafka:C
 # + return - Array of consumer records if executed successfully or else a `kafka:Error`
 isolated remote function poll(decimal timeout) returns ConsumerRecord[]|Error;
 ```
-This will be updated to return the user's desired type,
+`kafka:ConsumerRecord` will be updated to allow data binding as follows.
 ```ballerina
-isolated remote function poll(decimal timeout, typedesc<json|xml[]> T = <>) returns T|Error;
+public type ConsumerRecord record {|
+    byte[] key?;
+    json|xml|byte[] value;
+    int timestamp;
+    PartitionOffset offset;
+|};
 ```
+That way, user can receive messages in the desired type via the following way.
+```ballerina
+public type Person record {|
+    string name;
+    string age;
+|};
 
+public type PersonRecord record {|
+    *ConsumerRecord;
+    Person value;
+|};
+
+PersonRecord[] persons = check consumer->poll(2);
+```
+To allow these `poll()` function will also be updated to return the desired type,
+```ballerina
+isolated remote function poll(decimal timeout, typedesc<json|xml[]|kafka:ConsumerRecord[]> T = <>) returns T|Error;
+```
+For the cases where the user wants none of the `kafka:ConsumerRecord` information, `pollWithType()` API will be introduced.
+```ballerina
+isolated remote function pollWithType(decimal timeout, typedesc<json|xml[]> T = <>) returns T|Error;
+```
+With this, user can do the following.
+```ballerina
+Person[] persons = check consumer->pollWithType(2);
+```
 With this new data binding improvement, the compiler plugin validation for `onConsumerRecord` function will also be updated to allow types other than `kafka:ConsumerRecord`.
 ## Testing
 - Testing the runtime data type conversions on the producer, consumer & listener.
