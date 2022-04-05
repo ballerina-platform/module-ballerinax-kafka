@@ -132,11 +132,11 @@ public class KafkaListenerImpl implements KafkaListener {
         }
         if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
             bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                    consumer, properties, returnType == null? PredefinedTypes.TYPE_NULL: returnType,
+                    consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
                     getResourceParameters(service, this.listener, records));
         } else {
             bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                    consumer, properties, returnType == null? PredefinedTypes.TYPE_NULL: returnType,
+                    consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
                     getResourceParameters(service, this.listener, records));
         }
     }

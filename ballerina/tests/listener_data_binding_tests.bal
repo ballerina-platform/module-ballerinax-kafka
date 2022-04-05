@@ -174,7 +174,7 @@ function stringBindingListenerTest() returns error? {
 
     Service decimalBindingService =
     service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, string[] data) returns error? {
+        remote function onConsumerRecord(string[] data) returns error? {
             foreach string value in data {
                 receivedStringValue += value;
                 log:printInfo("Received string: " + value.toString());
@@ -206,7 +206,7 @@ function floatBindingListenerTest() returns error? {
 
     Service floatBindingService =
     service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, float[] data) returns error? {
+        remote function onConsumerRecord(ConsumerRecord[] records, float[] data) returns error? {
             foreach float value in data {
                 receivedfloatValue += value;
                 log:printInfo("Received float: " + value.toString());
@@ -239,7 +239,7 @@ function xmlBindingListenerTest() returns error? {
 
     Service xmlBindingService =
     service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, xml[] data) returns error? {
+        remote function onConsumerRecord(Caller caller, xml[] data) returns error? {
             foreach xml value in data {
                 receivedXmlValues.push(value);
                 log:printInfo("Received xml: " + value.toString());
@@ -303,7 +303,7 @@ function mapBindingListenerTest() returns error? {
 
     Service mapBindingService =
     service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, map<Person>[] data) returns error? {
+        remote function onConsumerRecord(map<Person>[] data) returns error? {
             foreach map<Person> value in data {
                 receivedMapValues.push(value);
                 log:printInfo("Received map: " + value.toString());
@@ -340,7 +340,7 @@ function tableBindingListenerTest() returns error? {
 
     Service tableBindingService =
     service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, table<Person>[] data) returns error? {
+        remote function onConsumerRecord(ConsumerRecord[] records, table<Person>[] data) returns error? {
             foreach table<Person> value in data {
                 receivedTableValues.push(value);
                 log:printInfo("Received table: " + value.toString());
@@ -373,7 +373,7 @@ function jsonBindingListenerTest() returns error? {
 
     Service jsonBindingService =
     service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, json[] data) returns error? {
+        remote function onConsumerRecord(Caller caller, json[] data) returns error? {
             foreach json value in data {
                 receivedJsonValues.push(value);
                 log:printInfo("Received json: " + value.toString());
