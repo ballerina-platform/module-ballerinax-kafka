@@ -208,13 +208,13 @@ public type ConsumerRecord record {|
 public type ProducerRecord record {|
     string topic;
     byte[] key?;
-    byte[] value;
+    anydata value;
     int timestamp?;
     int partition?;
 |};
 
 // Producer-related records
-# Represents the `kafaka:Producer` configuration.
+# Represents the `kafka:Producer` configuration.
 #
 # + acks - Number of acknowledgments
 # + compressionType - Compression type to be used for messages

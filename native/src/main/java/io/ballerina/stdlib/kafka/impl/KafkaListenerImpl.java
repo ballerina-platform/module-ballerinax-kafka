@@ -21,26 +21,70 @@ package io.ballerina.stdlib.kafka.impl;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.creators.TypeCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.IntersectionType;
+import io.ballerina.runtime.api.types.MapType;
+import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.Parameter;
+import io.ballerina.runtime.api.types.StructureType;
+import io.ballerina.runtime.api.types.TableType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.utils.JsonUtils;
+import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.XmlUtils;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.values.BTable;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.ballerina.stdlib.kafka.api.KafkaListener;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaObserverContext;
+import io.ballerina.stdlib.kafka.utils.KafkaConstants;
 import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import io.ballerina.stdlib.kafka.utils.ModuleUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.stream.Stream;
 
+import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
+import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.TypeTags.BOOLEAN_TAG;
+import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
+import static io.ballerina.runtime.api.TypeTags.DECIMAL_TAG;
+import static io.ballerina.runtime.api.TypeTags.FLOAT_TAG;
+import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
+import static io.ballerina.runtime.api.TypeTags.INT_TAG;
+import static io.ballerina.runtime.api.TypeTags.JSON_TAG;
+import static io.ballerina.runtime.api.TypeTags.MAP_TAG;
+import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
+import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
+import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
+import static io.ballerina.runtime.api.TypeTags.TABLE_TAG;
+import static io.ballerina.runtime.api.TypeTags.XML_TAG;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_RECORD_STRUCT_NAME;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_RECORD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getResourceParameters;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecord;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
 
 /**
  * Kafka Connector Consumer for Ballerina.
@@ -74,31 +118,44 @@ public class KafkaListenerImpl implements KafkaListener {
     @Override
     public void onError(Throwable throwable) {
         KafkaMetricsUtil.reportConsumerError(listener, KafkaObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+        executeOnError(throwable);
     }
 
     private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records) {
         StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
                 ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), KAFKA_RESOURCE_ON_RECORD);
+        Map<String, Object> properties = null;
+        Type returnType = null;
         if (ObserveUtils.isTracingEnabled()) {
-            Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
-            Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
-                bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, properties, returnType, getResourceParameters(service, this.listener, records));
-            } else {
-                bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, properties, returnType, getResourceParameters(service, this.listener, records));
-            }
+            properties = getNewObserverContextInProperties(listener);
+            returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
+        }
+        if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+            bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                    consumer, properties, returnType == null? PredefinedTypes.TYPE_NULL: returnType,
+                    getResourceParameters(service, this.listener, records));
         } else {
-            if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
-                bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, null, PredefinedTypes.TYPE_NULL,
-                        getResourceParameters(service, this.listener, records));
-            } else {
-                bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, null, PredefinedTypes.TYPE_NULL,
-                        getResourceParameters(service, this.listener, records));
-            }
+            bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                    consumer, properties, returnType == null? PredefinedTypes.TYPE_NULL: returnType,
+                    getResourceParameters(service, this.listener, records));
+        }
+    }
+
+    private void executeOnError(Throwable throwable) {
+        StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), KAFKA_RESOURCE_ON_ERROR);
+        Map<String, Object> properties = null;
+        if (ObserveUtils.isTracingEnabled()) {
+            properties = getNewObserverContextInProperties(listener);
+        }
+        if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
+            bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
+                    null, properties, PredefinedTypes.TYPE_NULL,
+                    KafkaUtils.createKafkaError("Data binding Error: " + throwable.getMessage()), true);
+        } else {
+            bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
+                    null, properties, PredefinedTypes.TYPE_NULL,
+                    KafkaUtils.createKafkaError("Data binding Error: " + throwable.getMessage()), true);
         }
     }
 
@@ -109,5 +166,156 @@ public class KafkaListenerImpl implements KafkaListener {
                                                                         KafkaUtils.getBootstrapServers(listener));
         properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
         return properties;
+    }
+
+    public Object[] getResourceParameters(BObject service, BObject listener, ConsumerRecords records) {
+        Parameter[] parameters = getOnConsumerRecordMethod(service).get().getParameters();
+        boolean callerExists = false;
+        boolean consumerRecordsExists = false;
+        boolean dataExists = false;
+        BObject caller = createCaller(listener);
+        Object[] arguments = new Object[parameters.length * 2];
+        int index = 0;
+        for (Parameter parameter : parameters) {
+            switch (parameter.type.getTag()) {
+                case OBJECT_TYPE_TAG:
+                    if (callerExists) {
+                        throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                    }
+                    callerExists = true;
+                    arguments[index++] = caller;
+                    arguments[index++] = true;
+                    break;
+                case INTERSECTION_TAG:
+                case ARRAY_TAG:
+                    if (isConsumerRecordArrayType(parameter.type)) {
+                        if (consumerRecordsExists) {
+                            throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                        }
+                        consumerRecordsExists = true;
+                        arguments[index++] = getConsumerRecords(records, parameter.type.isReadOnly());
+                        arguments[index++] = true;
+                    } else {
+                        if (dataExists) {
+                            throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                        }
+                        dataExists = true;
+                        arguments[index++] = getDataWithIntendedType(parameter.type, records);
+                        arguments[index++] = true;
+                    }
+                    break;
+                default:
+                    throw KafkaUtils.createKafkaError("Invalid remote function signature");
+            }
+        }
+        return arguments;
+    }
+
+    private boolean isConsumerRecordArrayType(Type parameterType) {
+        if (parameterType.getTag() == INTERSECTION_TAG) {
+            List<Type> constituentTypes = ((IntersectionType) parameterType).getConstituentTypes();
+            return ((ArrayType) constituentTypes.get(0)).getElementType().getName().equals(CONSUMER_RECORD_STRUCT_NAME);
+        }
+        return ((ArrayType) parameterType).getElementType().getName().equals(CONSUMER_RECORD_STRUCT_NAME);
+    }
+
+    private BObject createCaller(BObject listener) {
+        BObject caller = ValueCreator.createObjectValue(ModuleUtils.getModule(), KafkaConstants.CALLER_STRUCT_NAME);
+        KafkaConsumer consumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
+        Properties consumerProperties = (Properties) listener.getNativeData(NATIVE_CONSUMER_CONFIG);
+        caller.addNativeData(NATIVE_CONSUMER, consumer);
+        caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
+        return caller;
+    }
+
+    private BArray getConsumerRecords(ConsumerRecords records, boolean readOnly) {
+        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
+        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
+        List<BMap<BString, Object>> recordMapList = new ArrayList();
+        for (Object record : records) {
+            BMap<BString, Object> consumerRecord = populateConsumerRecord(
+                    (ConsumerRecord) record, keyType, valueType);
+            recordMapList.add(consumerRecord);
+        }
+        BArray consumerRecordsArray = ValueCreator.createArrayValue(recordMapList.toArray(),
+                TypeCreator.createArrayType(getConsumerRecord().getType(), readOnly));
+        return consumerRecordsArray;
+    }
+
+    private Object getDataWithIntendedType(Type type, ConsumerRecords records) {
+        Type intendedType = getIntendedType(type);
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(intendedType, type.isReadOnly()));
+        for (Object record: records) {
+            String strValue = new String(((byte[]) ((ConsumerRecord) record).value()), StandardCharsets.UTF_8);
+            try {
+                switch (intendedType.getTag()) {
+                    case INT_TAG:
+                        bArray.append(Long.parseLong(strValue));
+                        break;
+                    case BOOLEAN_TAG:
+                        bArray.append(Boolean.parseBoolean(strValue));
+                        break;
+                    case FLOAT_TAG:
+                        bArray.append(Double.parseDouble(strValue));
+                        break;
+                    case DECIMAL_TAG:
+                        bArray.append(ValueCreator.createDecimalValue(strValue));
+                        break;
+                    case STRING_TAG:
+                        bArray.append(StringUtils.fromString(strValue));
+                        break;
+                    case XML_TAG:
+                        bArray.append(XmlUtils.parse(strValue));
+                        break;
+                    case MAP_TAG:
+                        bArray.append(JsonUtils.convertJSONToMap(JsonUtils.parse(strValue), ((MapType) intendedType)));
+                        break;
+                    case RECORD_TYPE_TAG:
+                        StructureType structureType = (StructureType) intendedType;
+                        bArray.append(JsonUtils.convertJSONToRecord(JsonUtils.parse(strValue), structureType));
+                        break;
+                    case ANYDATA_TAG:
+                        bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
+                        break;
+                    case TABLE_TAG:
+                        BArray bArray1 = (BArray) (JsonUtils.convertJSON(JsonUtils.parse(strValue),
+                                TypeCreator.createArrayType(((TableType) intendedType).getConstrainedType())));
+                        BTable bTable = ValueCreator.createTableValue((TableType) intendedType);
+                        for (int i = 0; i < bArray1.size(); i++) {
+                            bTable.put(bArray1.get(i));
+                        }
+                        bArray.append(bTable);
+                        break;
+                    case JSON_TAG:
+                        bArray.append(JsonUtils.parse(strValue));
+                        break;
+                    case ARRAY_TAG:
+                        if (((ArrayType) intendedType).getElementType().getTag() == BYTE_TAG) {
+                            bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
+                            break;
+                        }
+                        /*-fallthrough*/
+                    default:
+                        throw KafkaUtils.createKafkaError("Invalid parameter types found for data binding");
+                }
+            } catch (BError exception) {
+                throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", exception.getMessage()));
+            }
+        }
+        return bArray;
+    }
+
+    private Type getIntendedType(Type type) {
+        if (type.getTag() == INTERSECTION_TAG) {
+            return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
+        }
+        return ((ArrayType) type).getElementType();
+    }
+
+    public static Optional<MethodType> getOnConsumerRecordMethod(BObject service) {
+        MethodType[] methodTypes = service.getType().getMethods();
+        return Stream.of(methodTypes)
+                .filter(methodType -> KAFKA_RESOURCE_ON_RECORD.equals(methodType.getName()))
+                .findFirst();
     }
 }
