@@ -208,7 +208,7 @@ public class KafkaServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errors().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic, CompilationErrors.INVALID_REMOTE_FUNCTION);
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_RESOURCE_FUNCTION);
     }
 
     @Test
