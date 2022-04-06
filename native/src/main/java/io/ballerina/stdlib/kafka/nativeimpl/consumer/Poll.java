@@ -22,6 +22,7 @@ import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
@@ -45,6 +46,7 @@ import java.util.concurrent.ThreadFactory;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecord;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getDataWithIntendedType;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getMilliSeconds;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
 
@@ -56,7 +58,7 @@ public class Poll {
     // static init
     private static final ExecutorService executorService = Executors.newCachedThreadPool(new KafkaThreadFactory());
 
-    public static Object poll(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
+    public static Object poll(Environment env, BObject consumerObject, BDecimal timeout) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
@@ -74,6 +76,27 @@ public class Poll {
                     }
                 }
                 balFuture.complete(consumerRecordsArray);
+            } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
+            }
+        });
+        return null;
+    }
+
+    public static Object pollWithType(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
+        KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
+        Future balFuture = env.markAsync();
+        KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
+        executorService.execute(()-> {
+            try {
+                Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
+                ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
+                BArray dataArray = ValueCreator.createArrayValue((ArrayType) bTypedesc.getDescribingType());
+                if (!recordsRetrieved.isEmpty()) {
+                    dataArray = getDataWithIntendedType(bTypedesc.getDescribingType(), recordsRetrieved);
+                }
+                balFuture.complete(dataArray);
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));

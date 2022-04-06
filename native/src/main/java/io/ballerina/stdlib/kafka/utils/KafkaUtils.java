@@ -24,21 +24,29 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.IntersectionType;
+import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.StructureType;
+import io.ballerina.runtime.api.types.TableType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.values.BTable;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -50,6 +58,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -59,6 +68,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
+import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.TypeTags.BOOLEAN_TAG;
+import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
+import static io.ballerina.runtime.api.TypeTags.DECIMAL_TAG;
+import static io.ballerina.runtime.api.TypeTags.FLOAT_TAG;
+import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
+import static io.ballerina.runtime.api.TypeTags.INT_TAG;
+import static io.ballerina.runtime.api.TypeTags.JSON_TAG;
+import static io.ballerina.runtime.api.TypeTags.MAP_TAG;
+import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
+import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
+import static io.ballerina.runtime.api.TypeTags.TABLE_TAG;
+import static io.ballerina.runtime.api.TypeTags.XML_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 
 /**
@@ -579,6 +602,76 @@ public class KafkaUtils {
                                                                               record.partition());
         fields[3] = ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, record.offset());
         return ValueCreator.createRecordValue(getConsumerRecord(), fields);
+    }
+
+    public static BArray getDataWithIntendedType(Type type, ConsumerRecords records) {
+        Type intendedType = getIntendedType(type);
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(intendedType, type.isReadOnly()));
+        for (Object record: records) {
+            String strValue = new String(((byte[]) ((ConsumerRecord) record).value()), StandardCharsets.UTF_8);
+            try {
+                switch (intendedType.getTag()) {
+                    case INT_TAG:
+                        bArray.append(Long.parseLong(strValue));
+                        break;
+                    case BOOLEAN_TAG:
+                        bArray.append(Boolean.parseBoolean(strValue));
+                        break;
+                    case FLOAT_TAG:
+                        bArray.append(Double.parseDouble(strValue));
+                        break;
+                    case DECIMAL_TAG:
+                        bArray.append(ValueCreator.createDecimalValue(strValue));
+                        break;
+                    case STRING_TAG:
+                        bArray.append(StringUtils.fromString(strValue));
+                        break;
+                    case XML_TAG:
+                        bArray.append(XmlUtils.parse(strValue));
+                        break;
+                    case MAP_TAG:
+                        bArray.append(JsonUtils.convertJSONToMap(JsonUtils.parse(strValue), ((MapType) intendedType)));
+                        break;
+                    case RECORD_TYPE_TAG:
+                        StructureType structureType = (StructureType) intendedType;
+                        bArray.append(JsonUtils.convertJSONToRecord(JsonUtils.parse(strValue), structureType));
+                        break;
+                    case ANYDATA_TAG:
+                        bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
+                        break;
+                    case TABLE_TAG:
+                        BArray bArray1 = (BArray) (JsonUtils.convertJSON(JsonUtils.parse(strValue),
+                                TypeCreator.createArrayType(((TableType) intendedType).getConstrainedType())));
+                        BTable bTable = ValueCreator.createTableValue((TableType) intendedType);
+                        for (int i = 0; i < bArray1.size(); i++) {
+                            bTable.put(bArray1.get(i));
+                        }
+                        bArray.append(bTable);
+                        break;
+                    case JSON_TAG:
+                        bArray.append(JsonUtils.parse(strValue));
+                        break;
+                    case ARRAY_TAG:
+                        if (((ArrayType) intendedType).getElementType().getTag() == BYTE_TAG) {
+                            bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
+                            break;
+                        }
+                        /*-fallthrough*/
+                    default:
+                        throw KafkaUtils.createKafkaError("Invalid parameter types found for data binding");
+                }
+            } catch (BError exception) {
+                throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", exception.getMessage()));
+            }
+        }
+        return bArray;
+    }
+
+    private static Type getIntendedType(Type type) {
+        if (type.getTag() == INTERSECTION_TAG) {
+            return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
+        }
+        return ((ArrayType) type).getElementType();
     }
 
     private static Object getBValues(Object value, String type) {
