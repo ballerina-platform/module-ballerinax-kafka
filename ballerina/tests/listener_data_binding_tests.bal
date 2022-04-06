@@ -412,7 +412,7 @@ function dataBindingErrorListenerTest() returns error? {
             }
         }
 
-        remote function onConsumerError(error e) {
+        remote function onConsumerError(Error e) {
             log:printError(e.message());
             errorReceived = true;
             errorMsg = e.message();
