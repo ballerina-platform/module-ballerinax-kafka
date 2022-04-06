@@ -45,13 +45,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants
         .CompilationErrors.INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_ERROR;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_ERROR_ALLOWED;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_PARAMS_ALLOWED;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.ERROR_PARAM;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.getMethodSymbol;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.validateModuleId;
 
@@ -63,17 +68,23 @@ public class KafkaFunctionValidator {
     private final SyntaxNodeAnalysisContext context;
     private final ServiceDeclarationNode serviceDeclarationNode;
     FunctionDefinitionNode onConsumerRecord;
+    FunctionDefinitionNode onError;
 
-    public KafkaFunctionValidator(SyntaxNodeAnalysisContext context, FunctionDefinitionNode onConsumerRecord) {
+    public KafkaFunctionValidator(SyntaxNodeAnalysisContext context, FunctionDefinitionNode onConsumerRecord,
+                                  FunctionDefinitionNode onError) {
         this.context = context;
         this.serviceDeclarationNode = (ServiceDeclarationNode) context.node();
         this.onConsumerRecord = onConsumerRecord;
+        this.onError = onError;
     }
 
     public void validate() {
         validateMandatoryFunction();
         if (Objects.nonNull(onConsumerRecord)) {
             validateOnConsumerRecord();
+        }
+        if (Objects.nonNull(onError)) {
+            validateOnError();
         }
     }
 
@@ -90,12 +101,51 @@ public class KafkaFunctionValidator {
                     DiagnosticSeverity.ERROR, onConsumerRecord.functionSignature().location()));
         }
         SeparatedNodeList<ParameterNode> parameters = onConsumerRecord.functionSignature().parameters();
-        validateFunctionParameters(parameters, onConsumerRecord);
+        validateOnConsumerRecordParameters(parameters, onConsumerRecord);
         validateReturnTypeErrorOrNil(onConsumerRecord);
     }
 
-    private void validateFunctionParameters(SeparatedNodeList<ParameterNode> parameters,
-                                            FunctionDefinitionNode functionDefinitionNode) {
+    private void validateOnError() {
+        if (!PluginUtils.isRemoteFunction(context, onError)) {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(FUNCTION_SHOULD_BE_REMOTE,
+                    DiagnosticSeverity.ERROR, onError.functionSignature().location()));
+        }
+        SeparatedNodeList<ParameterNode> parameters = onError.functionSignature().parameters();
+        validateOnErrorParameters(parameters, onError);
+        validateReturnTypeErrorOrNil(onError);
+    }
+
+    private void validateOnErrorParameters(SeparatedNodeList<ParameterNode> parameters,
+                                           FunctionDefinitionNode functionDefinitionNode) {
+        if (parameters.size() == 1) {
+            ParameterNode paramNode = parameters.get(0);
+            SyntaxKind paramSyntaxKind = ((RequiredParameterNode) paramNode).typeName().kind();
+            if (paramSyntaxKind.equals(QUALIFIED_NAME_REFERENCE)) {
+                SemanticModel semanticModel = context.semanticModel();
+                Node parameterTypeNode = ((RequiredParameterNode) paramNode).typeName();
+                Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
+                if (!paramSymbol.get().getName().get().equals(ERROR_PARAM) ||
+                        !validateModuleId(paramSymbol.get().getModule().get())) {
+                    context.reportDiagnostic(PluginUtils.getDiagnostic(
+                            CompilationErrors.ONLY_ERROR_ALLOWED,
+                            DiagnosticSeverity.ERROR, paramNode.location()));
+                }
+            } else if (!paramSyntaxKind.equals(ERROR_TYPE_DESC)) {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(
+                        CompilationErrors.ONLY_ERROR_ALLOWED,
+                        DiagnosticSeverity.ERROR, paramNode.location()));
+            }
+        } else if (parameters.size() > 1) {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(ONLY_ERROR_ALLOWED,
+                    DiagnosticSeverity.ERROR, functionDefinitionNode.functionSignature().location()));
+        } else {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(MUST_HAVE_ERROR,
+                    DiagnosticSeverity.ERROR, functionDefinitionNode.functionSignature().location()));
+        }
+    }
+
+    private void validateOnConsumerRecordParameters(SeparatedNodeList<ParameterNode> parameters,
+                                                    FunctionDefinitionNode functionDefinitionNode) {
         // Here there can be caller and consumerRecords scenario + consumerRecords only scenario
         // If the param count is 1, checks are done for array_type and intersection_type
         // (kafka:ConsumerRecords[]/ kafka:ConsumerRecords[] & readonly)
@@ -118,7 +168,7 @@ public class KafkaFunctionValidator {
             SyntaxKind secondParamSyntaxKind = ((RequiredParameterNode) secondParamNode).typeName().kind();
             // If the second parameter is a qualified_name_ref, try to validate it for caller and try to validate
             // first param for kafka:ConsumerRecords
-            if (secondParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+            if (secondParamSyntaxKind.equals(QUALIFIED_NAME_REFERENCE)) {
                 boolean callerResult = validateCallerParam(secondParamNode);
                 if (firstParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
                     validateConsumerRecordsParam(firstParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);
@@ -138,7 +188,7 @@ public class KafkaFunctionValidator {
                 }
             // If the first parameter is a qualified_name_ref, try to validate it for caller and try to validate
             // second param for kafka:ConsumerRecords
-            } else if (firstParamSyntaxKind.equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+            } else if (firstParamSyntaxKind.equals(QUALIFIED_NAME_REFERENCE)) {
                 boolean callerResult = validateCallerParam(firstParamNode);
                 if (secondParamSyntaxKind.equals(SyntaxKind.ARRAY_TYPE_DESC)) {
                     validateConsumerRecordsParam(secondParamNode, INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS);

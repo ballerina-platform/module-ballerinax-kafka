@@ -87,6 +87,22 @@ public class KafkaServiceValidationTest {
     }
 
     @Test
+    public void testValidService7() {
+        Package currentPackage = loadPackage("valid_service_7");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
+    public void testValidService8() {
+        Package currentPackage = loadPackage("valid_service_8");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
     public void testInvalidService1() {
         Package currentPackage = loadPackage("invalid_service_1");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -192,7 +208,7 @@ public class KafkaServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errors().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION);
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_REMOTE_FUNCTION);
     }
 
     @Test
@@ -228,6 +244,65 @@ public class KafkaServiceValidationTest {
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
             assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS);
+        }
+    }
+
+    @Test
+    public void testInvalidService14() {
+        Package currentPackage = loadPackage("invalid_service_14");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 7);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, CompilationErrors.ONLY_ERROR_ALLOWED);
+        }
+    }
+
+    @Test
+    public void testInvalidService15() {
+        Package currentPackage = loadPackage("invalid_service_15");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, CompilationErrors.MUST_HAVE_ERROR);
+    }
+
+    @Test
+    public void testInvalidService16() {
+        Package currentPackage = loadPackage("invalid_service_16");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, CompilationErrors.INVALID_REMOTE_FUNCTION);
+        }
+    }
+
+    @Test
+    public void testInvalidService17() {
+        Package currentPackage = loadPackage("invalid_service_17");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, CompilationErrors.FUNCTION_SHOULD_BE_REMOTE);
+    }
+
+    @Test
+    public void testInvalidService18() {
+        Package currentPackage = loadPackage("invalid_service_18");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, CompilationErrors.INVALID_RESOURCE_FUNCTION);
         }
     }
 

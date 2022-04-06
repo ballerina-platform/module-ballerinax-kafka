@@ -46,11 +46,12 @@ public class KafkaServiceValidator {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) context.node();
         NodeList<Node> memberNodes = serviceDeclarationNode.members();
 
-        boolean hasRemoteFunction = serviceDeclarationNode.members().stream().anyMatch(child ->
+        boolean hasOnConsumerRecordRemoteFunction = serviceDeclarationNode.members().stream().anyMatch(child ->
                 child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION &&
-                        PluginUtils.isRemoteFunction(context, (FunctionDefinitionNode) child));
+                        PluginUtils.isRemoteFunction(context, (FunctionDefinitionNode) child) &&
+                        ((FunctionDefinitionNode) child).functionName().toString().equals("onConsumerRecord"));
 
-        if (serviceDeclarationNode.members().isEmpty() || !hasRemoteFunction) {
+        if (serviceDeclarationNode.members().isEmpty() || !hasOnConsumerRecordRemoteFunction) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode(),
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getError(),
@@ -61,6 +62,7 @@ public class KafkaServiceValidator {
 
         validateAnnotation(context);
         FunctionDefinitionNode onConsumerRecord = null;
+        FunctionDefinitionNode onError = null;
 
         for (Node node : memberNodes) {
             if (node.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
@@ -70,17 +72,19 @@ public class KafkaServiceValidator {
                 if (functionName.isPresent()) {
                     if (functionName.get().equals(PluginConstants.ON_RECORDS_FUNC)) {
                         onConsumerRecord = functionDefinitionNode;
+                    } else if (functionName.get().equals(PluginConstants.ON_ERROR_FUNC)) {
+                        onError = functionDefinitionNode;
                     } else if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
                         context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
                                 DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
                     }
                 }
             } else if (node.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
-                context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_FUNCTION,
+                context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_RESOURCE_FUNCTION,
                         DiagnosticSeverity.ERROR, node.location()));
             }
         }
-        new KafkaFunctionValidator(context, onConsumerRecord).validate();
+        new KafkaFunctionValidator(context, onConsumerRecord, onError).validate();
     }
 
     private void validateAnnotation(SyntaxNodeAnalysisContext context) {
