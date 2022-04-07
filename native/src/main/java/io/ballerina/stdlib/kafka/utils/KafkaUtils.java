@@ -640,11 +640,11 @@ public class KafkaUtils {
                         bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
                         break;
                     case TABLE_TAG:
-                        BArray bArray1 = (BArray) (JsonUtils.convertJSON(JsonUtils.parse(strValue),
+                        BArray valueList = (BArray) (JsonUtils.convertJSON(JsonUtils.parse(strValue),
                                 TypeCreator.createArrayType(((TableType) intendedType).getConstrainedType())));
                         BTable bTable = ValueCreator.createTableValue((TableType) intendedType);
-                        for (int i = 0; i < bArray1.size(); i++) {
-                            bTable.put(bArray1.get(i));
+                        for (int i = 0; i < valueList.size(); i++) {
+                            bTable.put(valueList.get(i));
                         }
                         bArray.append(bTable);
                         break;

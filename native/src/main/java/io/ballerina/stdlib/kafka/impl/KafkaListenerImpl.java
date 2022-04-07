@@ -131,11 +131,11 @@ public class KafkaListenerImpl implements KafkaListener {
         if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
             bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
                     null, properties, PredefinedTypes.TYPE_NULL,
-                    KafkaUtils.createKafkaError("Data binding Error: " + throwable.getMessage()), true);
+                    KafkaUtils.createKafkaError(throwable.getMessage()), true);
         } else {
             bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
                     null, properties, PredefinedTypes.TYPE_NULL,
-                    KafkaUtils.createKafkaError("Data binding Error: " + throwable.getMessage()), true);
+                    KafkaUtils.createKafkaError(throwable.getMessage()), true);
         }
     }
 
