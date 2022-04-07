@@ -67,7 +67,7 @@ table<Person>[] receivedTableValues = [];
 boolean errorReceived = false;
 string errorMsg = "";
 
-@test:Config {}
+@test:Config {enable: true}
 function intBindingListenerTest() returns error? {
     string topic = "int-binding-listener-test-topic";
     check sendMessage(1, topic);
@@ -101,7 +101,7 @@ function intBindingListenerTest() returns error? {
     test:assertEquals(receivedIntValue, 15);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function booleanBindingListenerTest() returns error? {
     string topic = "boolean-binding-listener-test-topic";
     check sendMessage(true, topic);
@@ -133,7 +133,7 @@ function booleanBindingListenerTest() returns error? {
     test:assertEquals(receivedBoolValue, true);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function decimalBindingListenerTest() returns error? {
     string topic = "decimal-binding-listener-test-topic";
     check sendMessage(1.0d, topic);
@@ -165,7 +165,7 @@ function decimalBindingListenerTest() returns error? {
     test:assertEquals(receivedDecimalValue, 6.0d);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function stringBindingListenerTest() returns error? {
     string topic = "string-binding-listener-test-topic";
     check sendMessage(TEST_MESSAGE, topic);
@@ -197,7 +197,7 @@ function stringBindingListenerTest() returns error? {
     test:assertEquals(receivedStringValue, TEST_MESSAGE + TEST_MESSAGE + TEST_MESSAGE);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function floatBindingListenerTest() returns error? {
     string topic = "float-binding-listener-test-topic";
     check sendMessage(1.0, topic);
@@ -229,7 +229,7 @@ function floatBindingListenerTest() returns error? {
     test:assertEquals(receivedfloatValue, 6.0);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function xmlBindingListenerTest() returns error? {
     string topic = "xml-binding-listener-test-topic";
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
@@ -262,7 +262,7 @@ function xmlBindingListenerTest() returns error? {
     test:assertEquals(receivedXmlValues, [xmlData, xmlData, xmlData]);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function recordBindingListenerTest() returns error? {
     string topic = "record-binding-listener-test-topic";
     check sendMessage(personRecord1, topic);
@@ -294,7 +294,7 @@ function recordBindingListenerTest() returns error? {
     test:assertEquals(receivedPersonValues, [personRecord1, personRecord1, personRecord1]);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function mapBindingListenerTest() returns error? {
     string topic = "map-binding-listener-test-topic";
     check sendMessage(personMap, topic);
@@ -326,7 +326,7 @@ function mapBindingListenerTest() returns error? {
     test:assertEquals(receivedMapValues, [personMap, personMap, personMap]);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function tableBindingListenerTest() returns error? {
     string topic = "table-binding-listener-test-topic";
     table<Person> key(name) personMapTable = table [];
@@ -364,7 +364,7 @@ function tableBindingListenerTest() returns error? {
     test:assertEquals(receivedTableValues.toString(), expectedValues.toString());
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function jsonBindingListenerTest() returns error? {
     string topic = "json-binding-listener-test-topic";
     check sendMessage(jsonData, topic);
@@ -396,7 +396,7 @@ function jsonBindingListenerTest() returns error? {
     test:assertEquals(receivedJsonValues, [jsonData, jsonData, jsonData]);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function dataBindingErrorListenerTest() returns error? {
     string topic = "data-binding-error-listener-test-topic";
     check sendMessage(jsonData, topic);
@@ -432,5 +432,6 @@ function dataBindingErrorListenerTest() returns error? {
     runtime:sleep(3);
     check dataBindingListener.gracefulStop();
     test:assertTrue(errorReceived);
+    log:printInfo(errorMsg);
     test:assertTrue(errorMsg.startsWith("Data binding failed: "));
 }
