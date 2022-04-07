@@ -25,9 +25,7 @@ import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.IntersectionType;
-import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
-import io.ballerina.runtime.api.types.StructureType;
 import io.ballerina.runtime.api.types.TableType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.JsonUtils;
@@ -53,6 +51,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
+import org.ballerinalang.langlib.value.CloneWithType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -70,15 +69,8 @@ import java.util.Properties;
 
 import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
-import static io.ballerina.runtime.api.TypeTags.BOOLEAN_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
-import static io.ballerina.runtime.api.TypeTags.DECIMAL_TAG;
-import static io.ballerina.runtime.api.TypeTags.FLOAT_TAG;
 import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
-import static io.ballerina.runtime.api.TypeTags.INT_TAG;
-import static io.ballerina.runtime.api.TypeTags.JSON_TAG;
-import static io.ballerina.runtime.api.TypeTags.MAP_TAG;
-import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.runtime.api.TypeTags.TABLE_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
@@ -611,30 +603,11 @@ public class KafkaUtils {
             String strValue = new String(((byte[]) ((ConsumerRecord) record).value()), StandardCharsets.UTF_8);
             try {
                 switch (intendedType.getTag()) {
-                    case INT_TAG:
-                        bArray.append(Long.parseLong(strValue));
-                        break;
-                    case BOOLEAN_TAG:
-                        bArray.append(Boolean.parseBoolean(strValue));
-                        break;
-                    case FLOAT_TAG:
-                        bArray.append(Double.parseDouble(strValue));
-                        break;
-                    case DECIMAL_TAG:
-                        bArray.append(ValueCreator.createDecimalValue(strValue));
-                        break;
                     case STRING_TAG:
                         bArray.append(StringUtils.fromString(strValue));
                         break;
                     case XML_TAG:
                         bArray.append(XmlUtils.parse(strValue));
-                        break;
-                    case MAP_TAG:
-                        bArray.append(JsonUtils.convertJSONToMap(JsonUtils.parse(strValue), ((MapType) intendedType)));
-                        break;
-                    case RECORD_TYPE_TAG:
-                        StructureType structureType = (StructureType) intendedType;
-                        bArray.append(JsonUtils.convertJSONToRecord(JsonUtils.parse(strValue), structureType));
                         break;
                     case ANYDATA_TAG:
                         bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
@@ -648,9 +621,6 @@ public class KafkaUtils {
                         }
                         bArray.append(bTable);
                         break;
-                    case JSON_TAG:
-                        bArray.append(JsonUtils.parse(strValue));
-                        break;
                     case ARRAY_TAG:
                         if (((ArrayType) intendedType).getElementType().getTag() == BYTE_TAG) {
                             bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
@@ -658,7 +628,7 @@ public class KafkaUtils {
                         }
                         /*-fallthrough*/
                     default:
-                        throw KafkaUtils.createKafkaError("Invalid parameter types found for data binding");
+                        bArray.append(CloneWithType.convert(intendedType, JsonUtils.parse(strValue)));
                 }
             } catch (BError exception) {
                 throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", exception.getMessage()));
