@@ -14,14 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/log;
 import ballerina/test;
 
-@test:Config {}
+@test:Config {enable: true}
 function stringBindingConsumerTest() returns error? {
     string topic = "string-binding-consumer-test-topic";
-    check producer->send({topic, value: TEST_MESSAGE.toBytes()});
-    check producer->send({topic, value: TEST_MESSAGE.toBytes()});
-    check producer->send({topic, value: TEST_MESSAGE.toBytes()});
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -38,13 +39,13 @@ function stringBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function intBindingConsumerTest() returns error? {
     string topic = "int-binding-consumer-test-topic";
     int sendingValue = 100;
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -61,13 +62,13 @@ function intBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function floatBindingConsumerTest() returns error? {
     string topic = "float-binding-consumer-test-topic";
     float sendingValue = 100.9;
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -84,13 +85,13 @@ function floatBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function decimalBindingConsumerTest() returns error? {
     string topic = "decimal-binding-consumer-test-topic";
     decimal sendingValue = 10.4d;
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -107,13 +108,13 @@ function decimalBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function booleanBindingConsumerTest() returns error? {
     string topic = "boolean-binding-consumer-test-topic";
     boolean sendingValue = true;
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
-    check producer->send({topic, value: sendingValue.toString().toBytes()});
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -130,13 +131,13 @@ function booleanBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function xmlBindingConsumerTest() returns error? {
     string topic = "xml-binding-consumer-test-topic";
     xml sendingValue = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
     check sendMessage(sendingValue, topic);
-    check producer->send({topic, value: sendingValue});
-    check producer->send({topic, value: sendingValue});
+    check sendMessage(sendingValue, topic);
+    check sendMessage(sendingValue, topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -153,12 +154,12 @@ function xmlBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function jsonBindingConsumerTest() returns error? {
     string topic = "json-binding-consumer-test-topic";
-    check producer->send({topic, value: jsonData.toString().toBytes()});
-    check producer->send({topic, value: jsonData.toString().toBytes()});
-    check producer->send({topic, value: jsonData.toString().toBytes()});
+    check sendMessage(jsonData.toString().toBytes(), topic);
+    check sendMessage(jsonData.toString().toBytes(), topic);
+    check sendMessage(jsonData.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -175,12 +176,12 @@ function jsonBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function mapBindingConsumerTest() returns error? {
     string topic = "map-binding-consumer-test-topic";
-    check producer->send({topic, value: personMap.toString().toBytes()});
-    check producer->send({topic, value: personMap.toString().toBytes()});
-    check producer->send({topic, value: personMap.toString().toBytes()});
+    check sendMessage(personMap.toString().toBytes(), topic);
+    check sendMessage(personMap.toString().toBytes(), topic);
+    check sendMessage(personMap.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -197,7 +198,7 @@ function mapBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function tableBindingConsumerTest() returns error? {
     string topic = "table-binding-consumer-test-topic";
     table<Person> key(name) personMapTable = table [];
@@ -205,9 +206,9 @@ function tableBindingConsumerTest() returns error? {
     personMapTable.add(personRecord2);
     personMapTable.add(personRecord3);
 
-    check producer->send({topic, value: personMapTable.toString().toBytes()});
-    check producer->send({topic, value: personMapTable.toString().toBytes()});
-    check producer->send({topic, value: personMapTable.toString().toBytes()});
+    check sendMessage(personMapTable, topic);
+    check sendMessage(personMapTable, topic);
+    check sendMessage(personMapTable, topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -224,12 +225,12 @@ function tableBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function recordBindingConsumerTest() returns error? {
     string topic = "record-binding-consumer-test-topic";
-    check producer->send({topic, value: personRecord1.toString().toBytes()});
-    check producer->send({topic, value: personRecord1.toString().toBytes()});
-    check producer->send({topic, value: personRecord1.toString().toBytes()});
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],

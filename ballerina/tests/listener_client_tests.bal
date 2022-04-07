@@ -32,7 +32,7 @@ string incorrectEndpointMsg = "";
 
 int receivedMsgCount = 0;
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerServiceTest() returns error? {
     string topic = "service-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -51,7 +51,7 @@ function consumerServiceTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerServiceInvalidUrlTest() returns error? {
     string topic = "consumer-service-invalid-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -70,7 +70,7 @@ function consumerServiceInvalidUrlTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function attachDetachToClosedListenerTest() returns error? {
     string topic = "attach-detach-closed-listener-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -123,7 +123,7 @@ function attachDetachToClosedListenerTest() returns error? {
     incorrectEndpointMsg = "";
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerServiceGracefulStopTest() returns error? {
     string topic = "listener-graceful-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -145,7 +145,7 @@ function consumerServiceGracefulStopTest() returns error? {
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerServiceImmediateStopTest() returns error? {
     string topic = "listener-immediate-stop-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -167,7 +167,7 @@ function consumerServiceImmediateStopTest() returns error? {
     test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerServiceSubscribeErrorTest() returns error? {
     string topic = "listener-subscribe-error-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -204,7 +204,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
     check 'listener.detach(incorrectEndpointsService);
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function listenerConfigTest() returns error? {
     string topic = "listener-config-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -224,7 +224,7 @@ function listenerConfigTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function listenerConfigErrorTest() returns error? {
     string topic = "listener-config-error-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -262,6 +262,7 @@ function listenerConfigErrorTest() returns error? {
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [consumerServiceCommitTest]
 }
 function consumerServiceCommitOffsetTest() returns error? {
@@ -298,7 +299,7 @@ function consumerServiceCommitOffsetTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerServiceCommitTest() returns error? {
     string topic = "listener-commit-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -333,7 +334,7 @@ function consumerServiceCommitTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function saslListenerTest() returns error? {
     string topic = "sasl-listener-test-topic";
 
@@ -355,7 +356,7 @@ function saslListenerTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function saslListenerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-listener-incorrect-credentials-test-topic";
     AuthenticationConfiguration invalidAuthConfig = {
@@ -382,7 +383,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslListenerTest() returns error? {
     string topic = "ssl-listener-test-topic";
 
@@ -404,7 +405,7 @@ function sslListenerTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function basicMessageOrderTest() returns error? {
     string topic = "message-order-test-topic";
     int i = 0;
@@ -436,7 +437,7 @@ function basicMessageOrderTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function listenerDetachTest() returns error? {
     string topic1 = "listener-detach-test-topic";
     ConsumerConfiguration consumerConfiguration1 = {
@@ -494,7 +495,7 @@ function listenerDetachTest() returns error? {
     check listener2.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function plaintextToSecuredEndpointsListenerTest() returns error? {
     string topic = "plaintext-secured-endpoints-listener-test-topic";
 
@@ -530,7 +531,7 @@ function plaintextToSecuredEndpointsListenerTest() returns error? {
     check testListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function invalidSecuredEndpointsListenerTest() returns error? {
     string topic = "invalid-secured-endpoints-listener-test-topic";
 
@@ -586,7 +587,7 @@ function invalidSecuredEndpointsListenerTest() returns error? {
     check testListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectStoresListenerTest() returns error? {
     string topic = "ssl-incorrect-stores-listener-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -627,7 +628,7 @@ function sslIncorrectStoresListenerTest() returns error? {
     check testListener.gracefulStop();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectMasterPasswordListenerTest() returns error? {
     string topic = "ssl-incorrect-master-password-listener-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -666,7 +667,7 @@ function sslIncorrectMasterPasswordListenerTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectCertPathListenerTest() returns error? {
     string topic = "ssl-incorrect-cert-path-listener-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -705,7 +706,7 @@ function sslIncorrectCertPathListenerTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function invalidSecurityProtocolListenerTest() returns error? {
     string topic = "invalid-security-protocol-listener-test-topic";
 

@@ -17,7 +17,7 @@
 import ballerina/lang.value;
 import ballerina/test;
 
-@test:Config {}
+@test:Config {enable: true}
 function intProduceTest() returns error? {
     string topic = "int-produce-test-topic";
     check producer->send({topic, value: 1});
@@ -43,7 +43,7 @@ function intProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function floatProduceTest() returns error? {
     string topic = "float-produce-test-topic";
     check producer->send({topic, value: 1.2});
@@ -69,7 +69,7 @@ function floatProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function decimalProduceTest() returns error? {
     string topic = "decimal-produce-test-topic";
     check producer->send({topic, value: 1.7d});
@@ -95,7 +95,7 @@ function decimalProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function booleanProduceTest() returns error? {
     string topic = "boolean-produce-test-topic";
     check producer->send({topic, value: true});
@@ -120,7 +120,7 @@ function booleanProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function stringProduceTest() returns error? {
     string topic = "string-produce-test-topic";
     check producer->send({topic, value: TEST_MESSAGE});
@@ -145,7 +145,7 @@ function stringProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function xmlProduceTest() returns error? {
     string topic = "xml-produce-test-topic";
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
@@ -171,7 +171,7 @@ function xmlProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function recordProduceTest() returns error? {
     string topic = "record-produce-test-topic";
     check producer->send({topic, value: personRecord1});
@@ -197,7 +197,7 @@ function recordProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function mapProduceTest() returns error? {
     string topic = "map-produce-test-topic";
     check producer->send({topic, value: personMap});
@@ -223,7 +223,7 @@ function mapProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function tableProduceTest() returns error? {
     string topic = "table-produce-test-topic";
     table<Person> key(name) personMapTable = table [];
