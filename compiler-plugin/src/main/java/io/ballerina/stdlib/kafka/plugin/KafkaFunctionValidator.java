@@ -60,7 +60,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TABLE_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.XML_TYPE_DESC;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CALLER;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE;
-import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_SINGLE_PARAMETER;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_PARAM_COUNT;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_PARAM_TYPES;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_RETURN_TYPE_ERROR_OR_NIL;
@@ -198,7 +198,7 @@ public class KafkaFunctionValidator {
                 reportErrorDiagnostic(INVALID_PARAM_TYPES, location);
             }
         } else if (!consumerRecordsExists && !dataExists) {
-            reportErrorDiagnostic(INVALID_FUNCTION_PARAM_RECORDS, location);
+            reportErrorDiagnostic(INVALID_SINGLE_PARAMETER, location);
         }
     }
 

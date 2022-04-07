@@ -32,7 +32,7 @@ import static io.ballerina.stdlib.kafka.plugin.CompilerPluginTestUtils.BALLERINA
 import static io.ballerina.stdlib.kafka.plugin.CompilerPluginTestUtils.RESOURCE_DIRECTORY;
 import static io.ballerina.stdlib.kafka.plugin.CompilerPluginTestUtils.getEnvironmentBuilder;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE;
-import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_PARAM_RECORDS;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_SINGLE_PARAMETER;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_MULTIPLE_LISTENERS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_PARAM_COUNT;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_PARAM_TYPES;
@@ -202,7 +202,7 @@ public class KafkaServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errors().size(), 3);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic, INVALID_FUNCTION_PARAM_RECORDS);
+        assertDiagnostic(diagnostic, INVALID_SINGLE_PARAMETER);
     }
 
     @Test(enabled = true, description = "Validate duplicate parameters")
@@ -368,7 +368,7 @@ public class KafkaServiceValidationTest {
         Object[] diagnostics = diagnosticResult.errors().toArray();
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
-            assertDiagnostic(diagnostic, INVALID_PARAM_TYPES);
+            assertDiagnostic(diagnostic, INVALID_SINGLE_PARAMETER);
         }
     }
 

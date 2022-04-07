@@ -56,7 +56,7 @@ public class PluginConstants {
                 "optional parameter kafka:Caller.", "KAFKA_105"),
         INVALID_PARAM_TYPES("Invalid method parameters. Only kafka:ConsumerRecord[], anydata[] and " +
                 "kafka:Caller is allowed", "KAFKA_106"),
-        INVALID_FUNCTION_PARAM_RECORDS("Invalid method parameter. Only kafka:ConsumerRecord[] or anydata[]" +
+        INVALID_SINGLE_PARAMETER("Invalid method parameter. Only kafka:ConsumerRecord[] or anydata[]" +
                 " is allowed.", "KAFKA_107"),
         INVALID_PARAM_COUNT("Invalid method parameter count. " +
                 "Only kafka:Caller, kafka:ConsumerRecord[] and anydata[] are allowed.", "KAFKA_108"),
