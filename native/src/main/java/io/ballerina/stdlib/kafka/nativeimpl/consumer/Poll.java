@@ -100,7 +100,7 @@ public class Poll {
                 balFuture.complete(dataArray);
             } catch (BError bError) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                balFuture.complete(createKafkaError("Data binding failed: " + bError.getMessage()));
+                balFuture.complete(createKafkaError(bError.getMessage()));
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));

@@ -91,7 +91,7 @@ public client isolated class Producer {
     # ```
     #
     # + producerRecord - Record to be produced
-    # + return -  A `kafka:Error` if send action fails to send data or else '()'
+    # + return - A `kafka:Error` if send action fails to send data or else '()'
     isolated remote function send(ProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
         byte[] value;

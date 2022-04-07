@@ -248,6 +248,25 @@ function recordBindingConsumerTest() returns error? {
 }
 
 @test:Config {enable: true}
+function nilBindingConsumerTest() returns error? {
+    string topic = "nil-binding-consumer-test-topic";
+    check sendMessage((), topic);
+    check sendMessage((), topic);
+    check sendMessage((), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-11",
+        clientId: "data-binding-consumer-id-11",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    ()[] records = check consumer->pollWithType(5);
+    test:assertEquals(records.length(), 3);
+    check consumer->close();
+}
+
+@test:Config {enable: true}
 function dataBindingErrorConsumerTest() returns error? {
     string topic = "data-binding-error-consumer-test-topic";
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -256,8 +275,8 @@ function dataBindingErrorConsumerTest() returns error? {
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
-        groupId: "data-binding-consumer-group-11",
-        clientId: "data-binding-consumer-id-11",
+        groupId: "data-binding-consumer-group-12",
+        clientId: "data-binding-consumer-id-12",
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
