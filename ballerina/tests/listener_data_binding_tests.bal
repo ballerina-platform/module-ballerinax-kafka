@@ -432,6 +432,5 @@ function dataBindingErrorListenerTest() returns error? {
     runtime:sleep(3);
     check dataBindingListener.gracefulStop();
     test:assertTrue(errorReceived);
-    log:printInfo(errorMsg);
     test:assertTrue(errorMsg.startsWith("Data binding failed: "));
 }
