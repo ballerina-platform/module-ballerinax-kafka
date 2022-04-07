@@ -153,7 +153,6 @@ public class KafkaListenerImpl implements KafkaListener {
         boolean callerExists = false;
         boolean consumerRecordsExists = false;
         boolean dataExists = false;
-        BObject caller = createCaller(listener);
         Object[] arguments = new Object[parameters.length * 2];
         int index = 0;
         for (Parameter parameter : parameters) {
@@ -163,7 +162,7 @@ public class KafkaListenerImpl implements KafkaListener {
                         throw KafkaUtils.createKafkaError("Invalid remote function signature");
                     }
                     callerExists = true;
-                    arguments[index++] = caller;
+                    arguments[index++] = createCaller(listener);
                     arguments[index++] = true;
                     break;
                 case INTERSECTION_TAG:
@@ -213,8 +212,7 @@ public class KafkaListenerImpl implements KafkaListener {
         String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
         List<BMap<BString, Object>> recordMapList = new ArrayList();
         for (Object record : records) {
-            BMap<BString, Object> consumerRecord = populateConsumerRecord(
-                    (ConsumerRecord) record, keyType, valueType);
+            BMap<BString, Object> consumerRecord = populateConsumerRecord((ConsumerRecord) record, keyType, valueType);
             recordMapList.add(consumerRecord);
         }
         BArray consumerRecordsArray = ValueCreator.createArrayValue(recordMapList.toArray(),
@@ -222,10 +220,9 @@ public class KafkaListenerImpl implements KafkaListener {
         return consumerRecordsArray;
     }
 
-    public static Optional<MethodType> getOnConsumerRecordMethod(BObject service) {
+    private static Optional<MethodType> getOnConsumerRecordMethod(BObject service) {
         MethodType[] methodTypes = service.getType().getMethods();
         return Stream.of(methodTypes)
-                .filter(methodType -> KAFKA_RESOURCE_ON_RECORD.equals(methodType.getName()))
-                .findFirst();
+                .filter(methodType -> KAFKA_RESOURCE_ON_RECORD.equals(methodType.getName())).findFirst();
     }
 }

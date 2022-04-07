@@ -613,13 +613,7 @@ public class KafkaUtils {
                         bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
                         break;
                     case TABLE_TAG:
-                        BArray valueList = (BArray) (JsonUtils.convertJSON(JsonUtils.parse(strValue),
-                                TypeCreator.createArrayType(((TableType) intendedType).getConstrainedType())));
-                        BTable bTable = ValueCreator.createTableValue((TableType) intendedType);
-                        for (int i = 0; i < valueList.size(); i++) {
-                            bTable.put(valueList.get(i));
-                        }
-                        bArray.append(bTable);
+                        bArray.append(getbTable((TableType) intendedType, strValue));
                         break;
                     case ARRAY_TAG:
                         if (((ArrayType) intendedType).getElementType().getTag() == BYTE_TAG) {
@@ -635,6 +629,16 @@ public class KafkaUtils {
             }
         }
         return bArray;
+    }
+
+    private static BTable getbTable(TableType intendedType, String strValue) {
+        BArray valueList = (BArray) (JsonUtils.convertJSON(JsonUtils.parse(strValue),
+                TypeCreator.createArrayType(intendedType.getConstrainedType())));
+        BTable bTable = ValueCreator.createTableValue(intendedType);
+        for (int i = 0; i < valueList.size(); i++) {
+            bTable.put(valueList.get(i));
+        }
+        return bTable;
     }
 
     private static Type getIntendedType(Type type) {
@@ -657,10 +661,6 @@ public class KafkaUtils {
 
     public static BMap<BString, Object> getConsumerRecord() {
         return createKafkaRecord(KafkaConstants.CONSUMER_RECORD_STRUCT_NAME);
-    }
-
-    public static BMap<BString, Object> getAvroGenericRecord() {
-        return createKafkaRecord(KafkaConstants.AVRO_GENERIC_RECORD_NAME);
     }
 
     public static BMap<BString, Object> getPartitionOffsetRecord() {
