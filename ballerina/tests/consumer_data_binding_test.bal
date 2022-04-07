@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/test;
+import ballerina/log;
 
 @test:Config {enable: true}
 function stringBindingConsumerTest() returns error? {
@@ -243,5 +244,28 @@ function recordBindingConsumerTest() returns error? {
     records.forEach(function(Person value) {
         test:assertEquals(value, personRecord1);
     });
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function dataBindingErrorConsumerTest() returns error? {
+    string topic = "data-binding-error-consumer-test-topic";
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-11",
+        clientId: "data-binding-consumer-id-11",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    int[]|Error result = consumer->pollWithType(5);
+    test:assertTrue(result is Error);
+    if result is Error {
+        log:printInfo(result.message());
+        test:assertTrue(result.message().startsWith("Data binding failed"));
+    }
     check consumer->close();
 }
