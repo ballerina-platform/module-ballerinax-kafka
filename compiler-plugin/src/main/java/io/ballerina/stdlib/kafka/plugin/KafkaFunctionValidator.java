@@ -82,6 +82,7 @@ public class KafkaFunctionValidator {
 
     private final SyntaxNodeAnalysisContext context;
     private final ServiceDeclarationNode serviceDeclarationNode;
+    private final SemanticModel semanticModel;
     FunctionDefinitionNode onConsumerRecord;
     FunctionDefinitionNode onError;
 
@@ -91,6 +92,7 @@ public class KafkaFunctionValidator {
         this.serviceDeclarationNode = (ServiceDeclarationNode) context.node();
         this.onConsumerRecord = onConsumerRecord;
         this.onError = onError;
+        this.semanticModel = context.semanticModel();
     }
 
     public void validate() {
@@ -131,7 +133,6 @@ public class KafkaFunctionValidator {
             ParameterNode paramNode = parameters.get(0);
             SyntaxKind paramSyntaxKind = ((RequiredParameterNode) paramNode).typeName().kind();
             if (paramSyntaxKind.equals(QUALIFIED_NAME_REFERENCE)) {
-                SemanticModel semanticModel = context.semanticModel();
                 Node parameterTypeNode = ((RequiredParameterNode) paramNode).typeName();
                 Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
                 if (!paramSymbol.get().getName().get().equals(ERROR_PARAM) ||
@@ -158,6 +159,10 @@ public class KafkaFunctionValidator {
              reportErrorDiagnostic(MUST_HAVE_CALLER_AND_RECORDS, location);
              return;
         }
+        validateParameterTypes(parameters, location);
+    }
+
+    private void validateParameterTypes(SeparatedNodeList<ParameterNode> parameters, Location location) {
         boolean callerExists = false;
         boolean consumerRecordsExists = false;
         boolean dataExists = false;
@@ -188,6 +193,11 @@ public class KafkaFunctionValidator {
                     break;
             }
         }
+        validateParameterTypeResults(parameters, location, callerExists, consumerRecordsExists, dataExists);
+    }
+
+    private void validateParameterTypeResults(SeparatedNodeList<ParameterNode> parameters, Location location,
+                                              boolean callerExists, boolean consumerRecordsExists, boolean dataExists) {
         if (parameters.size() == 3) {
             if (!callerExists || !consumerRecordsExists || !dataExists) {
                 reportErrorDiagnostic(INVALID_PARAM_TYPES, location);
@@ -204,7 +214,6 @@ public class KafkaFunctionValidator {
 
     private boolean validateCallerParam(RequiredParameterNode requiredParameterNode) {
         Node parameterTypeNode = requiredParameterNode.typeName();
-        SemanticModel semanticModel = context.semanticModel();
         Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
         if (paramSymbol.isPresent()) {
             Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
@@ -222,7 +231,6 @@ public class KafkaFunctionValidator {
         Node parameterTypeNode = requiredParameterNode.typeName();
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) parameterTypeNode;
         TypeDescriptorNode memberType = arrayTypeDescriptorNode.memberTypeDesc();
-        SemanticModel semanticModel = context.semanticModel();
         Optional<Symbol> paramSymbol = semanticModel.symbol(memberType);
         if (paramSymbol.isPresent()) {
             Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
@@ -239,7 +247,6 @@ public class KafkaFunctionValidator {
     private boolean validateReadonlyConsumerRecordsParam(RequiredParameterNode requiredParameterNode) {
         Node parameterTypeNode = requiredParameterNode.typeName();
         IntersectionTypeDescriptorNode typeDescriptorNode = (IntersectionTypeDescriptorNode) parameterTypeNode;
-        SemanticModel semanticModel = context.semanticModel();
         Optional<TypeDescriptorNode> arrayTypeDescNode = Optional.empty();
         if (typeDescriptorNode.rightTypeDesc().kind() == ARRAY_TYPE_DESC) {
             arrayTypeDescNode = Optional.of(((ArrayTypeDescriptorNode) typeDescriptorNode.rightTypeDesc())
