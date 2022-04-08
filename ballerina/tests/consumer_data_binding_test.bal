@@ -201,11 +201,9 @@ function mapBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function tableBindingConsumerTest() returns error? {
     string topic = "table-binding-consumer-test-topic";
-    table<Person> key(name) personMapTable = table [];
-    personMapTable.add(personRecord1);
-    personMapTable.add(personRecord2);
-    personMapTable.add(personRecord3);
+    table<Person> personMapTable = table [];
 
+    personMapTable.add(personRecord1);
     check sendMessage(personMapTable, topic);
     check sendMessage(personMapTable, topic);
     check sendMessage(personMapTable, topic);
@@ -220,7 +218,7 @@ function tableBindingConsumerTest() returns error? {
     table<Person>[] records = check consumer->pollWithType(5);
     test:assertEquals(records.length(), 3);
     records.forEach(function(table<Person> value) {
-        test:assertEquals(value.toString(), personMapTable.toString());
+        test:assertEquals(value, personMapTable);
     });
     check consumer->close();
 }

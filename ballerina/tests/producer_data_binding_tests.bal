@@ -226,10 +226,8 @@ function mapProduceTest() returns error? {
 @test:Config {enable: true}
 function tableProduceTest() returns error? {
     string topic = "table-produce-test-topic";
-    table<Person> key(name) personMapTable = table [];
+    table<Person> personMapTable = table [];
     personMapTable.add(personRecord1);
-    personMapTable.add(personRecord2);
-    personMapTable.add(personRecord3);
     check producer->send({topic, value: personMapTable});
     check producer->send({topic, value: personMapTable});
     check producer->send({topic, value: personMapTable});
@@ -249,6 +247,6 @@ function tableProduceTest() returns error? {
         table<Person> personTable = checkpanic value:fromJsonStringWithType(checkpanic 'string:fromBytes(cRecord.value));
         receivedValues.push(personTable);
     });
-    test:assertEquals(receivedValues.toString(), [personMapTable, personMapTable, personMapTable].toString());
+    test:assertEquals(receivedValues, [personMapTable, personMapTable, personMapTable]);
     check consumer->close();
 }

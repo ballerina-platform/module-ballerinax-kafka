@@ -329,11 +329,9 @@ function mapBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function tableBindingListenerTest() returns error? {
     string topic = "table-binding-listener-test-topic";
-    table<Person> key(name) personMapTable = table [];
+    table<Person> personMapTable = table [];
 
     personMapTable.add(personRecord1);
-    personMapTable.add(personRecord2);
-    personMapTable.add(personRecord3);
     check sendMessage(personMapTable, topic);
     check sendMessage(personMapTable, topic);
     check sendMessage(personMapTable, topic);
@@ -361,7 +359,7 @@ function tableBindingListenerTest() returns error? {
     runtime:sleep(5);
     check dataBindingListener.gracefulStop();
     table<Person>[] expectedValues = [personMapTable, personMapTable, personMapTable];
-    test:assertEquals(receivedTableValues.toString(), expectedValues.toString());
+    test:assertEquals(receivedTableValues, expectedValues);
 }
 
 @test:Config {enable: true}
