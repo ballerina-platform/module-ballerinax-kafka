@@ -26,7 +26,6 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
-import io.ballerina.runtime.api.types.TableType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
@@ -38,7 +37,7 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.api.values.BTable;
+import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -52,6 +51,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
 import org.ballerinalang.langlib.value.CloneWithType;
+import org.ballerinalang.langlib.value.FromJsonWithType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -71,8 +71,8 @@ import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
 import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
+import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
-import static io.ballerina.runtime.api.TypeTags.TABLE_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 
@@ -612,8 +612,8 @@ public class KafkaUtils {
                     case ANYDATA_TAG:
                         bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
                         break;
-                    case TABLE_TAG:
-                        bArray.append(getbTable((TableType) intendedType, strValue));
+                    case RECORD_TYPE_TAG:
+                        bArray.append(CloneWithType.convert(intendedType, JsonUtils.parse(strValue)));
                         break;
                     case ARRAY_TAG:
                         if (((ArrayType) intendedType).getElementType().getTag() == BYTE_TAG) {
@@ -622,23 +622,14 @@ public class KafkaUtils {
                         }
                         /*-fallthrough*/
                     default:
-                        bArray.append(CloneWithType.convert(intendedType, JsonUtils.parse(strValue)));
+                        BTypedesc typeDesc = ValueCreator.createTypedescValue(intendedType);
+                        bArray.append(FromJsonWithType.fromJsonWithType(JsonUtils.parse(strValue), typeDesc));
                 }
             } catch (BError exception) {
                 throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", exception.getMessage()));
             }
         }
         return bArray;
-    }
-
-    private static BTable getbTable(TableType intendedType, String strValue) {
-        BArray valueList = (BArray) (JsonUtils.convertJSON(JsonUtils.parse(strValue),
-                TypeCreator.createArrayType(intendedType.getConstrainedType())));
-        BTable bTable = ValueCreator.createTableValue(intendedType);
-        for (int i = 0; i < valueList.size(); i++) {
-            bTable.put(valueList.get(i));
-        }
-        return bTable;
     }
 
     private static Type getIntendedType(Type type) {
