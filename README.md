@@ -12,8 +12,8 @@ Apache Kafka is an open-source distributed event streaming platform used for hig
 
 This library supports Kafka 1.x.x and 2.0.0 versions.
 
-### Consumer and Producer
-#### Kafka Producer
+### Consumer and producer
+#### Kafka producer
 A Kafka producer is a Kafka client that publishes records to the Kafka cluster. The producer is thread-safe and sharing a single producer instance across threads will generally be faster than having multiple instances. When working with a Kafka producer, the first thing to do is to initialize the producer.
 For the producer to execute successfully, an active Kafka broker should be available.
 
@@ -29,7 +29,7 @@ kafka:ProducerConfiguration producerConfiguration = {
 
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL, producerConfiguration);
 ```
-#### Kafka Consumer
+#### Kafka consumer
 A Kafka consumer is a subscriber responsible for reading records from one or more topics and one or more partitions of a topic. When working with a Kafka consumer, the first thing to do is initialize the consumer.
 For the consumer to execute successfully, an active Kafka broker should be available.
 
@@ -70,7 +70,7 @@ service kafka:Service on kafkaListener {
     }
 }
 ```
-### Data Serialization
+### Data serialization
 Serialization is the process of converting data into a stream of bytes that is used for transmission. Kafka
 stores and transmits these bytes of arrays in its queue. Deserialization does the opposite of serialization
 in which bytes of arrays are converted into the desired data type.
@@ -120,15 +120,15 @@ kafka:TopicPartition topicPartition = {
 check kafkaConsumer->assign([topicPartition]);
 ```
 
-## Issues and Projects 
+## Issues and projects 
 
 Issues and Projects tabs are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina Standard Library parent repository](https://github.com/ballerina-platform/ballerina-standard-library). 
 
 This repository only contains the source code for the library.
 
-## Building from the Source
+## Build from the source
 
-### Setting Up the Prerequisites
+### Set up the prerequisites
 
 * Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
 
@@ -140,7 +140,7 @@ This repository only contains the source code for the library.
 
 2. Download and install [Docker](https://www.docker.com/). This is required to run the tests.
 
-### Building the Source
+### Build the source
 
 Execute the commands below to build from the source.
 
@@ -178,17 +178,17 @@ Execute the commands below to build from the source.
    ./gradlew clean build -PpublishToCentral=true
    ```
 
-## Contributing to Ballerina
+## Contribute to Ballerina
 
 As an open source project, Ballerina welcomes contributions from the community. 
 
 For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
 
-## Code of Conduct
+## Code of conduct
 
 All the contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
 
-## Useful Links
+## Useful links
 
 * For more information go to the [`kafka` library](https://lib.ballerina.io/ballerinax/kafka/latest).
 * For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
