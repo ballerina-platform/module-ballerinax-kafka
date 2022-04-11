@@ -643,7 +643,7 @@ public class KafkaUtils {
         }
     }
 
-    private static Type getIntendedType(Type type) {
+    public static Type getIntendedType(Type type) {
         if (type.getTag() == INTERSECTION_TAG) {
             return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
         }

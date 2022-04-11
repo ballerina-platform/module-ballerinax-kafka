@@ -26,18 +26,12 @@
         <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR" />
     </Match>
     <Match>
-        <Class name="io.ballerina.stdlib.kafka.utils.KafkaUtils" />
-        <Method name="invokeMethodSync"/>
-        <Bug pattern="RV_RETURN_VALUE_IGNORED" />
-    </Match>
-    <Match>
         <Class name="io.ballerina.stdlib.kafka.nativeimpl.consumer.Poll" />
         <Method name="poll"/>
         <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE" />
     </Match>
     <Match>
         <Class name="io.ballerina.stdlib.kafka.utils.KafkaUtils" />
-        <Method name="getValueWithIntendedType"/>
         <Bug pattern="BC_UNCONFIRMED_CAST" />
     </Match>
 </FindBugsFilter>

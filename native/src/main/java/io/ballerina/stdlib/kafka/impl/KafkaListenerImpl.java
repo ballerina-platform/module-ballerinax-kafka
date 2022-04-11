@@ -23,8 +23,6 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.ArrayType;
-import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Parameter;
 import io.ballerina.runtime.api.types.RecordType;
@@ -62,6 +60,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_R
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getIntendedType;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
 
 /**
@@ -188,13 +187,7 @@ public class KafkaListenerImpl implements KafkaListener {
     }
 
     private BArray getConsumerRecords(ConsumerRecords records, Parameter parameter) {
-        RecordType recordType;
-        if (parameter.type.isReadOnly()) {
-            recordType = (RecordType) ((ArrayType) ((IntersectionType) parameter.type).getConstituentTypes().get(0))
-                    .getElementType();
-        } else {
-            recordType = (RecordType) ((ArrayType) parameter.type).getElementType();
-        }
+        RecordType recordType = (RecordType) getIntendedType(parameter.type);
         List<BMap<BString, Object>> recordMapList = new ArrayList();
         for (Object record : records) {
             BMap<BString, Object> consumerRecord = populateConsumerRecord((ConsumerRecord) record, recordType);
