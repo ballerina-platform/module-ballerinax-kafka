@@ -896,8 +896,7 @@ service object {
 
 Service sslConsumerService =
 service object {
-    remote function onConsumerRecord(Caller caller,
-                                ConsumerRecord[] & readonly records) returns error? {
+    remote function onConsumerRecord(Caller caller, ConsumerRecord[] & readonly records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);

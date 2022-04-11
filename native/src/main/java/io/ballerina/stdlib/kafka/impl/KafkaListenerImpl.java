@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Parameter;
 import io.ballerina.runtime.api.types.RecordType;
@@ -187,7 +188,13 @@ public class KafkaListenerImpl implements KafkaListener {
     }
 
     private BArray getConsumerRecords(ConsumerRecords records, Parameter parameter) {
-        RecordType recordType = (RecordType) ((ArrayType) parameter.type).getElementType();
+        RecordType recordType;
+        if (parameter.type.isReadOnly()) {
+            recordType = (RecordType) ((ArrayType) ((IntersectionType) parameter.type).getConstituentTypes().get(0))
+                    .getElementType();
+        } else {
+            recordType = (RecordType) ((ArrayType) parameter.type).getElementType();
+        }
         List<BMap<BString, Object>> recordMapList = new ArrayList();
         for (Object record : records) {
             BMap<BString, Object> consumerRecord = populateConsumerRecord((ConsumerRecord) record, recordType);

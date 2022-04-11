@@ -70,70 +70,70 @@ string errorMsg = "";
 public type IntConsumerRecord record {|
     int key?;
     int value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type FloatConsumerRecord record {|
     float key?;
     float value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type DecimalConsumerRecord record {|
     decimal key?;
     decimal value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type BooleanConsumerRecord record {|
     boolean key?;
     boolean value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type StringConsumerRecord record {|
     string key?;
     string value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type PersonConsumerRecord record {|
     byte[] key?;
     Person value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type MapConsumerRecord record {|
     byte[] key?;
     map<Person> value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type XmlConsumerRecord record {|
     xml key?;
     xml value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type TableConsumerRecord record {|
     string key?;
     table<Person> value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
 public type JsonConsumerRecord record {|
     json key?;
     json value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 
@@ -146,7 +146,7 @@ function dataBindingErrorListenerTest() returns error? {
 
     Service dataBindingErrorService =
     service object {
-        remote function onConsumerRecord(XmlConsumerRecord[] records, Caller caller) returns error? {
+        remote function onConsumerRecord(readonly & XmlConsumerRecord[] records, Caller caller) returns error? {
             foreach XmlConsumerRecord 'record in records {
                 log:printInfo("Received int record: " + 'record.toString());
                 errorReceived = false;
@@ -183,7 +183,7 @@ function intConsumerRecordBindingListenerTest() returns error? {
 
     Service intBindingService =
     service object {
-        remote function onConsumerRecord(IntConsumerRecord[] records, Caller caller) returns error? {
+        remote function onConsumerRecord(readonly & IntConsumerRecord[] records, Caller caller) returns error? {
             foreach int i in 0 ... records.length() {
                 receivedIntValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
@@ -217,7 +217,7 @@ function floatConsumerRecordBindingListenerTest() returns error? {
 
     Service floatBindingService =
     service object {
-        remote function onConsumerRecord(FloatConsumerRecord[] records, Caller caller) returns error? {
+        remote function onConsumerRecord(FloatConsumerRecord[] & readonly records, Caller caller) returns error? {
             foreach int i in 0 ... records.length() {
                 receivedFloatValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());

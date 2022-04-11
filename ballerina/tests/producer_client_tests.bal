@@ -21,7 +21,7 @@ import ballerina/crypto;
 
 string MESSAGE_KEY = "TEST-KEY";
 
-@test:Config{}
+@test:Config{enable: true}
 function producerInitTest() returns error? {
     ProducerConfiguration producerConfiguration1 = {
         clientId: "test-producer-02",
@@ -265,7 +265,7 @@ isolated function failTransaction() returns error {
     return error("Fail!");
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function saslProducerTest() returns error? {
     string topic = "sasl-producer-test-topic";
 
@@ -297,7 +297,7 @@ function saslProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function saslProducerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
     AuthenticationConfiguration invalidAuthConfig = {

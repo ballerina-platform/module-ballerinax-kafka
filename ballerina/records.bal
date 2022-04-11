@@ -207,7 +207,7 @@ public type ConsumerRecord record {|
 public type AnydataConsumerRecord record {|
     anydata key?;
     anydata value;
-    int timestamp?;
+    int timestamp;
     PartitionOffset offset?;
 |};
 

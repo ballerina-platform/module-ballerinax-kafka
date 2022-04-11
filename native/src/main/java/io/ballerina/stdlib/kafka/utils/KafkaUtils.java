@@ -608,6 +608,15 @@ public class KafkaUtils {
         return ValueCreator.createRecordValue(ValueCreator.createRecordValue(recordType), fields);
     }
 
+    public static BArray getValuesWithIntendedType(Type type, ConsumerRecords records) {
+        Type intendedType = getIntendedType(type);
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(intendedType, type.isReadOnly()));
+        for (Object record: records) {
+            bArray.append(getValueWithIntendedType(intendedType, (byte[]) ((ConsumerRecord) record).value()));
+        }
+        return bArray;
+    }
+
     public static Object getValueWithIntendedType(Type type, byte[] value) {
         String strValue = new String(value, StandardCharsets.UTF_8);
         try {
@@ -632,15 +641,6 @@ public class KafkaUtils {
         } catch (BError bError) {
             throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", bError.getMessage()));
         }
-    }
-
-    public static BArray getValueWithIntendedType(Type type, ConsumerRecords records) {
-        Type intendedType = getIntendedType(type);
-        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(intendedType, type.isReadOnly()));
-        for (Object record: records) {
-            bArray.append(getValueWithIntendedType(intendedType, (byte[]) ((ConsumerRecord) record).value()));
-        }
-        return bArray;
     }
 
     private static Type getIntendedType(Type type) {
