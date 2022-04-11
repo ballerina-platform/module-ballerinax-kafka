@@ -198,6 +198,13 @@ public type ConsumerRecord record {|
     PartitionOffset offset;
 |};
 
+public type AnydataConsumerRecord record {|
+    anydata key?;
+    anydata value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
+
 # Details related to the producer record.
 #
 # + topic - Topic to which the record will be appended
@@ -208,6 +215,14 @@ public type ConsumerRecord record {|
 public type ProducerRecord record {|
     string topic;
     byte[] key?;
+    anydata value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type AnydataProducerRecord record {|
+    string topic;
+    anydata key?;
     anydata value;
     int timestamp?;
     int partition?;

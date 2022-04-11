@@ -92,20 +92,23 @@ public client isolated class Producer {
     #
     # + producerRecord - Record to be produced
     # + return - A `kafka:Error` if send action fails to send data or else '()'
-    isolated remote function send(ProducerRecord producerRecord) returns Error? {
+    isolated remote function send(AnydataProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
         byte[] value;
-        anydata anydataValue = producerRecord.value;
-        if anydataValue is string {
-            value = anydataValue.toBytes();
-        } else if anydataValue is xml {
-            value = anydataValue.toString().toBytes();
-        } else if anydataValue is byte[] {
+        anydata anydataValue = producerRecord.key;
+        byte[]? key = ();
+        anydata anydataKey = producerRecord.key;
+        if anydataValue is byte[] {
             value = anydataValue;
         } else {
             value = anydataValue.toJsonString().toBytes();
         }
-        return sendByteArrayValues(self, value, producerRecord.topic, producerRecord?.key,
+        if anydataKey is byte[] {
+            key = anydataValue;
+        } else if !anydataKey is () {
+            key = anydataKey.toJsonString().toBytes();
+        }
+        return sendByteArrayValues(self, value, producerRecord.topic, key,
         producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
     }
 }

@@ -59,7 +59,7 @@ public class Poll {
     // static init
     private static final ExecutorService executorService = Executors.newCachedThreadPool(new KafkaThreadFactory());
 
-    public static Object poll(Environment env, BObject consumerObject, BDecimal timeout) {
+    public static Object poll(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
@@ -85,7 +85,7 @@ public class Poll {
         return null;
     }
 
-    public static Object pollWithType(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
+    public static Object pollPayload(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);

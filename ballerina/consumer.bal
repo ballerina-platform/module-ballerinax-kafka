@@ -250,12 +250,12 @@ public client isolated class Consumer {
 
     # Polls the external broker to retrieve messages.
     # ```ballerina
-    # kafka:ConsumerRecord[] result = check consumer->poll(10);
+    # kafka:AnydataConsumerRecord[] result = check consumer->poll(10);
     # ```
     #
     # + timeout - Polling time in seconds
     # + return - Array of consumer records if executed successfully or else a `kafka:Error`
-    isolated remote function poll(decimal timeout) returns ConsumerRecord[]|Error =
+    isolated remote function poll(decimal timeout, typedesc<AnydataConsumerRecord[]> T = <>) returns T|Error =
     @java:Method {
         name: "poll",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.Poll"
@@ -264,15 +264,15 @@ public client isolated class Consumer {
     # Polls the external broker to retrieve messages in the required data type without the `kafka:ConsumerRecord`
     # information.
     # ```ballerina
-    # Person[] persons = check consumer->pollWithType(10);
+    # Person[] persons = check consumer->pollPayload(10);
     # ```
     #
     # + timeout - Polling time in seconds
     # + T - Optional type description of the required data type
     # + return - Array of data in the required format if executed successfully or else a `kafka:Error`
-    isolated remote function pollWithType(decimal timeout, typedesc<anydata[]> T = <>) returns T|Error =
+    isolated remote function pollPayload(decimal timeout, typedesc<anydata[]> T = <>) returns T|Error =
     @java:Method {
-        name: "pollWithType",
+        name: "pollPayload",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.Poll"
     } external;
 

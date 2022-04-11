@@ -31,7 +31,7 @@ function stringBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    string[] records = check consumer->pollWithType(2);
+    string[] records = check consumer->pollPayload(2);
     test:assertEquals(records.length(), 3);
     records.forEach(function(string value) {
         test:assertEquals(value, TEST_MESSAGE);
@@ -54,7 +54,7 @@ function intBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    int[] records = check consumer->pollWithType(2);
+    int[] records = check consumer->pollPayload(2);
     test:assertEquals(records.length(), 3);
     records.forEach(function(int value) {
         test:assertEquals(value, sendingValue);
@@ -77,7 +77,7 @@ function floatBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    float[] records = check consumer->pollWithType(2);
+    float[] records = check consumer->pollPayload(2);
     test:assertEquals(records.length(), 3);
     records.forEach(function(float value) {
         test:assertEquals(value, sendingValue);
@@ -100,7 +100,7 @@ function decimalBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    decimal[] records = check consumer->pollWithType(2);
+    decimal[] records = check consumer->pollPayload(2);
     test:assertEquals(records.length(), 3);
     records.forEach(function(decimal value) {
         test:assertEquals(value, sendingValue);
@@ -123,7 +123,7 @@ function booleanBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    boolean[] records = check consumer->pollWithType(2);
+    boolean[] records = check consumer->pollPayload(2);
     test:assertEquals(records.length(), 3);
     records.forEach(function(boolean value) {
         test:assertEquals(value, sendingValue);
@@ -146,7 +146,7 @@ function xmlBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    xml[] records = check consumer->pollWithType(5);
+    xml[] records = check consumer->pollPayload(5);
     test:assertEquals(records.length(), 3);
     records.forEach(function(xml value) {
         test:assertEquals(value, sendingValue);
@@ -168,7 +168,7 @@ function jsonBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    json[] records = check consumer->pollWithType(5);
+    json[] records = check consumer->pollPayload(5);
     test:assertEquals(records.length(), 3);
     records.forEach(function(json value) {
         test:assertEquals(value, jsonData);
@@ -190,7 +190,7 @@ function mapBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    map<Person>[] records = check consumer->pollWithType(5);
+    map<Person>[] records = check consumer->pollPayload(5);
     test:assertEquals(records.length(), 3);
     records.forEach(function(map<Person> value) {
         test:assertEquals(value, personMap);
@@ -215,7 +215,7 @@ function tableBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    table<Person>[] records = check consumer->pollWithType(5);
+    table<Person>[] records = check consumer->pollPayload(5);
     test:assertEquals(records.length(), 3);
     records.forEach(function(table<Person> value) {
         test:assertEquals(value, personMapTable);
@@ -237,7 +237,7 @@ function recordBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    Person[] records = check consumer->pollWithType(5);
+    Person[] records = check consumer->pollPayload(5);
     test:assertEquals(records.length(), 3);
     records.forEach(function(Person value) {
         test:assertEquals(value, personRecord1);
@@ -259,7 +259,7 @@ function nilBindingConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    ()[] records = check consumer->pollWithType(5);
+    ()[] records = check consumer->pollPayload(5);
     test:assertEquals(records.length(), 3);
     check consumer->close();
 }
@@ -278,7 +278,7 @@ function dataBindingErrorConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    int[]|Error result = consumer->pollWithType(5);
+    int[]|Error result = consumer->pollPayload(5);
     test:assertTrue(result is Error);
     if result is Error {
         log:printInfo(result.message());
