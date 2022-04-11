@@ -24,9 +24,9 @@ import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
-import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Parameter;
+import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
@@ -56,14 +56,11 @@ import java.util.stream.Stream;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_RECORD_STRUCT_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_RECORD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecord;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getDataWithIntendedType;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
 
 /**
@@ -152,7 +149,6 @@ public class KafkaListenerImpl implements KafkaListener {
         Parameter[] parameters = getOnConsumerRecordMethod(service).get().getParameters();
         boolean callerExists = false;
         boolean consumerRecordsExists = false;
-        boolean dataExists = false;
         Object[] arguments = new Object[parameters.length * 2];
         int index = 0;
         for (Parameter parameter : parameters) {
@@ -167,35 +163,18 @@ public class KafkaListenerImpl implements KafkaListener {
                     break;
                 case INTERSECTION_TAG:
                 case ARRAY_TAG:
-                    if (isConsumerRecordArrayType(parameter.type)) {
-                        if (consumerRecordsExists) {
-                            throw KafkaUtils.createKafkaError("Invalid remote function signature");
-                        }
-                        consumerRecordsExists = true;
-                        arguments[index++] = getConsumerRecords(records, parameter.type.isReadOnly());
-                        arguments[index++] = true;
-                    } else {
-                        if (dataExists) {
-                            throw KafkaUtils.createKafkaError("Invalid remote function signature");
-                        }
-                        dataExists = true;
-                        arguments[index++] = getDataWithIntendedType(parameter.type, records);
-                        arguments[index++] = true;
+                    if (consumerRecordsExists) {
+                        throw KafkaUtils.createKafkaError("Invalid remote function signature");
                     }
+                    consumerRecordsExists = true;
+                    arguments[index++] = getConsumerRecords(records, parameter);
+                    arguments[index++] = true;
                     break;
                 default:
                     throw KafkaUtils.createKafkaError("Invalid remote function signature");
             }
         }
         return arguments;
-    }
-
-    private boolean isConsumerRecordArrayType(Type parameterType) {
-        if (parameterType.getTag() == INTERSECTION_TAG) {
-            List<Type> constituentTypes = ((IntersectionType) parameterType).getConstituentTypes();
-            return ((ArrayType) constituentTypes.get(0)).getElementType().getName().equals(CONSUMER_RECORD_STRUCT_NAME);
-        }
-        return ((ArrayType) parameterType).getElementType().getName().equals(CONSUMER_RECORD_STRUCT_NAME);
     }
 
     private BObject createCaller(BObject listener) {
@@ -207,16 +186,15 @@ public class KafkaListenerImpl implements KafkaListener {
         return caller;
     }
 
-    private BArray getConsumerRecords(ConsumerRecords records, boolean readOnly) {
-        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
+    private BArray getConsumerRecords(ConsumerRecords records, Parameter parameter) {
+        RecordType recordType = (RecordType) ((ArrayType) parameter.type).getElementType();
         List<BMap<BString, Object>> recordMapList = new ArrayList();
         for (Object record : records) {
-            BMap<BString, Object> consumerRecord = populateConsumerRecord((ConsumerRecord) record, keyType, valueType);
+            BMap<BString, Object> consumerRecord = populateConsumerRecord((ConsumerRecord) record, recordType);
             recordMapList.add(consumerRecord);
         }
         BArray consumerRecordsArray = ValueCreator.createArrayValue(recordMapList.toArray(),
-                TypeCreator.createArrayType(getConsumerRecord().getType(), readOnly));
+                TypeCreator.createArrayType(recordType, parameter.type.isReadOnly()));
         return consumerRecordsArray;
     }
 

@@ -17,12 +17,97 @@
 import ballerina/lang.value;
 import ballerina/test;
 
+public type IntProducerRecord record {|
+    string topic;
+    int key?;
+    int value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type FloatProducerRecord record {|
+    string topic;
+    float key?;
+    float value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type DecimalProducerRecord record {|
+    string topic;
+    decimal key?;
+    decimal value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type BooleanProducerRecord record {|
+    string topic;
+    boolean key?;
+    boolean value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type StringProducerRecord record {|
+    string topic;
+    string key?;
+    string value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type PersonProducerRecord record {|
+    string topic;
+    string key?;
+    Person value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type MapProducerRecord record {|
+    string topic;
+    string key?;
+    map<Person> value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type XmlProducerRecord record {|
+    string topic;
+    string key?;
+    xml value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type TableProducerRecord record {|
+    string topic;
+    string key?;
+    table<Person> value;
+    int timestamp?;
+    int partition?;
+|};
+
+public type JsonProducerRecord record {|
+    string topic;
+    string key?;
+    json value;
+    int timestamp?;
+    int partition?;
+|};
+
 @test:Config {enable: true}
 function intProduceTest() returns error? {
     string topic = "int-produce-test-topic";
-    check producer->send({topic, value: 1});
-    check producer->send({topic, value: 2});
-    check producer->send({topic, value: 3});
+    IntProducerRecord producerRecord = {
+        topic,
+        'key: 2,
+        value: 10
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -35,20 +120,29 @@ function intProduceTest() returns error? {
     test:assertEquals(consumerRecords.length(), 3);
 
     int receivedValue = 0;
+    int receivedKey = 0;
     consumerRecords.forEach(function(ConsumerRecord cRecord) {
         string receivedMsg = checkpanic 'string:fromBytes(cRecord.value);
         receivedValue += checkpanic int:fromString(receivedMsg);
+        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        receivedKey += checkpanic int:fromString(receivedKeyString);
     });
-    test:assertEquals(receivedValue, 6);
+    test:assertEquals(receivedValue, 30);
+    test:assertEquals(receivedKey, 6);
     check consumer->close();
 }
 
 @test:Config {enable: true}
 function floatProduceTest() returns error? {
     string topic = "float-produce-test-topic";
-    check producer->send({topic, value: 1.2});
-    check producer->send({topic, value: 2.6});
-    check producer->send({topic, value: 3.7});
+    FloatProducerRecord producerRecord = {
+        topic,
+        'key: 100.9,
+        value: 100.9
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -61,20 +155,29 @@ function floatProduceTest() returns error? {
     test:assertEquals(consumerRecords.length(), 3);
 
     float receivedValue = 0;
+    float receivedKey = 0;
     consumerRecords.forEach(function(ConsumerRecord cRecord) {
         string receivedMsg = checkpanic 'string:fromBytes(cRecord.value);
-        receivedValue += checkpanic float:fromString(receivedMsg);
+        receivedValue = checkpanic float:fromString(receivedMsg);
+        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        receivedKey = checkpanic float:fromString(receivedKeyString);
     });
-    test:assertEquals(receivedValue, 7.5);
+    test:assertEquals(receivedValue, 100.9);
+    test:assertEquals(receivedKey, 100.9);
     check consumer->close();
 }
 
 @test:Config {enable: true}
 function decimalProduceTest() returns error? {
     string topic = "decimal-produce-test-topic";
-    check producer->send({topic, value: 1.7d});
-    check producer->send({topic, value: 2.4d});
-    check producer->send({topic, value: 0.9d});
+    DecimalProducerRecord producerRecord = {
+        topic,
+        'key: 2.3d,
+        value: 10.3d
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -87,20 +190,29 @@ function decimalProduceTest() returns error? {
     test:assertEquals(consumerRecords.length(), 3);
 
     decimal receivedValue = 0;
+    decimal receivedKey = 0;
     consumerRecords.forEach(function(ConsumerRecord cRecord) {
         string receivedMsg = checkpanic 'string:fromBytes(cRecord.value);
         receivedValue += checkpanic decimal:fromString(receivedMsg);
+        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        receivedKey += checkpanic decimal:fromString(receivedKeyString);
     });
-    test:assertEquals(receivedValue, 5.0d);
+    test:assertEquals(receivedValue, 30.9d);
+    test:assertEquals(receivedKey, 6.9d);
     check consumer->close();
 }
 
 @test:Config {enable: true}
 function booleanProduceTest() returns error? {
     string topic = "boolean-produce-test-topic";
-    check producer->send({topic, value: true});
-    check producer->send({topic, value: true});
-    check producer->send({topic, value: true});
+    BooleanProducerRecord producerRecord = {
+        topic,
+        'key: true,
+        value: true
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -113,19 +225,27 @@ function booleanProduceTest() returns error? {
     test:assertEquals(consumerRecords.length(), 3);
 
     string receivedValue = "false";
+    string receivedKey = "";
     consumerRecords.forEach(function(ConsumerRecord cRecord) {
         receivedValue = checkpanic 'string:fromBytes(cRecord.value);
+        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
     });
     test:assertEquals(receivedValue, "true");
+    test:assertEquals(receivedKey, "true");
     check consumer->close();
 }
 
 @test:Config {enable: true}
 function stringProduceTest() returns error? {
     string topic = "string-produce-test-topic";
-    check producer->send({topic, value: TEST_MESSAGE});
-    check producer->send({topic, value: TEST_MESSAGE});
-    check producer->send({topic, value: TEST_MESSAGE});
+    StringProducerRecord producerRecord = {
+        topic,
+        'key: TEST_KEY,
+        value: TEST_MESSAGE
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -138,10 +258,13 @@ function stringProduceTest() returns error? {
     test:assertEquals(consumerRecords.length(), 3);
 
     string receivedValue = "";
+    string receivedKey = "";
     consumerRecords.forEach(function(ConsumerRecord cRecord) {
-        receivedValue += checkpanic 'string:fromBytes(cRecord.value);
+        receivedValue = checkpanic 'string:fromBytes(cRecord.value);
+        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
     });
-    test:assertEquals(receivedValue, TEST_MESSAGE + TEST_MESSAGE + TEST_MESSAGE);
+    test:assertEquals(receivedValue, TEST_MESSAGE);
+    test:assertEquals(receivedKey, TEST_KEY);
     check consumer->close();
 }
 
@@ -149,9 +272,14 @@ function stringProduceTest() returns error? {
 function xmlProduceTest() returns error? {
     string topic = "xml-produce-test-topic";
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
-    check producer->send({topic, value: xmlData});
-    check producer->send({topic, value: xmlData});
-    check producer->send({topic, value: xmlData});
+    XmlProducerRecord producerRecord = {
+        topic,
+        'key: TEST_KEY,
+        value: xmlData
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -164,19 +292,26 @@ function xmlProduceTest() returns error? {
     test:assertEquals(consumerRecords.length(), 3);
 
     string[] receivedValues = [];
+    string receivedKey = "";
     consumerRecords.forEach(function(ConsumerRecord cRecord) {
         receivedValues.push(checkpanic 'string:fromBytes(cRecord.value));
+        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
     });
     test:assertEquals(receivedValues, [xmlData.toString(), xmlData.toString(), xmlData.toString()]);
+    test:assertEquals(receivedKey, TEST_KEY);
     check consumer->close();
 }
 
 @test:Config {enable: true}
 function recordProduceTest() returns error? {
     string topic = "record-produce-test-topic";
-    check producer->send({topic, value: personRecord1});
-    check producer->send({topic, value: personRecord1});
-    check producer->send({topic, value: personRecord1});
+    PersonProducerRecord producerRecord = {
+        topic,
+        value: personRecord1
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -200,9 +335,13 @@ function recordProduceTest() returns error? {
 @test:Config {enable: true}
 function mapProduceTest() returns error? {
     string topic = "map-produce-test-topic";
-    check producer->send({topic, value: personMap});
-    check producer->send({topic, value: personMap});
-    check producer->send({topic, value: personMap});
+    MapProducerRecord producerRecord = {
+        topic,
+        value: personMap
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -228,9 +367,13 @@ function tableProduceTest() returns error? {
     string topic = "table-produce-test-topic";
     table<Person> personMapTable = table [];
     personMapTable.add(personRecord1);
-    check producer->send({topic, value: personMapTable});
-    check producer->send({topic, value: personMapTable});
-    check producer->send({topic, value: personMapTable});
+    TableProducerRecord producerRecord = {
+        topic,
+        value: personMapTable
+    };
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
+    check producer->send(producerRecord);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],

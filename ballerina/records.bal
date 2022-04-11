@@ -198,11 +198,25 @@ public type ConsumerRecord record {|
     PartitionOffset offset;
 |};
 
+# Type related to anydata consumer record.
+#
+# + key - Key that is included in the record
+# + value - Anydata record content
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + offset - Topic partition position in which the consumed record is stored
 public type AnydataConsumerRecord record {|
     anydata key?;
     anydata value;
     int timestamp?;
     PartitionOffset offset?;
+|};
+
+# Subtype related to `kafka:AnydataConsumerRecord` record.
+#
+# + value - Record content in bytes
+public type BytesConsumerRecord record {|
+    *AnydataConsumerRecord;
+    byte[] value;
 |};
 
 # Details related to the producer record.
@@ -220,12 +234,27 @@ public type ProducerRecord record {|
     int partition?;
 |};
 
+# Details related to the anydata producer record.
+#
+# + topic - Topic to which the record will be appended
+# + key - Key that is included in the record
+# + value - Anydata record content
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + partition - Partition to which the record should be sent
 public type AnydataProducerRecord record {|
     string topic;
     anydata key?;
     anydata value;
     int timestamp?;
     int partition?;
+|};
+
+# Subtype related to `kafka:AnydataProducerRecord` record.
+#
+# + value - Record content in bytes
+public type BytesProducerRecord record {|
+    *AnydataProducerRecord;
+    byte[] value;
 |};
 
 // Producer-related records

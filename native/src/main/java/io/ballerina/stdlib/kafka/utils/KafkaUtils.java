@@ -24,8 +24,10 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.Field;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
@@ -75,6 +77,8 @@ import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_VALUE;
 
 /**
  * Utility class for Kafka Connector Implementation.
@@ -578,14 +582,22 @@ public class KafkaUtils {
         return ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, offset);
     }
 
-    public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, String keyType,
-                                                                   String valueType) {
+    public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, RecordType recordType) {
         Object key = null;
+        Map<String, Field> fieldMap = recordType.getFields();
+        Type keyType = fieldMap.get(KAFKA_RECORD_KEY).getFieldType();
+        Type valueType = fieldMap.get(KAFKA_RECORD_VALUE).getFieldType();
         if (Objects.nonNull(record.key())) {
-            key = getBValues(record.key(), keyType);
+            key = getValueWithIntendedType(keyType, (byte[]) record.key());
+            if (key instanceof BError) {
+                throw (BError) key;
+            }
         }
 
-        Object value = getBValues(record.value(), valueType);
+        Object value = getValueWithIntendedType(valueType, (byte[]) record.value());
+        if (value instanceof BError) {
+            throw (BError) value;
+        }
         Object[] fields = new Object[4];
         fields[0] = key;
         fields[1] = value;
@@ -593,41 +605,40 @@ public class KafkaUtils {
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                                                                               record.partition());
         fields[3] = ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, record.offset());
-        return ValueCreator.createRecordValue(getConsumerRecord(), fields);
+        return ValueCreator.createRecordValue(ValueCreator.createRecordValue(recordType), fields);
     }
 
-    public static BArray getDataWithIntendedType(Type type, ConsumerRecords records) {
+    public static Object getValueWithIntendedType(Type type, byte[] value) {
+        String strValue = new String(value, StandardCharsets.UTF_8);
+        try {
+            switch (type.getTag()) {
+                case STRING_TAG:
+                    return StringUtils.fromString(strValue);
+                case XML_TAG:
+                    return XmlUtils.parse(strValue);
+                case ANYDATA_TAG:
+                    return ValueCreator.createArrayValue(value);
+                case RECORD_TYPE_TAG:
+                    return CloneWithType.convert(type, JsonUtils.parse(strValue));
+                case ARRAY_TAG:
+                    if (((ArrayType) type).getElementType().getTag() == BYTE_TAG) {
+                        return ValueCreator.createArrayValue(value);
+                    }
+                    /*-fallthrough*/
+                default:
+                    BTypedesc typeDesc = ValueCreator.createTypedescValue(type);
+                    return FromJsonWithType.fromJsonWithType(JsonUtils.parse(strValue), typeDesc);
+            }
+        } catch (BError bError) {
+            throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", bError.getMessage()));
+        }
+    }
+
+    public static BArray getValueWithIntendedType(Type type, ConsumerRecords records) {
         Type intendedType = getIntendedType(type);
         BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(intendedType, type.isReadOnly()));
         for (Object record: records) {
-            String strValue = new String(((byte[]) ((ConsumerRecord) record).value()), StandardCharsets.UTF_8);
-            try {
-                switch (intendedType.getTag()) {
-                    case STRING_TAG:
-                        bArray.append(StringUtils.fromString(strValue));
-                        break;
-                    case XML_TAG:
-                        bArray.append(XmlUtils.parse(strValue));
-                        break;
-                    case ANYDATA_TAG:
-                        bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
-                        break;
-                    case RECORD_TYPE_TAG:
-                        bArray.append(CloneWithType.convert(intendedType, JsonUtils.parse(strValue)));
-                        break;
-                    case ARRAY_TAG:
-                        if (((ArrayType) intendedType).getElementType().getTag() == BYTE_TAG) {
-                            bArray.append(ValueCreator.createArrayValue((byte[]) ((ConsumerRecord) record).value()));
-                            break;
-                        }
-                        /*-fallthrough*/
-                    default:
-                        BTypedesc typeDesc = ValueCreator.createTypedescValue(intendedType);
-                        bArray.append(FromJsonWithType.fromJsonWithType(JsonUtils.parse(strValue), typeDesc));
-                }
-            } catch (BError exception) {
-                throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", exception.getMessage()));
-            }
+            bArray.append(getValueWithIntendedType(intendedType, (byte[]) ((ConsumerRecord) record).value()));
         }
         return bArray;
     }
@@ -637,21 +648,6 @@ public class KafkaUtils {
             return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
         }
         return ((ArrayType) type).getElementType();
-    }
-
-    private static Object getBValues(Object value, String type) {
-        if (KafkaConstants.SERDES_BYTE_ARRAY.equals(type)) {
-            if (value instanceof byte[]) {
-                return ValueCreator.createArrayValue((byte[]) value);
-            } else {
-                throw createKafkaError("Invalid type - expected: byte[]");
-            }
-        }
-        throw createKafkaError("Unexpected type found for consumer record");
-    }
-
-    public static BMap<BString, Object> getConsumerRecord() {
-        return createKafkaRecord(KafkaConstants.CONSUMER_RECORD_STRUCT_NAME);
     }
 
     public static BMap<BString, Object> getPartitionOffsetRecord() {

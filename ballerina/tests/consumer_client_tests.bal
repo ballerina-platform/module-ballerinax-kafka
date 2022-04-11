@@ -21,6 +21,7 @@ import ballerina/crypto;
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
 const TEST_MESSAGE_III = "Hello, Kafka";
+const TEST_KEY = "kafka-key";
 const EMPTY_MESSAGE = "";
 
 const decimal TIMEOUT_DURATION = 5;
@@ -960,7 +961,7 @@ function saslConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function saslConsumerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-consumer-incorrect-credentials-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -990,7 +991,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function consumerAdditionalPropertiesTest() returns error? {
     string topic = "consumer-additional-properties-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1391,6 +1392,6 @@ function invalidSecurityProtocolConsumerTest() returns error? {
     }
 }
 
-function sendMessage(anydata message, string topic) returns error? {
-    return producer->send({ topic: topic, value: message });
+function sendMessage(anydata message, string topic, anydata? key = ()) returns error? {
+    return producer->send({ topic: topic, value: message, key });
 }

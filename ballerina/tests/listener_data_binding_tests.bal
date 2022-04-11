@@ -55,344 +55,87 @@ map<Person> personMap = {
 json jsonData = personMap.toJson();
 
 int receivedIntValue = 0;
-boolean receivedBoolValue = false;
+float receivedFloatValue = 0;
+decimal receivedDecimalValue = 0;
+boolean receivedBooleanValue = false;
 string receivedStringValue = "";
-decimal receivedDecimalValue = 0d;
-float receivedfloatValue = 0;
-xml[] receivedXmlValues = [];
-json[] receivedJsonValues = [];
-map<Person>[] receivedMapValues = [];
-Person[] receivedPersonValues = [];
-table<Person>[] receivedTableValues = [];
+xml receivedXmlValue = xml ``;
+Person? receivedPersonValue = ();
+map<Person> receivedMapValue = {};
+table<Person> receivedTableValue = table [];
+json receivedJsonValue = {};
 boolean errorReceived = false;
 string errorMsg = "";
 
-@test:Config {enable: true}
-function intBindingListenerTest() returns error? {
-    string topic = "int-binding-listener-test-topic";
-    check sendMessage(1, topic);
-    check sendMessage(2, topic);
-    check sendMessage(3, topic);
-    check sendMessage(4, topic);
-    check sendMessage(5, topic);
+public type IntConsumerRecord record {|
+    int key?;
+    int value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-    Service intBindingService =
-    service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, int[] data) returns error? {
-            foreach int val in data {
-                receivedIntValue += val;
-                log:printInfo("Received int: " + val.toString());
-            }
-        }
-    };
+public type FloatConsumerRecord record {|
+    float key?;
+    float value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-01",
-        clientId: "data-binding-listener-01",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(intBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedIntValue, 15);
-}
+public type DecimalConsumerRecord record {|
+    decimal key?;
+    decimal value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-@test:Config {enable: true}
-function booleanBindingListenerTest() returns error? {
-    string topic = "boolean-binding-listener-test-topic";
-    check sendMessage(true, topic);
-    check sendMessage(true, topic);
-    check sendMessage(true, topic);
+public type BooleanConsumerRecord record {|
+    boolean key?;
+    boolean value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-    Service booleanBindingService =
-    service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, boolean[] data) returns error? {
-            foreach boolean value in data {
-                receivedBoolValue = value;
-                log:printInfo("Received boolean: " + value.toString());
-            }
-        }
-    };
+public type StringConsumerRecord record {|
+    string key?;
+    string value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-02",
-        clientId: "data-binding-listener-02",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(booleanBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedBoolValue, true);
-}
+public type PersonConsumerRecord record {|
+    byte[] key?;
+    Person value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-@test:Config {enable: true}
-function decimalBindingListenerTest() returns error? {
-    string topic = "decimal-binding-listener-test-topic";
-    check sendMessage(1.0d, topic);
-    check sendMessage(2.0d, topic);
-    check sendMessage(3.0d, topic);
+public type MapConsumerRecord record {|
+    byte[] key?;
+    map<Person> value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-    Service decimalBindingService =
-    service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, decimal[] data) returns error? {
-            foreach decimal value in data {
-                receivedDecimalValue += value;
-                log:printInfo("Received decimal: " + value.toString());
-            }
-        }
-    };
+public type XmlConsumerRecord record {|
+    xml key?;
+    xml value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-03",
-        clientId: "data-binding-listener-03",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(decimalBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedDecimalValue, 6.0d);
-}
+public type TableConsumerRecord record {|
+    string key?;
+    table<Person> value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
-@test:Config {enable: true}
-function stringBindingListenerTest() returns error? {
-    string topic = "string-binding-listener-test-topic";
-    check sendMessage(TEST_MESSAGE, topic);
-    check sendMessage(TEST_MESSAGE, topic);
-    check sendMessage(TEST_MESSAGE, topic);
-
-    Service decimalBindingService =
-    service object {
-        remote function onConsumerRecord(string[] data) returns error? {
-            foreach string value in data {
-                receivedStringValue += value;
-                log:printInfo("Received string: " + value.toString());
-            }
-        }
-    };
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-04",
-        clientId: "data-binding-listener-04",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(decimalBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedStringValue, TEST_MESSAGE + TEST_MESSAGE + TEST_MESSAGE);
-}
-
-@test:Config {enable: true}
-function floatBindingListenerTest() returns error? {
-    string topic = "float-binding-listener-test-topic";
-    check sendMessage(1.0, topic);
-    check sendMessage(2.0, topic);
-    check sendMessage(3.0, topic);
-
-    Service floatBindingService =
-    service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, float[] data) returns error? {
-            foreach float value in data {
-                receivedfloatValue += value;
-                log:printInfo("Received float: " + value.toString());
-            }
-        }
-    };
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-05",
-        clientId: "data-binding-listener-05",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(floatBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedfloatValue, 6.0);
-}
-
-@test:Config {enable: true}
-function xmlBindingListenerTest() returns error? {
-    string topic = "xml-binding-listener-test-topic";
-    xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
-    check sendMessage(xmlData, topic);
-    check sendMessage(xmlData, topic);
-    check sendMessage(xmlData, topic);
-
-    Service xmlBindingService =
-    service object {
-        remote function onConsumerRecord(Caller caller, xml[] data) returns error? {
-            foreach xml value in data {
-                receivedXmlValues.push(value);
-                log:printInfo("Received xml: " + value.toString());
-            }
-        }
-    };
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-06",
-        clientId: "data-binding-listener-06",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(xmlBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(5);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedXmlValues, [xmlData, xmlData, xmlData]);
-}
-
-@test:Config {enable: true}
-function recordBindingListenerTest() returns error? {
-    string topic = "record-binding-listener-test-topic";
-    check sendMessage(personRecord1, topic);
-    check sendMessage(personRecord1, topic);
-    check sendMessage(personRecord1, topic);
-
-    Service recordBindingService =
-    service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, Person[] data) returns error? {
-            foreach Person value in data {
-                receivedPersonValues.push(value);
-                log:printInfo("Received record: " + value.toString());
-            }
-        }
-    };
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-07",
-        clientId: "data-binding-listener-07",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(recordBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(5);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedPersonValues, [personRecord1, personRecord1, personRecord1]);
-}
-
-@test:Config {enable: true}
-function mapBindingListenerTest() returns error? {
-    string topic = "map-binding-listener-test-topic";
-    check sendMessage(personMap, topic);
-    check sendMessage(personMap, topic);
-    check sendMessage(personMap, topic);
-
-    Service mapBindingService =
-    service object {
-        remote function onConsumerRecord(map<Person>[] data) returns error? {
-            foreach map<Person> value in data {
-                receivedMapValues.push(value);
-                log:printInfo("Received map: " + value.toString());
-            }
-        }
-    };
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-08",
-        clientId: "data-binding-listener-08",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(mapBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(5);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedMapValues, [personMap, personMap, personMap]);
-}
-
-@test:Config {enable: true}
-function tableBindingListenerTest() returns error? {
-    string topic = "table-binding-listener-test-topic";
-    table<Person> personMapTable = table [];
-
-    personMapTable.add(personRecord1);
-    check sendMessage(personMapTable, topic);
-    check sendMessage(personMapTable, topic);
-    check sendMessage(personMapTable, topic);
-
-    Service tableBindingService =
-    service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, table<Person>[] data) returns error? {
-            foreach table<Person> value in data {
-                receivedTableValues.push(value);
-                log:printInfo("Received table: " + value.toString());
-            }
-        }
-    };
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-09",
-        clientId: "data-binding-listener-09",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(tableBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(5);
-    check dataBindingListener.gracefulStop();
-    table<Person>[] expectedValues = [personMapTable, personMapTable, personMapTable];
-    test:assertEquals(receivedTableValues, expectedValues);
-}
-
-@test:Config {enable: true}
-function jsonBindingListenerTest() returns error? {
-    string topic = "json-binding-listener-test-topic";
-    check sendMessage(jsonData, topic);
-    check sendMessage(jsonData, topic);
-    check sendMessage(jsonData, topic);
-
-    Service jsonBindingService =
-    service object {
-        remote function onConsumerRecord(Caller caller, json[] data) returns error? {
-            foreach json value in data {
-                receivedJsonValues.push(value);
-                log:printInfo("Received json: " + value.toString());
-            }
-        }
-    };
-
-    ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
-        offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-10",
-        clientId: "data-binding-listener-10",
-        pollingInterval: 1
-    };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(jsonBindingService);
-    check dataBindingListener.'start();
-    runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
-    test:assertEquals(receivedJsonValues, [jsonData, jsonData, jsonData]);
-}
+public type JsonConsumerRecord record {|
+    json key?;
+    json value;
+    int timestamp?;
+    PartitionOffset offset?;
+|};
 
 @test:Config {enable: true}
 function dataBindingErrorListenerTest() returns error? {
@@ -403,9 +146,9 @@ function dataBindingErrorListenerTest() returns error? {
 
     Service dataBindingErrorService =
     service object {
-        remote function onConsumerRecord(ConsumerRecord[] records, Caller caller, int[] data) returns error? {
-            foreach json value in data {
-                log:printInfo("Received json: " + value.toString());
+        remote function onConsumerRecord(XmlConsumerRecord[] records, Caller caller) returns error? {
+            foreach XmlConsumerRecord 'record in records {
+                log:printInfo("Received int record: " + 'record.toString());
                 errorReceived = false;
             }
         }
@@ -431,4 +174,360 @@ function dataBindingErrorListenerTest() returns error? {
     check dataBindingListener.gracefulStop();
     test:assertTrue(errorReceived);
     test:assertTrue(errorMsg.startsWith("Data binding failed: "));
+}
+
+@test:Config {enable: true}
+function intConsumerRecordBindingListenerTest() returns error? {
+    string topic = "int-consumer-record-listener-test-topic";
+    check sendMessage(1, topic);
+
+    Service intBindingService =
+    service object {
+        remote function onConsumerRecord(IntConsumerRecord[] records, Caller caller) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedIntValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-01",
+        clientId: "data-binding-listener-01",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(intBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(3);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedIntValue, 1);
+}
+
+@test:Config {enable: true}
+function floatConsumerRecordBindingListenerTest() returns error? {
+    string topic = "float-consumer-record-listener-test-topic";
+    check sendMessage(10.5, topic);
+
+    Service floatBindingService =
+    service object {
+        remote function onConsumerRecord(FloatConsumerRecord[] records, Caller caller) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedFloatValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-01",
+        clientId: "data-binding-listener-01",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(floatBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(3);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedFloatValue, 10.5);
+}
+
+@test:Config {enable: true}
+function decimalConsumerRecordBindingListenerTest() returns error? {
+    string topic = "decimal-consumer-record-listener-test-topic";
+    check sendMessage(98.5d, topic);
+
+    Service decimalBindingService =
+    service object {
+        remote function onConsumerRecord(DecimalConsumerRecord[] records, Caller caller) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedDecimalValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-01",
+        clientId: "data-binding-listener-01",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(decimalBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(3);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedDecimalValue, 98.5d);
+}
+
+@test:Config {enable: true}
+function booleanConsumerRecordBindingListenerTest() returns error? {
+    string topic = "int-consumer-record-listener-test-topic";
+    check sendMessage(true, topic);
+
+    Service booleanBindingService =
+    service object {
+        remote function onConsumerRecord(BooleanConsumerRecord[] records, Caller caller) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedBooleanValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-01",
+        clientId: "data-binding-listener-01",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(booleanBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(3);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedBooleanValue, true);
+}
+
+@test:Config {enable: true}
+function stringConsumerRecordListenerTest() returns error? {
+    string topic = "string-consumer-record-listener-test-topic";
+    check sendMessage(TEST_MESSAGE, topic);
+    check sendMessage(TEST_MESSAGE, topic);
+    check sendMessage(TEST_MESSAGE, topic);
+
+    Service stringBindingService =
+    service object {
+        remote function onConsumerRecord(StringConsumerRecord[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedStringValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-04",
+        clientId: "data-binding-listener-04",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(stringBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(3);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedStringValue, TEST_MESSAGE);
+}
+
+@test:Config {enable: true}
+function xmlConsumerRecordListenerTest() returns error? {
+    string topic = "xml-consumer-record-listener-test-topic";
+    xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
+    check sendMessage(xmlData, topic);
+    check sendMessage(xmlData, topic);
+    check sendMessage(xmlData, topic);
+
+    Service xmlBindingService =
+    service object {
+        remote function onConsumerRecord(Caller caller, XmlConsumerRecord[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedXmlValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-06",
+        clientId: "data-binding-listener-06",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(xmlBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(5);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedXmlValue, xmlData);
+}
+
+@test:Config {enable: true}
+function recordConsumerRecordListenerTest() returns error? {
+    string topic = "record-consumer-record-listener-test-topic";
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+
+    Service recordBindingService =
+    service object {
+        remote function onConsumerRecord(PersonConsumerRecord[] records, Caller caller) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedPersonValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-07",
+        clientId: "data-binding-listener-07",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(recordBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(5);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedPersonValue, personRecord1);
+}
+
+@test:Config {enable: true}
+function mapConsumerRecordListenerTest() returns error? {
+    string topic = "map-consumer-record-listener-test-topic";
+    check sendMessage(personMap, topic);
+    check sendMessage(personMap, topic);
+    check sendMessage(personMap, topic);
+
+    Service mapBindingService =
+    service object {
+        remote function onConsumerRecord(MapConsumerRecord[] records, Caller caller) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedMapValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-07",
+        clientId: "data-binding-listener-07",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(mapBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(5);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedMapValue, personMap);
+}
+
+@test:Config {enable: true}
+function tableConsumerRecordListenerTest() returns error? {
+    string topic = "table-consumer-record-listener-test-topic";
+    table<Person> personMapTable = table [];
+
+    personMapTable.add(personRecord1);
+    check sendMessage(personMapTable, topic);
+    check sendMessage(personMapTable, topic);
+    check sendMessage(personMapTable, topic);
+
+    Service tableBindingService =
+    service object {
+        remote function onConsumerRecord(TableConsumerRecord[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedTableValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-09",
+        clientId: "data-binding-listener-09",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(tableBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(5);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedTableValue, personMapTable);
+}
+
+@test:Config {enable: true}
+function jsonConsumerRecordListenerTest() returns error? {
+    string topic = "json-consumer-record-listener-test-topic";
+    check sendMessage(jsonData, topic);
+    check sendMessage(jsonData, topic);
+    check sendMessage(jsonData, topic);
+
+    Service jsonBindingService =
+    service object {
+        remote function onConsumerRecord(Caller caller, JsonConsumerRecord[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedJsonValue = records[i].value;
+                log:printInfo("Received record: " + records[i].toString());
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-10",
+        clientId: "data-binding-listener-10",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(jsonBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(3);
+    check dataBindingListener.gracefulStop();
+    test:assertEquals(receivedJsonValue, jsonData);
 }

@@ -278,11 +278,127 @@ function dataBindingErrorConsumerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
-    int[]|Error result = consumer->pollPayload(5);
+    xml[]|Error result = consumer->pollPayload(5);
     test:assertTrue(result is Error);
     if result is Error {
         log:printInfo(result.message());
         test:assertTrue(result.message().startsWith("Data binding failed"));
     }
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function stringConsumerRecordTest() returns error? {
+    string topic = "string-consumer-record-test-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    StringConsumerRecord[] records = check consumer->poll(5);
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(StringConsumerRecord value) {
+        test:assertEquals(value.value, TEST_MESSAGE);
+    });
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function intConsumerRecordTest() returns error? {
+    string topic = "int-consumer-record-test-topic";
+    check sendMessage(1.toString().toBytes(), topic);
+    check sendMessage(1.toString().toBytes(), topic);
+    check sendMessage(1.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    IntConsumerRecord[] records = check consumer->poll(5);
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(IntConsumerRecord value) {
+        test:assertEquals(value.value, 1);
+    });
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function xmlConsumerRecordTest() returns error? {
+    string topic = "xml-consumer-record-test-topic";
+    xml sendingValue = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+    check sendMessage(sendingValue.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    XmlConsumerRecord[] records = check consumer->poll(5);
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(XmlConsumerRecord value) {
+        test:assertEquals(value.value, sendingValue);
+    });
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function recordConsumerRecordTest() returns error? {
+    string topic = "record-consumer-record-test-topic";
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    PersonConsumerRecord[] records = check consumer->poll(5);
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(PersonConsumerRecord value) {
+        test:assertEquals(value.value, personRecord1);
+    });
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function jsonConsumerRecordTest() returns error? {
+    string topic = "json-consumer-record-test-topic";
+    check sendMessage(jsonData.toString().toBytes(), topic);
+    check sendMessage(jsonData.toString().toBytes(), topic);
+    check sendMessage(jsonData.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    JsonConsumerRecord[] records = check consumer->poll(5);
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(JsonConsumerRecord value) {
+        test:assertEquals(value.value, jsonData);
+    });
     check consumer->close();
 }

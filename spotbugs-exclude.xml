@@ -35,4 +35,9 @@
         <Method name="poll"/>
         <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE" />
     </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.utils.KafkaUtils" />
+        <Method name="getValueWithIntendedType"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST" />
+    </Match>
 </FindBugsFilter>

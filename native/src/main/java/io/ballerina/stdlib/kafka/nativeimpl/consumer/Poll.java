@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
@@ -33,7 +34,6 @@ import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
-import io.ballerina.stdlib.kafka.utils.KafkaConstants;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -46,9 +46,8 @@ import java.util.concurrent.ThreadFactory;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecord;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getDataWithIntendedType;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getMilliSeconds;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getValueWithIntendedType;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
 
 /**
@@ -63,16 +62,15 @@ public class Poll {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
+        RecordType recordType = (RecordType) ((ArrayType) bTypedesc.getDescribingType()).getElementType();
         executorService.execute(()-> {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
-                BArray consumerRecordsArray = ValueCreator.createArrayValue(
-                        TypeCreator.createArrayType(getConsumerRecord().getType()));
+                BArray consumerRecordsArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
                 ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
                 if (!recordsRetrieved.isEmpty()) {
                     for (Object record : recordsRetrieved) {
-                        BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record,
-                                KafkaConstants.DEFAULT_SER_DES_TYPE, KafkaConstants.DEFAULT_SER_DES_TYPE);
+                        BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record, recordType);
                         consumerRecordsArray.append(recordValue);
                     }
                 }
@@ -95,7 +93,7 @@ public class Poll {
                 ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
                 BArray dataArray = ValueCreator.createArrayValue((ArrayType) bTypedesc.getDescribingType());
                 if (!recordsRetrieved.isEmpty()) {
-                    dataArray = getDataWithIntendedType(bTypedesc.getDescribingType(), recordsRetrieved);
+                    dataArray = getValueWithIntendedType(bTypedesc.getDescribingType(), recordsRetrieved);
                 }
                 balFuture.complete(dataArray);
             } catch (BError bError) {
