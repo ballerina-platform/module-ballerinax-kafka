@@ -191,6 +191,7 @@ public type ConsumerConfiguration record {|
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + offset - Topic partition position in which the consumed record is stored
+@deprecated
 public type ConsumerRecord record {|
     byte[] key?;
     byte[] value;
@@ -226,10 +227,11 @@ public type BytesConsumerRecord record {|
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + partition - Partition to which the record should be sent
+@deprecated
 public type ProducerRecord record {|
     string topic;
     byte[] key?;
-    anydata value;
+    byte[] value;
     int timestamp?;
     int partition?;
 |};

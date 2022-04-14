@@ -254,6 +254,7 @@ public client isolated class Consumer {
     # ```
     #
     # + timeout - Polling time in seconds
+    # + T - Optional type description of the required data type
     # + return - Array of consumer records if executed successfully or else a `kafka:Error`
     isolated remote function poll(decimal timeout, typedesc<AnydataConsumerRecord[]> T = <>) returns T|Error =
     @java:Method {
