@@ -402,3 +402,26 @@ function jsonConsumerRecordTest() returns error? {
     });
     check consumer->close();
 }
+
+@test:Config {enable: true}
+function readonlyConsumerRecordTest() returns error? {
+    string topic = "readonly-consumer-record-test-topic";
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    PersonConsumerRecord[] & readonly records = check consumer->poll(5);
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(PersonConsumerRecord value) {
+        test:assertTrue(value.isReadOnly());
+    });
+    check consumer->close();
+}

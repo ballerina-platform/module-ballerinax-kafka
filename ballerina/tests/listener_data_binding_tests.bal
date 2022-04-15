@@ -66,6 +66,7 @@ table<Person> receivedTableValue = table [];
 json receivedJsonValue = {};
 boolean errorReceived = false;
 string errorMsg = "";
+boolean isReadonly = false;
 
 public type IntConsumerRecord record {|
     int key?;
@@ -530,4 +531,43 @@ function jsonConsumerRecordListenerTest() returns error? {
     runtime:sleep(3);
     check dataBindingListener.gracefulStop();
     test:assertEquals(receivedJsonValue, jsonData);
+}
+
+@test:Config {enable: false}
+function readonlyConsumerRecordListenerTest() returns error? {
+    string topic = "readonly-consumer-record-listener-test-topic";
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+
+    Service readonlyBindingService =
+    service object {
+        remote function onConsumerRecord(PersonConsumerRecord[] & readonly records, Caller caller) returns error? {
+            foreach PersonConsumerRecord rec in records {
+                if rec.isReadOnly() {
+                    isReadonly = true;
+                } else {
+                    isReadonly = false;
+                }
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-07",
+        clientId: "data-binding-listener-07",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(readonlyBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(5);
+    check dataBindingListener.gracefulStop();
+    test:assertTrue(isReadonly);
 }
