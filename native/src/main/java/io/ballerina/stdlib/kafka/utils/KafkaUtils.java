@@ -608,11 +608,24 @@ public class KafkaUtils {
         return ValueCreator.createRecordValue(ValueCreator.createRecordValue(recordType), fields);
     }
 
-    public static BArray getValuesWithIntendedType(Type type, ConsumerRecords records) {
-        Type intendedType = getIntendedType(type);
-        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(intendedType, type.isReadOnly()));
+    public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly) {
+        BArray consumerRecordsArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
+        for (Object record : records) {
+            consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType));
+        }
+        if (readonly) {
+            consumerRecordsArray.freezeDirect();
+        }
+        return consumerRecordsArray;
+    }
+
+    public static BArray getValuesWithIntendedType(ArrayType type, ConsumerRecords records) {
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(type.getElementType()));
         for (Object record: records) {
-            bArray.append(getValueWithIntendedType(intendedType, (byte[]) ((ConsumerRecord) record).value()));
+            bArray.append(getValueWithIntendedType(type.getElementType(), (byte[]) ((ConsumerRecord) record).value()));
+        }
+        if (type.isReadOnly()) {
+            bArray.freezeDirect();
         }
         return bArray;
     }
@@ -641,13 +654,6 @@ public class KafkaUtils {
         } catch (BError bError) {
             throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", bError.getMessage()));
         }
-    }
-
-    public static Type getIntendedType(Type type) {
-        if (type.getTag() == INTERSECTION_TAG) {
-            return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
-        }
-        return ((ArrayType) type).getElementType();
     }
 
     public static BMap<BString, Object> getPartitionOffsetRecord() {

@@ -21,16 +21,14 @@ package io.ballerina.stdlib.kafka.impl;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
-import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Parameter;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
-import io.ballerina.runtime.api.values.BArray;
-import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.ballerina.stdlib.kafka.api.KafkaListener;
@@ -40,13 +38,10 @@ import io.ballerina.stdlib.kafka.observability.KafkaObserverContext;
 import io.ballerina.stdlib.kafka.utils.KafkaConstants;
 import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import io.ballerina.stdlib.kafka.utils.ModuleUtils;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -60,8 +55,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_R
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getIntendedType;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
 
 /**
  * Kafka Connector Consumer for Ballerina.
@@ -167,7 +161,8 @@ public class KafkaListenerImpl implements KafkaListener {
                         throw KafkaUtils.createKafkaError("Invalid remote function signature");
                     }
                     consumerRecordsExists = true;
-                    arguments[index++] = getConsumerRecords(records, parameter);
+                    arguments[index++] = getConsumerRecords(records, (RecordType) getIntendedType(parameter.type),
+                            parameter.type.isReadOnly());
                     arguments[index++] = true;
                     break;
                 default:
@@ -186,16 +181,11 @@ public class KafkaListenerImpl implements KafkaListener {
         return caller;
     }
 
-    private BArray getConsumerRecords(ConsumerRecords records, Parameter parameter) {
-        RecordType recordType = (RecordType) getIntendedType(parameter.type);
-        List<BMap<BString, Object>> recordMapList = new ArrayList();
-        for (Object record : records) {
-            BMap<BString, Object> consumerRecord = populateConsumerRecord((ConsumerRecord) record, recordType);
-            recordMapList.add(consumerRecord);
+    private Type getIntendedType(Type type) {
+        if (type.getTag() == INTERSECTION_TAG) {
+            return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
         }
-        BArray consumerRecordsArray = ValueCreator.createArrayValue(recordMapList.toArray(),
-                TypeCreator.createArrayType(recordType, parameter.type.isReadOnly()));
-        return consumerRecordsArray;
+        return ((ArrayType) type).getElementType();
     }
 
     private static Optional<MethodType> getOnConsumerRecordMethod(BObject service) {

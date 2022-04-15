@@ -20,22 +20,19 @@ package io.ballerina.stdlib.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
-import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
-import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
 import io.ballerina.stdlib.kafka.utils.KafkaUtils;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
@@ -47,8 +44,8 @@ import java.util.concurrent.ThreadFactory;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getMilliSeconds;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateConsumerRecord;
 
 /**
  * Native function polls the broker to retrieve messages within given timeout.
@@ -62,19 +59,13 @@ public class Poll {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
         Future balFuture = env.markAsync();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
-        RecordType recordType = (RecordType) ((ArrayType) bTypedesc.getDescribingType()).getElementType();
+        RecordType recordType = getRecordType(bTypedesc);
         executorService.execute(()-> {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
-                BArray consumerRecordsArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
                 ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-                if (!recordsRetrieved.isEmpty()) {
-                    for (Object record : recordsRetrieved) {
-                        BMap<BString, Object> recordValue = populateConsumerRecord((ConsumerRecord) record, recordType);
-                        consumerRecordsArray.append(recordValue);
-                    }
-                }
-                balFuture.complete(consumerRecordsArray);
+                balFuture.complete(getConsumerRecords(recordsRetrieved, recordType,
+                        bTypedesc.getDescribingType().isReadOnly()));
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
@@ -91,9 +82,10 @@ public class Poll {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
                 ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-                BArray dataArray = ValueCreator.createArrayValue((ArrayType) bTypedesc.getDescribingType());
+                ArrayType arrayType = (ArrayType) bTypedesc.getDescribingType();
+                BArray dataArray = ValueCreator.createArrayValue(arrayType);
                 if (!recordsRetrieved.isEmpty()) {
-                    dataArray = KafkaUtils.getValuesWithIntendedType(bTypedesc.getDescribingType(), recordsRetrieved);
+                    dataArray = KafkaUtils.getValuesWithIntendedType(arrayType, recordsRetrieved);
                 }
                 balFuture.complete(dataArray);
             } catch (BError bError) {
@@ -105,6 +97,17 @@ public class Poll {
             }
         });
         return null;
+    }
+
+    private static RecordType getRecordType(BTypedesc bTypedesc) {
+        RecordType recordType;
+        if (bTypedesc.getDescribingType().isReadOnly()) {
+            recordType = (RecordType) ((IntersectionType) ((ArrayType) bTypedesc.getDescribingType())
+                    .getElementType()).getConstituentTypes().get(0);
+        } else {
+            recordType = (RecordType) ((ArrayType) bTypedesc.getDescribingType()).getElementType();
+        }
+        return recordType;
     }
 
     static class KafkaThreadFactory implements ThreadFactory {
