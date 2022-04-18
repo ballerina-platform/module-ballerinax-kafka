@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.kafka.impl;
 
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.stdlib.kafka.api.KafkaListener;
 import io.ballerina.stdlib.kafka.utils.KafkaConstants;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -103,7 +104,7 @@ public class KafkaRecordConsumer {
                                      + this.consumerId + " has received " + recordsRetrieved.count() + " records.");
             }
             processRetrievedRecords(recordsRetrieved);
-        } catch (KafkaException | IllegalStateException | IllegalArgumentException e) {
+        } catch (KafkaException | IllegalStateException | IllegalArgumentException | BError e) {
             this.kafkaListener.onError(e);
             // When un-recoverable exception is thrown we stop scheduling task to the executor.
             // Later at stopConsume() on KafkaRecordConsumer we close the consumer.

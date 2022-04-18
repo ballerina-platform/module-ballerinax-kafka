@@ -30,3 +30,13 @@ service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller) {
     }
 }
+
+service kafka:Service on kafkaListener {
+    remote function onConsumerRecord(readonly & int caller) {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    remote function onConsumerRecord(readonly & kafka:Caller caller) {
+    }
+}

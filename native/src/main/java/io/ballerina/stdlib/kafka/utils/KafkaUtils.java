@@ -24,34 +24,41 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.Field;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
+import org.ballerinalang.langlib.value.CloneWithType;
+import org.ballerinalang.langlib.value.FromJsonWithType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -61,12 +68,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
-import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
-import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
+import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
+import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
+import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
+import static io.ballerina.runtime.api.TypeTags.XML_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_VALUE;
 
 /**
  * Utility class for Kafka Connector Implementation.
@@ -74,51 +84,6 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CON
 public class KafkaUtils {
 
     private KafkaUtils() {
-    }
-
-    public static Object[] getResourceParameters(BObject service, BObject listener, ConsumerRecords records) {
-        Type[] parameterTypes = service.getType().getMethods()[0].getParameterTypes();
-        if (parameterTypes.length == 2) {
-            BObject caller =
-                    ValueCreator.createObjectValue(ModuleUtils.getModule(), KafkaConstants.CALLER_STRUCT_NAME);
-            KafkaConsumer consumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
-            Properties consumerProperties = (Properties) listener.getNativeData(NATIVE_CONSUMER_CONFIG);
-            caller.addNativeData(NATIVE_CONSUMER, consumer);
-            caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
-            if (parameterTypes[0].getTag() == OBJECT_TYPE_TAG && parameterTypes[1].getTag() == ARRAY_TAG) {
-                return new Object[]{caller, true, getConsumerRecords(records, false), true};
-            } else if (parameterTypes[0].getTag() == ARRAY_TAG && parameterTypes[1].getTag() == OBJECT_TYPE_TAG) {
-                return new Object[]{getConsumerRecords(records, false), true, caller, true};
-            } else if (parameterTypes[0].getTag() == OBJECT_TYPE_TAG
-                    && parameterTypes[1].getTag() == INTERSECTION_TAG) {
-                return new Object[]{caller, true, getConsumerRecords(records, true), true};
-            } else if (parameterTypes[0].getTag() == INTERSECTION_TAG
-                    && parameterTypes[1].getTag() == OBJECT_TYPE_TAG) {
-                return new Object[]{getConsumerRecords(records, true), true, caller, true};
-            } else {
-                throw KafkaUtils.createKafkaError("Invalid remote function signature");
-            }
-        } else if (parameterTypes.length == 1 && parameterTypes[0].getTag() == ARRAY_TAG) {
-            return new Object[]{getConsumerRecords(records, false), true};
-        } else if (parameterTypes.length == 1 && parameterTypes[0].getTag() == INTERSECTION_TAG) {
-            return new Object[]{getConsumerRecords(records, true), true};
-        } else {
-            throw KafkaUtils.createKafkaError("Invalid remote function signature");
-        }
-    }
-
-    private static BArray getConsumerRecords(ConsumerRecords records, boolean readOnly) {
-        String keyType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-        String valueType = KafkaConstants.DEFAULT_SER_DES_TYPE;
-        List<BMap<BString, Object>> recordMapList = new ArrayList();
-        for (Object record : records) {
-            BMap<BString, Object> consumerRecord = populateConsumerRecord(
-                    (ConsumerRecord) record, keyType, valueType);
-            recordMapList.add(consumerRecord);
-        }
-        BArray consumerRecordsArray = ValueCreator.createArrayValue(recordMapList.toArray(),
-                TypeCreator.createArrayType(getConsumerRecord().getType(), readOnly));
-        return consumerRecordsArray;
     }
 
     public static Properties processKafkaConsumerConfig(Object bootStrapServers, BMap<BString, Object> configurations) {
@@ -615,14 +580,22 @@ public class KafkaUtils {
         return ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, offset);
     }
 
-    public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, String keyType,
-                                                                   String valueType) {
+    public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, RecordType recordType) {
         Object key = null;
+        Map<String, Field> fieldMap = recordType.getFields();
+        Type keyType = fieldMap.get(KAFKA_RECORD_KEY).getFieldType();
+        Type valueType = fieldMap.get(KAFKA_RECORD_VALUE).getFieldType();
         if (Objects.nonNull(record.key())) {
-            key = getBValues(record.key(), keyType);
+            key = getValueWithIntendedType(keyType, (byte[]) record.key());
+            if (key instanceof BError) {
+                throw (BError) key;
+            }
         }
 
-        Object value = getBValues(record.value(), valueType);
+        Object value = getValueWithIntendedType(valueType, (byte[]) record.value());
+        if (value instanceof BError) {
+            throw (BError) value;
+        }
         Object[] fields = new Object[4];
         fields[0] = key;
         fields[1] = value;
@@ -630,26 +603,55 @@ public class KafkaUtils {
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                                                                               record.partition());
         fields[3] = ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, record.offset());
-        return ValueCreator.createRecordValue(getConsumerRecord(), fields);
+        return ValueCreator.createRecordValue(ValueCreator.createRecordValue(recordType), fields);
     }
 
-    private static Object getBValues(Object value, String type) {
-        if (KafkaConstants.SERDES_BYTE_ARRAY.equals(type)) {
-            if (value instanceof byte[]) {
-                return ValueCreator.createArrayValue((byte[]) value);
-            } else {
-                throw createKafkaError("Invalid type - expected: byte[]");
-            }
+    public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly) {
+        BArray consumerRecordsArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
+        for (Object record : records) {
+            consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType));
         }
-        throw createKafkaError("Unexpected type found for consumer record");
+        if (readonly) {
+            consumerRecordsArray.freezeDirect();
+        }
+        return consumerRecordsArray;
     }
 
-    public static BMap<BString, Object> getConsumerRecord() {
-        return createKafkaRecord(KafkaConstants.CONSUMER_RECORD_STRUCT_NAME);
+    public static BArray getValuesWithIntendedType(ArrayType type, ConsumerRecords records) {
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(type.getElementType()));
+        for (Object record: records) {
+            bArray.append(getValueWithIntendedType(type.getElementType(), (byte[]) ((ConsumerRecord) record).value()));
+        }
+        if (type.isReadOnly()) {
+            bArray.freezeDirect();
+        }
+        return bArray;
     }
 
-    public static BMap<BString, Object> getAvroGenericRecord() {
-        return createKafkaRecord(KafkaConstants.AVRO_GENERIC_RECORD_NAME);
+    public static Object getValueWithIntendedType(Type type, byte[] value) {
+        String strValue = new String(value, StandardCharsets.UTF_8);
+        try {
+            switch (type.getTag()) {
+                case STRING_TAG:
+                    return StringUtils.fromString(strValue);
+                case XML_TAG:
+                    return XmlUtils.parse(strValue);
+                case ANYDATA_TAG:
+                    return ValueCreator.createArrayValue(value);
+                case RECORD_TYPE_TAG:
+                    return CloneWithType.convert(type, JsonUtils.parse(strValue));
+                case ARRAY_TAG:
+                    if (((ArrayType) type).getElementType().getTag() == BYTE_TAG) {
+                        return ValueCreator.createArrayValue(value);
+                    }
+                    /*-fallthrough*/
+                default:
+                    BTypedesc typeDesc = ValueCreator.createTypedescValue(type);
+                    return FromJsonWithType.fromJsonWithType(JsonUtils.parse(strValue), typeDesc);
+            }
+        } catch (BError bError) {
+            throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", bError.getMessage()));
+        }
     }
 
     public static BMap<BString, Object> getPartitionOffsetRecord() {

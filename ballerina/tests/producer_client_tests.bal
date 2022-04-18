@@ -21,7 +21,7 @@ import ballerina/crypto;
 
 string MESSAGE_KEY = "TEST-KEY";
 
-@test:Config{}
+@test:Config{enable: true}
 function producerInitTest() returns error? {
     ProducerConfiguration producerConfiguration1 = {
         clientId: "test-producer-02",
@@ -71,7 +71,7 @@ function producerInitTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function producerSendStringTest() returns error? {
     string topic = "send-string-test-topic";
     Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
@@ -96,7 +96,7 @@ function producerSendStringTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function producerKeyTypeMismatchErrorTest() returns error? {
     string topic = "key-type-mismatch-error-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
@@ -112,6 +112,7 @@ function producerKeyTypeMismatchErrorTest() returns error? {
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [producerSendStringTest]
 }
 function producerCloseTest() returns error? {
@@ -131,7 +132,7 @@ function producerCloseTest() returns error? {
     check producer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function producerFlushTest() returns error? {
     string topic = "producer-flush-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
@@ -151,7 +152,7 @@ function producerFlushTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function producerGetTopicPartitionsTest() returns error? {
     string topic = "get-topic-partitions-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
@@ -160,7 +161,7 @@ function producerGetTopicPartitionsTest() returns error? {
     check producer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function producerGetTopicPartitionsErrorTest() returns error? {
     string topic = "get-topic-partitions-error-test-topic";
     Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
@@ -175,7 +176,7 @@ function producerGetTopicPartitionsErrorTest() returns error? {
     check producer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function transactionalProducerTest() returns error? {
     string topic = "transactional-producer-test-topic";
     ProducerConfiguration producerConfigs = {
@@ -211,7 +212,7 @@ function transactionalProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function transactionalProducerWithAbortTest() returns error? {
     string topic = "rollback-producer-test-topic";
     ProducerConfiguration producerConfigs = {
@@ -264,7 +265,7 @@ isolated function failTransaction() returns error {
     return error("Fail!");
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function saslProducerTest() returns error? {
     string topic = "sasl-producer-test-topic";
 
@@ -296,7 +297,7 @@ function saslProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function saslProducerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
     AuthenticationConfiguration invalidAuthConfig = {
@@ -335,7 +336,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function producerAdditionalPropertiesTest() returns error? {
     string topic = "producer-additional-properties-test-topic";
     map<string> propertyMap = {
@@ -369,7 +370,7 @@ function producerAdditionalPropertiesTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslProducerTest() returns error? {
     string topic = "ssl-producer-test-topic";
 
@@ -398,7 +399,7 @@ function sslProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslCertKeyProducerTest() returns error? {
     string topic = "ssl-cert-key-producer-test-topic";
 
@@ -440,7 +441,7 @@ function sslCertKeyProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslCertOnlyProducerTest() returns error? {
     string topic = "ssl-cert-only-producer-test-topic";
 
@@ -476,7 +477,7 @@ function sslCertOnlyProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function SSLWithSASLAuthProducerTest() returns error? {
     string topic = "ssl-with-sasl-auth-producer-test-topic";
 
@@ -546,7 +547,7 @@ function SSLWithSASLAuthProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function SASLOnSSLEndpointProducerTest() returns error? {
     string topic = "sasl-on-ssl-endpoint-producer-test-topic";
 
@@ -569,7 +570,7 @@ function SASLOnSSLEndpointProducerTest() returns error? {
     check producer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function operationsOnClosedProducerTest() returns error? {
     string topic = "operations-on-closed-producer";
     ProducerConfiguration producerConfiguration = {
@@ -586,7 +587,7 @@ function operationsOnClosedProducerTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function producerAuthWithoutSecurityConfigsTest() returns error? {
     string topic = "producer-auth-without-security-configs-test-topic";
 
@@ -613,7 +614,7 @@ function producerAuthWithoutSecurityConfigsTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectStoresTest() returns error? {
     string topic = "ssl-incorrect-stores-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -654,7 +655,7 @@ function sslIncorrectStoresTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectMasterPasswordTest() returns error? {
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
@@ -693,7 +694,7 @@ function sslIncorrectMasterPasswordTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectCertPathTest() returns error? {
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,

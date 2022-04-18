@@ -21,6 +21,7 @@ import ballerina/crypto;
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
 const TEST_MESSAGE_III = "Hello, Kafka";
+const TEST_KEY = "kafka-key";
 const EMPTY_MESSAGE = "";
 
 const decimal TIMEOUT_DURATION = 5;
@@ -98,7 +99,7 @@ ProducerConfiguration producerConfiguration = {
 };
 Producer producer = check new (DEFAULT_URL, producerConfiguration);
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerCloseTest() returns error? {
     string topic = "close-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -109,7 +110,7 @@ function consumerCloseTest() returns error? {
         clientId: "test-consumer-11"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close();
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
     ConsumerRecord[]|Error result = consumer->poll(5);
@@ -120,7 +121,7 @@ function consumerCloseTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerCloseWithDurationTest() returns error? {
     string topic = "close-with-duration-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -130,7 +131,7 @@ function consumerCloseWithDurationTest() returns error? {
         clientId: "test-consumer-12"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close(TIMEOUT_DURATION);
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
     ConsumerRecord[]|Error result = consumer->poll(5);
@@ -141,7 +142,7 @@ function consumerCloseWithDurationTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerCloseWithDefaultTimeoutTest() returns error? {
     string topic = "close-with-default-timeout-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -152,7 +153,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close();
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
     ConsumerRecord[]|Error result = consumer->poll(5);
@@ -163,7 +164,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerConfigTest() returns error? {
     string topic = "consumer-config-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -183,7 +184,7 @@ function consumerConfigTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerFunctionsTest() returns error? {
     string topic = "consumer-functions-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -202,7 +203,7 @@ function consumerFunctionsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerSeekTest() returns error? {
     string topic = "consumer-seek-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -241,7 +242,7 @@ function consumerSeekTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerSeekToBeginningTest() returns error? {
     string topic = "consumer-seek-to-beginning-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -273,7 +274,7 @@ function consumerSeekToBeginningTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerSeekToEndTest() returns error? {
     string topic = "consumer-seek-to-end-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -306,7 +307,7 @@ function consumerSeekToEndTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerSeekToNegativeValueTest() returns error? {
     string topic = "consumer-seek-negative-value-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -335,6 +336,7 @@ function consumerSeekToNegativeValueTest() returns error? {
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerPositionOffsetsTest() returns error? {
@@ -354,7 +356,7 @@ function consumerPositionOffsetsTest() returns error? {
     test:assertEquals(partitionOffsetBefore, 0, "Expected: 0. Received: " + partitionOffsetBefore.toString());
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     int partitionOffsetAfter = check consumer->getPositionOffset(topicPartition, TIMEOUT_DURATION);
     test:assertEquals(partitionOffsetAfter, 2, "Expected: 2. Received: " + partitionOffsetAfter.toString());
     check consumer->close();
@@ -367,13 +369,14 @@ function consumerPositionOffsetsTest() returns error? {
     consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topicPartition]);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     partitionOffsetAfter = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(partitionOffsetAfter, 3, "Expected: 3. Received: " + partitionOffsetAfter.toString());
     check consumer->close();
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerBeginningOffsetsTest() returns error? {
@@ -393,11 +396,11 @@ function consumerBeginningOffsetsTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topic1Partition, topic2Partition]);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     PartitionOffset[] partitionEndOffsets = check consumer->getBeginningOffsets([topic1Partition, topic2Partition]);
     test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     partitionEndOffsets = check consumer->getBeginningOffsets([topic1Partition, topic2Partition], TIMEOUT_DURATION);
     test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
@@ -410,7 +413,7 @@ function consumerBeginningOffsetsTest() returns error? {
     };
     consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topic1Partition, topic2Partition]);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     partitionEndOffsets = check consumer->getBeginningOffsets([topic1Partition, topic2Partition]);
     test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
@@ -426,6 +429,7 @@ function consumerBeginningOffsetsTest() returns error? {
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerEndOffsetsTest() returns error? {
@@ -475,7 +479,7 @@ function consumerEndOffsetsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerTopicPartitionsTest() returns error? {
     string topic1 = "consumer-topic-partitions-test-topic-1";
     string topic2 = "consumer-topic-partitions-test-topic-2";
@@ -504,7 +508,7 @@ function consumerTopicPartitionsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerPauseResumePartitionTest() returns error? {
     string topic = "consumer-pause-resume-partition-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -536,7 +540,7 @@ function consumerPauseResumePartitionTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerPauseResumePartitionErrorTest() returns error? {
     string topic1 = "consumer-pause-resume-partition-error-test-topic-1";
     string topic2 = "consumer-pause-resume-partition-error-test-topic-2";
@@ -578,7 +582,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerAssignToEmptyTopicTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -600,7 +604,7 @@ function consumerAssignToEmptyTopicTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerGetAssignedPartitionsTest() returns error? {
     string topic = "consumer-assigned-partitions-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -622,6 +626,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeUnsubscribeTest() returns error? {
@@ -643,6 +648,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
 }
 function consumerSubscribeTest() returns error? {
@@ -652,17 +658,17 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 34);
+    test:assertEquals(availableTopics.length(), 37);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
-    _ = check consumer->poll(1); // Polling to force-update the metadata
+    ConsumerRecord[] _ = check consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.length(), 11);
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscribe-closed-consumer-group",
@@ -679,7 +685,7 @@ function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerSubscribeToEmptyTopicTest() returns error? {
     string topic = "consumer-subscribe-topic";
     Consumer consumer = check new (DEFAULT_URL, {
@@ -705,7 +711,7 @@ function consumerSubscribeToEmptyTopicTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerTopicsAvailableWithTimeoutTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-topics-available-timeout-test-group-1",
@@ -713,7 +719,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 36);
+    test:assertEquals(availableTopics.length(), 39);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -723,11 +729,12 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 36);
+    test:assertEquals(availableTopics.length(), 39);
     check consumer->close();
 }
 
 @test:Config {
+    enable: true,
     dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeErrorTest() returns error? {
@@ -746,7 +753,7 @@ function consumerSubscribeErrorTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function manualCommitTest() returns error? {
     string topic = "manual-commit-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -763,7 +770,7 @@ function manualCommitTest() returns error? {
         check sendMessage(count.toString().toBytes(), topic);
         count += 1;
     }
-    _ = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     TopicPartition topicPartition = {
         topic: topic,
         partition: 0
@@ -790,7 +797,7 @@ function manualCommitTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function manualCommitWithDurationTest() returns error? {
     string topic = "manual-commit-with-duration-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -801,7 +808,7 @@ function manualCommitWithDurationTest() returns error? {
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    _ = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     int manualCommitOffset = 5;
     TopicPartition topicPartition = {
         topic: topic,
@@ -820,7 +827,7 @@ function manualCommitWithDurationTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function manualCommitWithDefaultTimeoutTest() returns error? {
     string topic = "manual-commit-with-default-timeout-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -832,7 +839,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    _ = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     int manualCommitOffset = 5;
     TopicPartition topicPartition = {
         topic: topic,
@@ -851,7 +858,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function nonExistingTopicPartitionOffsetsTest() returns error? {
     string existingTopic = "existing-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -875,7 +882,7 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     string topic = "operations-with-received-topic-partitions-test-topic-7";
     ConsumerConfiguration consumerConfiguration = {
@@ -885,7 +892,7 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
         clientId: "test-consumer-51"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    _ = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
     TopicPartition[] partitions = check consumer->getAssignment();
     check consumer->unsubscribe();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -934,7 +941,7 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function saslConsumerTest() returns error? {
     string topic = "sasl-consumer-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -954,7 +961,7 @@ function saslConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function saslConsumerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-consumer-incorrect-credentials-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -984,7 +991,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function consumerAdditionalPropertiesTest() returns error? {
     string topic = "consumer-additional-properties-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1004,13 +1011,13 @@ function consumerAdditionalPropertiesTest() returns error? {
     };
 
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    _ = check consumer->poll(5);
+    ConsumerRecord[] _ = check consumer->poll(5);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertEquals(committedOffset, ());
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslKeystoreConsumerTest() returns error? {
     string topic = "ssl-keystore-consumer-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1029,7 +1036,7 @@ function sslKeystoreConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslCertKeyConsumerTest() returns error? {
     string topic = "ssl-cert-key-consumer-test-topic";
 
@@ -1061,7 +1068,7 @@ function sslCertKeyConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslCertOnlyConsumerTest() returns error? {
     string topic = "ssl-cert-only-consumer-test-topic";
 
@@ -1087,7 +1094,7 @@ function sslCertOnlyConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function saslSslConsumerTest() returns error? {
     string topic = "sasl-ssl-consumer-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1107,7 +1114,7 @@ function saslSslConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function incorrectKafkaUrlTest() returns error? {
     string topic = "incorrect-kafka-url-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1123,7 +1130,7 @@ function incorrectKafkaUrlTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function plaintextToSecuredEndpointsConsumerTest() returns error? {
     string topic = "plaintext-secured-endpoints-consumer-test-topic";
 
@@ -1152,7 +1159,7 @@ function plaintextToSecuredEndpointsConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function invalidSecuredEndpointsConsumerTest() returns error? {
     string topic = "invalid-secured-endpoints-consumer-test-topic";
 
@@ -1196,7 +1203,7 @@ function invalidSecuredEndpointsConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectStoresConsumerTest() returns error? {
     string topic = "ssl-incorrect-stores-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -1237,7 +1244,7 @@ function sslIncorrectStoresConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectMasterPasswordConsumerTest() returns error? {
     string topic = "ssl-incorrect-master-password-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -1276,7 +1283,7 @@ function sslIncorrectMasterPasswordConsumerTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function sslIncorrectCertPathConsumerTest() returns error? {
     string topic = "ssl-incorrect-cert-path-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -1315,7 +1322,7 @@ function sslIncorrectCertPathConsumerTest() returns error? {
     }
 }
 
-@test:Config {}
+@test:Config {enable: true}
 function invalidSecurityProtocolConsumerTest() returns error? {
     string topic = "invalid-security-protocol-consumer-test-topic";
 
@@ -1385,6 +1392,6 @@ function invalidSecurityProtocolConsumerTest() returns error? {
     }
 }
 
-function sendMessage(byte[] message, string topic) returns error? {
-    return producer->send({ topic: topic, value: message });
+function sendMessage(anydata message, string topic, anydata? key = ()) returns error? {
+    return producer->send({ topic: topic, value: message, key });
 }

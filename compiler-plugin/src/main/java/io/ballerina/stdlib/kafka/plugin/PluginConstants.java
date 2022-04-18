@@ -26,6 +26,7 @@ public class PluginConstants {
     public static final String PACKAGE_PREFIX = "kafka";
     public static final String REMOTE_QUALIFIER = "REMOTE";
     public static final String ON_RECORDS_FUNC = "onConsumerRecord";
+    public static final String ON_ERROR_FUNC = "onError";
     public static final String PACKAGE_ORG = "ballerinax";
 
     // parameters
@@ -49,22 +50,24 @@ public class PluginConstants {
         NO_ON_CONSUMER_RECORD("Service must have remote method onConsumerRecord.",
                 "KAFKA_101"),
         INVALID_REMOTE_FUNCTION("Invalid remote method.", "KAFKA_102"),
-        INVALID_FUNCTION("Invalid remote method.", "KAFKA_103"),
+        INVALID_RESOURCE_FUNCTION("Resource functions not allowed.", "KAFKA_103"),
         FUNCTION_SHOULD_BE_REMOTE("Method must have the remote qualifier.", "KAFKA_104"),
-        MUST_HAVE_CALLER_AND_RECORDS("Must have the required parameter kafka:ConsumerRecord[] and optional " +
-                "parameter kafka:Caller.", "KAFKA_105"),
-        INVALID_FUNCTION_PARAM_CALLER_OR_RECORDS("Invalid method parameter. Only kafka:Caller or " +
-                "kafka:ConsumerRecord[] is allowed.", "KAFKA_106"),
-        INVALID_FUNCTION_PARAM_RECORDS("Invalid method parameter. Only kafka:ConsumerRecord[] is allowed.",
-                "KAFKA_107"),
-        ONLY_PARAMS_ALLOWED("Invalid method parameter count. " +
+        MUST_HAVE_CALLER_AND_RECORDS("Must have the required parameter kafka:ConsumerRecord[] and " +
+                "optional parameter kafka:Caller.", "KAFKA_105"),
+        INVALID_PARAM_TYPES("Invalid method parameters. Only kafka:ConsumerRecord[] and " +
+                "kafka:Caller is allowed", "KAFKA_106"),
+        INVALID_SINGLE_PARAMETER("Invalid method parameter. Only kafka:ConsumerRecord[]" +
+                " is allowed.", "KAFKA_107"),
+        INVALID_PARAM_COUNT("Invalid method parameter count. " +
                 "Only kafka:Caller and kafka:ConsumerRecord[] are allowed.", "KAFKA_108"),
         INVALID_RETURN_TYPE_ERROR_OR_NIL("Invalid return type. Only error? or kafka:Error? is allowed.",
                 "KAFKA_109"),
         INVALID_MULTIPLE_LISTENERS("Multiple listener attachments. Only one kafka:Listener is allowed.",
                 "KAFKA_110"),
         INVALID_ANNOTATION_NUMBER("No annotations are allowed for kafka services.", "KAFKA_111"),
-        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "KAFKA_112");
+        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "KAFKA_112"),
+        MUST_HAVE_ERROR("Must have the required parameter kafka:Error", "KAFKA_113"),
+        ONLY_ERROR_ALLOWED("Invalid method parameter. Only kafka:Error or error is allowed", "KAFKA_114");
 
         private final String error;
         private final String errorCode;

@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- [Added data binding support.](https://github.com/ballerina-platform/ballerina-standard-library/issues/2751)
+
+## [3.2.0] - 2022-01-29
+
 ### Changed
 - [Make kafka:Caller optional in onConsumerRecord method in kafka:Service.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1661)
 

@@ -21,6 +21,12 @@ package io.ballerina.stdlib.kafka.impl;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.IntersectionType;
+import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.Parameter;
+import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.observability.ObservabilityConstants;
@@ -29,6 +35,7 @@ import io.ballerina.stdlib.kafka.api.KafkaListener;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaObserverContext;
+import io.ballerina.stdlib.kafka.utils.KafkaConstants;
 import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import io.ballerina.stdlib.kafka.utils.ModuleUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -36,11 +43,19 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.stream.Stream;
 
+import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
+import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_RECORD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getResourceParameters;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
 
 /**
  * Kafka Connector Consumer for Ballerina.
@@ -74,31 +89,44 @@ public class KafkaListenerImpl implements KafkaListener {
     @Override
     public void onError(Throwable throwable) {
         KafkaMetricsUtil.reportConsumerError(listener, KafkaObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+        executeOnError(throwable);
     }
 
     private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records) {
         StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
                 ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), KAFKA_RESOURCE_ON_RECORD);
+        Map<String, Object> properties = null;
+        Type returnType = null;
         if (ObserveUtils.isTracingEnabled()) {
-            Type returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
-            Map<String, Object> properties = getNewObserverContextInProperties(listener);
-            if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
-                bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, properties, returnType, getResourceParameters(service, this.listener, records));
-            } else {
-                bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, properties, returnType, getResourceParameters(service, this.listener, records));
-            }
+            properties = getNewObserverContextInProperties(listener);
+            returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
+        }
+        if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+            bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                    consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
+                    getResourceParameters(service, this.listener, records));
         } else {
-            if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
-                bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, null, PredefinedTypes.TYPE_NULL,
-                        getResourceParameters(service, this.listener, records));
-            } else {
-                bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                        consumer, null, PredefinedTypes.TYPE_NULL,
-                        getResourceParameters(service, this.listener, records));
-            }
+            bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                    consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
+                    getResourceParameters(service, this.listener, records));
+        }
+    }
+
+    private void executeOnError(Throwable throwable) {
+        StrandMetadata metadata = new StrandMetadata(ModuleUtils.getModule().getOrg(),
+                ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), KAFKA_RESOURCE_ON_ERROR);
+        Map<String, Object> properties = null;
+        if (ObserveUtils.isTracingEnabled()) {
+            properties = getNewObserverContextInProperties(listener);
+        }
+        if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
+            bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
+                    null, properties, PredefinedTypes.TYPE_NULL,
+                    KafkaUtils.createKafkaError(throwable.getMessage()), true);
+        } else {
+            bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
+                    null, properties, PredefinedTypes.TYPE_NULL,
+                    KafkaUtils.createKafkaError(throwable.getMessage()), true);
         }
     }
 
@@ -109,5 +137,60 @@ public class KafkaListenerImpl implements KafkaListener {
                                                                         KafkaUtils.getBootstrapServers(listener));
         properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
         return properties;
+    }
+
+    public Object[] getResourceParameters(BObject service, BObject listener, ConsumerRecords records) {
+        Parameter[] parameters = getOnConsumerRecordMethod(service).get().getParameters();
+        boolean callerExists = false;
+        boolean consumerRecordsExists = false;
+        Object[] arguments = new Object[parameters.length * 2];
+        int index = 0;
+        for (Parameter parameter : parameters) {
+            switch (parameter.type.getTag()) {
+                case OBJECT_TYPE_TAG:
+                    if (callerExists) {
+                        throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                    }
+                    callerExists = true;
+                    arguments[index++] = createCaller(listener);
+                    arguments[index++] = true;
+                    break;
+                case INTERSECTION_TAG:
+                case ARRAY_TAG:
+                    if (consumerRecordsExists) {
+                        throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                    }
+                    consumerRecordsExists = true;
+                    arguments[index++] = getConsumerRecords(records, (RecordType) getIntendedType(parameter.type),
+                            parameter.type.isReadOnly());
+                    arguments[index++] = true;
+                    break;
+                default:
+                    throw KafkaUtils.createKafkaError("Invalid remote function signature");
+            }
+        }
+        return arguments;
+    }
+
+    private BObject createCaller(BObject listener) {
+        BObject caller = ValueCreator.createObjectValue(ModuleUtils.getModule(), KafkaConstants.CALLER_STRUCT_NAME);
+        KafkaConsumer consumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
+        Properties consumerProperties = (Properties) listener.getNativeData(NATIVE_CONSUMER_CONFIG);
+        caller.addNativeData(NATIVE_CONSUMER, consumer);
+        caller.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
+        return caller;
+    }
+
+    private Type getIntendedType(Type type) {
+        if (type.getTag() == INTERSECTION_TAG) {
+            return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
+        }
+        return ((ArrayType) type).getElementType();
+    }
+
+    private static Optional<MethodType> getOnConsumerRecordMethod(BObject service) {
+        MethodType[] methodTypes = service.getType().getMethods();
+        return Stream.of(methodTypes)
+                .filter(methodType -> KAFKA_RESOURCE_ON_RECORD.equals(methodType.getName())).findFirst();
     }
 }
