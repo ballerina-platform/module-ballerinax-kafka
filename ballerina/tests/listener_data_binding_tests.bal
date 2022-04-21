@@ -76,52 +76,44 @@ public type IntConsumerRecord record {|
 |};
 
 public type FloatConsumerRecord record {|
+    *AnydataConsumerRecord;
     float key?;
     float value;
-    int timestamp;
-    PartitionOffset offset?;
 |};
 
 public type DecimalConsumerRecord record {|
-    decimal key?;
+    *AnydataConsumerRecord;
     decimal value;
-    int timestamp;
-    PartitionOffset offset?;
+    decimal key?;
 |};
 
 public type BooleanConsumerRecord record {|
+    *AnydataConsumerRecord;
     boolean key?;
     boolean value;
-    int timestamp;
-    PartitionOffset offset?;
 |};
 
 public type StringConsumerRecord record {|
+    *AnydataConsumerRecord;
     string key?;
     string value;
-    int timestamp;
-    PartitionOffset offset?;
 |};
 
 public type PersonConsumerRecord record {|
-    byte[] key?;
+    *AnydataConsumerRecord;
     Person value;
-    int timestamp;
-    PartitionOffset offset?;
 |};
 
 public type MapConsumerRecord record {|
+    *AnydataConsumerRecord;
     byte[] key?;
     map<Person> value;
-    int timestamp;
-    PartitionOffset offset?;
 |};
 
 public type XmlConsumerRecord record {|
+    *AnydataConsumerRecord;
     xml key?;
     xml value;
-    int timestamp;
-    PartitionOffset offset?;
 |};
 
 public type TableConsumerRecord record {|
@@ -132,10 +124,10 @@ public type TableConsumerRecord record {|
 |};
 
 public type JsonConsumerRecord record {|
-    json key?;
-    json value;
-    int timestamp;
     PartitionOffset offset?;
+    json key?;
+    int timestamp;
+    json value;
 |};
 
 @test:Config {enable: true}
