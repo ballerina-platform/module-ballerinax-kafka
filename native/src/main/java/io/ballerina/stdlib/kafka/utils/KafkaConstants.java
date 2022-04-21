@@ -62,6 +62,8 @@ public class KafkaConstants {
     public static final String KAFKA_RESOURCE_ON_ERROR = "onError";
     public static final String KAFKA_RECORD_KEY = "key";
     public static final String KAFKA_RECORD_VALUE = "value";
+    public static final String KAFKA_RECORD_TIMESTAMP = "timestamp";
+    public static final String KAFKA_RECORD_PARTITION_OFFSET = "offset";
 
     public static final BString ADDITIONAL_PROPERTIES_MAP_FIELD = StringUtils.fromString("additionalProperties");
 

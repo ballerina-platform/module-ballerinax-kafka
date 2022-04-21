@@ -76,6 +76,8 @@ import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_PARTITION_OFFSET;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_TIMESTAMP;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_VALUE;
 
 /**
@@ -596,14 +598,15 @@ public class KafkaUtils {
         if (value instanceof BError) {
             throw (BError) value;
         }
-        Object[] fields = new Object[4];
-        fields[0] = key;
-        fields[1] = value;
-        fields[2] = record.timestamp();
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                                                                               record.partition());
-        fields[3] = ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, record.offset());
-        return ValueCreator.createRecordValue(ValueCreator.createRecordValue(recordType), fields);
+        BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
+        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_KEY), key);
+        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_VALUE), value);
+        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_TIMESTAMP), record.timestamp());
+        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_PARTITION_OFFSET), ValueCreator.createRecordValue(
+                getPartitionOffsetRecord(), topicPartition, record.offset()));
+        return consumerRecord;
     }
 
     public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly) {
