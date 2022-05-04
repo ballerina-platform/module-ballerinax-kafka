@@ -16,24 +16,6 @@
 
 import ballerina/crypto;
 
-// Common record types
-# Represents the topic partition position in which the consumed record is stored.
-#
-# + partition - The `kafka:TopicPartition` to which the record is related
-# + offset - Offset in which the record is stored in the partition
-public type PartitionOffset record {|
-    TopicPartition partition;
-    int offset;
-|};
-
-# Represents a topic partition.
-#
-# + topic - Topic to which the partition is related
-# + partition - Index of the specific partition
-public type TopicPartition record {|
-    string topic;
-    int partition;
-|};
 
 // Security-related records
 # Configurations for secure communication with the Kafka server.
@@ -185,6 +167,25 @@ public type ConsumerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 
+// Common record types
+# Represents the topic partition position in which the consumed record is stored.
+#
+# + partition - The `kafka:TopicPartition` to which the record is related
+# + offset - Offset in which the record is stored in the partition
+public type PartitionOffset record {|
+    TopicPartition partition;
+    int offset;
+|};
+
+# Represents a topic partition.
+#
+# + topic - Topic to which the partition is related
+# + partition - Index of the specific partition
+public type TopicPartition record {|
+    string topic;
+    int partition;
+|};
+
 # Type related to consumer record.
 #
 # + key - Key that is included in the record
@@ -209,7 +210,7 @@ public type AnydataConsumerRecord record {|
     anydata key?;
     anydata value;
     int timestamp;
-    PartitionOffset offset?;
+    PartitionOffset offset;
 |};
 
 # Subtype related to `kafka:AnydataConsumerRecord` record.

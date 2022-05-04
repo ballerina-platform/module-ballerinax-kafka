@@ -72,7 +72,7 @@ public type IntConsumerRecord record {|
     int key?;
     int value;
     int timestamp;
-    PartitionOffset offset?;
+    PartitionOffset offset;
 |};
 
 public type FloatConsumerRecord record {|
@@ -120,11 +120,11 @@ public type TableConsumerRecord record {|
     string key?;
     table<Person> value;
     int timestamp;
-    PartitionOffset offset?;
+    PartitionOffset offset;
 |};
 
 public type JsonConsumerRecord record {|
-    PartitionOffset offset?;
+    PartitionOffset offset;
     json key?;
     int timestamp;
     json value;
