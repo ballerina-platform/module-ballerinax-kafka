@@ -25,66 +25,88 @@ kafka:ConsumerConfiguration consumerConfigs = {
 
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
 
-//service kafka:Service on kafkaListener {
-//    private final string var1 = "Kafka Service";
-//    private final int var2 = 54;
-//
-//    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, @kafka:Payload PayloadConsumerRecord[] data) {
-//    }
-//
-//    remote function onError(kafka:Error 'error) returns error|() {
-//    }
-//}
-//
-//service kafka:Service on kafkaListener {
-//    private final string var1 = "Kafka Service";
-//    private final int var2 = 54;
-//
-//    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, @kafka:Payload PayloadConsumerRecord[] & readonly data) {
-//    }
-//
-//    remote function onError(kafka:Error 'error) returns error|() {
-//    }
-//}
-//
-//service kafka:Service on kafkaListener {
-//    private final string var1 = "Kafka Service";
-//    private final int var2 = 54;
-//
-//    remote function onConsumerRecord(kafka:ConsumerRecord[] & readonly records, kafka:Caller caller, @kafka:Payload PayloadConsumerRecord[] & readonly data) {
-//    }
-//
-//    remote function onError(kafka:Error 'error) returns error|() {
-//    }
-//}
-//
-//service kafka:Service on kafkaListener {
-//    private final string var1 = "Kafka Service";
-//    private final int var2 = 54;
-//
-//    remote function onConsumerRecord(@kafka:Payload PayloadConsumerRecord[] & readonly data, kafka:ConsumerRecord[] records, kafka:Caller caller) {
-//    }
-//
-//    remote function onError(kafka:Error 'error) returns error|() {
-//    }
-//}
-//
-//service kafka:Service on kafkaListener {
-//    private final string var1 = "Kafka Service";
-//    private final int var2 = 54;
-//
-//    remote function onConsumerRecord(@kafka:Payload PayloadConsumerRecord[] & readonly data, kafka:ConsumerRecord[] & readonly records, kafka:Caller caller) {
-//    }
-//
-//    remote function onError(kafka:Error 'error) returns error|() {
-//    }
-//}
+service kafka:Service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
+    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, @kafka:Payload PayloadConsumerRecord[] data) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
+    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, @kafka:Payload PayloadConsumerRecord[] & readonly data) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
+    remote function onConsumerRecord(kafka:ConsumerRecord[] & readonly records, kafka:Caller caller, @kafka:Payload PayloadConsumerRecord[] & readonly data) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
+    remote function onConsumerRecord(@kafka:Payload PayloadConsumerRecord[] & readonly data, kafka:ConsumerRecord[] records, kafka:Caller caller) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
+
+service kafka:Service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
+    remote function onConsumerRecord(@kafka:Payload PayloadConsumerRecord[] & readonly data, kafka:ConsumerRecord[] & readonly records, kafka:Caller caller) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
 
 service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
     remote function onConsumerRecord(@kafka:Payload PayloadConsumerRecord[] & readonly data, PersonConsumerRecord[] & readonly records, kafka:Caller caller) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
+
+service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
+    remote function onConsumerRecord(string[] & readonly data, PersonConsumerRecord[] & readonly records, kafka:Caller caller) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
+
+service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
+    remote function onConsumerRecord(string[] & readonly data, kafka:ConsumerRecord[] & readonly records, kafka:Caller caller) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
