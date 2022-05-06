@@ -1078,3 +1078,46 @@ function readonlyPayloadWithPayloadAnnotationListenerTest() returns error? {
     test:assertTrue(isPayloadReadonly);
     test:assertEquals(readOnlyPayloads, [payloadConsumerRecord, payloadConsumerRecord, payloadConsumerRecord]);
 }
+
+@test:Config {enable: true}
+function readonlyPayloadReadonlyConsumerRecordsListenerTest() returns error? {
+    string topic = "readonly-payload-with-readonly-consumer-records-listener-test-topic";
+
+    isPayloadReadonly = false;
+    readOnlyPayloads = [];
+
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+
+    Service payloadRecordBindingService =
+    service object {
+        remote function onConsumerRecord(Person[] & readonly payload, PersonConsumerRecord[] & readonly consumerRecords) returns error? {
+            if payload.isReadOnly() && consumerRecords.isReadOnly() {
+                readOnlyPayloads = payload;
+                isPayloadReadonly = true;
+            } else {
+                isPayloadReadonly = false;
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-10",
+        clientId: "data-binding-listener-10",
+        pollingInterval: 1
+    };
+    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
+    check dataBindingListener.attach(payloadRecordBindingService);
+    check dataBindingListener.'start();
+    runtime:sleep(3);
+    check dataBindingListener.gracefulStop();
+    test:assertTrue(isPayloadReadonly);
+    test:assertEquals(readOnlyPayloads, [personRecord1, personRecord1, personRecord1]);
+}
