@@ -192,6 +192,9 @@ public type TopicPartition record {|
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + offset - Topic partition position in which the consumed record is stored
+# # Deprecated
+# Usage of this record is deprecated. Use subtypes of AnydataConsumerRecord 
+# instead to support data-binding
 @deprecated
 public type ConsumerRecord record {|
     byte[] key?;
@@ -228,6 +231,9 @@ public type BytesConsumerRecord record {|
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + partition - Partition to which the record should be sent
+# # Deprecated
+# Usage of this record is deprecated. Use subtypes of AnydataProducerRecord 
+# instead to support data-binding
 @deprecated
 public type ProducerRecord record {|
     string topic;
@@ -338,3 +344,9 @@ public type ProducerConfiguration record {|
     AuthenticationConfiguration auth?;
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
+
+# Defines the Payload remote function parameter.
+public type KafkaPayload record {||};
+
+# The annotation which is used to define the payload parameter in the `onConsumerRecord` service method.
+public annotation KafkaPayload Payload on parameter;

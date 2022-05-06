@@ -53,6 +53,7 @@ public class KafkaConstants {
     public static final String AVRO_GENERIC_RECORD_NAME = "AvroGenericRecord";
     public static final String CONSUMER_RECORD_STRUCT_NAME = "ConsumerRecord";
     public static final String CALLER_STRUCT_NAME = "Caller";
+    public static final String TYPE_CHECKER_OBJECT_NAME = "TypeChecker";
     public static final String SERVER_CONNECTOR = "serverConnector";
 
     public static final BString CONSUMER_CONFIG_FIELD_NAME = StringUtils.fromString("consumerConfig");
@@ -60,10 +61,15 @@ public class KafkaConstants {
 
     public static final String KAFKA_RESOURCE_ON_RECORD = "onConsumerRecord";
     public static final String KAFKA_RESOURCE_ON_ERROR = "onError";
+    public static final String KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD = "isAnydataConsumerRecord";
     public static final String KAFKA_RECORD_KEY = "key";
     public static final String KAFKA_RECORD_VALUE = "value";
     public static final String KAFKA_RECORD_TIMESTAMP = "timestamp";
     public static final String KAFKA_RECORD_PARTITION_OFFSET = "offset";
+
+    public static final String PARAM_ANNOTATION_PREFIX = "$param$.";
+    public static final BString PARAM_PAYLOAD_ANNOTATION_NAME = StringUtils.fromString(
+            ModuleUtils.getModule().toString() + ":Payload");
 
     public static final BString ADDITIONAL_PROPERTIES_MAP_FIELD = StringUtils.fromString("additionalProperties");
 

@@ -620,17 +620,6 @@ public class KafkaUtils {
         return consumerRecordsArray;
     }
 
-    public static BArray getValuesWithIntendedType(ArrayType type, ConsumerRecords records) {
-        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(type.getElementType()));
-        for (Object record: records) {
-            bArray.append(getValueWithIntendedType(type.getElementType(), (byte[]) ((ConsumerRecord) record).value()));
-        }
-        if (type.isReadOnly()) {
-            bArray.freezeDirect();
-        }
-        return bArray;
-    }
-
     public static Object getValueWithIntendedType(Type type, byte[] value) {
         String strValue = new String(value, StandardCharsets.UTF_8);
         try {
