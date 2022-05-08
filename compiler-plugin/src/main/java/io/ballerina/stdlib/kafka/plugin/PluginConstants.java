@@ -35,6 +35,14 @@ public class PluginConstants {
     public static final String ERROR_PARAM = "Error";
     public static final String PAYLOAD_ANNOTATION = "kafka:Payload ";
 
+    // consumer record fields
+    public static final String CONSUMER_RECORD_VALUE = "value";
+    public static final String CONSUMER_RECORD_KEY = "key";
+    public static final String CONSUMER_RECORD_TIMESTAMP = "timestamp";
+    public static final String CONSUMER_RECORD_OFFSET = "offset";
+    public static final String CONSUMER_RECORD_TOPIC = "topic";
+    public static final String CONSUMER_RECORD_PARTITION = "partition";
+
     // return types error or nil
     public static final String ERROR = "error";
 
