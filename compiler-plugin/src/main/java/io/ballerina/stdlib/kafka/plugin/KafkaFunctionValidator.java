@@ -34,11 +34,13 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.ParenthesisedTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Location;
 
@@ -73,6 +75,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.INT_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.JSON_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAP_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PARENTHESISED_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
@@ -289,16 +292,24 @@ public class KafkaFunctionValidator {
         Node parameterTypeNode = requiredParameterNode.typeName();
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) parameterTypeNode;
         TypeDescriptorNode memberType = arrayTypeDescriptorNode.memberTypeDesc();
-        SyntaxKind syntaxKind = memberType.kind();
-        return validateDataParamSyntaxKind(syntaxKind);
+        return validateDataParamSyntaxKind(memberType);
     }
 
-    private boolean validateDataParamSyntaxKind(SyntaxKind syntaxKind) {
+    private boolean validateDataParamSyntaxKind(TypeDescriptorNode typeDescriptorNode) {
+        SyntaxKind syntaxKind = typeDescriptorNode.kind();
+        if (syntaxKind == PARENTHESISED_TYPE_DESC) {
+            ParenthesisedTypeDescriptorNode parenthesisedNode = (ParenthesisedTypeDescriptorNode) typeDescriptorNode;
+            return validateDataParamSyntaxKind(parenthesisedNode.typedesc());
+        } else if (syntaxKind == UNION_TYPE_DESC) {
+            UnionTypeDescriptorNode unionNode = (UnionTypeDescriptorNode) typeDescriptorNode;
+            return validateDataParamSyntaxKind(unionNode.leftTypeDesc()) &&
+                    validateDataParamSyntaxKind(unionNode.rightTypeDesc());
+        }
         return syntaxKind == INT_TYPE_DESC || syntaxKind == STRING_TYPE_DESC || syntaxKind == BOOLEAN_TYPE_DESC ||
                 syntaxKind == FLOAT_TYPE_DESC || syntaxKind == DECIMAL_TYPE_DESC || syntaxKind == RECORD_TYPE_DESC ||
                 syntaxKind == MAP_TYPE_DESC || syntaxKind == BYTE_TYPE_DESC || syntaxKind == TABLE_TYPE_DESC ||
                 syntaxKind == JSON_TYPE_DESC || syntaxKind == XML_TYPE_DESC || syntaxKind == ANYDATA_TYPE_DESC ||
-                syntaxKind == UNION_TYPE_DESC || syntaxKind == NIL_TYPE_DESC || syntaxKind == SIMPLE_NAME_REFERENCE ||
+                syntaxKind == NIL_TYPE_DESC || syntaxKind == SIMPLE_NAME_REFERENCE ||
                 syntaxKind == QUALIFIED_NAME_REFERENCE;
     }
 
@@ -333,13 +344,11 @@ public class KafkaFunctionValidator {
         Node parameterTypeNode = requiredParameterNode.typeName();
         IntersectionTypeDescriptorNode typeDescriptorNode = (IntersectionTypeDescriptorNode) parameterTypeNode;
         if (typeDescriptorNode.rightTypeDesc().kind() == ARRAY_TYPE_DESC) {
-            SyntaxKind syntaxKind = ((ArrayTypeDescriptorNode) typeDescriptorNode.rightTypeDesc())
-                    .memberTypeDesc().kind();
-            return validateDataParamSyntaxKind(syntaxKind);
+            return validateDataParamSyntaxKind(((ArrayTypeDescriptorNode) typeDescriptorNode.rightTypeDesc())
+                    .memberTypeDesc());
         } else if (typeDescriptorNode.leftTypeDesc().kind() == ARRAY_TYPE_DESC) {
-            SyntaxKind syntaxKind = ((ArrayTypeDescriptorNode) typeDescriptorNode.leftTypeDesc())
-                    .memberTypeDesc().kind();
-            return validateDataParamSyntaxKind(syntaxKind);
+            return validateDataParamSyntaxKind(((ArrayTypeDescriptorNode) typeDescriptorNode.leftTypeDesc())
+                    .memberTypeDesc());
         }
         return false;
     }
