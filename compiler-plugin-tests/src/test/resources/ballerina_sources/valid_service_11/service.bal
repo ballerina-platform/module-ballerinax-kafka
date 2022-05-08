@@ -95,6 +95,17 @@ service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
+    remote function onConsumerRecord(@kafka:Payload PayloadConsumerRecordWithTypeReference[] & readonly data, PersonConsumerRecord[] & readonly records, kafka:Caller caller) {
+    }
+
+    remote function onError(kafka:Error 'error) returns error|() {
+    }
+}
+
+service on kafkaListener {
+    private final string var1 = "Kafka Service";
+    private final int var2 = 54;
+
     remote function onConsumerRecord(string[] & readonly data, PersonConsumerRecord[] & readonly records, kafka:Caller caller) {
     }
 
@@ -129,6 +140,13 @@ public type PayloadConsumerRecord record {|
             int partition;
         |} partition;
     |} offset;
+|};
+
+public type PayloadConsumerRecordWithTypeReference record {|
+    string key?;
+    string value;
+    int timestamp;
+    kafka:PartitionOffset offset;
 |};
 
 public type Person record {|

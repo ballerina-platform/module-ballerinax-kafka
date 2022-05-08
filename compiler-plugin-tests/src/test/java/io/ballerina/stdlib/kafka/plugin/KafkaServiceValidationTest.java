@@ -113,8 +113,7 @@ public class KafkaServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
-    @Test(enabled = true, description = "Validate data binding parameter(disabled until " +
-            "anydata[] parameter is allowed)")
+    @Test(enabled = true, description = "Validate data binding parameter")
     public void testValidService9() {
         Package currentPackage = loadPackage("valid_service_9");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -122,8 +121,7 @@ public class KafkaServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
-    @Test(enabled = true, description = "Validate readonly data binding parameter(disabled until " +
-            "anydata[] parameter is allowed)")
+    @Test(enabled = true, description = "Validate readonly data binding parameter")
     public void testValidService10() {
         Package currentPackage = loadPackage("valid_service_10");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -134,6 +132,14 @@ public class KafkaServiceValidationTest {
     @Test(enabled = true, description = "Validate data binding parameter with @Payload annotation")
     public void testValidService11() {
         Package currentPackage = loadPackage("valid_service_11");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test(enabled = true, description = "Validate `kafka:AnydataConsumerRecord` subtypes")
+    public void testValidService12() {
+        Package currentPackage = loadPackage("valid_service_12");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
@@ -357,7 +363,7 @@ public class KafkaServiceValidationTest {
         }
     }
 
-    @Test(enabled = true, description = "Validate readonly data parameter(disabled until " +
+    @Test(enabled = true, description = "Validate readonly payload parameter(disabled until " +
             "anydata[] parameter is allowed)")
     public void testInvalidService20() {
         Package currentPackage = loadPackage("invalid_service_20");
@@ -371,7 +377,7 @@ public class KafkaServiceValidationTest {
         }
     }
 
-    @Test(enabled = true, description = "Validate data parameter in 1 parameter scenario")
+    @Test(enabled = true, description = "Validate payload parameter in 1 parameter scenario")
     public void testInvalidService21() {
         Package currentPackage = loadPackage("invalid_service_21");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -381,6 +387,19 @@ public class KafkaServiceValidationTest {
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
             assertDiagnostic(diagnostic, INVALID_SINGLE_PARAMETER);
+        }
+    }
+
+    @Test(enabled = true, description = "Validate payload parameter without @Payload flag")
+    public void testInvalidService22() {
+        Package currentPackage = loadPackage("invalid_service_22");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 3);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, INVALID_PARAM_TYPES);
         }
     }
 
