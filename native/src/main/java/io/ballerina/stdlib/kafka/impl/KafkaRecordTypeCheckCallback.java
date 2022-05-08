@@ -23,20 +23,14 @@ import io.ballerina.runtime.api.async.Callback;
 import java.util.concurrent.Semaphore;
 
 /**
- * {@code KafkaRecordTypeCheckListener} listener provides ability control poll cycle flow by notifications received from
- * Ballerina side.
+ * {@code KafkaRecordTypeCheckCallback} provides ability to check whether a given type is a subtype of
+ * kafka:AnydataConsumerRecord.
  */
 public class KafkaRecordTypeCheckCallback implements Callback {
 
     private final Semaphore semaphore;
     private Boolean isConsumerRecordType = false;
 
-    /**
-     * Future will get notified from the Ballerina engine when the Resource invocation is over or when an error
-     * occurred.
-     *
-     * @param semaphore       semaphore to handle futures
-     */
     public KafkaRecordTypeCheckCallback(Semaphore semaphore) {
         this.semaphore = semaphore;
     }

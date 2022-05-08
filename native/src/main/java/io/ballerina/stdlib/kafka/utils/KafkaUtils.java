@@ -28,6 +28,7 @@ import io.ballerina.runtime.api.types.Field;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
@@ -73,6 +74,7 @@ import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
 import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
+import static io.ballerina.runtime.api.TypeTags.UNION_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
@@ -632,18 +634,36 @@ public class KafkaUtils {
                     return ValueCreator.createArrayValue(value);
                 case RECORD_TYPE_TAG:
                     return CloneWithType.convert(type, JsonUtils.parse(strValue));
+                case UNION_TAG:
+                    if (hasStringType((UnionType) type)) {
+                        return StringUtils.fromString(strValue);
+                    }
+                    return getValueFromJson(type, strValue);
                 case ARRAY_TAG:
                     if (((ArrayType) type).getElementType().getTag() == BYTE_TAG) {
                         return ValueCreator.createArrayValue(value);
                     }
                     /*-fallthrough*/
                 default:
-                    BTypedesc typeDesc = ValueCreator.createTypedescValue(type);
-                    return FromJsonWithType.fromJsonWithType(JsonUtils.parse(strValue), typeDesc);
+                    return getValueFromJson(type, strValue);
             }
         } catch (BError bError) {
             throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", bError.getMessage()));
         }
+    }
+
+    private static boolean hasStringType(UnionType type) {
+        return type.getMemberTypes().stream().anyMatch(memberType -> {
+            if (memberType.getTag() == STRING_TAG) {
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private static Object getValueFromJson(Type type, String stringValue) {
+        BTypedesc typeDesc = ValueCreator.createTypedescValue(type);
+        return FromJsonWithType.fromJsonWithType(JsonUtils.parse(stringValue), typeDesc);
     }
 
     public static BMap<BString, Object> getPartitionOffsetRecord() {

@@ -425,3 +425,25 @@ function readonlyConsumerRecordTest() returns error? {
     });
     check consumer->close();
 }
+
+@test:Config {enable: true}
+function unionBindingConsumerTest() returns error? {
+    string topic = "union-binding-consumer-test-topic";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-08",
+        clientId: "data-binding-consumer-id-08",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    (int|string)[] records = check consumer->pollPayload(1);
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(int|string value) {
+        test:assertEquals(value, TEST_MESSAGE);
+    });
+    check consumer->close();
+}
