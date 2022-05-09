@@ -19,12 +19,12 @@
 package io.ballerina.stdlib.kafka.plugin;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ClassSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -34,22 +34,62 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.ParenthesisedTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Location;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.compiler.api.symbols.TypeDescKind.ANYDATA;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.ARRAY;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.BOOLEAN;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.DECIMAL;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.FLOAT;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.INT;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.JSON;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.MAP;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.NIL;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.RECORD;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.STRING;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.TABLE;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.TYPE_REFERENCE;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.UNION;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.XML;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ANYDATA_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ARRAY_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.BYTE_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.DECIMAL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.FLOAT_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.INT_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.JSON_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAP_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PARENTHESISED_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TABLE_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNION_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.XML_TYPE_DESC;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CALLER;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_KEY;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_OFFSET;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_PARTITION;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_TIMESTAMP;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_TOPIC;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_VALUE;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.FUNCTION_SHOULD_BE_REMOTE;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_PARAM_COUNT;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.INVALID_PARAM_TYPES;
@@ -60,6 +100,7 @@ import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_ERROR_ALLOWED;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.ERROR_PARAM;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.PAYLOAD_ANNOTATION;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.getDiagnostic;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.getMethodSymbol;
 import static io.ballerina.stdlib.kafka.plugin.PluginUtils.validateModuleId;
@@ -155,18 +196,35 @@ public class KafkaFunctionValidator {
     private void validateParameterTypes(SeparatedNodeList<ParameterNode> parameters, Location location) {
         boolean callerExists = false;
         boolean consumerRecordsExists = false;
+        boolean payloadExists = false;
         for (ParameterNode paramNode: parameters) {
             RequiredParameterNode requiredParameterNode = (RequiredParameterNode) paramNode;
             SyntaxKind paramSyntaxKind = requiredParameterNode.typeName().kind();
             switch (paramSyntaxKind) {
                 case ARRAY_TYPE_DESC:
-                    if (!consumerRecordsExists) {
-                        consumerRecordsExists = validateConsumerRecordsParam(requiredParameterNode);
+                    if (validateConsumerRecordsParam(requiredParameterNode)) {
+                        if (consumerRecordsExists) {
+                            break;
+                        }
+                        consumerRecordsExists = true;
+                    } else if (validateDataParam(requiredParameterNode)) {
+                        if (payloadExists) {
+                            break;
+                        }
+                        payloadExists = true;
                     }
                     break;
                 case INTERSECTION_TYPE_DESC:
-                    if (!consumerRecordsExists) {
-                        consumerRecordsExists = validateReadonlyConsumerRecordsParam(requiredParameterNode);
+                    if (validateReadonlyConsumerRecordsParam(requiredParameterNode)) {
+                        if (consumerRecordsExists) {
+                            break;
+                        }
+                        consumerRecordsExists = true;
+                    } else if (validateReadonlyDataParam(requiredParameterNode)) {
+                        if (payloadExists) {
+                            break;
+                        }
+                        payloadExists = true;
                     }
                     break;
                 case QUALIFIED_NAME_REFERENCE:
@@ -176,16 +234,22 @@ public class KafkaFunctionValidator {
                     break;
             }
         }
-        validateParameterTypeResults(parameters, location, callerExists, consumerRecordsExists);
+        validateParameterTypeResults(parameters, location, callerExists, consumerRecordsExists, payloadExists);
     }
 
     private void validateParameterTypeResults(SeparatedNodeList<ParameterNode> parameters, Location location,
-                                              boolean callerExists, boolean consumerRecordsExists) {
-        if (parameters.size() == 2) {
-            if (!callerExists || !consumerRecordsExists) {
+                                              boolean callerExists, boolean consumerRecordsExists,
+                                              boolean payloadExists) {
+        if (parameters.size() == 3) {
+            if (!callerExists || !consumerRecordsExists || !payloadExists) {
                 reportErrorDiagnostic(INVALID_PARAM_TYPES, location);
             }
-        } else if (!consumerRecordsExists) {
+        } else if (parameters.size() == 2) {
+            if ((!callerExists || !consumerRecordsExists) && (!callerExists || !payloadExists)
+                    && (!payloadExists || !consumerRecordsExists)) {
+                reportErrorDiagnostic(INVALID_PARAM_TYPES, location);
+            }
+        } else if (!consumerRecordsExists && !payloadExists) {
             reportErrorDiagnostic(INVALID_SINGLE_PARAMETER, location);
         }
     }
@@ -206,22 +270,55 @@ public class KafkaFunctionValidator {
     }
 
     private boolean validateConsumerRecordsParam(RequiredParameterNode requiredParameterNode) {
+        boolean hasPayloadAnnotation = requiredParameterNode.annotations().stream()
+                .anyMatch(annotationNode -> annotationNode.annotReference().toString().equals(PAYLOAD_ANNOTATION));
+        if (hasPayloadAnnotation) {
+            return false;
+        }
         Node parameterTypeNode = requiredParameterNode.typeName();
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) parameterTypeNode;
         TypeDescriptorNode memberType = arrayTypeDescriptorNode.memberTypeDesc();
-        Optional<Symbol> symbol = semanticModel.symbol(memberType);
-        return symbol.isPresent() && isRecordTypeReference((TypeReferenceTypeSymbol) symbol.get());
-    }
-
-    private boolean isRecordTypeReference(TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
-        if (typeReferenceTypeSymbol.definition() instanceof ClassSymbol) {
+        if (memberType.kind() != QUALIFIED_NAME_REFERENCE && memberType.kind() != SIMPLE_NAME_REFERENCE) {
             return false;
         }
-        TypeDefinitionSymbol typeDefinitionSymbol = (TypeDefinitionSymbol) typeReferenceTypeSymbol.definition();
-        return typeDefinitionSymbol.typeDescriptor().typeKind() == TypeDescKind.RECORD;
+        Optional<Symbol> symbol = semanticModel.symbol(memberType);
+        if (symbol.isPresent() && symbol.get().kind() == SymbolKind.TYPE) {
+            return isConsumerRecordType((TypeReferenceTypeSymbol) symbol.get());
+        }
+        return false;
+    }
+
+    private boolean validateDataParam(RequiredParameterNode requiredParameterNode) {
+        Node parameterTypeNode = requiredParameterNode.typeName();
+        ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) parameterTypeNode;
+        TypeDescriptorNode memberType = arrayTypeDescriptorNode.memberTypeDesc();
+        return validateDataParamSyntaxKind(memberType);
+    }
+
+    private boolean validateDataParamSyntaxKind(TypeDescriptorNode typeDescriptorNode) {
+        SyntaxKind syntaxKind = typeDescriptorNode.kind();
+        if (syntaxKind == PARENTHESISED_TYPE_DESC) {
+            ParenthesisedTypeDescriptorNode parenthesisedNode = (ParenthesisedTypeDescriptorNode) typeDescriptorNode;
+            return validateDataParamSyntaxKind(parenthesisedNode.typedesc());
+        } else if (syntaxKind == UNION_TYPE_DESC) {
+            UnionTypeDescriptorNode unionNode = (UnionTypeDescriptorNode) typeDescriptorNode;
+            return validateDataParamSyntaxKind(unionNode.leftTypeDesc()) &&
+                    validateDataParamSyntaxKind(unionNode.rightTypeDesc());
+        }
+        return syntaxKind == INT_TYPE_DESC || syntaxKind == STRING_TYPE_DESC || syntaxKind == BOOLEAN_TYPE_DESC ||
+                syntaxKind == FLOAT_TYPE_DESC || syntaxKind == DECIMAL_TYPE_DESC || syntaxKind == RECORD_TYPE_DESC ||
+                syntaxKind == MAP_TYPE_DESC || syntaxKind == BYTE_TYPE_DESC || syntaxKind == TABLE_TYPE_DESC ||
+                syntaxKind == JSON_TYPE_DESC || syntaxKind == XML_TYPE_DESC || syntaxKind == ANYDATA_TYPE_DESC ||
+                syntaxKind == NIL_TYPE_DESC || syntaxKind == SIMPLE_NAME_REFERENCE ||
+                syntaxKind == QUALIFIED_NAME_REFERENCE;
     }
 
     private boolean validateReadonlyConsumerRecordsParam(RequiredParameterNode requiredParameterNode) {
+        boolean hasPayloadAnnotation = requiredParameterNode.annotations().stream()
+                .anyMatch(annotationNode -> annotationNode.annotReference().toString().equals(PAYLOAD_ANNOTATION));
+        if (hasPayloadAnnotation) {
+            return false;
+        }
         Node parameterTypeNode = requiredParameterNode.typeName();
         IntersectionTypeDescriptorNode typeDescriptorNode = (IntersectionTypeDescriptorNode) parameterTypeNode;
         Optional<TypeDescriptorNode> arrayTypeDescNode = Optional.empty();
@@ -232,14 +329,134 @@ public class KafkaFunctionValidator {
             arrayTypeDescNode = Optional.of(((ArrayTypeDescriptorNode) typeDescriptorNode.leftTypeDesc())
                     .memberTypeDesc());
         }
-        if (arrayTypeDescNode.isEmpty()) {
+        if (arrayTypeDescNode.isEmpty() || (arrayTypeDescNode.get().kind() != QUALIFIED_NAME_REFERENCE &&
+                arrayTypeDescNode.get().kind() != SIMPLE_NAME_REFERENCE)) {
             return false;
         }
         Optional<Symbol> typeSymbol = semanticModel.symbol(arrayTypeDescNode.get());
         if (typeSymbol.isPresent() && typeSymbol.get().kind() == SymbolKind.TYPE) {
-            return isRecordTypeReference((TypeReferenceTypeSymbol) typeSymbol.get());
+            return isConsumerRecordType((TypeSymbol) typeSymbol.get());
         }
         return false;
+    }
+
+    private boolean validateReadonlyDataParam(RequiredParameterNode requiredParameterNode) {
+        Node parameterTypeNode = requiredParameterNode.typeName();
+        IntersectionTypeDescriptorNode typeDescriptorNode = (IntersectionTypeDescriptorNode) parameterTypeNode;
+        if (typeDescriptorNode.rightTypeDesc().kind() == ARRAY_TYPE_DESC) {
+            return validateDataParamSyntaxKind(((ArrayTypeDescriptorNode) typeDescriptorNode.rightTypeDesc())
+                    .memberTypeDesc());
+        } else if (typeDescriptorNode.leftTypeDesc().kind() == ARRAY_TYPE_DESC) {
+            return validateDataParamSyntaxKind(((ArrayTypeDescriptorNode) typeDescriptorNode.leftTypeDesc())
+                    .memberTypeDesc());
+        }
+        return false;
+    }
+
+    private boolean isConsumerRecordType(TypeSymbol typeSymbol) {
+        RecordTypeSymbol recordTypeSymbol;
+        if (typeSymbol.typeKind() == TYPE_REFERENCE) {
+            if (((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor().typeKind() == RECORD) {
+                recordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
+            } else {
+                return false;
+            }
+        } else {
+            recordTypeSymbol = (RecordTypeSymbol) typeSymbol;
+        }
+        Map<String, RecordFieldSymbol> fieldDescriptors = recordTypeSymbol.fieldDescriptors();
+        return validateConsumerRecordFields(fieldDescriptors);
+    }
+
+    private boolean validateConsumerRecordFields(Map<String, RecordFieldSymbol> fieldDescriptors) {
+        if (fieldDescriptors.size() != 4 || !fieldDescriptors.containsKey(CONSUMER_RECORD_KEY) ||
+                !fieldDescriptors.containsKey(CONSUMER_RECORD_VALUE) ||
+                !fieldDescriptors.containsKey(CONSUMER_RECORD_TIMESTAMP) ||
+                !fieldDescriptors.containsKey(CONSUMER_RECORD_OFFSET)) {
+            return false;
+        }
+        if (fieldDescriptors.get(CONSUMER_RECORD_TIMESTAMP).typeDescriptor().typeKind() != INT) {
+            return false;
+        }
+        if (fieldDescriptors.get(CONSUMER_RECORD_OFFSET).typeDescriptor().typeKind() != TYPE_REFERENCE &&
+                fieldDescriptors.get(CONSUMER_RECORD_OFFSET).typeDescriptor().typeKind() != RECORD) {
+            return false;
+        }
+        if (!validateOffsetField(fieldDescriptors.get(CONSUMER_RECORD_OFFSET).typeDescriptor())) {
+            return false;
+        }
+        if (!validateAnydataFields(fieldDescriptors.get(CONSUMER_RECORD_KEY).typeDescriptor())) {
+            return false;
+        }
+        if (!validateAnydataFields(fieldDescriptors.get(CONSUMER_RECORD_VALUE).typeDescriptor())) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateAnydataFields(TypeSymbol typeSymbol) {
+        TypeDescKind symbolTypeKind = typeSymbol.typeKind();
+        return symbolTypeKind == ANYDATA || symbolTypeKind == ARRAY || symbolTypeKind == BOOLEAN ||
+                symbolTypeKind == JSON || symbolTypeKind == INT || symbolTypeKind == STRING ||
+                symbolTypeKind == FLOAT || symbolTypeKind == DECIMAL || symbolTypeKind == RECORD ||
+                symbolTypeKind == TABLE || symbolTypeKind == XML || symbolTypeKind == UNION ||
+                symbolTypeKind == MAP || symbolTypeKind == NIL || symbolTypeKind == TYPE_REFERENCE;
+    }
+
+    private boolean validateOffsetField(TypeSymbol offsetTypeSymbol) {
+        RecordTypeSymbol offsetRecordSymbol;
+        if (offsetTypeSymbol.typeKind() == TYPE_REFERENCE) {
+            if (((TypeReferenceTypeSymbol) offsetTypeSymbol).typeDescriptor().typeKind() == RECORD) {
+                offsetRecordSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) offsetTypeSymbol).typeDescriptor();
+            } else {
+                return false;
+            }
+        } else {
+            offsetRecordSymbol = (RecordTypeSymbol) offsetTypeSymbol;
+        }
+        Map<String, RecordFieldSymbol> partitionOffsetFieldDescriptors = offsetRecordSymbol.fieldDescriptors();
+        if (partitionOffsetFieldDescriptors.size() != 2 || !partitionOffsetFieldDescriptors.containsKey(
+                CONSUMER_RECORD_PARTITION) || !partitionOffsetFieldDescriptors.containsKey(CONSUMER_RECORD_OFFSET)) {
+            return false;
+        }
+        if (partitionOffsetFieldDescriptors.get(CONSUMER_RECORD_OFFSET).typeDescriptor().typeKind() != INT) {
+            return false;
+        }
+        if (partitionOffsetFieldDescriptors.get(CONSUMER_RECORD_PARTITION).typeDescriptor().typeKind() !=
+                TYPE_REFERENCE && partitionOffsetFieldDescriptors.get(CONSUMER_RECORD_PARTITION).typeDescriptor()
+                .typeKind() != RECORD) {
+            return false;
+        }
+        if (!validatePartitionField(partitionOffsetFieldDescriptors.get(CONSUMER_RECORD_PARTITION).typeDescriptor())) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validatePartitionField(TypeSymbol partitionTypeSymbol) {
+        RecordTypeSymbol partitionRecordSymbol;
+        if (partitionTypeSymbol.typeKind() == TYPE_REFERENCE) {
+            if (((TypeReferenceTypeSymbol) partitionTypeSymbol).typeDescriptor().typeKind() == RECORD) {
+                partitionRecordSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) partitionTypeSymbol)
+                        .typeDescriptor();
+            } else {
+                return false;
+            }
+        } else {
+            partitionRecordSymbol = (RecordTypeSymbol) partitionTypeSymbol;
+        }
+        Map<String, RecordFieldSymbol> topicPartitionFieldDescs = partitionRecordSymbol.fieldDescriptors();
+        if (topicPartitionFieldDescs.size() != 2 || !topicPartitionFieldDescs.containsKey(CONSUMER_RECORD_TOPIC) ||
+                !topicPartitionFieldDescs.containsKey(CONSUMER_RECORD_PARTITION)) {
+            return false;
+        }
+        if (topicPartitionFieldDescs.get(CONSUMER_RECORD_TOPIC).typeDescriptor().typeKind() != STRING) {
+            return false;
+        }
+        if (topicPartitionFieldDescs.get(CONSUMER_RECORD_PARTITION).typeDescriptor().typeKind() != INT) {
+            return false;
+        }
+        return true;
     }
 
     private void validateReturnTypeErrorOrNil(FunctionDefinitionNode functionDefinitionNode) {

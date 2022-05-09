@@ -18,83 +18,63 @@ import ballerina/lang.value;
 import ballerina/test;
 
 public type IntProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     int key?;
     int value;
-    int timestamp?;
-    int partition?;
 |};
 
 public type FloatProducerRecord record {|
-    string topic;
-    float key?;
+    *AnydataProducerRecord;
     float value;
-    int timestamp?;
-    int partition?;
+    float key?;
 |};
 
 public type DecimalProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     decimal key?;
     decimal value;
-    int timestamp?;
-    int partition?;
 |};
 
 public type BooleanProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     boolean key?;
     boolean value;
-    int timestamp?;
-    int partition?;
 |};
 
 public type StringProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     string key?;
     string value;
-    int timestamp?;
-    int partition?;
 |};
 
 public type PersonProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     string key?;
     Person value;
-    int timestamp?;
-    int partition?;
 |};
 
 public type MapProducerRecord record {|
-    string topic;
-    string key?;
+    *AnydataProducerRecord;
     map<Person> value;
-    int timestamp?;
-    int partition?;
+    string key?;
 |};
 
 public type XmlProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     string key?;
     xml value;
-    int timestamp?;
-    int partition?;
 |};
 
 public type TableProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     string key?;
     table<Person> value;
-    int timestamp?;
-    int partition?;
 |};
 
 public type JsonProducerRecord record {|
-    string topic;
+    *AnydataProducerRecord;
     string key?;
     json value;
-    int timestamp?;
-    int partition?;
 |};
 
 @test:Config {enable: true}

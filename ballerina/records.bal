@@ -16,24 +16,6 @@
 
 import ballerina/crypto;
 
-// Common record types
-# Represents the topic partition position in which the consumed record is stored.
-#
-# + partition - The `kafka:TopicPartition` to which the record is related
-# + offset - Offset in which the record is stored in the partition
-public type PartitionOffset record {|
-    TopicPartition partition;
-    int offset;
-|};
-
-# Represents a topic partition.
-#
-# + topic - Topic to which the partition is related
-# + partition - Index of the specific partition
-public type TopicPartition record {|
-    string topic;
-    int partition;
-|};
 
 // Security-related records
 # Configurations for secure communication with the Kafka server.
@@ -185,12 +167,34 @@ public type ConsumerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 
+// Common record types
+# Represents the topic partition position in which the consumed record is stored.
+#
+# + partition - The `kafka:TopicPartition` to which the record is related
+# + offset - Offset in which the record is stored in the partition
+public type PartitionOffset record {|
+    TopicPartition partition;
+    int offset;
+|};
+
+# Represents a topic partition.
+#
+# + topic - Topic to which the partition is related
+# + partition - Index of the specific partition
+public type TopicPartition record {|
+    string topic;
+    int partition;
+|};
+
 # Type related to consumer record.
 #
 # + key - Key that is included in the record
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + offset - Topic partition position in which the consumed record is stored
+# # Deprecated
+# Usage of this record is deprecated. Use subtypes of AnydataConsumerRecord 
+# instead to support data-binding
 @deprecated
 public type ConsumerRecord record {|
     byte[] key?;
@@ -209,7 +213,7 @@ public type AnydataConsumerRecord record {|
     anydata key?;
     anydata value;
     int timestamp;
-    PartitionOffset offset?;
+    PartitionOffset offset;
 |};
 
 # Subtype related to `kafka:AnydataConsumerRecord` record.
@@ -227,6 +231,9 @@ public type BytesConsumerRecord record {|
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + partition - Partition to which the record should be sent
+# # Deprecated
+# Usage of this record is deprecated. Use subtypes of AnydataProducerRecord 
+# instead to support data-binding
 @deprecated
 public type ProducerRecord record {|
     string topic;
@@ -337,3 +344,9 @@ public type ProducerConfiguration record {|
     AuthenticationConfiguration auth?;
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
+
+# Defines the Payload remote function parameter.
+public type KafkaPayload record {||};
+
+# The annotation which is used to define the payload parameter in the `onConsumerRecord` service method.
+public annotation KafkaPayload Payload on parameter;
