@@ -58,6 +58,7 @@ import static io.ballerina.compiler.api.symbols.TypeDescKind.INT;
 import static io.ballerina.compiler.api.symbols.TypeDescKind.JSON;
 import static io.ballerina.compiler.api.symbols.TypeDescKind.MAP;
 import static io.ballerina.compiler.api.symbols.TypeDescKind.NIL;
+import static io.ballerina.compiler.api.symbols.TypeDescKind.OBJECT;
 import static io.ballerina.compiler.api.symbols.TypeDescKind.RECORD;
 import static io.ballerina.compiler.api.symbols.TypeDescKind.STRING;
 import static io.ballerina.compiler.api.symbols.TypeDescKind.TABLE;
@@ -71,12 +72,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.BYTE_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DECIMAL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FLOAT_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.INTERSECTION_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.INT_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.JSON_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAP_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PARENTHESISED_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.READONLY_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_TYPE_DESC;
@@ -297,20 +300,34 @@ public class KafkaFunctionValidator {
 
     private boolean validateDataParamSyntaxKind(TypeDescriptorNode typeDescriptorNode) {
         SyntaxKind syntaxKind = typeDescriptorNode.kind();
-        if (syntaxKind == PARENTHESISED_TYPE_DESC) {
+        if (syntaxKind == INTERSECTION_TYPE_DESC) {
+            IntersectionTypeDescriptorNode intersectionNode = (IntersectionTypeDescriptorNode) typeDescriptorNode;
+            if (intersectionNode.leftTypeDesc().kind() != READONLY_TYPE_DESC) {
+                return validateDataParamSyntaxKind((TypeDescriptorNode) intersectionNode.leftTypeDesc());
+            } else if (intersectionNode.rightTypeDesc().kind() != READONLY_TYPE_DESC) {
+                return validateDataParamSyntaxKind((TypeDescriptorNode) intersectionNode.rightTypeDesc());
+            } else {
+                return false;
+            }
+        } else if (syntaxKind == PARENTHESISED_TYPE_DESC) {
             ParenthesisedTypeDescriptorNode parenthesisedNode = (ParenthesisedTypeDescriptorNode) typeDescriptorNode;
             return validateDataParamSyntaxKind(parenthesisedNode.typedesc());
         } else if (syntaxKind == UNION_TYPE_DESC) {
             UnionTypeDescriptorNode unionNode = (UnionTypeDescriptorNode) typeDescriptorNode;
             return validateDataParamSyntaxKind(unionNode.leftTypeDesc()) &&
                     validateDataParamSyntaxKind(unionNode.rightTypeDesc());
+        } else if (syntaxKind == QUALIFIED_NAME_REFERENCE) {
+            TypeReferenceTypeSymbol typeSymbol = (TypeReferenceTypeSymbol) context.semanticModel()
+                    .symbol(typeDescriptorNode).get();
+            return typeSymbol.typeDescriptor().typeKind() != OBJECT;
+        } else if (syntaxKind == ARRAY_TYPE_DESC) {
+            return validateDataParamSyntaxKind(((ArrayTypeDescriptorNode) typeDescriptorNode).memberTypeDesc());
         }
         return syntaxKind == INT_TYPE_DESC || syntaxKind == STRING_TYPE_DESC || syntaxKind == BOOLEAN_TYPE_DESC ||
                 syntaxKind == FLOAT_TYPE_DESC || syntaxKind == DECIMAL_TYPE_DESC || syntaxKind == RECORD_TYPE_DESC ||
                 syntaxKind == MAP_TYPE_DESC || syntaxKind == BYTE_TYPE_DESC || syntaxKind == TABLE_TYPE_DESC ||
                 syntaxKind == JSON_TYPE_DESC || syntaxKind == XML_TYPE_DESC || syntaxKind == ANYDATA_TYPE_DESC ||
-                syntaxKind == NIL_TYPE_DESC || syntaxKind == SIMPLE_NAME_REFERENCE ||
-                syntaxKind == QUALIFIED_NAME_REFERENCE;
+                syntaxKind == NIL_TYPE_DESC || syntaxKind == SIMPLE_NAME_REFERENCE;
     }
 
     private boolean validateReadonlyConsumerRecordsParam(RequiredParameterNode requiredParameterNode) {
