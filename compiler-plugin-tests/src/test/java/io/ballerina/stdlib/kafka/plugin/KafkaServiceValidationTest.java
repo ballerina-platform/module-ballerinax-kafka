@@ -403,7 +403,7 @@ public class KafkaServiceValidationTest {
         }
     }
 
-    @Test(enabled = true, description = "Validate object type arrays")
+    @Test(enabled = true, description = "Validate object type parameters")
     public void testInvalidService23() {
         Package currentPackage = loadPackage("invalid_service_23");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -412,7 +412,7 @@ public class KafkaServiceValidationTest {
         Object[] diagnostics = diagnosticResult.errors().toArray();
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
-            assertDiagnostic(diagnostic, INVALID_PARAM_TYPES);
+            assertDiagnostic(diagnostic, INVALID_SINGLE_PARAMETER);
         }
     }
 
