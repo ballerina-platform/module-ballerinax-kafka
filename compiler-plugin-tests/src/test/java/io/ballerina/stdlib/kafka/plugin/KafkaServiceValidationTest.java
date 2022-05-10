@@ -403,6 +403,19 @@ public class KafkaServiceValidationTest {
         }
     }
 
+    @Test(enabled = true, description = "Validate object type arrays")
+    public void testInvalidService23() {
+        Package currentPackage = loadPackage("invalid_service_23");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, INVALID_PARAM_TYPES);
+        }
+    }
+
     private Package loadPackage(String path) {
         Path projectDirPath = RESOURCE_DIRECTORY.resolve(BALLERINA_SOURCES).resolve(path);
         BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectDirPath);
