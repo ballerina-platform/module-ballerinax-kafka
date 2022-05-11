@@ -890,7 +890,7 @@ kafka:ConsumerConfiguration consumerConfiguration = {
 
 public type Order record {|
     int orderId;
-    string itemName;
+    string productName;
     boolean paymentValid;
 |};
 
@@ -906,7 +906,7 @@ public function main() returns error? {
     OrderConsumerRecord[] records = check consumer->poll(1);
     
     check from OrderConsumerRecord orderRecord in records
-        where orderRecord.value.isValid
+        where orderRecord.value.paymentValid
         do {
             io:println("Received Order: " + orderRecord.value.productName);
         };
@@ -931,7 +931,7 @@ kafka:ConsumerConfiguration consumerConfigs = {
 
 public type Order record {|
     int orderId;
-    string itemName;
+    string productName;
     boolean paymentValid;
 |};
 
@@ -952,7 +952,7 @@ kafka:Service listenerService =
 service object {
     remote function onConsumerRecord(kafka:Caller caller, OrderConsumerRecord[] records) returns error? {
         check from OrderConsumerRecord orderRecord in records
-           where orderRecord.value.isValid
+           where orderRecord.value.paymentValid
            do {
                log:printInfo("Received Order: " + orderRecord.value.productName);
            };
