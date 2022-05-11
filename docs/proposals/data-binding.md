@@ -3,10 +3,10 @@
 _Owners_: @shafreenAnfar @dilanSachi @aashikam     
 _Reviewers_: @shafreenAnfar @aashikam  
 _Created_: 2022/03/14  
-_Issues_: [#2751](https://github.com/ballerina-platform/ballerina-standard-library/issues/2751) [#2783](https://github.com/ballerina-platform/ballerina-standard-library/issues/2783)
+_Issues_: [#2751](https://github.com/ballerina-platform/ballerina-standard-library/issues/2751) [#2783](https://github.com/ballerina-platform/ballerina-standard-library/issues/2783) [#2880](https://github.com/ballerina-platform/ballerina-standard-library/issues/2880)
 
 ## Summary
-Data binding helps to access the incoming and outgoing message data in the user's desired type. Similar to the Ballerina HTTP package, subtypes of `json`, `xml` will be the supported types. This proposal discusses ways to provide data binding for both on producer side, and the consumer side.
+Data binding helps to access the incoming and outgoing message data in the user's desired type. Similar to the Ballerina HTTP package, subtypes of `anydata` will be the supported types. This proposal discusses ways to provide data binding for both on producer side, and the consumer side.
 
 ## Goals
 - Improve user experience by adding data binding support for `kafka:Service`, `kafka:Producer` and `Kafka:Consumer`.
@@ -36,100 +36,130 @@ foreach kafka:ConsumerRecord 'record in records {
     Person person = check value:fromJsonStringWithType(messageContent);
 }
 ```
-Instead of this, if data binding support is introduced, user can easily send and receive the messages in the desired format.
+Instead of this, if data binding support is introduced, users can easily send and receive the messages in the desired format.
+
+For this purpose, we will introduce 2 new records for consuming and producing.
 ```ballerina
-check producer->send({ topic: TOPIC, value: person});
-
-PersonRecord[] personRecords = check consumer->poll(2);
+# Type related to anydata consumer record.
+#
+# + key - Key that is included in the record
+# + value - Anydata record content
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + offset - Topic partition position in which the consumed record is stored
+public type AnydataConsumerRecord record {|
+    anydata key?;
+    anydata value;
+    int timestamp;
+    PartitionOffset offset;
+|};
 ```
+```ballerina
+# Details related to the anydata producer record.
+#
+# + topic - Topic to which the record will be appended
+# + key - Key that is included in the record
+# + value - Anydata record content
+# + timestamp - Timestamp of the record, in milliseconds since epoch
+# + partition - Partition to which the record should be sent
+public type AnydataProducerRecord record {|
+    string topic;
+    anydata key?;
+    anydata value;
+    int timestamp?;
+    int partition?;
+|};
+```
+With these, user can create user-defined subtypes of the above records to achieve data binding as shown below.
+```ballerina
+public type PersonProducerRecord record {|
+    *kafka:AnydataProducerRecord;
+    string key?;
+    Person value;
+|};
+check producer->send(personRecord);
 
+public type PersonConsumerRecord record {|
+    *kafka:AnydataConsumerRecord;
+    string key?;
+    Person value;
+|};
+PersonConsumerRecord[] personRecords = check consumer->poll(2);
+```
 ### Listener
 `kafka:Listener` receive messages in the `onConsumerRecord` method of the `kafka:Service`.
 ```ballerina
 remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns kafka:Error?;
 ```
-This will be updated to accept the above-mentioned parameter types. The user can state the required data type as a parameter in the remote function signature. So the received data will be converted to the requested type and dispatched to the remote function.
+This will be updated to accept the above-mentioned parameter types. User can create a subtype of `kafka:AnydataConsumerRecord` and use it in the function signature or directly use a subtype of `anydata` to get the payload binded directly.
 Therefore, following scenarios will be available for the user.
 ```ballerina
-remote function onConsumerRecord(kafka:Caller caller, json|xml[]|byte[] data, kafka:ConsumerRecord[] records) returns kafka:Error?;
+remote function onConsumerRecord(kafka:Caller caller, anydata[] data, kafka:AnydataConsumerRecord[] records) returns kafka:Error?;
 ```
 ```ballerina
-remote function onConsumerRecord(kafka:Caller caller, json|xml|byte[] data) returns kafka:Error?;
+remote function onConsumerRecord(kafka:Caller caller, anydata[] data) returns kafka:Error?;
 ```
-### Producer
-The `kafka:Producer` client has `send(kafka:ProducerRecord record)` API to send data to the Kafka server. Currently, `kafka:ProducerRecord` is as follows.
 ```ballerina
-# Details related to the producer record.
-#
-# + topic - Topic to which the record will be appended
-# + key - Key that is included in the record
-# + value - Record content
-# + timestamp - Timestamp of the record, in milliseconds since epoch
-# + partition - Partition to which the record should be sent
-public type ProducerRecord record {|
-    string topic;
+remote function onConsumerRecord(kafka:Caller caller, kafka:AnydataConsumerRecord[] consumerRecords) returns kafka:Error?;
+```
+As an example,
+```ballerina
+remote function onConsumerRecord(kafka:Caller caller, PersonConsumerRecord[] data) returns kafka:Error?;
+remote function onConsumerRecord(kafka:Caller caller, Person[] data) returns kafka:Error?;
+```
+In a case where the user defined payload type is structurally same as `kafka:AnydataConsumerRecord`, user can include the `@Payload` annotation to remove the ambiguity.
+```ballerina
+public type RandomPayload record {|
     byte[] key?;
     byte[] value;
-    int timestamp?;
-    int partition?;
+    int timestamp;
+    record {
+        record {
+            string topic;
+            int partition;
+        } partition;
+        int offset;
+    } offset;
 |};
+remote function onConsumerRecord(kafka:AnydataConsumerRecord[] consumerRecords, @kafka:Payload RandomPayload[] payload) returns kafka:Error?;
+```
+### Producer
+The `kafka:Producer` client has `send(kafka:ProducerRecord record)` API to send data to the Kafka server.
+```ballerina
+isolated remote function send(kafka:ProducerRecord producerRecord) returns Error?;
 ```
 This will be updated as,
 ```ballerina
-public type ProducerRecord record {|
-    string topic;
-    byte[] key?;
-    json|xml|byte[] value;
-    int timestamp?;
-    int partition?;
-|};
-```
-Whatever the data type given as the value will be converted to a `byte[]` internally and sent to the Kafka server. If the data binding fails, a `kafka:Error` will be returned from the API.
+# Produces records to the Kafka server.
+#
+# + producerRecord - Record to be produced
+# + return - A `kafka:Error` if send action fails to send data or else '()'
+remote function send(kafka:AnydataProducerRecord producerRecord) returns Error?;
+``` 
+With this, whatever the data type given as the value will be converted to a `byte[]` internally and sent to the Kafka server. If the data binding fails, a `kafka:Error` will be returned from the API.
 ### Consumer
 To consume messages, the consumer client has `poll()` API which returns `kafka:ConsumerRecord[]`.
+```ballerina
+remote function poll(decimal timeout) returns ConsumerRecord[]|Error;
+```
+This will be updated as follows.
 ```ballerina
 # Polls the external broker to retrieve messages.
 #
 # + timeout - Polling time in seconds
+# + T - Optional type description of the required data type
 # + return - Array of consumer records if executed successfully or else a `kafka:Error`
-isolated remote function poll(decimal timeout) returns ConsumerRecord[]|Error;
+isolated remote function poll(decimal timeout, typedesc<AnydataConsumerRecord[]> T = <>) returns T|Error;
 ```
-`kafka:ConsumerRecord` will be updated to allow data binding as follows.
-```ballerina
-public type ConsumerRecord record {|
-    byte[] key?;
-    json|xml|byte[] value;
-    int timestamp;
-    PartitionOffset offset;
-|};
-```
-That way, user can receive messages in the desired type via the following way.
-```ballerina
-public type Person record {|
-    string name;
-    string age;
-|};
 
-public type PersonRecord record {|
-    *ConsumerRecord;
-    Person value;
-|};
-
-PersonRecord[] persons = check consumer->poll(2);
-```
-To allow these `poll()` function will also be updated to return the desired type,
+For the cases where the user wants none of the `kafka:ConsumerRecord` information, `pollPayload()` API will be introduced.
 ```ballerina
-isolated remote function poll(decimal timeout, typedesc<json|xml[]|kafka:ConsumerRecord[]> T = <>) returns T|Error;
-```
-For the cases where the user wants none of the `kafka:ConsumerRecord` information, `pollWithType()` API will be introduced.
-```ballerina
-isolated remote function pollWithType(decimal timeout, typedesc<json|xml[]> T = <>) returns T|Error;
+isolated remote function pollPayload(decimal timeout, typedesc<anydata[]> T = <>) returns T|Error;
 ```
 With this, user can do the following.
 ```ballerina
-Person[] persons = check consumer->pollWithType(2);
+Person[] persons = check consumer->pollPayload(2);
 ```
-With this new data binding improvement, the compiler plugin validation for `onConsumerRecord` function will also be updated to allow types other than `kafka:ConsumerRecord`.
+With this new data binding improvement, the compiler plugin validation for `onConsumerRecord` function will also be updated to allow types of both `kafka:AnydataConsumerRecord[]` and `anydata[]`.
 ## Testing
 - Testing the runtime data type conversions on the producer, consumer & listener.
 - Testing compiler plugin validation to accept new data types.
