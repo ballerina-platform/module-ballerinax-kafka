@@ -3,7 +3,7 @@
 _Owners_: @shafreenAnfar @dilanSachi @aashikam    
 _Reviewers_: @shafreenAnfar @aashikam  
 _Created_: 2020/10/28   
-_Updated_: 2022/02/08   
+_Updated_: 2022/05/11   
 _Edition_: Swan Lake 
 _Issue_: [#2186](https://github.com/ballerina-platform/ballerina-standard-library/issues/2186)  
 
@@ -207,19 +207,27 @@ public type ProducerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 ```
-* A `kafka:ProducerRecord` corresponds to a message and other metadata that is sent to the Kafka server.
+* A `kafka:AnydataProducerRecord` corresponds to a message and other metadata that is sent to the Kafka server.
 ```ballerina
-public type ProducerRecord record {|
+public type AnydataProducerRecord record {|
     # Topic to which the record will be appended
     string topic;
     # Key that is included in the record
-    byte[] key?;
+    anydata key?;
     # Record content
-    byte[] value;
+    anydata value;
     # Timestamp of the record, in milliseconds since epoch
     int timestamp?;
     # Partition to which the record should be sent
     int partition?;
+|};
+```
+* `kafka:BytesProducerRecord` defines the subtype of `kafka:AnydataProducerRecord` where the value is a `byte[]`;
+```ballerina
+public type BytesProducerRecord record {|
+    *AnydataProducerRecord;
+    // Record content in bytes
+    byte[] value;
 |};
 ```
 ### 3.2. Initialization
@@ -260,12 +268,12 @@ kafka:ProducerConfiguration producerConfigs = {
 ```ballerina
 # Produces records to the Kafka server.
 # ```ballerina
-# kafka:Error? result = producer->send("Hello World, Ballerina", "kafka-topic");
+# kafka:Error? result = producer->send({value: "Hello World, Ballerina", topic: "kafka-topic"});
 # ```
 #
 # + producerRecord - Record to be produced
 # + return -  A `kafka:Error` if send action fails to send data or else '()'
-isolated remote function send(ProducerRecord producerRecord) returns Error?;
+isolated remote function send(AnydataProducerRecord producerRecord) returns Error?;
 ```
 * If the user wants to ensure the message order or ensure that the message goes to a specific partition, `key` and
   `partition` configurations can be provided in the `ProducerRecord`;
@@ -396,17 +404,25 @@ public type ConsumerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 ```
-* A `kafka:ConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
+* A `kafka:AnydataConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
 ```ballerina
-public type ConsumerRecord record {|
+public type AnydataConsumerRecord record {|
     # Key that is included in the record
-    byte[] key?;
+    anydata key?;
     # Record content
-    byte[] value;
+    anydata value;
     # Timestamp of the record, in milliseconds since epoch
     int timestamp;
     # Topic partition position in which the consumed record is stored
     PartitionOffset offset;
+|};
+```
+* `kafka:BytesConsumerRecord` defines the subtype of `kafka:AnydataConsumerRecord` where the value is a `byte[]`.
+```ballerina
+public type BytesConsumerRecord record {|
+    *AnydataConsumerRecord;
+    // Record content in bytes
+    byte[] value;
 |};
 ```
 ### 4.2. Consumer Client
@@ -452,14 +468,36 @@ kafka:ConsumerConfiguration consumerConfiguration = {
 ```ballerina
 # Polls the external broker to retrieve messages.
 # ```ballerina
-# kafka:ConsumerRecord[] result = check consumer->poll(10);
+# kafka:AnydataConsumerRecord[] result = check consumer->poll(10);
 # ```
 #
 # + timeout - Polling time in seconds
+# + T - Optional type description of the required data type
 # + return - Array of consumer records if executed successfully or else a `kafka:Error`
-isolated remote function poll(decimal timeout) returns ConsumerRecord[]|Error;
+isolated remote function poll(decimal timeout, typedesc<AnydataConsumerRecord[]> T = <>) returns T|Error;
 ```
 * When polling, a timeout value can be specified, and it will be the maximum time that the `poll()` method will block for.
+* Subtypes of `kafka:AnydataConsumerRecord` can be created to bind the data to a specific type.
+```ballerina
+public type StringConsumerRecord record {|
+    *kafka:AnydataConsumerRecord;
+    string content;
+|};
+StringConsumerRecord[] stringRecords = check consumer->poll(10);
+```
+* If none of the metadata of the consumer records are not needed, `pollPayload` api can be used to directly get the payload in the intended type.
+```ballerina
+# Polls the external broker to retrieve messages in the required data type without the `kafka:AnydataConsumerRecord`
+# information.
+# ```ballerina
+# Person[] persons = check consumer->pollPayload(10);
+# ```
+#
+# + timeout - Polling time in seconds
+# + T - Optional type description of the required data type
+# + return - Array of data in the required format if executed successfully or else a `kafka:Error`
+isolated remote function pollPayload(decimal timeout, typedesc<anydata[]> T = <>) returns T|Error;
+```
 * After consuming messages, the consumed offsets can be committed to the Kafka server. This can be done automatically by 
 specifying `autoCommit: true` in `kafka:ConsumerConfiguration` or by manually using `commit()`.
 ```ballerina
@@ -741,7 +779,7 @@ After initializing the listener, a service must be attached to the listener. The
 1. Attach the service to the listener directly.
 ```ballerina
 service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
         // process results
     }
 }
@@ -751,12 +789,22 @@ service kafka:Service on kafkaListener {
 // Create a service object
 kafka:Service listenerService =
 service object {
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
         // process results
     }
 };
 ```
 The remote function `onConsumerRecord()` is called when the listener receives messages from the Kafka server.
+
+As same as the consumer, if the metadata of `kafka:AnydataConsumerRecord` is not needed, payload can be directly received as well.
+```ballerina
+kafka:Service listenerService =
+service object {
+    remote function onConsumerRecord(kafka:Caller caller, Person[] payload) returns error? {
+        // process results
+    }
+};
+```
 
 The Listener has following functions to manage a service.
 * `attach()` - can be used to attach a service to the listener dynamically.
@@ -867,7 +915,7 @@ kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL, producerConfigs);
 
 public function main() returns error? {
     string message = "Hello World, Ballerina";
-    check kafkaProducer->send({ topic: "kafka-topic", value: message.toBytes() });
+    check kafkaProducer->send({ topic: "kafka-topic", value: message });
     check kafkaProducer->'flush();
     check kafkaProducer->close();
 }
@@ -887,18 +935,28 @@ kafka:ConsumerConfiguration consumerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SSL
 };
 
+public type Order record {|
+    int orderId;
+    string productName;
+    boolean paymentValid;
+|};
+
+public type OrderConsumerRecord record {|
+    *kafka:AnydataConumerRecord;
+    Order value;
+|};
+
 kafka:Consumer consumer = check new (kafka:DEFAULT_URL, consumerConfiguration);
 
 public function main() returns error? {
     check consumer->subscribe(["kafka-topic"]);
-    kafka:ConsumerRecord[] records = check consumer->poll(1);
-
-    foreach var kafkaRecord in records {
-        byte[] messageContent = kafkaRecord.value;
-        string message = check string:fromBytes(messageContent);
-
-        io:println("Received Message: " + message);
-    }
+    OrderConsumerRecord[] records = check consumer->poll(1);
+    
+    check from OrderConsumerRecord orderRecord in records
+        where orderRecord.value.paymentValid
+        do {
+            io:println("Received Order: " + orderRecord.value.productName);
+        };
 }
 ```
 #### 5.2.2. Using Listener
@@ -918,6 +976,17 @@ kafka:ConsumerConfiguration consumerConfigs = {
     securityProtocol: kafka:PROTOCOL_SSL
 };
 
+public type Order record {|
+    int orderId;
+    string productName;
+    boolean paymentValid;
+|};
+
+public type OrderConsumerRecord record {|
+    *kafka:AnydataConumerRecord;
+    Order value;
+|};
+
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
 
 public function main() returns error? {
@@ -928,20 +997,16 @@ public function main() returns error? {
 
 kafka:Service listenerService =
 service object {
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
-        foreach var kafkaRecord in records {
-            check processKafkaRecord(kafkaRecord);
-        }
+    remote function onConsumerRecord(kafka:Caller caller, OrderConsumerRecord[] records) returns error? {
+        check from OrderConsumerRecord orderRecord in records
+           where orderRecord.value.paymentValid
+           do {
+               log:printInfo("Received Order: " + orderRecord.value.productName);
+           };
         kafka:Error? commitResult = caller->commit();
         if commitResult is error {
             log:printError("Error occurred while committing the offsets for the consumer ", 'error = commitResult);
         }
     }
 };
-
-function processKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns error? {
-    byte[] value = kafkaRecord.value;
-    string messageContent = check string:fromBytes(value);
-    log:printInfo("Received Message: " + messageContent);
-}
 ```
