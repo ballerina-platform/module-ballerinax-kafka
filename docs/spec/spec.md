@@ -207,9 +207,9 @@ public type ProducerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 ```
-* A `kafka:ProducerRecord` corresponds to a message and other metadata that is sent to the Kafka server.
+* A `kafka:AnydataProducerRecord` corresponds to a message and other metadata that is sent to the Kafka server.
 ```ballerina
-public type ProducerRecord record {|
+public type AnydataProducerRecord record {|
     # Topic to which the record will be appended
     string topic;
     # Key that is included in the record
@@ -220,6 +220,14 @@ public type ProducerRecord record {|
     int timestamp?;
     # Partition to which the record should be sent
     int partition?;
+|};
+```
+* `kafka:BytesProducerRecord` defines the subtype of `kafka:AnydataProducerRecord` where the value is a `byte[]`;
+```ballerina
+public type BytesProducerRecord record {|
+    *AnydataProducerRecord;
+    // Record content in bytes
+    byte[] value;
 |};
 ```
 ### 3.2. Initialization
@@ -396,9 +404,9 @@ public type ConsumerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 ```
-* A `kafka:ConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
+* A `kafka:AnydataConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
 ```ballerina
-public type ConsumerRecord record {|
+public type AnydataConsumerRecord record {|
     # Key that is included in the record
     anydata key?;
     # Record content
@@ -407,6 +415,14 @@ public type ConsumerRecord record {|
     int timestamp;
     # Topic partition position in which the consumed record is stored
     PartitionOffset offset;
+|};
+```
+* `kafka:BytesConsumerRecord` defines the subtype of `kafka:AnydataConsumerRecord` where the value is a `byte[]`.
+```ballerina
+public type BytesConsumerRecord record {|
+    *AnydataConsumerRecord;
+    // Record content in bytes
+    byte[] value;
 |};
 ```
 ### 4.2. Consumer Client
@@ -461,6 +477,27 @@ kafka:ConsumerConfiguration consumerConfiguration = {
 isolated remote function poll(decimal timeout, typedesc<AnydataConsumerRecord[]> T = <>) returns T|Error;
 ```
 * When polling, a timeout value can be specified, and it will be the maximum time that the `poll()` method will block for.
+* Subtypes of `kafka:AnydataConsumerRecord` can be created to bind the data to a specific type.
+```ballerina
+public type StringConsumerRecord record {|
+    *kafka:AnydataConsumerRecord;
+    string content;
+|};
+StringConsumerRecord[] stringRecords = check consumer->poll(10);
+```
+* If none of the metadata of the consumer records are not needed, `pollPayload` api can be used to directly get the payload in the intended type.
+```ballerina
+# Polls the external broker to retrieve messages in the required data type without the `kafka:AnydataConsumerRecord`
+# information.
+# ```ballerina
+# Person[] persons = check consumer->pollPayload(10);
+# ```
+#
+# + timeout - Polling time in seconds
+# + T - Optional type description of the required data type
+# + return - Array of data in the required format if executed successfully or else a `kafka:Error`
+isolated remote function pollPayload(decimal timeout, typedesc<anydata[]> T = <>) returns T|Error;
+```
 * After consuming messages, the consumed offsets can be committed to the Kafka server. This can be done automatically by 
 specifying `autoCommit: true` in `kafka:ConsumerConfiguration` or by manually using `commit()`.
 ```ballerina
@@ -758,6 +795,16 @@ service object {
 };
 ```
 The remote function `onConsumerRecord()` is called when the listener receives messages from the Kafka server.
+
+As same as the consumer, if the metadata of `kafka:AnydataConsumerRecord` is not needed, payload can be directly received as well.
+```ballerina
+kafka:Service listenerService =
+service object {
+    remote function onConsumerRecord(kafka:Caller caller, Person[] payload) returns error? {
+        // process results
+    }
+};
+```
 
 The Listener has following functions to manage a service.
 * `attach()` - can be used to attach a service to the listener dynamically.
