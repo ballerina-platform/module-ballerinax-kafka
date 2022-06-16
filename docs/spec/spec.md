@@ -4,8 +4,7 @@ _Owners_: @shafreenAnfar @dilanSachi @aashikam
 _Reviewers_: @shafreenAnfar @aashikam  
 _Created_: 2020/10/28   
 _Updated_: 2022/05/11   
-_Edition_: Swan Lake 
-_Issue_: [#2186](https://github.com/ballerina-platform/ballerina-standard-library/issues/2186)  
+_Edition_: Swan Lake  
 
 # Introduction
 This is the specification for the Kafka standard library of [Ballerina language](https://ballerina.io/), which can send and receive messages by connecting to a Kafka server.
