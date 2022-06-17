@@ -6,7 +6,7 @@ _Created_: 2020/10/28
 _Updated_: 2022/05/11   
 _Edition_: Swan Lake  
 
-# Introduction
+## Introduction
 This is the specification for the Kafka standard library of [Ballerina language](https://ballerina.io/), which can send and receive messages by connecting to a Kafka server.
 
 The Kafka library specification has evolved and may continue to evolve in the future. The released versions of the specification can be found under the relevant GitHub tag.
@@ -15,7 +15,7 @@ If you have any feedback or suggestions about the library, start a discussion vi
 
 The conforming implementation of the specification is released to Ballerina central. Any deviation from the specification is considered a bug.
 
-# Contents
+## Contents
 1. [Overview](#1-overview)
 2. [Configurations](#2-configurations)
    *  2.1. [Security Configurations](#21-security-configurations)
