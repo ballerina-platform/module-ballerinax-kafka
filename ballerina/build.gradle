@@ -172,8 +172,8 @@ publishing {
     }
 }
 
-updateTomlFiles.dependsOn copyStdlibs
 
+updateTomlFiles.dependsOn copyStdlibs
 test.dependsOn startKafkaServer
 
 build.dependsOn "generatePomFileForMavenPublication"
