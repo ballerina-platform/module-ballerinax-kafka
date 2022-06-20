@@ -24,7 +24,7 @@ jobs:
         if: github.event.action == 'check_connector_for_breaking_changes'
         run: |
           echo "BUILD_USING_DOCKER=true" >> $GITHUB_ENV
-          echo "GRADLE_SKIP_TASKS=-x :rabbitmq-compiler-plugin-tests:test"  >> $GITHUB_ENV
+          echo "GRADLE_SKIP_TASKS=-x :kafka-compiler-plugin-tests:test"  >> $GITHUB_ENV
 
       # Build the project with Gradle
       - name: Build with Gradle
