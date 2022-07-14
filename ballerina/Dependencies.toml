@@ -35,6 +35,7 @@ dependencies = [
 org = "ballerina"
 name = "constraint"
 version = "1.0.0"
+scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -100,6 +101,7 @@ dependencies = [
 org = "ballerina"
 name = "io"
 version = "1.2.2"
+scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
@@ -211,6 +213,7 @@ dependencies = [
 org = "ballerina"
 name = "lang.value"
 version = "0.0.0"
+scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -219,6 +222,7 @@ dependencies = [
 org = "ballerina"
 name = "log"
 version = "2.3.0"
+scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
