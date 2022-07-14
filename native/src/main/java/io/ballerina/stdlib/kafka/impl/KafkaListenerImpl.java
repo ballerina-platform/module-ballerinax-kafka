@@ -253,10 +253,10 @@ public class KafkaListenerImpl implements KafkaListener {
         for (Object record: records) {
             bArray.append(getValueWithIntendedType(intendedType, (byte[]) ((ConsumerRecord) record).value()));
         }
+        validateConstraints(bArray, getElementTypeDescFromArrayTypeDesc(ValueCreator.createTypedescValue(type)));
         if (type.isReadOnly()) {
             bArray.freezeDirect();
         }
-        validateConstraints(bArray, getElementTypeDescFromArrayTypeDesc(ValueCreator.createTypedescValue(type)));
         return bArray;
     }
 

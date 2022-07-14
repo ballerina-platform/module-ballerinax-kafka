@@ -95,7 +95,6 @@ public class Poll {
                 if (!recordsRetrieved.isEmpty()) {
                     dataArray = getValuesWithIntendedType(arrayType, recordsRetrieved);
                 }
-                validateConstraints(dataArray, getElementTypeDescFromArrayTypeDesc(bTypedesc));
                 balFuture.complete(dataArray);
             } catch (BError bError) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
@@ -115,6 +114,7 @@ public class Poll {
             bArray.append(getValueWithIntendedType(getReferredType(type.getElementType()),
                     (byte[]) ((ConsumerRecord) record).value()));
         }
+        validateConstraints(bArray, getElementTypeDescFromArrayTypeDesc(ValueCreator.createTypedescValue(type)));
         if (type.isReadOnly()) {
             bArray.freezeDirect();
         }

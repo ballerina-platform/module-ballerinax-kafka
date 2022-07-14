@@ -622,11 +622,11 @@ public class KafkaUtils {
         for (Object record : records) {
             consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType));
         }
+        validateConstraints(consumerRecordsArray,
+                getElementTypeDescFromArrayTypeDesc(consumerRecordsArray.getTypedesc()));
         if (readonly) {
             consumerRecordsArray.freezeDirect();
         }
-        validateConstraints(consumerRecordsArray,
-                getElementTypeDescFromArrayTypeDesc(consumerRecordsArray.getTypedesc()));
         return consumerRecordsArray;
     }
 
