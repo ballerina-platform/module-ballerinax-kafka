@@ -142,8 +142,8 @@ function arrayMaxLengthConstraintPayloadTest() returns error? {
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
-        groupId: "data-binding-consumer-group-10",
-        clientId: "data-binding-consumer-id-10",
+        groupId: "constraint-consumer-group-04",
+        clientId: "constraint-consumer-id-04",
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
@@ -165,8 +165,8 @@ function arrayMinLengthConstraintPayloadTest() returns error? {
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
-        groupId: "data-binding-consumer-group-10",
-        clientId: "data-binding-consumer-id-10",
+        groupId: "constraint-consumer-group-05",
+        clientId: "constraint-consumer-id-05",
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
@@ -188,8 +188,8 @@ function floatMinValueConstraintPayloadTest() returns error? {
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
-        groupId: "data-binding-consumer-group-10",
-        clientId: "data-binding-consumer-id-10",
+        groupId: "constraint-consumer-group-06",
+        clientId: "constraint-consumer-id-06",
         offsetReset: OFFSET_RESET_EARLIEST
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
@@ -226,8 +226,8 @@ function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-01",
-        clientId: "data-binding-listener-01",
+        groupId: "constraint-listener-group-07",
+        clientId: "constraint-listener-07",
         pollingInterval: 1
     };
     Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
@@ -261,8 +261,8 @@ function intMinValueConstraintListenerConsumerRecordTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-01",
-        clientId: "data-binding-listener-01",
+        groupId: "constraint-listener-group-08",
+        clientId: "constraint-listener-08",
         pollingInterval: 1
     };
     Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
@@ -295,8 +295,8 @@ function numberMaxValueConstraintListenerPayloadTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-01",
-        clientId: "data-binding-listener-01",
+        groupId: "constraint-listener-group-09",
+        clientId: "constraint-listener-09",
         pollingInterval: 1
     };
     Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
@@ -329,8 +329,8 @@ function numberMinValueConstraintListenerPayloadTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        groupId: "data-binding-listener-group-01",
-        clientId: "data-binding-listener-01",
+        groupId: "constraint-listener-group-10",
+        clientId: "constraint-listener-10",
         pollingInterval: 1
     };
     Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
