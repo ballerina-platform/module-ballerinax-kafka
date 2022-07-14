@@ -14,7 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
+# Defines the common error type for the module.
 public type Error distinct error;
+
+# Represents an error, which occurred due to payload binding.
+public type PayloadBindingError distinct Error;
+
+# Represents an error, which occurred due to payload constraint validation.
+public type PayloadValidationError distinct PayloadBindingError;
 
 isolated function getKeyTypeMismatchError(string expectedType) returns Error {
     string message = "Invalid type found for Kafka key. Expected key type: '" + expectedType + "'.";
