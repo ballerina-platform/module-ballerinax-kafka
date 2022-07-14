@@ -43,11 +43,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getElementTypeDescFromArrayTypeDesc;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getMilliSeconds;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getValueWithIntendedType;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.validateConstraints;
 
 /**
  * Native function polls the broker to retrieve messages within given timeout.
@@ -71,6 +74,9 @@ public class Poll {
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
+            } catch (BError e) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(e);
             }
         });
         return null;
@@ -89,10 +95,11 @@ public class Poll {
                 if (!recordsRetrieved.isEmpty()) {
                     dataArray = getValuesWithIntendedType(arrayType, recordsRetrieved);
                 }
+                validateConstraints(dataArray, getElementTypeDescFromArrayTypeDesc(bTypedesc));
                 balFuture.complete(dataArray);
             } catch (BError bError) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                balFuture.complete(createKafkaError(bError.getMessage()));
+                balFuture.complete(bError);
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
@@ -102,9 +109,11 @@ public class Poll {
     }
 
     private static BArray getValuesWithIntendedType(ArrayType type, ConsumerRecords records) {
-        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(type.getElementType()));
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(
+                getReferredType(type.getElementType())));
         for (Object record: records) {
-            bArray.append(getValueWithIntendedType(type.getElementType(), (byte[]) ((ConsumerRecord) record).value()));
+            bArray.append(getValueWithIntendedType(getReferredType(type.getElementType()),
+                    (byte[]) ((ConsumerRecord) record).value()));
         }
         if (type.isReadOnly()) {
             bArray.freezeDirect();
@@ -115,10 +124,10 @@ public class Poll {
     private static RecordType getRecordType(BTypedesc bTypedesc) {
         RecordType recordType;
         if (bTypedesc.getDescribingType().isReadOnly()) {
-            recordType = (RecordType) ((IntersectionType) ((ArrayType) bTypedesc.getDescribingType())
-                    .getElementType()).getConstituentTypes().get(0);
+            recordType = (RecordType) ((IntersectionType) getReferredType(((ArrayType) bTypedesc.getDescribingType())
+                    .getElementType())).getConstituentTypes().get(0);
         } else {
-            recordType = (RecordType) ((ArrayType) bTypedesc.getDescribingType()).getElementType();
+            recordType = (RecordType) getReferredType(((ArrayType) bTypedesc.getDescribingType()).getElementType());
         }
         return recordType;
     }

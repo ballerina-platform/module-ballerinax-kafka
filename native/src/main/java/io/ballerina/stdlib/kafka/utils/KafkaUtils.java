@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Field;
+import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
@@ -40,6 +41,7 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
+import io.ballerina.stdlib.constraint.Constraints;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -58,7 +60,6 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -72,15 +73,20 @@ import java.util.Properties;
 import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
+import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.runtime.api.TypeTags.UNION_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
+import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_PARTITION_OFFSET;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_TIMESTAMP;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_VALUE;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_BINDING_ERROR;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_VALIDATION_ERROR;
+import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getModule;
 
 /**
  * Utility class for Kafka Connector Implementation.
@@ -556,8 +562,8 @@ public class KafkaUtils {
 
     public static List<String> getStringListFromStringBArray(BArray stringArray) {
         ArrayList<String> values = new ArrayList<>();
-        if ((Objects.isNull(stringArray)) ||
-                (!((ArrayType) stringArray.getType()).getElementType().equals(PredefinedTypes.TYPE_STRING))) {
+        if ((Objects.isNull(stringArray)) || (!getReferredType(((ArrayType) stringArray.getType())
+                .getElementType()).equals(PredefinedTypes.TYPE_STRING))) {
             return values;
         }
         if (stringArray.size() != 0) {
@@ -587,8 +593,8 @@ public class KafkaUtils {
     public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, RecordType recordType) {
         Object key = null;
         Map<String, Field> fieldMap = recordType.getFields();
-        Type keyType = fieldMap.get(KAFKA_RECORD_KEY).getFieldType();
-        Type valueType = fieldMap.get(KAFKA_RECORD_VALUE).getFieldType();
+        Type keyType = getReferredType(fieldMap.get(KAFKA_RECORD_KEY).getFieldType());
+        Type valueType = getReferredType(fieldMap.get(KAFKA_RECORD_VALUE).getFieldType());
         if (Objects.nonNull(record.key())) {
             key = getValueWithIntendedType(keyType, (byte[]) record.key());
             if (key instanceof BError) {
@@ -619,6 +625,8 @@ public class KafkaUtils {
         if (readonly) {
             consumerRecordsArray.freezeDirect();
         }
+        validateConstraints(consumerRecordsArray,
+                getElementTypeDescFromArrayTypeDesc(consumerRecordsArray.getTypedesc()));
         return consumerRecordsArray;
     }
 
@@ -640,7 +648,7 @@ public class KafkaUtils {
                     }
                     return getValueFromJson(type, strValue);
                 case ARRAY_TAG:
-                    if (((ArrayType) type).getElementType().getTag() == BYTE_TAG) {
+                    if (getReferredType(((ArrayType) type).getElementType()).getTag() == BYTE_TAG) {
                         return ValueCreator.createArrayValue(value);
                     }
                     /*-fallthrough*/
@@ -648,7 +656,7 @@ public class KafkaUtils {
                     return getValueFromJson(type, strValue);
             }
         } catch (BError bError) {
-            throw KafkaUtils.createKafkaError(String.format("Data binding failed: %s", bError.getMessage()));
+            throw createPayloadBindingError(String.format("Data binding failed: %s", bError.getMessage()), bError);
         }
     }
 
@@ -675,17 +683,27 @@ public class KafkaUtils {
     }
 
     public static BError createKafkaError(String message) {
-        return ErrorCreator.createDistinctError(KAFKA_ERROR, ModuleUtils.getModule(),
+        return ErrorCreator.createDistinctError(KAFKA_ERROR, getModule(),
                                                 StringUtils.fromString(message));
     }
 
     public static BError createKafkaError(String message, BError cause) {
-        return ErrorCreator.createDistinctError(KAFKA_ERROR, ModuleUtils.getModule(),
+        return ErrorCreator.createDistinctError(KAFKA_ERROR, getModule(),
                                                  StringUtils.fromString(message), cause);
     }
 
+    public static BError createPayloadValidationError(String message, BArray results) {
+        return ErrorCreator.createError(getModule(), PAYLOAD_VALIDATION_ERROR, StringUtils.fromString(message),
+                ErrorCreator.createError(StringUtils.fromString(results.toString())), null);
+    }
+
+    public static BError createPayloadBindingError(String message, BError cause) {
+        return ErrorCreator.createError(getModule(), PAYLOAD_BINDING_ERROR, StringUtils.fromString(message),
+                cause, null);
+    }
+
     public static BMap<BString, Object> createKafkaRecord(String recordName) {
-        return ValueCreator.createRecordValue(ModuleUtils.getModule(), recordName);
+        return ValueCreator.createRecordValue(getModule(), recordName);
     }
 
     public static BArray getPartitionOffsetArrayFromOffsetMap(Map<TopicPartition, Long> offsetMap) {
@@ -896,9 +914,26 @@ public class KafkaUtils {
         return function;
     }
 
+    public static Object validateConstraints(BArray consumerRecordsArray, BTypedesc bTypedesc) {
+        for (int i = 0; i < consumerRecordsArray.size(); i++) {
+            Object validationResult = Constraints.validate(consumerRecordsArray.get(i), bTypedesc);
+            if (validationResult instanceof BError) {
+                throw createPayloadValidationError("Failed to validate", consumerRecordsArray);
+            }
+        }
+        return consumerRecordsArray;
+    }
+
+    public static BTypedesc getElementTypeDescFromArrayTypeDesc(BTypedesc arrayTypeDesc) {
+        if (arrayTypeDesc.getDescribingType().getTag() == INTERSECTION_TAG) {
+            return ValueCreator.createTypedescValue(((ArrayType) ((IntersectionType) arrayTypeDesc.getDescribingType())
+                    .getConstituentTypes().get(0)).getElementType());
+        }
+        return ValueCreator.createTypedescValue(((ArrayType) arrayTypeDesc.getDescribingType()).getElementType());
+    }
+
     public static String readPasswordValueFromFile(String filePath) throws IOException {
-        String fileContent = new String(Files.readAllBytes(Paths.get(filePath)), Charset.forName("UTF-8"));
-        return fileContent;
+        return Files.readString(Paths.get(filePath));
     }
 
 }

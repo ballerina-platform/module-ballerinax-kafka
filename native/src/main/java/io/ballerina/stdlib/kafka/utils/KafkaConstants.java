@@ -49,6 +49,8 @@ public class KafkaConstants {
     public static final String OFFSET_STRUCT_NAME = "PartitionOffset";
 
     public static final String KAFKA_ERROR = "Error";
+    public static final String PAYLOAD_BINDING_ERROR = "PayloadBindingError";
+    public static final String PAYLOAD_VALIDATION_ERROR = "PayloadValidationError";
 
     public static final String AVRO_GENERIC_RECORD_NAME = "AvroGenericRecord";
     public static final String CONSUMER_RECORD_STRUCT_NAME = "ConsumerRecord";
