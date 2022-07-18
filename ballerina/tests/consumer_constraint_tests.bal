@@ -60,10 +60,23 @@ public type Weight decimal;
 }
 public type NameList int[];
 
+public type Child record {|
+    @constraint:String {
+        maxLength: 25
+    }
+    string name;
+    @constraint:Int {
+        maxValue: 100,
+        minValue: 10
+    }
+    int age;
+|};
+
 string receivedIntMaxValueConstraintError = "";
 string receivedIntMinValueConstraintError = "";
 string receivedNumberMaxValueConstraintError = "";
 string receivedNumberMinValueConstraintError = "";
+int receivedValidRecordCount = 0;
 
  @test:Config {enable: true}
  function stringMinLengthConstraintConsumerRecordTest() returns error? {
@@ -230,11 +243,11 @@ function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
         clientId: "constraint-listener-07",
         pollingInterval: 1
     };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(intConstraintService);
-    check dataBindingListener.'start();
+    Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
+    check constraintListener.attach(intConstraintService);
+    check constraintListener.'start();
     runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
+    check constraintListener.gracefulStop();
     test:assertEquals(receivedIntMaxValueConstraintError, "Failed to validate");
 }
 
@@ -265,11 +278,11 @@ function intMinValueConstraintListenerConsumerRecordTest() returns error? {
         clientId: "constraint-listener-08",
         pollingInterval: 1
     };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(intConstraintService);
-    check dataBindingListener.'start();
+    Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
+    check constraintListener.attach(intConstraintService);
+    check constraintListener.'start();
     runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
+    check constraintListener.gracefulStop();
     test:assertEquals(receivedIntMinValueConstraintError, "Failed to validate");
 }
 
@@ -299,11 +312,11 @@ function numberMaxValueConstraintListenerPayloadTest() returns error? {
         clientId: "constraint-listener-09",
         pollingInterval: 1
     };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(intConstraintService);
-    check dataBindingListener.'start();
+    Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
+    check constraintListener.attach(intConstraintService);
+    check constraintListener.'start();
     runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
+    check constraintListener.gracefulStop();
     test:assertEquals(receivedNumberMaxValueConstraintError, "Failed to validate");
 }
 
@@ -333,10 +346,47 @@ function numberMinValueConstraintListenerPayloadTest() returns error? {
         clientId: "constraint-listener-10",
         pollingInterval: 1
     };
-    Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
-    check dataBindingListener.attach(intConstraintService);
-    check dataBindingListener.'start();
+    Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
+    check constraintListener.attach(intConstraintService);
+    check constraintListener.'start();
     runtime:sleep(3);
-    check dataBindingListener.gracefulStop();
+    check constraintListener.gracefulStop();
     test:assertEquals(receivedNumberMinValueConstraintError, "Failed to validate");
+}
+
+@test:Config {enable: true}
+function validRecordConstraintPayloadTest() returns error? {
+    string topic = "valid-record-constraint-listener-payload-test-topic";
+    check sendMessage({name: "Phil Dunphy", age: 56}, topic);
+    check sendMessage({name: "Claire Dunphy", age: 55}, topic);
+    check sendMessage({name: "Hayley Dunphy", age: 20}, topic);
+    check sendMessage({name: "Max Dunphy", age: 18}, topic);
+
+    Service validRecordService =
+    service object {
+        remote function onConsumerRecord(Child[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                log:printInfo("Received record: " + records[i].toString());
+                receivedValidRecordCount += 1;
+            }
+        }
+
+        remote function onError(Error e) {
+            log:printError(e.message());
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "constraint-listener-group-11",
+        clientId: "constraint-listener-11",
+        pollingInterval: 1
+    };
+    Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
+    check constraintListener.attach(validRecordService);
+    check constraintListener.'start();
+    runtime:sleep(3);
+    check constraintListener.gracefulStop();
+    test:assertEquals(receivedValidRecordCount, 4);
 }
