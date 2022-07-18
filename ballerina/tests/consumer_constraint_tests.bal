@@ -78,51 +78,51 @@ string receivedNumberMaxValueConstraintError = "";
 string receivedNumberMinValueConstraintError = "";
 int receivedValidRecordCount = 0;
 
- @test:Config {enable: true}
- function stringMinLengthConstraintConsumerRecordTest() returns error? {
-     string topic = "string-min-length-constraint-consumer-record-test-topic";
-     check sendMessage("This is a long message", topic);
-     check sendMessage("Short msg", topic);
+@test:Config {enable: true}
+function stringMinLengthConstraintConsumerRecordTest() returns error? {
+    string topic = "string-min-length-constraint-consumer-record-test-topic";
+    check sendMessage("This is a long message", topic);
+    check sendMessage("Short msg", topic);
 
-     ConsumerConfiguration consumerConfigs = {
-         topics: [topic],
-         groupId: "constraint-consumer-group-01",
-         clientId: "constraint-consumer-id-01",
-         offsetReset: OFFSET_RESET_EARLIEST
-     };
-     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "constraint-consumer-group-01",
+        clientId: "constraint-consumer-id-01",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
-     StringConstraintConsumerRecord[]|error result = consumer->poll(1);
-     if result is PayloadValidationError {
-         test:assertEquals(result.message(), "Failed to validate");
-     } else {
-         test:assertFail("Expected a constraint validation error");
-     }
-     check consumer->close();
- }
+    StringConstraintConsumerRecord[]|error result = consumer->poll(1);
+    if result is PayloadValidationError {
+        test:assertEquals(result.message(), "Failed to validate");
+    } else {
+        test:assertFail("Expected a constraint validation error");
+    }
+    check consumer->close();
+}
 
- @test:Config {enable: true}
- function stringMaxLengthConstraintConsumerRecordTest() returns error? {
-     string topic = "string-max-length-constraint-consumer-record-test-topic";
-     check sendMessage("This is a long message with a short key", topic, "key-01");
-     check sendMessage("This is a long message with a long key", topic, "key-00000000000002");
+@test:Config {enable: true}
+function stringMaxLengthConstraintConsumerRecordTest() returns error? {
+    string topic = "string-max-length-constraint-consumer-record-test-topic";
+    check sendMessage("This is a long message with a short key", topic, "key-01");
+    check sendMessage("This is a long message with a long key", topic, "key-00000000000002");
 
-     ConsumerConfiguration consumerConfigs = {
-         topics: [topic],
-         groupId: "constraint-consumer-group-02",
-         clientId: "constraint-consumer-id-02",
-         offsetReset: OFFSET_RESET_EARLIEST
-     };
-     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "constraint-consumer-group-02",
+        clientId: "constraint-consumer-id-02",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
-     StringConstraintConsumerRecord[]|error result = consumer->poll(1);
-     if result is PayloadValidationError {
-         test:assertEquals(result.message(), "Failed to validate");
-     } else {
-         test:assertFail("Expected a constraint validation error");
-     }
-     check consumer->close();
- }
+    StringConstraintConsumerRecord[]|error result = consumer->poll(1);
+    if result is PayloadValidationError {
+        test:assertEquals(result.message(), "Failed to validate");
+    } else {
+        test:assertFail("Expected a constraint validation error");
+    }
+    check consumer->close();
+}
 
 @test:Config {enable: true}
 function floatMaxValueConstraintPayloadTest() returns error? {
@@ -389,4 +389,31 @@ function validRecordConstraintPayloadTest() returns error? {
     runtime:sleep(3);
     check constraintListener.gracefulStop();
     test:assertEquals(receivedValidRecordCount, 4);
+}
+
+@test:Config {enable: true}
+function disabledConstraintValidationTest() returns error? {
+    string topic = "disabled-constraint-validation-test-topic";
+    check sendMessage("This is a long message", topic);
+    check sendMessage("Short msg", topic, "this-is-a-long-long-key");
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "constraint-consumer-group-01",
+        clientId: "constraint-consumer-id-01",
+        offsetReset: OFFSET_RESET_EARLIEST,
+        constraintValidation: false
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    StringConstraintConsumerRecord[]|error result = consumer->poll(2);
+    if result is error {
+        test:assertFail(result.message());
+    } else {
+        test:assertEquals(result.length(), 2);
+        test:assertEquals(result[0].value, "This is a long message");
+        test:assertEquals(result[1].value, "Short msg");
+        test:assertEquals(result[1].key, "this-is-a-long-long-key");
+    }
+    check consumer->close();
 }
