@@ -35,7 +35,8 @@ function orderProcessorTest() returns error? {
     kafka:ConsumerConfiguration testConsumerConfigs = {
         groupId: "test-consumer",
         offsetReset: kafka:OFFSET_RESET_EARLIEST,
-        topics: [PUBLISH_TOPIC]
+        topics: [PUBLISH_TOPIC],
+        constraintValidation: false
     };
     kafka:Consumer testConsumer = check new (kafka:DEFAULT_URL, testConsumerConfigs);
     kafka:ConsumerRecord[] records = check testConsumer->poll(3);
