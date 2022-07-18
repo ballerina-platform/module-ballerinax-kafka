@@ -53,7 +53,8 @@ public function main() returns error? {
         topics: [TOPIC],
         pollingInterval: 1,
         // Sets the `autoCommit` to `false` so that the records should be committed manually.
-        autoCommit: false
+        autoCommit: false,
+        constraintValidation: false
     };
 
     kafka:Listener kafkaListener = check new (kafka:DEFAULT_URL, consumerConfigs);

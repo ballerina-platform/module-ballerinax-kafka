@@ -26,7 +26,8 @@ kafka:ConsumerConfiguration consumerConfigs = {
     topics: [LISTENING_TOPIC],
     offsetReset: kafka:OFFSET_RESET_EARLIEST,
     pollingInterval: 1,
-    autoCommit: false
+    autoCommit: false,
+    constraintValidation: false
 };
 
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);
