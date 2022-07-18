@@ -58,14 +58,6 @@ public enum Protocol {
    DTLS
 }
 
-# Represents constraint validation options
-public enum ConstraintValidation {
-    INGRESS,
-    EGRESS,
-    INGRESS_EGRESS,
-    DISABLED
-}
-
 # Configurations related to Kafka authentication mechanisms.
 #
 # + mechanism - Type of the authentication mechanism. Currently only `SASL_PLAIN` is supported
@@ -123,6 +115,7 @@ public type AuthenticationConfiguration record {|
 #               performance is required
 # + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
 # + decoupleProcessing - Decouples processing
+# + constraintValidation - Configuration related to constraint validation check
 # + secureSocket - Configurations related to SSL/TLS encryption
 # + auth - Authentication-related configurations for the `kafka:Consumer`
 # + securityProtocol - Type of the security protocol to use in the broker connection
@@ -169,7 +162,7 @@ public type ConsumerConfiguration record {|
     boolean checkCRCS = true;
     boolean excludeInternalTopics = true;
     boolean decoupleProcessing = false;
-    ConstraintValidation constraintValidation = DISABLED;
+    boolean constraintValidation = true;
 
     SecureSocket secureSocket?;
     AuthenticationConfiguration auth?;
