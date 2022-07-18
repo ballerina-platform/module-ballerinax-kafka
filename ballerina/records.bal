@@ -58,6 +58,14 @@ public enum Protocol {
    DTLS
 }
 
+# Represents constraint validation options
+public enum ConstraintValidation {
+    INGRESS,
+    EGRESS,
+    INGRESS_EGRESS,
+    DISABLED
+}
+
 # Configurations related to Kafka authentication mechanisms.
 #
 # + mechanism - Type of the authentication mechanism. Currently only `SASL_PLAIN` is supported
@@ -161,6 +169,7 @@ public type ConsumerConfiguration record {|
     boolean checkCRCS = true;
     boolean excludeInternalTopics = true;
     boolean decoupleProcessing = false;
+    ConstraintValidation constraintValidation = DISABLED;
 
     SecureSocket secureSocket?;
     AuthenticationConfiguration auth?;
