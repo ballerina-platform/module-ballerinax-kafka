@@ -380,7 +380,7 @@ function stringConsumerRecordListenerTest() returns error? {
     test:assertEquals(receivedStringValue, TEST_MESSAGE);
 }
 
-@test:Config {enable: false}
+@test:Config {enable: true}
 function xmlConsumerRecordListenerTest() returns error? {
     string topic = "xml-consumer-record-listener-test-topic";
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
@@ -453,7 +453,7 @@ function recordConsumerRecordListenerTest() returns error? {
     test:assertEquals(receivedPersonValue, personRecord1);
 }
 
-@test:Config {enable: false}
+@test:Config {enable: true}
 function mapConsumerRecordListenerTest() returns error? {
     string topic = "map-consumer-record-listener-test-topic";
     check sendMessage(personMap, topic);
@@ -489,7 +489,7 @@ function mapConsumerRecordListenerTest() returns error? {
     test:assertEquals(receivedMapValue, personMap);
 }
 
-@test:Config {enable: false}
+@test:Config {enable: true}
 function tableConsumerRecordListenerTest() returns error? {
     string topic = "table-consumer-record-listener-test-topic";
     table<Person> personMapTable = table [];
@@ -775,7 +775,7 @@ function stringPayloadListenerTest() returns error? {
     test:assertEquals(receivedStringPayload, TEST_MESSAGE);
 }
 
-@test:Config {enable: false}
+@test:Config {enable: true}
 function xmlPayloadListenerTest() returns error? {
     string topic = "xml-payload-listener-test-topic";
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
@@ -884,7 +884,7 @@ function mapPayloadListenerTest() returns error? {
     test:assertEquals(receivedMapPayload, personMap);
 }
 
-@test:Config {enable: false}
+@test:Config {enable: true}
 function tablePayloadListenerTest() returns error? {
     string topic = "table-payload-listener-test-topic";
     table<Person> personMapTable = table [];

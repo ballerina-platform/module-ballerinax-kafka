@@ -333,7 +333,7 @@ function intConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: false}
+@test:Config {enable: true}
 function xmlConsumerRecordTest() returns error? {
     string topic = "xml-consumer-record-test-topic";
     xml sendingValue = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
