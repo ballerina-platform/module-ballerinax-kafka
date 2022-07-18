@@ -622,8 +622,6 @@ public class KafkaUtils {
         for (Object record : records) {
             consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType));
         }
-        validateConstraints(consumerRecordsArray,
-                getElementTypeDescFromArrayTypeDesc(consumerRecordsArray.getTypedesc()));
         if (readonly) {
             consumerRecordsArray.freezeDirect();
         }
@@ -914,14 +912,16 @@ public class KafkaUtils {
         return function;
     }
 
-    public static Object validateConstraints(BArray consumerRecordsArray, BTypedesc bTypedesc) {
-        for (int i = 0; i < consumerRecordsArray.size(); i++) {
-            Object validationResult = Constraints.validate(consumerRecordsArray.get(i), bTypedesc);
-            if (validationResult instanceof BError) {
-                throw createPayloadValidationError("Failed to validate", consumerRecordsArray);
+    public static Object validateConstraints(BArray valueArray, BTypedesc bTypedesc, boolean constraintValidation) {
+        if (constraintValidation) {
+            for (int i = 0; i < valueArray.size(); i++) {
+                Object validationResult = Constraints.validate(valueArray.get(i), bTypedesc);
+                if (validationResult instanceof BError) {
+                    throw createPayloadValidationError("Failed to validate", valueArray);
+                }
             }
         }
-        return consumerRecordsArray;
+        return valueArray;
     }
 
     public static BTypedesc getElementTypeDescFromArrayTypeDesc(BTypedesc arrayTypeDesc) {

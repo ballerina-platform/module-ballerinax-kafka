@@ -58,6 +58,7 @@ import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_RECORD;
@@ -173,20 +174,27 @@ public class KafkaListenerImpl implements KafkaListener {
                     break;
                 case INTERSECTION_TAG:
                 case ARRAY_TAG:
+                    boolean constraintValidation = (boolean) listener.getNativeData(CONSTRAINT_VALIDATION);
                     if (isConsumerRecordsType(parameter, consumerRecordMethodType.getAnnotations())) {
                         if (consumerRecordsExists) {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");
                         }
                         consumerRecordsExists = true;
-                        arguments[index++] = getConsumerRecords(records, (RecordType) getIntendedType(parameter.type),
-                                parameter.type.isReadOnly());
+                        BArray consumerRecords = getConsumerRecords(records,
+                                (RecordType) getIntendedType(parameter.type), parameter.type.isReadOnly());
+                        validateConstraints(consumerRecords, getElementTypeDescFromArrayTypeDesc(
+                                ValueCreator.createTypedescValue(parameter.type)), constraintValidation);
+                        arguments[index++] = consumerRecords;
                         arguments[index++] = true;
                     } else {
                         if (payloadExists) {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");
                         }
                         payloadExists = true;
-                        arguments[index++] = getValuesWithIntendedType(parameter.type, records);
+                        BArray payload = getValuesWithIntendedType(parameter.type, records);
+                        validateConstraints(payload, getElementTypeDescFromArrayTypeDesc(
+                                ValueCreator.createTypedescValue(parameter.type)), constraintValidation);
+                        arguments[index++] = payload;
                         arguments[index++] = true;
                     }
                     break;
@@ -253,7 +261,6 @@ public class KafkaListenerImpl implements KafkaListener {
         for (Object record: records) {
             bArray.append(getValueWithIntendedType(intendedType, (byte[]) ((ConsumerRecord) record).value()));
         }
-        validateConstraints(bArray, getElementTypeDescFromArrayTypeDesc(ValueCreator.createTypedescValue(type)));
         if (type.isReadOnly()) {
             bArray.freezeDirect();
         }

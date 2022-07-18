@@ -44,6 +44,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
@@ -69,8 +70,12 @@ public class Poll {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
                 ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-                balFuture.complete(getConsumerRecords(recordsRetrieved, recordType,
-                        bTypedesc.getDescribingType().isReadOnly()));
+                BArray consumerRecords = getConsumerRecords(recordsRetrieved, recordType,
+                        bTypedesc.getDescribingType().isReadOnly());
+                boolean constraintValidation = (boolean) consumerObject.getNativeData(CONSTRAINT_VALIDATION);
+                validateConstraints(consumerRecords, getElementTypeDescFromArrayTypeDesc(bTypedesc),
+                        constraintValidation);
+                balFuture.complete(consumerRecords);
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
@@ -95,6 +100,8 @@ public class Poll {
                 if (!recordsRetrieved.isEmpty()) {
                     dataArray = getValuesWithIntendedType(arrayType, recordsRetrieved);
                 }
+                boolean constraintValidation = (boolean) consumerObject.getNativeData(CONSTRAINT_VALIDATION);
+                validateConstraints(dataArray, getElementTypeDescFromArrayTypeDesc(bTypedesc), constraintValidation);
                 balFuture.complete(dataArray);
             } catch (BError bError) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
@@ -114,7 +121,6 @@ public class Poll {
             bArray.append(getValueWithIntendedType(getReferredType(type.getElementType()),
                     (byte[]) ((ConsumerRecord) record).value()));
         }
-        validateConstraints(bArray, getElementTypeDescFromArrayTypeDesc(ValueCreator.createTypedescValue(type)));
         if (type.isReadOnly()) {
             bArray.freezeDirect();
         }

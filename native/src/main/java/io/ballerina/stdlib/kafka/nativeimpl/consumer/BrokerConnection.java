@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
@@ -41,6 +42,7 @@ import java.util.Properties;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ALIAS_DURATION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.BOOTSTRAP_SERVERS;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
@@ -117,6 +119,8 @@ public class BrokerConnection {
             consumerObject.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
             consumerObject.addNativeData(BOOTSTRAP_SERVERS, consumerProperties.getProperty(BOOTSTRAP_SERVERS));
             consumerObject.addNativeData(KafkaConstants.CLIENT_ID, getClientIdFromProperties(consumerProperties));
+            consumerObject.addNativeData(CONSTRAINT_VALIDATION,
+                    configs.getBooleanValue(StringUtils.fromString("constraintValidation")));
             KafkaMetricsUtil.reportNewConsumer(consumerObject);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);

@@ -217,6 +217,7 @@ public class KafkaConstants {
     public static final String CLIENT_ID = "client.id";
     public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
     public static final String DEFAULT_SER_DES_TYPE = "BYTE_ARRAY";
+    public static final String CONSTRAINT_VALIDATION = "constraintValidation";
 
     public static final BigDecimal MILLISECOND_MULTIPLIER = new BigDecimal(1000);
 
