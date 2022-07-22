@@ -104,11 +104,13 @@ public class KafkaRecordConsumer {
                                      + this.consumerId + " has received " + recordsRetrieved.count() + " records.");
             }
             processRetrievedRecords(recordsRetrieved);
-        } catch (KafkaException | IllegalStateException | IllegalArgumentException | BError e) {
+        } catch (KafkaException | IllegalStateException | IllegalArgumentException e) {
             this.kafkaListener.onError(e);
             // When un-recoverable exception is thrown we stop scheduling task to the executor.
             // Later at stopConsume() on KafkaRecordConsumer we close the consumer.
             this.pollTaskFuture.cancel(false);
+        } catch (BError e) {
+            this.kafkaListener.onError(e);
         }
     }
 
