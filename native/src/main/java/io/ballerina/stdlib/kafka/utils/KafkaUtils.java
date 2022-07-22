@@ -566,8 +566,8 @@ public class KafkaUtils {
 
     public static List<String> getStringListFromStringBArray(BArray stringArray) {
         ArrayList<String> values = new ArrayList<>();
-        if ((Objects.isNull(stringArray)) || (!getReferredType(((ArrayType) stringArray.getType())
-                .getElementType()).equals(PredefinedTypes.TYPE_STRING))) {
+        if ((Objects.isNull(stringArray)) || (!getReferredType(((ArrayType) stringArray.getType()).getElementType())
+                .equals(PredefinedTypes.TYPE_STRING))) {
             return values;
         }
         if (stringArray.size() != 0) {

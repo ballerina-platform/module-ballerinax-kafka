@@ -176,7 +176,8 @@ public class KafkaListenerImpl implements KafkaListener {
         Object[] arguments = new Object[parameters.length * 2];
         int index = 0;
         for (Parameter parameter : parameters) {
-            switch (parameter.type.getTag()) {
+            Type referredType = getReferredType(parameter.type);
+            switch (referredType.getTag()) {
                 case OBJECT_TYPE_TAG:
                     if (callerExists) {
                         throw KafkaUtils.createKafkaError("Invalid remote function signature");
@@ -197,7 +198,7 @@ public class KafkaListenerImpl implements KafkaListener {
                         }
                         consumerRecordsExists = true;
                         BArray consumerRecords = getConsumerRecords(records,
-                                (RecordType) getIntendedType(parameter.type), parameter.type.isReadOnly(),
+                                (RecordType) getIntendedType(referredType), referredType.isReadOnly(),
                                 constraintValidation, autoCommit, kafkaConsumer);
                         arguments[index++] = consumerRecords;
                         arguments[index++] = true;
@@ -206,7 +207,7 @@ public class KafkaListenerImpl implements KafkaListener {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");
                         }
                         payloadExists = true;
-                        BArray payload = getValuesWithIntendedType(parameter.type, records, constraintValidation,
+                        BArray payload = getValuesWithIntendedType(referredType, records, constraintValidation,
                                 autoCommit, kafkaConsumer);
                         arguments[index++] = payload;
                         arguments[index++] = true;
@@ -227,7 +228,7 @@ public class KafkaListenerImpl implements KafkaListener {
                 return false;
             }
         }
-        return invokeIsAnydataConsumerRecordTypeMethod(getIntendedType(parameter.type));
+        return invokeIsAnydataConsumerRecordTypeMethod(getIntendedType(getReferredType(parameter.type)));
     }
 
     private BObject createCaller(BObject listener) {
@@ -244,7 +245,7 @@ public class KafkaListenerImpl implements KafkaListener {
             return getReferredType(((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0))
                     .getElementType());
         }
-        return getReferredType(((ArrayType) type).getElementType());
+        return getReferredType(getReferredType(((ArrayType) type).getElementType()));
     }
 
     private Optional<MethodType> getOnConsumerRecordMethod(BObject service) {
