@@ -57,6 +57,7 @@ import java.util.stream.Stream;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
+import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_RECORD;
@@ -218,7 +219,7 @@ public class KafkaListenerImpl implements KafkaListener {
         if (type.getTag() == INTERSECTION_TAG) {
             return ((ArrayType) ((IntersectionType) type).getConstituentTypes().get(0)).getElementType();
         }
-        return ((ArrayType) type).getElementType();
+        return getReferredType(getReferredType(((ArrayType) type).getElementType()));
     }
 
     private Optional<MethodType> getOnConsumerRecordMethod(BObject service) {

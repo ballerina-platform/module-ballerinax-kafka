@@ -76,6 +76,7 @@ import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.runtime.api.TypeTags.UNION_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
+import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_PARTITION_OFFSET;
@@ -556,8 +557,8 @@ public class KafkaUtils {
 
     public static List<String> getStringListFromStringBArray(BArray stringArray) {
         ArrayList<String> values = new ArrayList<>();
-        if ((Objects.isNull(stringArray)) ||
-                (!((ArrayType) stringArray.getType()).getElementType().equals(PredefinedTypes.TYPE_STRING))) {
+        if ((Objects.isNull(stringArray)) || (!getReferredType(((ArrayType) stringArray.getType()).getElementType())
+                .equals(PredefinedTypes.TYPE_STRING))) {
             return values;
         }
         if (stringArray.size() != 0) {
@@ -587,8 +588,8 @@ public class KafkaUtils {
     public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, RecordType recordType) {
         Object key = null;
         Map<String, Field> fieldMap = recordType.getFields();
-        Type keyType = fieldMap.get(KAFKA_RECORD_KEY).getFieldType();
-        Type valueType = fieldMap.get(KAFKA_RECORD_VALUE).getFieldType();
+        Type keyType = getReferredType(fieldMap.get(KAFKA_RECORD_KEY).getFieldType());
+        Type valueType = getReferredType(fieldMap.get(KAFKA_RECORD_VALUE).getFieldType());
         if (Objects.nonNull(record.key())) {
             key = getValueWithIntendedType(keyType, (byte[]) record.key());
             if (key instanceof BError) {
@@ -640,7 +641,7 @@ public class KafkaUtils {
                     }
                     return getValueFromJson(type, strValue);
                 case ARRAY_TAG:
-                    if (((ArrayType) type).getElementType().getTag() == BYTE_TAG) {
+                    if (getReferredType(((ArrayType) type).getElementType()).getTag() == BYTE_TAG) {
                         return ValueCreator.createArrayValue(value);
                     }
                     /*-fallthrough*/
