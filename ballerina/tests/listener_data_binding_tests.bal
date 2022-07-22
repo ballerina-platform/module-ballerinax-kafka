@@ -312,7 +312,7 @@ function decimalConsumerRecordBindingListenerTest() returns error? {
 
 @test:Config {enable: true}
 function booleanConsumerRecordBindingListenerTest() returns error? {
-    string topic = "int-consumer-record-listener-test-topic";
+    string topic = "boolean-consumer-record-listener-test-topic";
     check sendMessage(true, topic);
 
     Service booleanBindingService =
@@ -707,7 +707,7 @@ function decimalPayloadBindingListenerTest() returns error? {
 
 @test:Config {enable: true}
 function booleanPayloadBindingListenerTest() returns error? {
-    string topic = "int-payload-listener-test-topic";
+    string topic = "boolean-payload-listener-test-topic";
     check sendMessage(true, topic);
 
     Service booleanBindingService =
