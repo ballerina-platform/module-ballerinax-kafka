@@ -18,10 +18,10 @@
 public type Error distinct error;
 
 # Represents an error, which occurred due to payload binding.
-public type PayloadBindingError distinct Error;
+public type PayloadBindingError distinct (Error & error<PartitionOffset>);
 
 # Represents an error, which occurred due to payload constraint validation.
-public type PayloadValidationError distinct PayloadBindingError;
+public type PayloadValidationError distinct (PayloadBindingError & error<PartitionOffset>);
 
 isolated function getKeyTypeMismatchError(string expectedType) returns Error {
     string message = "Invalid type found for Kafka key. Expected key type: '" + expectedType + "'.";
