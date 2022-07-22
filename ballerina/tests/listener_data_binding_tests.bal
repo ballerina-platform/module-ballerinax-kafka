@@ -80,6 +80,7 @@ string errorMsg = "";
 boolean isConsumerRecordReadonly = false;
 boolean isPayloadReadonly = false;
 anydata[] readOnlyPayloads = [];
+int receivedSeekedValidRecordListenerCount = 0;
 
 public type IntConsumerRecord record {|
     int key?;
@@ -1120,4 +1121,47 @@ function readonlyPayloadReadonlyConsumerRecordsListenerTest() returns error? {
     check dataBindingListener.gracefulStop();
     test:assertTrue(isPayloadReadonly);
     test:assertEquals(readOnlyPayloads, [personRecord1, personRecord1, personRecord1]);
+}
+
+@test:Config {enable: true}
+function invalidRecordPayloadWithSeekListenerTest() returns error? {
+    string topic = "invalid-record-payload-with-seek-listener-test-topic";
+    check sendMessage(personRecord1, topic);
+    check sendMessage("Invalid", topic);
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+
+    Service invalidRecordService =
+    service object {
+        remote function onConsumerRecord(PersonConsumerRecord[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                log:printInfo("Received record: " + records[i].toString());
+                receivedSeekedValidRecordListenerCount += 1;
+            }
+        }
+
+        remote function onError(Error e, Caller caller) returns error? {
+            log:printError(e.toString());
+            if e is PayloadBindingError {
+                check caller->seek({
+                    partition: e.detail().partition,
+                    offset: e.detail().offset + 1
+                });
+            }
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-11",
+        clientId: "data-binding-listener-11",
+        pollingInterval: 2
+    };
+    Listener payloadListener = check new (DEFAULT_URL, consumerConfiguration);
+    check payloadListener.attach(invalidRecordService);
+    check payloadListener.'start();
+    runtime:sleep(40);
+    check payloadListener.gracefulStop();
+    test:assertEquals(receivedSeekedValidRecordListenerCount, 3);
 }
