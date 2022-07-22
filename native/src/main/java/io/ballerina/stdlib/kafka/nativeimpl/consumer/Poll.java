@@ -103,9 +103,10 @@ public class Poll {
     }
 
     private static BArray getValuesWithIntendedType(ArrayType type, ConsumerRecords records) {
-        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(type.getElementType()));
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(
+                getReferredType(type.getElementType())));
         for (Object record: records) {
-            bArray.append(getValueWithIntendedType(getReferredType(getReferredType(type.getElementType())),
+            bArray.append(getValueWithIntendedType(getReferredType(type.getElementType()),
                     (byte[]) ((ConsumerRecord) record).value()));
         }
         if (type.isReadOnly()) {
