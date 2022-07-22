@@ -81,21 +81,3 @@ service kafka:Service on kafkaListener {
     remote function onError(kafka:ConsumerRecord records) returns error? {
     }
 }
-
-service kafka:Service on kafkaListener {
-
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] & readonly records) {
-    }
-
-    remote function onError(kafka:Error 'error, kafka:ConsumerRecord records) returns error? {
-    }
-}
-
-service kafka:Service on kafkaListener {
-
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] & readonly records) {
-    }
-
-    remote function onError(error 'error, int records) returns error? {
-    }
-}
