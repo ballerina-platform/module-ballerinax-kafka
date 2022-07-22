@@ -115,7 +115,7 @@ public type AuthenticationConfiguration record {|
 #               performance is required
 # + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
 # + decoupleProcessing - Decouples processing
-# + constraintValidation - Configuration related to constraint validation check
+# + validation - Configuration related to constraint validation check
 # + secureSocket - Configurations related to SSL/TLS encryption
 # + auth - Authentication-related configurations for the `kafka:Consumer`
 # + securityProtocol - Type of the security protocol to use in the broker connection
@@ -162,7 +162,7 @@ public type ConsumerConfiguration record {|
     boolean checkCRCS = true;
     boolean excludeInternalTopics = true;
     boolean decoupleProcessing = false;
-    boolean constraintValidation = true;
+    boolean validation = true;
 
     SecureSocket secureSocket?;
     AuthenticationConfiguration auth?;
