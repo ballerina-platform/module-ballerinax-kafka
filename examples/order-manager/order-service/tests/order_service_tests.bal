@@ -43,8 +43,7 @@ function orderServiceTest() returns error? {
     kafka:ConsumerConfiguration testConsumerConfigs = {
         groupId: "order-service-consumer",
         offsetReset: kafka:OFFSET_RESET_EARLIEST,
-        topics: [TOPIC],
-        constraintValidation: false
+        topics: [TOPIC]
     };
 
     kafka:Consumer testConsumer = check new (kafka:DEFAULT_URL, testConsumerConfigs);

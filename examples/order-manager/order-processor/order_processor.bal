@@ -29,8 +29,7 @@ kafka:ConsumerConfiguration consumerConfigs = {
     groupId: "processing-consumer",
     topics: [LISTENING_TOPIC],
     offsetReset: kafka:OFFSET_RESET_EARLIEST,
-    pollingInterval: 1,
-    constraintValidation: false
+    pollingInterval: 1
 };
 
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs);

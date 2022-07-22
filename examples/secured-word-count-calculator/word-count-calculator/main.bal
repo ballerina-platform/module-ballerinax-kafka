@@ -81,8 +81,7 @@ kafka:ConsumerConfiguration consumerConfigs = {
     securityProtocol: kafka:PROTOCOL_SASL_SSL,
     auth: authConfig,
     // Making autocommit false in order to re-evaluate the word counts for every new instance of the listener
-    autoCommit: false,
-    constraintValidation: false
+    autoCommit: false
 };
 
 service kafka:Service on new kafka:Listener(KAFKA_SECURED_URL, consumerConfigs) {
