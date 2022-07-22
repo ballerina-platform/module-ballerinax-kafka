@@ -739,15 +739,15 @@ public class KafkaUtils {
     }
 
     public static BError createPayloadValidationError(BError cause, ConsumerRecord record) {
-        BMap<BString, Object> topicPartition = populateTopicPartitionRecord(record.topic(), record.partition());
-        BMap<BString, Object> partition = populatePartitionOffsetRecord(topicPartition, record.offset());
+        BMap<BString, Object> partition = populatePartitionOffsetRecord(populateTopicPartitionRecord(record.topic(),
+                record.partition()), record.offset());
         return ErrorCreator.createError(getModule(), PAYLOAD_VALIDATION_ERROR, StringUtils.fromString("Failed to " +
                 "validate payload. If needed, please seek past the record to continue consumption."), cause, partition);
     }
 
     public static BError createPayloadBindingError(String message, BError cause, ConsumerRecord record) {
-        BMap<BString, Object> topicPartition = populateTopicPartitionRecord(record.topic(), record.partition());
-        BMap<BString, Object> partition = populatePartitionOffsetRecord(topicPartition, record.offset());
+        BMap<BString, Object> partition = populatePartitionOffsetRecord(populateTopicPartitionRecord(record.topic(),
+                record.partition()), record.offset());
         return ErrorCreator.createError(getModule(), PAYLOAD_BINDING_ERROR, StringUtils.fromString(message),
                 cause, partition);
     }
