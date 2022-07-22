@@ -101,6 +101,7 @@ import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_ERROR;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_CALLER_ALLOWED;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_ERROR_ALLOWED;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.ERROR_PARAM;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.PAYLOAD_ANNOTATION;
@@ -164,22 +165,28 @@ public class KafkaFunctionValidator {
     private void validateOnErrorParameters(FunctionDefinitionNode functionDefinitionNode) {
         SeparatedNodeList<ParameterNode> parameters = functionDefinitionNode.functionSignature().parameters();
         if (parameters.size() == 1) {
-            ParameterNode paramNode = parameters.get(0);
-            SyntaxKind paramSyntaxKind = ((RequiredParameterNode) paramNode).typeName().kind();
-            if (paramSyntaxKind.equals(QUALIFIED_NAME_REFERENCE)) {
-                Node parameterTypeNode = ((RequiredParameterNode) paramNode).typeName();
-                Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
-                if (!paramSymbol.get().getName().get().equals(ERROR_PARAM) ||
-                        !validateModuleId(paramSymbol.get().getModule().get())) {
-                    reportErrorDiagnostic(ONLY_ERROR_ALLOWED, paramNode.location());
-                }
-            } else if (!paramSyntaxKind.equals(ERROR_TYPE_DESC)) {
-                reportErrorDiagnostic(ONLY_ERROR_ALLOWED, paramNode.location());
+            validateErrorParameter(parameters.get(0));
+        } else if (parameters.size() == 2) {
+            validateErrorParameter(parameters.get(0));
+            if (!validateCallerParam((RequiredParameterNode) parameters.get(1))) {
+                reportErrorDiagnostic(ONLY_CALLER_ALLOWED, parameters.get(1).location());
             }
-        } else if (parameters.size() > 1) {
-            reportErrorDiagnostic(ONLY_ERROR_ALLOWED, functionDefinitionNode.functionSignature().location());
         } else {
             reportErrorDiagnostic(MUST_HAVE_ERROR, functionDefinitionNode.functionSignature().location());
+        }
+    }
+
+    private void validateErrorParameter(ParameterNode parameterNode) {
+        SyntaxKind paramSyntaxKind = ((RequiredParameterNode) parameterNode).typeName().kind();
+        if (paramSyntaxKind.equals(QUALIFIED_NAME_REFERENCE)) {
+            Node parameterTypeNode = ((RequiredParameterNode) parameterNode).typeName();
+            Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
+            if (!paramSymbol.get().getName().get().equals(ERROR_PARAM) ||
+                    !validateModuleId(paramSymbol.get().getModule().get())) {
+                reportErrorDiagnostic(ONLY_ERROR_ALLOWED, parameterNode.location());
+            }
+        } else if (!paramSyntaxKind.equals(ERROR_TYPE_DESC)) {
+            reportErrorDiagnostic(ONLY_ERROR_ALLOWED, parameterNode.location());
         }
     }
 
