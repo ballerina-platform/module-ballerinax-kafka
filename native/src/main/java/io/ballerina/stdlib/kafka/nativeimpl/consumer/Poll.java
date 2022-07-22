@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
@@ -102,9 +103,11 @@ public class Poll {
     }
 
     private static BArray getValuesWithIntendedType(ArrayType type, ConsumerRecords records) {
-        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(type.getElementType()));
+        BArray bArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(
+                getReferredType(type.getElementType())));
         for (Object record: records) {
-            bArray.append(getValueWithIntendedType(type.getElementType(), (byte[]) ((ConsumerRecord) record).value()));
+            bArray.append(getValueWithIntendedType(getReferredType(type.getElementType()),
+                    (byte[]) ((ConsumerRecord) record).value()));
         }
         if (type.isReadOnly()) {
             bArray.freezeDirect();
@@ -115,10 +118,10 @@ public class Poll {
     private static RecordType getRecordType(BTypedesc bTypedesc) {
         RecordType recordType;
         if (bTypedesc.getDescribingType().isReadOnly()) {
-            recordType = (RecordType) ((IntersectionType) ((ArrayType) bTypedesc.getDescribingType())
-                    .getElementType()).getConstituentTypes().get(0);
+            recordType = (RecordType) ((IntersectionType) getReferredType(((ArrayType) bTypedesc.getDescribingType())
+                    .getElementType())).getConstituentTypes().get(0);
         } else {
-            recordType = (RecordType) ((ArrayType) bTypedesc.getDescribingType()).getElementType();
+            recordType = (RecordType) getReferredType(((ArrayType) bTypedesc.getDescribingType()).getElementType());
         }
         return recordType;
     }
