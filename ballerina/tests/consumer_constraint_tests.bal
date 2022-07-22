@@ -72,16 +72,18 @@ public type Child record {|
     int age;
 |};
 
+const validationErrorMessage = "Failed to validate payload. If needed, please seek past the record to continue consumption.";
+
 string receivedIntMaxValueConstraintError = "";
 string receivedIntMinValueConstraintError = "";
 string receivedNumberMaxValueConstraintError = "";
 string receivedNumberMinValueConstraintError = "";
 int receivedValidRecordCount = 0;
+int receivedSeekedValidRecordCount = 0;
 
 @test:Config {enable: true}
 function stringMinLengthConstraintConsumerRecordTest() returns error? {
     string topic = "string-min-length-constraint-consumer-record-test-topic";
-    check sendMessage("This is a long message", topic);
     check sendMessage("Short msg", topic);
 
     ConsumerConfiguration consumerConfigs = {
@@ -94,7 +96,7 @@ function stringMinLengthConstraintConsumerRecordTest() returns error? {
 
     StringConstraintConsumerRecord[]|error result = consumer->poll(1);
     if result is PayloadValidationError {
-        test:assertEquals(result.message(), "Failed to validate");
+        test:assertEquals(result.message(), validationErrorMessage);
     } else {
         test:assertFail("Expected a constraint validation error");
     }
@@ -104,7 +106,6 @@ function stringMinLengthConstraintConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function stringMaxLengthConstraintConsumerRecordTest() returns error? {
     string topic = "string-max-length-constraint-consumer-record-test-topic";
-    check sendMessage("This is a long message with a short key", topic, "key-01");
     check sendMessage("This is a long message with a long key", topic, "key-00000000000002");
 
     ConsumerConfiguration consumerConfigs = {
@@ -117,7 +118,7 @@ function stringMaxLengthConstraintConsumerRecordTest() returns error? {
 
     StringConstraintConsumerRecord[]|error result = consumer->poll(1);
     if result is PayloadValidationError {
-        test:assertEquals(result.message(), "Failed to validate");
+        test:assertEquals(result.message(), validationErrorMessage);
     } else {
         test:assertFail("Expected a constraint validation error");
     }
@@ -127,7 +128,6 @@ function stringMaxLengthConstraintConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function floatMaxValueConstraintPayloadTest() returns error? {
     string topic = "float-max-value-constraint-consumer-record-test-topic";
-    check sendMessage(55.45, topic);
     check sendMessage(1010.45, topic);
 
     ConsumerConfiguration consumerConfigs = {
@@ -140,7 +140,7 @@ function floatMaxValueConstraintPayloadTest() returns error? {
 
     Price[]|error result = consumer->pollPayload(2);
     if result is PayloadValidationError {
-        test:assertEquals(result.message(), "Failed to validate");
+        test:assertEquals(result.message(), validationErrorMessage);
     } else {
         test:assertFail("Expected a constraint validation error");
     }
@@ -150,7 +150,6 @@ function floatMaxValueConstraintPayloadTest() returns error? {
 @test:Config {enable: true}
 function arrayMaxLengthConstraintPayloadTest() returns error? {
     string topic = "array-max-length-constraint-payload-test-topic";
-    check sendMessage([1, 2, 3, 4], topic);
     check sendMessage([1, 2, 3, 4, 5, 6], topic);
 
     ConsumerConfiguration consumerConfigs = {
@@ -163,7 +162,7 @@ function arrayMaxLengthConstraintPayloadTest() returns error? {
 
     NameList[]|error result = consumer->pollPayload(2);
     if result is PayloadValidationError {
-        test:assertEquals(result.message(), "Failed to validate");
+        test:assertEquals(result.message(), validationErrorMessage);
     } else {
         test:assertFail("Expected a constraint validation error");
     }
@@ -173,7 +172,6 @@ function arrayMaxLengthConstraintPayloadTest() returns error? {
 @test:Config {enable: true}
 function arrayMinLengthConstraintPayloadTest() returns error? {
     string topic = "array-min-length-constraint-payload-test-topic";
-    check sendMessage([1, 2, 3, 4], topic);
     check sendMessage([1], topic);
 
     ConsumerConfiguration consumerConfigs = {
@@ -186,7 +184,7 @@ function arrayMinLengthConstraintPayloadTest() returns error? {
 
     NameList[]|error result = consumer->pollPayload(2);
     if result is PayloadValidationError {
-        test:assertEquals(result.message(), "Failed to validate");
+        test:assertEquals(result.message(), validationErrorMessage);
     } else {
         test:assertFail("Expected a constraint validation error");
     }
@@ -196,7 +194,6 @@ function arrayMinLengthConstraintPayloadTest() returns error? {
 @test:Config {enable: true}
 function floatMinValueConstraintPayloadTest() returns error? {
     string topic = "float-min-value-constraint-consumer-record-test-topic";
-    check sendMessage(55.45, topic);
     check sendMessage(1.45, topic);
 
     ConsumerConfiguration consumerConfigs = {
@@ -209,7 +206,7 @@ function floatMinValueConstraintPayloadTest() returns error? {
 
     Price[]|error result = consumer->pollPayload(2);
     if result is PayloadValidationError {
-        test:assertEquals(result.message(), "Failed to validate");
+        test:assertEquals(result.message(), validationErrorMessage);
     } else {
         test:assertFail("Expected a constraint validation error");
     }
@@ -219,7 +216,6 @@ function floatMinValueConstraintPayloadTest() returns error? {
 @test:Config {enable: true}
 function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
     string topic = "int-max-value-constraint-listener-test-topic";
-    check sendMessage(95, topic);
     check sendMessage(1000, topic);
 
     Service intConstraintService =
@@ -248,13 +244,12 @@ function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
     check constraintListener.'start();
     runtime:sleep(3);
     check constraintListener.gracefulStop();
-    test:assertEquals(receivedIntMaxValueConstraintError, "Failed to validate");
+    test:assertEquals(receivedIntMaxValueConstraintError, validationErrorMessage);
 }
 
 @test:Config {enable: true}
 function intMinValueConstraintListenerConsumerRecordTest() returns error? {
     string topic = "int-min-value-constraint-listener-test-topic";
-    check sendMessage(95, topic);
     check sendMessage(8, topic);
 
     Service intConstraintService =
@@ -283,7 +278,7 @@ function intMinValueConstraintListenerConsumerRecordTest() returns error? {
     check constraintListener.'start();
     runtime:sleep(3);
     check constraintListener.gracefulStop();
-    test:assertEquals(receivedIntMinValueConstraintError, "Failed to validate");
+    test:assertEquals(receivedIntMinValueConstraintError, validationErrorMessage);
 }
 
 @test:Config {enable: true}
@@ -317,7 +312,7 @@ function numberMaxValueConstraintListenerPayloadTest() returns error? {
     check constraintListener.'start();
     runtime:sleep(3);
     check constraintListener.gracefulStop();
-    test:assertEquals(receivedNumberMaxValueConstraintError, "Failed to validate");
+    test:assertEquals(receivedNumberMaxValueConstraintError, validationErrorMessage);
 }
 
 @test:Config {enable: true}
@@ -351,7 +346,7 @@ function numberMinValueConstraintListenerPayloadTest() returns error? {
     check constraintListener.'start();
     runtime:sleep(3);
     check constraintListener.gracefulStop();
-    test:assertEquals(receivedNumberMinValueConstraintError, "Failed to validate");
+    test:assertEquals(receivedNumberMinValueConstraintError, validationErrorMessage);
 }
 
 @test:Config {enable: true}
@@ -399,10 +394,10 @@ function disabledConstraintValidationTest() returns error? {
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
-        groupId: "constraint-consumer-group-01",
-        clientId: "constraint-consumer-id-01",
+        groupId: "constraint-consumer-group-12",
+        clientId: "constraint-consumer-id-12",
         offsetReset: OFFSET_RESET_EARLIEST,
-        constraintValidation: false
+        validation: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -416,4 +411,89 @@ function disabledConstraintValidationTest() returns error? {
         test:assertEquals(result[1].key, "this-is-a-long-long-key");
     }
     check consumer->close();
+}
+
+@test:Config {enable: true}
+function constraintErrorWithSeekConsumerRecordTest() returns error? {
+    string topic = "constraint-error-with-seek-test-topic";
+    check sendMessage("This is a valid message", topic);
+    check sendMessage("Invalid", topic);
+    check sendMessage("This is the second valid message", topic);
+    check sendMessage("This is the third valid message", topic);
+    check sendMessage("This is the fourth valid message", topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "constraint-consumer-group-13",
+        clientId: "constraint-consumer-id-13",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    StringConstraintConsumerRecord[] value = check consumer->poll(5);
+    test:assertEquals(value.length(), 1);
+    test:assertEquals(value[0].value, "This is a valid message");
+    StringConstraintConsumerRecord[]|error result = consumer->poll(5);
+    if result is PayloadValidationError {
+        test:assertEquals(result.message(), validationErrorMessage);
+        check consumer->seek({
+            partition: result.detail().partition,
+            offset: result.detail().offset + 1
+        });
+        result = consumer->poll(5);
+        if result is error {
+            test:assertFail(result.message());
+        } else {
+            test:assertEquals(result.length(), 3);
+            test:assertEquals(result[0].value, "This is the second valid message");
+            test:assertEquals(result[1].value, "This is the third valid message");
+            test:assertEquals(result[2].value, "This is the fourth valid message");
+        }
+    } else {
+        test:assertFail("Expected a constraint validation error");
+    }
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function invalidRecordConstraintWithSeekPayloadTest() returns error? {
+    string topic = "invalid-record-constraint-with-seek-listener-test-topic";
+    check sendMessage({name: "Phil Dunphy", age: 56}, topic);
+    check sendMessage({name: "Claire Dunphy", age: 150}, topic);
+    check sendMessage({name: "Hayley Dunphy", age: 20}, topic);
+    check sendMessage({name: "Max Dunphy", age: 18}, topic);
+
+    Service invalidRecordService =
+    service object {
+        remote function onConsumerRecord(Child[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                log:printInfo("Received record: " + records[i].toString());
+                receivedSeekedValidRecordCount += 1;
+            }
+        }
+
+        remote function onError(Error e, Caller caller) returns error? {
+            log:printError(e.toString());
+            if e is PayloadValidationError {
+                check caller->seek({
+                    partition: e.detail().partition,
+                    offset: e.detail().offset + 1
+                });
+            }
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "constraint-listener-group-16",
+        clientId: "constraint-listener-16",
+        pollingInterval: 2
+    };
+    Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
+    check constraintListener.attach(invalidRecordService);
+    check constraintListener.'start();
+    runtime:sleep(40);
+    check constraintListener.gracefulStop();
+    test:assertEquals(receivedSeekedValidRecordCount, 3);
 }
