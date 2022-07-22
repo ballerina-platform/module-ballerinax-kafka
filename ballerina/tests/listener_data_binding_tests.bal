@@ -1161,7 +1161,7 @@ function invalidRecordPayloadWithSeekListenerTest() returns error? {
     Listener payloadListener = check new (DEFAULT_URL, consumerConfiguration);
     check payloadListener.attach(invalidRecordService);
     check payloadListener.'start();
-    runtime:sleep(40);
+    runtime:sleep(5);
     check payloadListener.gracefulStop();
     test:assertEquals(receivedSeekedValidRecordListenerCount, 3);
 }

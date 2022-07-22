@@ -493,7 +493,7 @@ function invalidRecordConstraintWithSeekPayloadTest() returns error? {
     Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
     check constraintListener.attach(invalidRecordService);
     check constraintListener.'start();
-    runtime:sleep(40);
+    runtime:sleep(5);
     check constraintListener.gracefulStop();
     test:assertEquals(receivedSeekedValidRecordCount, 3);
 }
