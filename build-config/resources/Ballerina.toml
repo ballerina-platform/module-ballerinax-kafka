@@ -21,5 +21,11 @@ path = "./lib/kafka_2.12-@kafka.version@.jar"
 [[platform.java11.dependency]]
 path = "./lib/avro-@avro.version@.jar"
 
+[[platform.java11.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "constraint-native"
+version = "@constraint.version@"
+path = "./lib/constraint-native-@constraint.native.version@.jar"
+
 [build-options]
 observabilityIncluded=true

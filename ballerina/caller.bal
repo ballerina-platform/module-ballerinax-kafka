@@ -44,6 +44,17 @@ public client isolated class Caller {
         name: "commitOffset",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.Commit"
     } external;
+
+    # Seeks for a given offset in a topic partition.
+    # ```ballerina
+    # kafka:Error? result = consumer->seek(partitionOffset);
+    # ```
+    #
+    # + offset - The `PartitionOffset` to seek
+    # + return - A `kafka:Error` if an error is encountered or else `()`
+    isolated remote function seek(PartitionOffset offset) returns Error? =
+    @java:Method {
+        name: "seek",
+        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.Seek"
+    } external;
 }
-
-

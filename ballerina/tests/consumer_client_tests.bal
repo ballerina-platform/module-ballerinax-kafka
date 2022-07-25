@@ -658,13 +658,13 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 38);
+    test:assertEquals(availableTopics.length(), 43);
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
     ConsumerRecord[] _ = check consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
-    test:assertEquals(newSubscribedTopics.length(), 11);
+    test:assertEquals(newSubscribedTopics.length(), 13);
     check consumer->close();
 }
 
@@ -719,7 +719,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 40);
+    test:assertEquals(availableTopics.length(), 45);
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -729,7 +729,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 40);
+    test:assertEquals(availableTopics.length(), 45);
     check consumer->close();
 }
 
@@ -1390,6 +1390,28 @@ function invalidSecurityProtocolConsumerTest() returns error? {
     if result is Error {
         test:assertEquals(result.message(), "Cannot connect to the kafka server: Failed to construct kafka consumer");
     }
+}
+
+@test:Config {enable: true}
+function consumerPollFromMultipleTopicsTest() returns error? {
+    string topic1 = "consumer-multiple-topic-1";
+    string topic2 = "consumer-multiple-topic-2";
+    check sendMessage(TEST_MESSAGE.toBytes(), topic1);
+    check sendMessage(TEST_MESSAGE_II.toBytes(), topic2);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic1, topic2],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-multiple-topic-test-group",
+        clientId: "test-consumer-59"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 2);
+    string message1 = check 'string:fromBytes(consumerRecords[0].value);
+    string message2 = check 'string:fromBytes(consumerRecords[1].value);
+    test:assertTrue((message1 == TEST_MESSAGE && message2 == TEST_MESSAGE_II) ||
+                            (message2 == TEST_MESSAGE || message1 == TEST_MESSAGE_II));
+    check consumer->close();
 }
 
 function sendMessage(anydata message, string topic, anydata? key = ()) returns error? {

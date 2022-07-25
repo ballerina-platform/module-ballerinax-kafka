@@ -447,3 +447,66 @@ function unionBindingConsumerTest() returns error? {
     });
     check consumer->close();
 }
+
+@test:Config {enable: true}
+function readonlyRecordBindingConsumerTest() returns error? {
+    string topic = "readonly-record-binding-consumer-test-topic";
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+    check sendMessage(personRecord1.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-09",
+        clientId: "data-binding-consumer-id-09",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    readonly & Person[] records = check consumer->pollPayload(5);
+    test:assertTrue(records.isReadOnly());
+    test:assertEquals(records.length(), 3);
+    records.forEach(function(Person value) {
+        test:assertEquals(value, personRecord1);
+    });
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function pollErrorWithSeekConsumerRecordTest() returns error? {
+    string topic = "poll-error-with-seek-test-topic";
+    check sendMessage(personRecord1, topic);
+    check sendMessage("Invalid", topic);
+    check sendMessage(personRecord1, topic);
+    check sendMessage(personRecord1, topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+
+    PersonConsumerRecord[] value = check consumer->poll(5);
+    test:assertEquals(value.length(), 1);
+    test:assertEquals(value[0].value, personRecord1);
+    PersonConsumerRecord[]|error result = consumer->poll(5);
+    if result is PayloadBindingError {
+        test:assertEquals(result.message(), "Data binding failed: unrecognized token 'Invalid' at line: 1 column: 9");
+        check consumer->seek({
+            partition: result.detail().partition,
+            offset: result.detail().offset + 1
+        });
+        result = consumer->poll(5);
+        if result is error {
+            test:assertFail(result.message());
+        } else {
+            test:assertEquals(result.length(), 2);
+            test:assertEquals(result[0].value, personRecord1);
+            test:assertEquals(result[1].value, personRecord1);
+        }
+    } else {
+        test:assertFail("Expected a payload binding error");
+    }
+    check consumer->close();
+}

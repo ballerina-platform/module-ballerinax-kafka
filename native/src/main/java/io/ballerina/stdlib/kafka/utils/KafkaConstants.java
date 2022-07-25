@@ -49,6 +49,8 @@ public class KafkaConstants {
     public static final String OFFSET_STRUCT_NAME = "PartitionOffset";
 
     public static final String KAFKA_ERROR = "Error";
+    public static final String PAYLOAD_BINDING_ERROR = "PayloadBindingError";
+    public static final String PAYLOAD_VALIDATION_ERROR = "PayloadValidationError";
 
     public static final String AVRO_GENERIC_RECORD_NAME = "AvroGenericRecord";
     public static final String CONSUMER_RECORD_STRUCT_NAME = "ConsumerRecord";
@@ -130,6 +132,7 @@ public class KafkaConstants {
             "excludeInternalTopics");
     public static final BString CONSUMER_DEFAULT_API_TIMEOUT_CONFIG = StringUtils.fromString(
             "defaultApiTimeout");
+    public static final BString CONSUMER_ENABLE_AUTO_COMMIT = StringUtils.fromString("enable.auto.commit");
 
     // Producer Configuration.
     public static final BString PRODUCER_BOOTSTRAP_SERVERS_CONFIG = StringUtils.fromString("bootstrapServers");
@@ -215,6 +218,7 @@ public class KafkaConstants {
     public static final String CLIENT_ID = "client.id";
     public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
     public static final String DEFAULT_SER_DES_TYPE = "BYTE_ARRAY";
+    public static final BString CONSTRAINT_VALIDATION = StringUtils.fromString("validation");
 
     public static final BigDecimal MILLISECOND_MULTIPLIER = new BigDecimal(1000);
 

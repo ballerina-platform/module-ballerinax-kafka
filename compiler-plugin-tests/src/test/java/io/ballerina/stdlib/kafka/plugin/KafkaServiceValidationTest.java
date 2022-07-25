@@ -42,6 +42,7 @@ import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_CALLER_AND_RECORDS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.MUST_HAVE_ERROR;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.NO_ON_CONSUMER_RECORD;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_CALLER_ALLOWED;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CompilationErrors.ONLY_ERROR_ALLOWED;
 
 /**
@@ -140,6 +141,14 @@ public class KafkaServiceValidationTest {
     @Test(enabled = true, description = "Validate `kafka:AnydataConsumerRecord` subtypes")
     public void testValidService12() {
         Package currentPackage = loadPackage("valid_service_12");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test(enabled = true, description = "Validate onError method with `kafka:Error` and `kafka:Caller`")
+    public void testValidService13() {
+        Package currentPackage = loadPackage("valid_service_13");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
@@ -296,7 +305,7 @@ public class KafkaServiceValidationTest {
         Package currentPackage = loadPackage("invalid_service_14");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 7);
+        Assert.assertEquals(diagnosticResult.errors().size(), 5);
         Object[] diagnostics = diagnosticResult.errors().toArray();
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
@@ -413,6 +422,19 @@ public class KafkaServiceValidationTest {
         for (Object obj : diagnostics) {
             Diagnostic diagnostic = (Diagnostic) obj;
             assertDiagnostic(diagnostic, INVALID_SINGLE_PARAMETER);
+        }
+    }
+
+    @Test(enabled = true, description = "Validate caller parameter in onError")
+    public void testInvalidService24() {
+        Package currentPackage = loadPackage("invalid_service_24");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Object[] diagnostics = diagnosticResult.errors().toArray();
+        for (Object obj : diagnostics) {
+            Diagnostic diagnostic = (Diagnostic) obj;
+            assertDiagnostic(diagnostic, ONLY_CALLER_ALLOWED);
         }
     }
 

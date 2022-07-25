@@ -24,6 +24,7 @@ module io.ballerina.stdlib.kafka.runtime {
     requires org.apache.avro;
     requires com.fasterxml.jackson.core;
     requires org.slf4j;
+    requires io.ballerina.stdlib.constraint;
     exports io.ballerina.stdlib.kafka.impl;
     exports io.ballerina.stdlib.kafka.nativeimpl.consumer;
     exports io.ballerina.stdlib.kafka.nativeimpl.producer;
