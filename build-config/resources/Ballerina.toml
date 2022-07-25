@@ -10,6 +10,9 @@ license = ["Apache-2.0"]
 distribution = "2201.1.0"
 
 [[platform.java11.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "kafka-native"
+version = "@toml.version@"
 path = "../native/build/libs/kafka-native-@project.version@.jar"
 
 [[platform.java11.dependency]]
