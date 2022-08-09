@@ -77,7 +77,8 @@ public class KafkaRecordConsumer {
         this.kafkaConsumer.subscribe(topics);
         this.kafkaListener = kafkaListener;
         if (configParams.get(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue()) != null) {
-            this.pollingTimeout = Duration.ofMillis((Integer) configParams.get(KafkaConstants.ALIAS_POLLING_TIMEOUT));
+            this.pollingTimeout = Duration.ofMillis((Integer)
+                    configParams.get(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue()));
         }
         if (configParams.get(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue()) != null) {
             this.pollingInterval = (Integer) configParams.get(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue());
