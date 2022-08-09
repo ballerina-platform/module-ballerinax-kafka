@@ -29,6 +29,7 @@ string sslMsg = "";
 string detachMsg1 = "";
 string detachMsg2 = "";
 string incorrectEndpointMsg = "";
+string receivedTimeoutConfigValue = "";
 
 int receivedMsgCount = 0;
 
@@ -938,3 +939,34 @@ service object {
         }
     }
 };
+
+@test:Config {enable: true}
+function listenerWithPollTimeoutConfigTest() returns error? {
+    string topic = "listener-poll-timeout-config-test-topic";
+    check sendMessage(TEST_MESSAGE, topic);
+    check sendMessage(TEST_MESSAGE, topic);
+
+    Service configService =
+    service object {
+        remote function onConsumerRecord(string[] records) returns error? {
+            foreach int i in 0 ... records.length() {
+                receivedTimeoutConfigValue = records[i];
+            }
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "test-listener-group-28",
+        clientId: "test-listener-28",
+        pollingInterval: 2,
+        pollingTimeout: 1
+    };
+    Listener configListener = check new (DEFAULT_URL, consumerConfiguration);
+    check configListener.attach(configService);
+    check configListener.'start();
+    runtime:sleep(3);
+    check configListener.gracefulStop();
+    test:assertEquals(receivedTimeoutConfigValue, TEST_MESSAGE);
+}
