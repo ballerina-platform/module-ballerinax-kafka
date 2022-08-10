@@ -77,6 +77,7 @@ scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
+	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "file"},
 	{org = "ballerina", name = "io"},
