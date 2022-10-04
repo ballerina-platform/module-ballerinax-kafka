@@ -75,9 +75,6 @@ dependencies {
     externalJars(group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    externalJars(group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
-        transitive = false
-    }
     externalJars(group: 'io.ballerina.stdlib', name: 'constraint-native', version: "${stdlibConstraintVersion}")
 }
 

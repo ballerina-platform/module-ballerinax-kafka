@@ -21,8 +21,6 @@ module io.ballerina.stdlib.kafka.runtime {
     requires io.ballerina.runtime;
     requires io.ballerina.lang.value;
     requires java.transaction.xa;
-    requires org.apache.avro;
-    requires com.fasterxml.jackson.core;
     requires org.slf4j;
     requires io.ballerina.stdlib.constraint;
     exports io.ballerina.stdlib.kafka.impl;
