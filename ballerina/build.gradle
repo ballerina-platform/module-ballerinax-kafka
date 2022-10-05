@@ -84,7 +84,6 @@ task updateTomlFiles {
         def constraintVersion = stripBallerinaExtensionVersion("${project.stdlibConstraintVersion}")
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@kafka.version@", kafkaVersion)
-        newConfig = newConfig.replace("@avro.version@", avroVersion)
         newConfig = newConfig.replace("@constraint.native.version@", stdlibConstraintVersion)
         newConfig = newConfig.replace("@constraint.version@", constraintVersion)
         ballerinaConfigFile.text = newConfig
