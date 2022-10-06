@@ -22,9 +22,6 @@ path = "./lib/kafka-clients-@kafka.version@.jar"
 path = "./lib/kafka_2.12-@kafka.version@.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/avro-@avro.version@.jar"
-
-[[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
 version = "@constraint.version@"

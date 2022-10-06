@@ -31,7 +31,6 @@ dependencies {
     implementation group: 'org.ballerinalang', name: 'value', version: "${ballerinaLangVersion}"
     implementation group: 'io.ballerina.stdlib', name: 'constraint-native', version: "${stdlibConstraintVersion}"
     implementation group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}"
-    implementation group: 'org.apache.avro', name: 'avro', version: "${avroVersion}"
     implementation group: 'org.slf4j', name: 'slf4j-api', version:{slf4jVersion}
 }
 

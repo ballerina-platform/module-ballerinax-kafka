@@ -75,9 +75,6 @@ dependencies {
     externalJars(group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    externalJars(group: 'org.apache.avro', name: 'avro', version: "${avroVersion}") {
-        transitive = false
-    }
     externalJars(group: 'io.ballerina.stdlib', name: 'constraint-native', version: "${stdlibConstraintVersion}")
 }
 
@@ -87,7 +84,6 @@ task updateTomlFiles {
         def constraintVersion = stripBallerinaExtensionVersion("${project.stdlibConstraintVersion}")
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@kafka.version@", kafkaVersion)
-        newConfig = newConfig.replace("@avro.version@", avroVersion)
         newConfig = newConfig.replace("@constraint.native.version@", stdlibConstraintVersion)
         newConfig = newConfig.replace("@constraint.version@", constraintVersion)
         ballerinaConfigFile.text = newConfig

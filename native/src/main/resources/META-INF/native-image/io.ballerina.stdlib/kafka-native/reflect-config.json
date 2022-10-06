@@ -1,0 +1,91 @@
+[
+  {
+    "name": "org.apache.kafka.clients.producer.internals.DefaultPartitioner",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.clients.consumer.RangeAssignor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.security.authenticator.AbstractLogin$DefaultLoginCallbackHandler",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.security.authenticator.DefaultLogin",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.security.plain.PlainLoginModule",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ByteArrayDeserializer",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.utils.AppInfoParser$AppInfo",
+    "queryAllPublicConstructors": true
+  },
+  {
+    "name": "org.apache.kafka.common.utils.AppInfoParser$AppInfoMBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ByteArraySerializer",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.ConfigFile",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]
