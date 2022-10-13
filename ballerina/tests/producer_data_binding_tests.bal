@@ -80,6 +80,7 @@ public type JsonProducerRecord record {|
 @test:Config {enable: true}
 function intProduceTest() returns error? {
     string topic = "int-produce-test-topic";
+    kafkaTopics.push(topic);
     IntProducerRecord producerRecord = {
         topic,
         'key: 2,
@@ -115,6 +116,7 @@ function intProduceTest() returns error? {
 @test:Config {enable: true}
 function floatProduceTest() returns error? {
     string topic = "float-produce-test-topic";
+    kafkaTopics.push(topic);
     FloatProducerRecord producerRecord = {
         topic,
         'key: 100.9,
@@ -150,6 +152,7 @@ function floatProduceTest() returns error? {
 @test:Config {enable: true}
 function decimalProduceTest() returns error? {
     string topic = "decimal-produce-test-topic";
+    kafkaTopics.push(topic);
     DecimalProducerRecord producerRecord = {
         topic,
         'key: 2.3d,
@@ -185,6 +188,7 @@ function decimalProduceTest() returns error? {
 @test:Config {enable: true}
 function booleanProduceTest() returns error? {
     string topic = "boolean-produce-test-topic";
+    kafkaTopics.push(topic);
     BooleanProducerRecord producerRecord = {
         topic,
         'key: true,
@@ -218,6 +222,7 @@ function booleanProduceTest() returns error? {
 @test:Config {enable: true}
 function stringProduceTest() returns error? {
     string topic = "string-produce-test-topic";
+    kafkaTopics.push(topic);
     StringProducerRecord producerRecord = {
         topic,
         'key: TEST_KEY,
@@ -251,6 +256,7 @@ function stringProduceTest() returns error? {
 @test:Config {enable: true}
 function xmlProduceTest() returns error? {
     string topic = "xml-produce-test-topic";
+    kafkaTopics.push(topic);
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
     XmlProducerRecord producerRecord = {
         topic,
@@ -285,6 +291,7 @@ function xmlProduceTest() returns error? {
 @test:Config {enable: true}
 function recordProduceTest() returns error? {
     string topic = "record-produce-test-topic";
+    kafkaTopics.push(topic);
     PersonProducerRecord producerRecord = {
         topic,
         value: personRecord1
@@ -315,6 +322,7 @@ function recordProduceTest() returns error? {
 @test:Config {enable: true}
 function mapProduceTest() returns error? {
     string topic = "map-produce-test-topic";
+    kafkaTopics.push(topic);
     MapProducerRecord producerRecord = {
         topic,
         value: personMap
@@ -345,6 +353,7 @@ function mapProduceTest() returns error? {
 @test:Config {enable: true}
 function tableProduceTest() returns error? {
     string topic = "table-produce-test-topic";
+    kafkaTopics.push(topic);
     table<Person> personMapTable = table [];
     personMapTable.add(personRecord1);
     TableProducerRecord producerRecord = {

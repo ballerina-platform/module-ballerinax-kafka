@@ -20,6 +20,7 @@ import ballerina/log;
 @test:Config {enable: true}
 function stringBindingConsumerTest() returns error? {
     string topic = "string-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -42,6 +43,7 @@ function stringBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function intBindingConsumerTest() returns error? {
     string topic = "int-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     int sendingValue = 100;
     check sendMessage(sendingValue.toString().toBytes(), topic);
     check sendMessage(sendingValue.toString().toBytes(), topic);
@@ -65,6 +67,7 @@ function intBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function floatBindingConsumerTest() returns error? {
     string topic = "float-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     float sendingValue = 100.9;
     check sendMessage(sendingValue.toString().toBytes(), topic);
     check sendMessage(sendingValue.toString().toBytes(), topic);
@@ -88,6 +91,7 @@ function floatBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function decimalBindingConsumerTest() returns error? {
     string topic = "decimal-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     decimal sendingValue = 10.4d;
     check sendMessage(sendingValue.toString().toBytes(), topic);
     check sendMessage(sendingValue.toString().toBytes(), topic);
@@ -111,6 +115,7 @@ function decimalBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function booleanBindingConsumerTest() returns error? {
     string topic = "boolean-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     boolean sendingValue = true;
     check sendMessage(sendingValue.toString().toBytes(), topic);
     check sendMessage(sendingValue.toString().toBytes(), topic);
@@ -134,6 +139,7 @@ function booleanBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function xmlBindingConsumerTest() returns error? {
     string topic = "xml-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     xml sendingValue = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
     check sendMessage(sendingValue, topic);
     check sendMessage(sendingValue, topic);
@@ -157,6 +163,7 @@ function xmlBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function jsonBindingConsumerTest() returns error? {
     string topic = "json-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(jsonData.toString().toBytes(), topic);
     check sendMessage(jsonData.toString().toBytes(), topic);
     check sendMessage(jsonData.toString().toBytes(), topic);
@@ -179,6 +186,7 @@ function jsonBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function mapBindingConsumerTest() returns error? {
     string topic = "map-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personMap.toString().toBytes(), topic);
     check sendMessage(personMap.toString().toBytes(), topic);
     check sendMessage(personMap.toString().toBytes(), topic);
@@ -201,6 +209,7 @@ function mapBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function tableBindingConsumerTest() returns error? {
     string topic = "table-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     table<Person> personMapTable = table [];
 
     personMapTable.add(personRecord1);
@@ -226,6 +235,7 @@ function tableBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function recordBindingConsumerTest() returns error? {
     string topic = "record-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -248,6 +258,7 @@ function recordBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function nilBindingConsumerTest() returns error? {
     string topic = "nil-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage((), topic);
     check sendMessage((), topic);
     check sendMessage((), topic);
@@ -267,6 +278,7 @@ function nilBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function dataBindingErrorConsumerTest() returns error? {
     string topic = "data-binding-error-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -290,6 +302,7 @@ function dataBindingErrorConsumerTest() returns error? {
 @test:Config {enable: true}
 function stringConsumerRecordTest() returns error? {
     string topic = "string-consumer-record-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -313,6 +326,7 @@ function stringConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function intConsumerRecordTest() returns error? {
     string topic = "int-consumer-record-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(1.toString().toBytes(), topic);
     check sendMessage(1.toString().toBytes(), topic);
     check sendMessage(1.toString().toBytes(), topic);
@@ -336,6 +350,7 @@ function intConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function xmlConsumerRecordTest() returns error? {
     string topic = "xml-consumer-record-test-topic";
+    kafkaTopics.push(topic);
     xml sendingValue = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
     check sendMessage(sendingValue.toString().toBytes(), topic);
     check sendMessage(sendingValue.toString().toBytes(), topic);
@@ -360,6 +375,7 @@ function xmlConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function recordConsumerRecordTest() returns error? {
     string topic = "record-consumer-record-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -383,6 +399,7 @@ function recordConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function jsonConsumerRecordTest() returns error? {
     string topic = "json-consumer-record-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(jsonData.toString().toBytes(), topic);
     check sendMessage(jsonData.toString().toBytes(), topic);
     check sendMessage(jsonData.toString().toBytes(), topic);
@@ -406,6 +423,7 @@ function jsonConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function readonlyConsumerRecordTest() returns error? {
     string topic = "readonly-consumer-record-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -429,6 +447,7 @@ function readonlyConsumerRecordTest() returns error? {
 @test:Config {enable: true}
 function unionBindingConsumerTest() returns error? {
     string topic = "union-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -451,6 +470,7 @@ function unionBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function readonlyRecordBindingConsumerTest() returns error? {
     string topic = "readonly-record-binding-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -474,6 +494,7 @@ function readonlyRecordBindingConsumerTest() returns error? {
 @test:Config {enable: true}
 function pollErrorWithSeekConsumerRecordTest() returns error? {
     string topic = "poll-error-with-seek-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1, topic);
     check sendMessage("Invalid", topic);
     check sendMessage(personRecord1, topic);

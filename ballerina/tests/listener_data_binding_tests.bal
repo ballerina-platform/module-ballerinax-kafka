@@ -173,6 +173,7 @@ PayloadConsumerRecord payloadConsumerRecord = {
 @test:Config {enable: true}
 function dataBindingErrorListenerTest() returns error? {
     string topic = "data-binding-error-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(jsonData, topic);
     check sendMessage(jsonData, topic);
     check sendMessage(jsonData, topic);
@@ -212,6 +213,7 @@ function dataBindingErrorListenerTest() returns error? {
 @test:Config {enable: true}
 function intConsumerRecordBindingListenerTest() returns error? {
     string topic = "int-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(1, topic);
 
     Service intBindingService =
@@ -246,6 +248,7 @@ function intConsumerRecordBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function floatConsumerRecordBindingListenerTest() returns error? {
     string topic = "float-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(10.5, topic);
 
     Service floatBindingService =
@@ -280,6 +283,7 @@ function floatConsumerRecordBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function decimalConsumerRecordBindingListenerTest() returns error? {
     string topic = "decimal-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(98.5d, topic);
 
     Service decimalBindingService =
@@ -314,6 +318,7 @@ function decimalConsumerRecordBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function booleanConsumerRecordBindingListenerTest() returns error? {
     string topic = "boolean-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(true, topic);
 
     Service booleanBindingService =
@@ -348,6 +353,7 @@ function booleanConsumerRecordBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function stringConsumerRecordListenerTest() returns error? {
     string topic = "string-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE, topic);
     check sendMessage(TEST_MESSAGE, topic);
     check sendMessage(TEST_MESSAGE, topic);
@@ -384,6 +390,7 @@ function stringConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function xmlConsumerRecordListenerTest() returns error? {
     string topic = "xml-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
     check sendMessage(xmlData, topic);
     check sendMessage(xmlData, topic);
@@ -421,6 +428,7 @@ function xmlConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function recordConsumerRecordListenerTest() returns error? {
     string topic = "record-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1, topic);
     check sendMessage(personRecord1, topic);
     check sendMessage(personRecord1, topic);
@@ -457,6 +465,7 @@ function recordConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function mapConsumerRecordListenerTest() returns error? {
     string topic = "map-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personMap, topic);
     check sendMessage(personMap, topic);
     check sendMessage(personMap, topic);
@@ -493,6 +502,7 @@ function mapConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function tableConsumerRecordListenerTest() returns error? {
     string topic = "table-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     table<Person> personMapTable = table [];
 
     personMapTable.add(personRecord1);
@@ -532,6 +542,7 @@ function tableConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function jsonConsumerRecordListenerTest() returns error? {
     string topic = "json-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(jsonData, topic);
     check sendMessage(jsonData, topic);
     check sendMessage(jsonData, topic);
@@ -568,6 +579,7 @@ function jsonConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function readonlyConsumerRecordListenerTest() returns error? {
     string topic = "readonly-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1, topic);
     check sendMessage(personRecord1, topic);
     check sendMessage(personRecord1, topic);
@@ -607,6 +619,7 @@ function readonlyConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function intPayloadBindingListenerTest() returns error? {
     string topic = "int-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(1, topic);
 
     Service intBindingService =
@@ -641,6 +654,7 @@ function intPayloadBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function floatPayloadBindingListenerTest() returns error? {
     string topic = "float-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(10.5, topic);
 
     Service floatBindingService =
@@ -675,6 +689,7 @@ function floatPayloadBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function decimalPayloadBindingListenerTest() returns error? {
     string topic = "decimal-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(98.5d, topic);
 
     Service decimalBindingService =
@@ -709,6 +724,7 @@ function decimalPayloadBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function booleanPayloadBindingListenerTest() returns error? {
     string topic = "boolean-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(true, topic);
 
     Service booleanBindingService =
@@ -743,6 +759,7 @@ function booleanPayloadBindingListenerTest() returns error? {
 @test:Config {enable: true}
 function stringPayloadListenerTest() returns error? {
     string topic = "string-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE, topic);
     check sendMessage(TEST_MESSAGE, topic);
     check sendMessage(TEST_MESSAGE, topic);
@@ -779,6 +796,7 @@ function stringPayloadListenerTest() returns error? {
 @test:Config {enable: true}
 function xmlPayloadListenerTest() returns error? {
     string topic = "xml-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
     check sendMessage(xmlData, topic);
     check sendMessage(xmlData, topic);
@@ -816,6 +834,7 @@ function xmlPayloadListenerTest() returns error? {
 @test:Config {enable: true}
 function recordPayloadListenerTest() returns error? {
     string topic = "record-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1, topic);
     check sendMessage(personRecord1, topic);
     check sendMessage(personRecord1, topic);
@@ -852,6 +871,7 @@ function recordPayloadListenerTest() returns error? {
 @test:Config {enable: true}
 function mapPayloadListenerTest() returns error? {
     string topic = "map-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personMap, topic);
     check sendMessage(personMap, topic);
     check sendMessage(personMap, topic);
@@ -888,6 +908,7 @@ function mapPayloadListenerTest() returns error? {
 @test:Config {enable: true}
 function tablePayloadListenerTest() returns error? {
     string topic = "table-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     table<Person> personMapTable = table [];
 
     personMapTable.add(personRecord1);
@@ -927,6 +948,7 @@ function tablePayloadListenerTest() returns error? {
 @test:Config {enable: true}
 function jsonPayloadListenerTest() returns error? {
     string topic = "json-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(jsonData, topic);
     check sendMessage(jsonData, topic);
     check sendMessage(jsonData, topic);
@@ -963,6 +985,7 @@ function jsonPayloadListenerTest() returns error? {
 @test:Config {enable: true}
 function payloadConsumerRecordListenerTest() returns error? {
     string topic = "payload-consumer-record-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(payloadConsumerRecord, topic);
     check sendMessage(payloadConsumerRecord, topic);
     check sendMessage(payloadConsumerRecord, topic);
@@ -999,6 +1022,7 @@ function payloadConsumerRecordListenerTest() returns error? {
 @test:Config {enable: true}
 function readonlyPayloadListenerTest() returns error? {
     string topic = "readonly-payload-listener-test-topic";
+    kafkaTopics.push(topic);
     isPayloadReadonly = false;
     readOnlyPayloads = [];
     check sendMessage(personRecord1, topic);
@@ -1040,6 +1064,7 @@ function readonlyPayloadListenerTest() returns error? {
 @test:Config {enable: true}
 function readonlyPayloadWithPayloadAnnotationListenerTest() returns error? {
     string topic = "readonly-payload-consumer-record-with-annotation-record-listener-test-topic";
+    kafkaTopics.push(topic);
 
     isPayloadReadonly = false;
     readOnlyPayloads = [];
@@ -1083,6 +1108,7 @@ function readonlyPayloadWithPayloadAnnotationListenerTest() returns error? {
 @test:Config {enable: true}
 function readonlyPayloadReadonlyConsumerRecordsListenerTest() returns error? {
     string topic = "readonly-payload-with-readonly-consumer-records-listener-test-topic";
+    kafkaTopics.push(topic);
 
     isPayloadReadonly = false;
     readOnlyPayloads = [];
@@ -1126,6 +1152,7 @@ function readonlyPayloadReadonlyConsumerRecordsListenerTest() returns error? {
 @test:Config {enable: true}
 function invalidRecordPayloadWithSeekListenerTest() returns error? {
     string topic = "invalid-record-payload-with-seek-listener-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(personRecord1, topic);
     check sendMessage("Invalid", topic);
     check sendMessage(personRecord1, topic);
