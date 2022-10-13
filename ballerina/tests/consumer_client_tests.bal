@@ -58,6 +58,8 @@ string receivedMessageWithCommit = "";
 string receivedMessageWithCommitOffset = "";
 string receivedConfigMessage = "";
 
+string[] kafkaTopics = [emptyTopic, nonExistingTopic];
+
 AuthenticationConfiguration authConfig = {
     mechanism: AUTH_SASL_PLAIN,
     username: SASL_USER,
@@ -102,6 +104,7 @@ Producer producer = check new (DEFAULT_URL, producerConfiguration);
 @test:Config {enable: true}
 function consumerCloseTest() returns error? {
     string topic = "close-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -124,6 +127,7 @@ function consumerCloseTest() returns error? {
 @test:Config {enable: true}
 function consumerCloseWithDurationTest() returns error? {
     string topic = "close-with-duration-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -145,6 +149,7 @@ function consumerCloseWithDurationTest() returns error? {
 @test:Config {enable: true}
 function consumerCloseWithDefaultTimeoutTest() returns error? {
     string topic = "close-with-default-timeout-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -167,6 +172,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
 @test:Config {enable: true}
 function consumerConfigTest() returns error? {
     string topic = "consumer-config-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -187,6 +193,7 @@ function consumerConfigTest() returns error? {
 @test:Config {enable: true}
 function consumerFunctionsTest() returns error? {
     string topic = "consumer-functions-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -206,6 +213,7 @@ function consumerFunctionsTest() returns error? {
 @test:Config {enable: true}
 function consumerSeekTest() returns error? {
     string topic = "consumer-seek-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -245,6 +253,7 @@ function consumerSeekTest() returns error? {
 @test:Config {enable: true}
 function consumerSeekToBeginningTest() returns error? {
     string topic = "consumer-seek-to-beginning-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -277,6 +286,7 @@ function consumerSeekToBeginningTest() returns error? {
 @test:Config {enable: true}
 function consumerSeekToEndTest() returns error? {
     string topic = "consumer-seek-to-end-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -341,6 +351,7 @@ function consumerSeekToNegativeValueTest() returns error? {
 }
 function consumerPositionOffsetsTest() returns error? {
     string topic = "consumer-position-offsets-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-position-offset-test-group",
@@ -381,6 +392,7 @@ function consumerPositionOffsetsTest() returns error? {
 }
 function consumerBeginningOffsetsTest() returns error? {
     string topic = "consumer-beginning-offsets-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-beginning-offsets-test-group-1",
@@ -434,6 +446,7 @@ function consumerBeginningOffsetsTest() returns error? {
 }
 function consumerEndOffsetsTest() returns error? {
     string topic = "consumer-end-offsets-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-end-offset-test-group-1",
@@ -483,6 +496,8 @@ function consumerEndOffsetsTest() returns error? {
 function consumerTopicPartitionsTest() returns error? {
     string topic1 = "consumer-topic-partitions-test-topic-1";
     string topic2 = "consumer-topic-partitions-test-topic-2";
+    kafkaTopics.push(topic1);
+    kafkaTopics.push(topic2);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic1, topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -511,6 +526,7 @@ function consumerTopicPartitionsTest() returns error? {
 @test:Config {enable: true}
 function consumerPauseResumePartitionTest() returns error? {
     string topic = "consumer-pause-resume-partition-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-pause-partition-test-group",
@@ -658,13 +674,18 @@ function consumerSubscribeTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 43);
+    string[] formattedTopics = availableTopics.filter(function (string topic) returns boolean {
+        return !topic.startsWith("_");
+    });
+    test:assertEquals(formattedTopics.sort(), kafkaTopics.sort());
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
     ConsumerRecord[] _ = check consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
-    test:assertEquals(newSubscribedTopics.length(), 13);
+    test:assertEquals(newSubscribedTopics.sort(), kafkaTopics.filter(function (string topic) returns boolean {
+        return topic.startsWith("consumer");
+    }).sort());
     check consumer->close();
 }
 
@@ -719,7 +740,10 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    test:assertEquals(availableTopics.length(), 45);
+    string[] formattedTopics = availableTopics.filter(function (string topic) returns boolean {
+        return !topic.startsWith("_");
+    });
+    test:assertEquals(formattedTopics.sort(), kafkaTopics.sort());
     check consumer->close();
 
     consumer = check new (DEFAULT_URL, {
@@ -729,7 +753,10 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    test:assertEquals(availableTopics.length(), 45);
+    formattedTopics = availableTopics.filter(function (string topic) returns boolean {
+        return !topic.startsWith("_");
+    });
+    test:assertEquals(formattedTopics.sort(), kafkaTopics.sort());
     check consumer->close();
 }
 
@@ -756,6 +783,7 @@ function consumerSubscribeErrorTest() returns error? {
 @test:Config {enable: true}
 function manualCommitTest() returns error? {
     string topic = "manual-commit-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -800,6 +828,7 @@ function manualCommitTest() returns error? {
 @test:Config {enable: true}
 function manualCommitWithDurationTest() returns error? {
     string topic = "manual-commit-with-duration-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -830,6 +859,7 @@ function manualCommitWithDurationTest() returns error? {
 @test:Config {enable: true}
 function manualCommitWithDefaultTimeoutTest() returns error? {
     string topic = "manual-commit-with-default-timeout-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -861,6 +891,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
 @test:Config {enable: true}
 function nonExistingTopicPartitionOffsetsTest() returns error? {
     string existingTopic = "existing-test-topic";
+    kafkaTopics.push(existingTopic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [existingTopic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -885,6 +916,7 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
 @test:Config {enable: true}
 function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     string topic = "operations-with-received-topic-partitions-test-topic-7";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -944,6 +976,7 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
 @test:Config{enable: true}
 function saslConsumerTest() returns error? {
     string topic = "sasl-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     ConsumerConfiguration consumerConfiguration = {
@@ -994,6 +1027,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
 @test:Config{enable: true}
 function consumerAdditionalPropertiesTest() returns error? {
     string topic = "consumer-additional-properties-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     map<string> propertyMap = {
         "enable.auto.commit": "false"
@@ -1020,6 +1054,7 @@ function consumerAdditionalPropertiesTest() returns error? {
 @test:Config {enable: true}
 function sslKeystoreConsumerTest() returns error? {
     string topic = "ssl-keystore-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     ConsumerConfiguration consumerConfiguration = {
@@ -1039,6 +1074,7 @@ function sslKeystoreConsumerTest() returns error? {
 @test:Config {enable: true}
 function sslCertKeyConsumerTest() returns error? {
     string topic = "ssl-cert-key-consumer-test-topic";
+    kafkaTopics.push(topic);
 
     CertKey certKey = {
         certFile: SSL_CLIENT_PUBLIC_CERT_FILE_PATH,
@@ -1071,6 +1107,7 @@ function sslCertKeyConsumerTest() returns error? {
 @test:Config {enable: true}
 function sslCertOnlyConsumerTest() returns error? {
     string topic = "ssl-cert-only-consumer-test-topic";
+    kafkaTopics.push(topic);
 
     SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
@@ -1097,6 +1134,7 @@ function sslCertOnlyConsumerTest() returns error? {
 @test:Config {enable: true}
 function saslSslConsumerTest() returns error? {
     string topic = "sasl-ssl-consumer-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     ConsumerConfiguration consumerConfiguration = {
@@ -1117,6 +1155,7 @@ function saslSslConsumerTest() returns error? {
 @test:Config {enable: true}
 function incorrectKafkaUrlTest() returns error? {
     string topic = "incorrect-kafka-url-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -1133,6 +1172,7 @@ function incorrectKafkaUrlTest() returns error? {
 @test:Config {enable: true}
 function plaintextToSecuredEndpointsConsumerTest() returns error? {
     string topic = "plaintext-secured-endpoints-consumer-test-topic";
+    kafkaTopics.push(topic);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -1162,6 +1202,7 @@ function plaintextToSecuredEndpointsConsumerTest() returns error? {
 @test:Config {enable: true}
 function invalidSecuredEndpointsConsumerTest() returns error? {
     string topic = "invalid-secured-endpoints-consumer-test-topic";
+    kafkaTopics.push(topic);
 
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
@@ -1396,6 +1437,8 @@ function invalidSecurityProtocolConsumerTest() returns error? {
 function consumerPollFromMultipleTopicsTest() returns error? {
     string topic1 = "consumer-multiple-topic-1";
     string topic2 = "consumer-multiple-topic-2";
+    kafkaTopics.push(topic1);
+    kafkaTopics.push(topic2);
     check sendMessage(TEST_MESSAGE.toBytes(), topic1);
     check sendMessage(TEST_MESSAGE_II.toBytes(), topic2);
     ConsumerConfiguration consumerConfiguration = {

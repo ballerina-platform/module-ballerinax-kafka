@@ -74,6 +74,7 @@ function producerInitTest() returns error? {
 @test:Config {enable: true}
 function producerSendStringTest() returns error? {
     string topic = "send-string-test-topic";
+    kafkaTopics.push(topic);
     Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
     Error? result = stringProducer->send({ topic: topic, value: message.toBytes() });
@@ -117,6 +118,7 @@ function producerKeyTypeMismatchErrorTest() returns error? {
 }
 function producerCloseTest() returns error? {
     string topic = "producer-close-test-topic";
+    kafkaTopics.push(topic);
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Test Message";
     Error? result = producer->send({ topic: topic, value: message.toBytes() });
@@ -135,6 +137,7 @@ function producerCloseTest() returns error? {
 @test:Config {enable: true}
 function producerFlushTest() returns error? {
     string topic = "producer-flush-test-topic";
+    kafkaTopics.push(topic);
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
     check producer->'flush();
@@ -155,6 +158,7 @@ function producerFlushTest() returns error? {
 @test:Config {enable: true}
 function producerGetTopicPartitionsTest() returns error? {
     string topic = "get-topic-partitions-test-topic";
+    kafkaTopics.push(topic);
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     TopicPartition[] topicPartitions = check producer->getTopicPartitions(topic);
     test:assertEquals(topicPartitions[0].partition, 0, "Expected: 0. Received: " + topicPartitions[0].partition.toString());
@@ -179,6 +183,7 @@ function producerGetTopicPartitionsErrorTest() returns error? {
 @test:Config {enable: true}
 function transactionalProducerTest() returns error? {
     string topic = "transactional-producer-test-topic";
+    kafkaTopics.push(topic);
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-05",
         acks: "all",
@@ -215,6 +220,7 @@ function transactionalProducerTest() returns error? {
 @test:Config {enable: true}
 function transactionalProducerWithAbortTest() returns error? {
     string topic = "rollback-producer-test-topic";
+    kafkaTopics.push(topic);
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-05",
         acks: "all",
@@ -268,6 +274,7 @@ isolated function failTransaction() returns error {
 @test:Config{enable: true}
 function saslProducerTest() returns error? {
     string topic = "sasl-producer-test-topic";
+    kafkaTopics.push(topic);
 
     ProducerConfiguration producerConfigs = {
         clientId: "test-producer-06",
@@ -300,6 +307,7 @@ function saslProducerTest() returns error? {
 @test:Config{enable: true}
 function saslProducerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
+    kafkaTopics.push(topic);
     AuthenticationConfiguration invalidAuthConfig = {
         mechanism: AUTH_SASL_PLAIN,
         username: SASL_USER,
@@ -339,6 +347,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
 @test:Config {enable: true}
 function producerAdditionalPropertiesTest() returns error? {
     string topic = "producer-additional-properties-test-topic";
+    kafkaTopics.push(topic);
     map<string> propertyMap = {
         "security.protocol": PROTOCOL_SASL_PLAINTEXT
     };
@@ -373,6 +382,7 @@ function producerAdditionalPropertiesTest() returns error? {
 @test:Config {enable: true}
 function sslProducerTest() returns error? {
     string topic = "ssl-producer-test-topic";
+    kafkaTopics.push(topic);
 
     ProducerConfiguration producerConfiguration = {
         clientId: "test-producer-09",
@@ -402,6 +412,7 @@ function sslProducerTest() returns error? {
 @test:Config {enable: true}
 function sslCertKeyProducerTest() returns error? {
     string topic = "ssl-cert-key-producer-test-topic";
+    kafkaTopics.push(topic);
 
     CertKey certKey = {
         certFile: SSL_CLIENT_PUBLIC_CERT_FILE_PATH,
@@ -444,6 +455,7 @@ function sslCertKeyProducerTest() returns error? {
 @test:Config {enable: true}
 function sslCertOnlyProducerTest() returns error? {
     string topic = "ssl-cert-only-producer-test-topic";
+    kafkaTopics.push(topic);
 
     SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
@@ -480,6 +492,7 @@ function sslCertOnlyProducerTest() returns error? {
 @test:Config {enable: true}
 function SSLWithSASLAuthProducerTest() returns error? {
     string topic = "ssl-with-sasl-auth-producer-test-topic";
+    kafkaTopics.push(topic);
 
     SecureSocket certSocket = {
         cert: SSL_BROKER_PUBLIC_CERT_FILE_PATH,
@@ -573,6 +586,7 @@ function SASLOnSSLEndpointProducerTest() returns error? {
 @test:Config {enable: true}
 function operationsOnClosedProducerTest() returns error? {
     string topic = "operations-on-closed-producer";
+    kafkaTopics.push(topic);
     ProducerConfiguration producerConfiguration = {
         clientId: "test-producer-16"
     };

@@ -36,6 +36,7 @@ int receivedMsgCount = 0;
 @test:Config {enable: true}
 function consumerServiceTest() returns error? {
     string topic = "service-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -55,6 +56,7 @@ function consumerServiceTest() returns error? {
 @test:Config {enable: true}
 function consumerServiceInvalidUrlTest() returns error? {
     string topic = "consumer-service-invalid-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -74,6 +76,7 @@ function consumerServiceInvalidUrlTest() returns error? {
 @test:Config {enable: true}
 function attachDetachToClosedListenerTest() returns error? {
     string topic = "attach-detach-closed-listener-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -127,6 +130,7 @@ function attachDetachToClosedListenerTest() returns error? {
 @test:Config {enable: true}
 function consumerServiceGracefulStopTest() returns error? {
     string topic = "listener-graceful-stop-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -149,6 +153,7 @@ function consumerServiceGracefulStopTest() returns error? {
 @test:Config {enable: true}
 function consumerServiceImmediateStopTest() returns error? {
     string topic = "listener-immediate-stop-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -171,6 +176,7 @@ function consumerServiceImmediateStopTest() returns error? {
 @test:Config {enable: true}
 function consumerServiceSubscribeErrorTest() returns error? {
     string topic = "listener-subscribe-error-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -208,6 +214,7 @@ function consumerServiceSubscribeErrorTest() returns error? {
 @test:Config {enable: true}
 function listenerConfigTest() returns error? {
     string topic = "listener-config-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -268,6 +275,7 @@ function listenerConfigErrorTest() returns error? {
 }
 function consumerServiceCommitOffsetTest() returns error? {
     string topic = "listener-commit-offset-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -303,6 +311,7 @@ function consumerServiceCommitOffsetTest() returns error? {
 @test:Config {enable: true}
 function consumerServiceCommitTest() returns error? {
     string topic = "listener-commit-test-topic";
+    kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -338,6 +347,7 @@ function consumerServiceCommitTest() returns error? {
 @test:Config {enable: true}
 function saslListenerTest() returns error? {
     string topic = "sasl-listener-test-topic";
+    kafkaTopics.push(topic);
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
@@ -387,6 +397,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
 @test:Config {enable: true}
 function sslListenerTest() returns error? {
     string topic = "ssl-listener-test-topic";
+    kafkaTopics.push(topic);
 
     ConsumerConfiguration consumerConfig = {
         groupId:"listener-sasl-test-group",
@@ -409,6 +420,7 @@ function sslListenerTest() returns error? {
 @test:Config {enable: true}
 function basicMessageOrderTest() returns error? {
     string topic = "message-order-test-topic";
+    kafkaTopics.push(topic);
     int i = 0;
     while (i < 5) {
         string message = i.toString();
@@ -441,6 +453,7 @@ function basicMessageOrderTest() returns error? {
 @test:Config {enable: true}
 function listenerDetachTest() returns error? {
     string topic1 = "listener-detach-test-topic";
+    kafkaTopics.push(topic1);
     ConsumerConfiguration consumerConfiguration1 = {
         topics: [topic1],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -480,6 +493,7 @@ function listenerDetachTest() returns error? {
 
     // Attach a new listener to the same service and test for messages
     string topic2 = "listener2-detach-test-topic";
+    kafkaTopics.push(topic2);
     ConsumerConfiguration consumerConfiguration2 = {
         topics: [topic2],
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -499,6 +513,7 @@ function listenerDetachTest() returns error? {
 @test:Config {enable: true}
 function plaintextToSecuredEndpointsListenerTest() returns error? {
     string topic = "plaintext-secured-endpoints-listener-test-topic";
+    kafkaTopics.push(topic);
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -535,7 +550,7 @@ function plaintextToSecuredEndpointsListenerTest() returns error? {
 @test:Config {enable: true}
 function invalidSecuredEndpointsListenerTest() returns error? {
     string topic = "invalid-secured-endpoints-listener-test-topic";
-
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     ConsumerConfiguration consumerConfiguration = {
@@ -943,6 +958,7 @@ service object {
 @test:Config {enable: true}
 function listenerWithPollTimeoutConfigTest() returns error? {
     string topic = "listener-poll-timeout-config-test-topic";
+    kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE, topic);
     check sendMessage(TEST_MESSAGE, topic);
 
