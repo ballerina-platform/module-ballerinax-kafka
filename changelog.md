@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - [Added constraint validation support for payload binding](https://github.com/ballerina-platform/ballerina-standard-library/issues/3053)
 
-### Changed
+### Fixed
 - [Fixed `NullPointerException` when setting `pollingTimeout` in `kafka:ConsumerConfiguration`](https://github.com/ballerina-platform/ballerina-standard-library/issues/3235)
 
 ## [3.3.0] - 2022-05-30
