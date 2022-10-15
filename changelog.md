@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- [Updated API Docs](https://github.com/ballerina-platform/ballerina-standard-library/issues/3463)
+
+## [3.4.0] - 2022-09-08
+
+### Added
+- [Added constraint validation support for payload binding](https://github.com/ballerina-platform/ballerina-standard-library/issues/3053)
+
+### Fixed
+- [Fixed `NullPointerException` when setting `pollingTimeout` in `kafka:ConsumerConfiguration`](https://github.com/ballerina-platform/ballerina-standard-library/issues/3235)
+
+## [3.3.0] - 2022-05-30
+
 ### Added
 - [Added data binding support.](https://github.com/ballerina-platform/ballerina-standard-library/issues/2751)
 
@@ -39,7 +52,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - [Add compiler plugin validations for Kafka services.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1237)
-
 
 ## [2.1.0-alpha6] - 2021-04-02
 
