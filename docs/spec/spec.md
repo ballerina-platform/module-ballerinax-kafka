@@ -317,7 +317,7 @@ public type ConsumerConfiguration record {|
     # Unique string that identifies the consumer
     string groupId?;
     # Topics to be subscribed by the consumer
-    string[] topics?;
+    string|string[] topics?;
     # Offset reset strategy if no initial offset
     OffsetResetMethod offsetReset?;
     # Strategy class for handling the partition assignment among consumers
@@ -711,9 +711,9 @@ isolated remote function getAvailableTopics(decimal duration = -1) returns strin
 # kafka:Error? result = consumer->subscribe(["kafka-topic-1", "kafka-topic-2"]);
 # ```
 #
-# + topics - The array of topics to subscribe
+# + topics - The topic/array of topics to subscribe
 # + return - A `kafka:Error` if an error is encountered or else '()'
-isolated remote function subscribe(string[] topics) returns Error?;
+isolated remote function subscribe(string|string[] topics) returns Error?;
 ```
 * To subscribe to a set of topics that match a specific patter, `subscribeWithPattern()` can be used.
 ```ballerina
