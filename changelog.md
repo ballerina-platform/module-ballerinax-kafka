@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 - [Updated API Docs](https://github.com/ballerina-platform/ballerina-standard-library/issues/3463)
+- [Added support for string type for topic config](https://github.com/ballerina-platform/ballerina-standard-library/issues/3695)
 
 ## [3.4.0] - 2022-09-08
 
