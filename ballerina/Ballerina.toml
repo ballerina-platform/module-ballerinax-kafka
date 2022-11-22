@@ -25,7 +25,7 @@ path = "./lib/kafka_2.12-2.8.0.jar"
 path = "./lib/slf4j-api-1.7.30.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/slf4j-simple-1.7.30.jar"
+path = "./lib/slf4j-jdk14-1.7.30.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
