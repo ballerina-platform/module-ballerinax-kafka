@@ -39,9 +39,7 @@ public client isolated class Consumer {
         check self.consumerInit();
 
         string|string[]? topics = config?.topics;
-        if topics is string {
-            check self->subscribe([topics]);
-        } else if topics is string[] {
+        if topics is string|string[] {
             check self->subscribe(topics);
         }
     }

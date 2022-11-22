@@ -38,8 +38,8 @@ public isolated client class Listener {
         self.valueDeserializerType = DES_BYTE_ARRAY;
         check self.listenerInit();
 
-        string[]? topics = config?.topics;
-        if topics is string[] {
+        string|string[]? topics = config?.topics;
+        if topics is string|string[] {
             if self.consumerConfig?.groupId !is string {
                 panic createError("The groupId of the consumer must be set to subscribe to the topics");
             }
