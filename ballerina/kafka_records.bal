@@ -121,7 +121,7 @@ public type AuthenticationConfiguration record {|
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ConsumerConfiguration record {|
     string groupId?;
-    string[] topics?;
+    string|string[] topics?;
     OffsetResetMethod offsetReset?;
     string partitionAssignmentStrategy?;
     string metricsRecordingLevel?;

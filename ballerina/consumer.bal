@@ -38,8 +38,10 @@ public client isolated class Consumer {
         self.valueDeserializerType = DES_BYTE_ARRAY;
         check self.consumerInit();
 
-        string[]? topics = config?.topics;
-        if topics is string[] {
+        string|string[]? topics = config?.topics;
+        if topics is string {
+            check self->subscribe([topics]);
+        } else if topics is string[] {
             check self->subscribe(topics);
         }
     }
@@ -334,11 +336,15 @@ public client isolated class Consumer {
     # kafka:Error? result = consumer->subscribe(["kafka-topic-1", "kafka-topic-2"]);
     # ```
     #
-    # + topics - The array of topics to subscribe
+    # + topics - The topic/array of topics to subscribe
     # + return - A `kafka:Error` if an error is encountered or else '()'
-    isolated remote function subscribe(string[] topics) returns Error? {
-        if (self.consumerConfig?.groupId is string) {
-            return self.consumerSubscribe(topics);
+    isolated remote function subscribe(string|string[] topics) returns Error? {
+        if self.consumerConfig?.groupId is string {
+            if topics is string {
+                return self.consumerSubscribe([topics]);
+            } else if topics is string[] {
+                return self.consumerSubscribe(topics);
+            }
         } else {
             panic createError("The groupId of the consumer must be set to subscribe to the topics");
         }
