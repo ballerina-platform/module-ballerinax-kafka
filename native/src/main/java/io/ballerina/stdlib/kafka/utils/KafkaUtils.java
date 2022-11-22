@@ -134,7 +134,7 @@ public class KafkaUtils {
         addStringParamIfPresent(KafkaConstants.SCHEMA_REGISTRY_URL, configurations, properties,
                                 KafkaConstants.CONSUMER_SCHEMA_REGISTRY_URL);
 
-        addStringArrayParamIfPresent(KafkaConstants.ALIAS_TOPICS.getValue(), configurations, properties,
+        addStringOrStringArrayParamIfPresent(KafkaConstants.ALIAS_TOPICS.getValue(), configurations, properties,
                                      KafkaConstants.ALIAS_TOPICS);
 
         addTimeParamIfPresent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, configurations, properties,
@@ -479,13 +479,19 @@ public class KafkaUtils {
         }
     }
 
-    private static void addStringArrayParamIfPresent(String paramName,
+    private static void addStringOrStringArrayParamIfPresent(String paramName,
                                                      BMap<BString, Object> configs,
                                                      Properties configParams,
                                                      BString key) {
         if (configs.containsKey(key)) {
-            BArray stringArray = (BArray) configs.get(key);
-            List<String> values = getStringListFromStringBArray(stringArray);
+            List<String> values;
+            Object paramValues = configs.get(key);
+            if (paramValues instanceof BArray) {
+                BArray stringArray = (BArray) paramValues;
+                values = getStringListFromStringBArray(stringArray);
+            } else {
+                values = List.of(((BString) paramValues).getValue());
+            }
             configParams.put(paramName, values);
         }
     }
