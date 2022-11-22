@@ -256,7 +256,7 @@ function consumerSeekToBeginningTest() returns error? {
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
+        topics: topic,
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-seek-beginning-test-group",
         clientId: "test-consumer-17"
@@ -722,7 +722,7 @@ function consumerSubscribeToEmptyTopicTest() returns error? {
     } else {
         test:assertFail(msg = "Expected an error");
     }
-    check consumer->subscribe([topic]);
+    check consumer->subscribe(topic);
     string[] subscriptions = check consumer->getSubscription();
     test:assertEquals(subscriptions.length(), 1);
     // should work as an unsubscription
