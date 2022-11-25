@@ -484,14 +484,13 @@ public class KafkaUtils {
                                                      Properties configParams,
                                                      BString key) {
         if (configs.containsKey(key)) {
-            ArrayList<String> values;
+            List<String> values;
             Object paramValues = configs.get(key);
             if (paramValues instanceof BArray) {
                 BArray stringArray = (BArray) paramValues;
                 values = getStringListFromStringBArray(stringArray);
             } else {
-                values = new ArrayList();
-                values.add(((BString) paramValues).getValue());
+                values = List.of(((BString) paramValues).getValue());
             }
             configParams.put(paramName, values);
         }
@@ -571,7 +570,7 @@ public class KafkaUtils {
         return partitionList;
     }
 
-    public static ArrayList<String> getStringListFromStringBArray(BArray stringArray) {
+    public static List<String> getStringListFromStringBArray(BArray stringArray) {
         ArrayList<String> values = new ArrayList<>();
         if ((Objects.isNull(stringArray)) || (!getReferredType(((ArrayType) stringArray.getType()).getElementType())
                 .equals(PredefinedTypes.TYPE_STRING))) {
