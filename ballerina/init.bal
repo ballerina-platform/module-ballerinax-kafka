@@ -26,5 +26,5 @@ function setModule() = @java:Method {
 } external;
 
 function initializeLoggingConfigurations() = @java:Method {
-    'class: "io.ballerina.stdlib.ftp.util.ModuleUtils"
+    'class: "io.ballerina.stdlib.kafka.utils.ModuleUtils"
 } external;
