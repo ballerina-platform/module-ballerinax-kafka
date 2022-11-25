@@ -22,6 +22,7 @@ module io.ballerina.stdlib.kafka.runtime {
     requires io.ballerina.lang.value;
     requires java.transaction.xa;
     requires org.slf4j;
+    requires java.logging;
     requires io.ballerina.stdlib.constraint;
     exports io.ballerina.stdlib.kafka.impl;
     exports io.ballerina.stdlib.kafka.nativeimpl.consumer;
