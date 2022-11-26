@@ -972,7 +972,7 @@ function listenerWithPollTimeoutConfigTest() returns error? {
     };
 
     ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
+        topics: topic,
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "test-listener-group-28",
         clientId: "test-listener-28",
