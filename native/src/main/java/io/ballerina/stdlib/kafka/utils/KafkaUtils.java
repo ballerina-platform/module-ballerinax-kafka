@@ -608,15 +608,9 @@ public class KafkaUtils {
         Type valueType = getReferredType(fieldMap.get(KAFKA_RECORD_VALUE).getFieldType());
         if (Objects.nonNull(record.key())) {
             key = getValueWithIntendedType(keyType, (byte[]) record.key(), record);
-            if (key instanceof BError) {
-                throw (BError) key;
-            }
         }
 
         Object value = getValueWithIntendedType(valueType, (byte[]) record.value(), record);
-        if (value instanceof BError) {
-            throw (BError) value;
-        }
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                                                                               record.partition());
         BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
@@ -683,33 +677,47 @@ public class KafkaUtils {
 
     public static Object getValueWithIntendedType(Type type, byte[] value, ConsumerRecord consumerRecord) {
         String strValue = new String(value, StandardCharsets.UTF_8);
+        Object intendedValue;
         try {
             switch (type.getTag()) {
                 case STRING_TAG:
-                    return StringUtils.fromString(strValue);
+                    intendedValue = StringUtils.fromString(strValue);
+                    break;
                 case XML_TAG:
-                    return XmlUtils.parse(strValue);
+                    intendedValue = XmlUtils.parse(strValue);
+                    break;
                 case ANYDATA_TAG:
-                    return ValueCreator.createArrayValue(value);
+                    intendedValue = ValueCreator.createArrayValue(value);
+                    break;
                 case RECORD_TYPE_TAG:
-                    return CloneWithType.convert(type, JsonUtils.parse(strValue));
+                    intendedValue = CloneWithType.convert(type, JsonUtils.parse(strValue));
+                    break;
                 case UNION_TAG:
                     if (hasStringType((UnionType) type)) {
-                        return StringUtils.fromString(strValue);
+                        intendedValue = StringUtils.fromString(strValue);
+                        break;
                     }
-                    return getValueFromJson(type, strValue);
+                    intendedValue = getValueFromJson(type, strValue);
+                    break;
                 case ARRAY_TAG:
                     if (getReferredType(((ArrayType) type).getElementType()).getTag() == BYTE_TAG) {
-                        return ValueCreator.createArrayValue(value);
+                        intendedValue = ValueCreator.createArrayValue(value);
+                        break;
                     }
                     /*-fallthrough*/
                 default:
-                    return getValueFromJson(type, strValue);
+                    intendedValue = getValueFromJson(type, strValue);
             }
         } catch (BError bError) {
             throw createPayloadBindingError(String.format("Data binding failed: %s", bError.getMessage()), bError,
                     consumerRecord);
         }
+        if (intendedValue instanceof BError) {
+            throw createPayloadBindingError(String.format("Data binding failed: %s",
+                    ((BError) intendedValue).getMessage()), (BError) intendedValue,
+                    consumerRecord);
+        }
+        return intendedValue;
     }
 
     private static boolean hasStringType(UnionType type) {
