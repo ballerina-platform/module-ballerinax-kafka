@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+- [Fixed consumer panic when a type casting error occurs](https://github.com/ballerina-platform/ballerina-standard-library/issues/3696)
+
+## [3.5.0] - 2022-11-29
+
 ### Changed
 - [Updated API Docs](https://github.com/ballerina-platform/ballerina-standard-library/issues/3463)
 - [Added support for string type for topic config](https://github.com/ballerina-platform/ballerina-standard-library/issues/3695)
