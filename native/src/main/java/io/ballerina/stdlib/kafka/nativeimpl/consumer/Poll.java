@@ -117,10 +117,11 @@ public class Poll {
     private static RecordType getRecordType(BTypedesc bTypedesc) {
         RecordType recordType;
         if (bTypedesc.getDescribingType().isReadOnly()) {
-            recordType = (RecordType) ((IntersectionType) getReferredType(((ArrayType) bTypedesc.getDescribingType())
-                    .getElementType())).getConstituentTypes().get(0);
+            recordType = (RecordType) getReferredType(((IntersectionType) getReferredType(((ArrayType) getReferredType(
+                    bTypedesc.getDescribingType())).getElementType())).getConstituentTypes().get(0));
         } else {
-            recordType = (RecordType) getReferredType(((ArrayType) bTypedesc.getDescribingType()).getElementType());
+            recordType = (RecordType) getReferredType(
+                            ((ArrayType) getReferredType(bTypedesc.getDescribingType())).getElementType());
         }
         return recordType;
     }
