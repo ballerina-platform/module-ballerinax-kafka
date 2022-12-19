@@ -58,6 +58,7 @@ import org.apache.kafka.common.config.SslConfigs;
 import org.ballerinalang.langlib.value.CloneWithType;
 import org.ballerinalang.langlib.value.FromJsonWithType;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -84,6 +85,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ADDITIONAL_PROPERTI
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT_CONFIG;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_SEEK_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_PARTITION_OFFSET;
@@ -97,6 +99,8 @@ import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getModule;
  * Utility class for Kafka Connector Implementation.
  */
 public class KafkaUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(KafkaUtils.class);
 
     private KafkaUtils() {
     }
@@ -626,7 +630,8 @@ public class KafkaUtils {
     }
 
     public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly,
-                                            boolean validateConstraints, boolean autoCommit, KafkaConsumer consumer) {
+                                            boolean validateConstraints, boolean autoCommit,
+                                            KafkaConsumer consumer, boolean autoSeek) {
         BArray consumerRecordsArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
         HashMap<String, PartitionOffset> partitionOffsetMap = new HashMap<>();
         int i = 0;
@@ -635,15 +640,18 @@ public class KafkaUtils {
             try {
                 consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType,
                         validateConstraints));
-                if (autoCommit) {
-                    updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
-                            consumerRecord.topic() + "-" + consumerRecord.partition());
-                }
             } catch (BError bError) {
-                if (i == 0) {
-                    throw bError;
+                if (!autoSeek) {
+                    if (i == 0) {
+                        throw bError;
+                    }
+                    break;
                 }
-                break;
+                logger.error(bError.getMessage());
+            }
+            if (autoCommit) {
+                updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
+                        consumerRecord.topic() + "-" + consumerRecord.partition());
             }
             i++;
         }
@@ -990,8 +998,8 @@ public class KafkaUtils {
         return Files.readString(Paths.get(filePath));
     }
 
-    public static BArray getValuesWithIntendedType(Type type, ConsumerRecords records, boolean constraintValidation,
-                                                   boolean autoCommit, KafkaConsumer consumer) {
+    public static BArray getValuesWithIntendedType(Type type, KafkaConsumer consumer, ConsumerRecords records,
+                                                   boolean constraintValidation, boolean autoCommit, boolean autoSeek) {
         ArrayType intendedType;
         if (type.getTag() == INTERSECTION_TAG) {
             intendedType = (ArrayType) ((IntersectionType) type).getConstituentTypes().get(0);
@@ -1010,16 +1018,19 @@ public class KafkaUtils {
                     validateConstraints(value, ValueCreator.createTypedescValue(intendedType.getElementType()),
                             consumerRecord);
                 }
-                if (autoCommit) {
-                    updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
-                            consumerRecord.topic() + "-" + consumerRecord.partition());
-                }
                 bArray.append(value);
             } catch (BError bError) {
-                if (i == 0) {
-                    throw bError;
+                if (!autoSeek) {
+                    if (i == 0) {
+                        throw bError;
+                    }
+                    break;
                 }
-                break;
+                logger.error(bError.getMessage());
+            }
+            if (autoCommit) {
+                updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
+                        consumerRecord.topic() + "-" + consumerRecord.partition());
             }
             i++;
         }
@@ -1049,5 +1060,9 @@ public class KafkaUtils {
             }
         }
         return (boolean) consumerConfig.get(CONSUMER_ENABLE_AUTO_COMMIT_CONFIG);
+    }
+
+    public static boolean getAutoSeekConfig(BObject bObject) {
+        return (boolean) bObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME).get(CONSUMER_ENABLE_AUTO_SEEK_CONFIG);
     }
 }

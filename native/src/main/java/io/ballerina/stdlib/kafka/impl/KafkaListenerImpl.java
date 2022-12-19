@@ -59,7 +59,6 @@ import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RESOURCE_ON_RECORD;
@@ -70,6 +69,8 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PARAM_PAYLOAD_ANNOT
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.TYPE_CHECKER_OBJECT_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoCommitConfig;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoSeekConfig;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getValuesWithIntendedType;
 
@@ -190,8 +191,8 @@ public class KafkaListenerImpl implements KafkaListener {
                 case ARRAY_TAG:
                     boolean constraintValidation = (boolean) listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                             .get(CONSTRAINT_VALIDATION);
-                    boolean autoCommit = (boolean) listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
-                            .get(CONSUMER_ENABLE_AUTO_COMMIT_CONFIG);
+                    boolean autoCommit = getAutoCommitConfig(listener);
+                    boolean autoSeek = getAutoSeekConfig(listener);
                     if (isConsumerRecordsType(parameter, consumerRecordMethodType.getAnnotations())) {
                         if (consumerRecordsExists) {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");
@@ -199,7 +200,7 @@ public class KafkaListenerImpl implements KafkaListener {
                         consumerRecordsExists = true;
                         BArray consumerRecords = getConsumerRecords(records,
                                 (RecordType) getIntendedType(referredType), referredType.isReadOnly(),
-                                constraintValidation, autoCommit, kafkaConsumer);
+                                constraintValidation, autoCommit, kafkaConsumer, autoSeek);
                         arguments[index++] = consumerRecords;
                         arguments[index++] = true;
                     } else {
@@ -207,8 +208,8 @@ public class KafkaListenerImpl implements KafkaListener {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");
                         }
                         payloadExists = true;
-                        BArray payload = getValuesWithIntendedType(referredType, records, constraintValidation,
-                                autoCommit, kafkaConsumer);
+                        BArray payload = getValuesWithIntendedType(referredType, kafkaConsumer, records,
+                                constraintValidation, autoCommit, autoSeek);
                         arguments[index++] = payload;
                         arguments[index++] = true;
                     }

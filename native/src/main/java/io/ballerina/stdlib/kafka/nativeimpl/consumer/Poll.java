@@ -47,6 +47,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIE
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoCommitConfig;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoSeekConfig;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getMilliSeconds;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getValuesWithIntendedType;
@@ -71,8 +72,10 @@ public class Poll {
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
+                boolean autoSeek = getAutoSeekConfig(consumerObject);
                 BArray consumerRecords = getConsumerRecords(recordsRetrieved, recordType,
-                        bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit, kafkaConsumer);
+                        bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit,
+                        kafkaConsumer, autoSeek);
                 balFuture.complete(consumerRecords);
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
@@ -98,9 +101,10 @@ public class Poll {
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
+                boolean autoSeek = getAutoSeekConfig(consumerObject);
                 if (!recordsRetrieved.isEmpty()) {
-                    dataArray = getValuesWithIntendedType(arrayType, recordsRetrieved, constraintValidation,
-                            autoCommit, kafkaConsumer);
+                    dataArray = getValuesWithIntendedType(arrayType, kafkaConsumer, recordsRetrieved,
+                            constraintValidation, autoCommit, autoSeek);
                 }
                 balFuture.complete(dataArray);
             } catch (BError bError) {
