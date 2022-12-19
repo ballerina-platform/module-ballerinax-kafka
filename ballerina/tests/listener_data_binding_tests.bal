@@ -201,7 +201,8 @@ function dataBindingErrorListenerTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "data-binding-listener-group-11",
         clientId: "data-binding-listener-11",
-        pollingInterval: 1
+        pollingInterval: 1,
+        autoSeek: false
     };
     Listener dataBindingListener = check new (DEFAULT_URL, consumerConfiguration);
     check dataBindingListener.attach(dataBindingErrorService);
@@ -1224,7 +1225,8 @@ function recordCastingErrorConsumerRecordTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "data-binding-listener-group-12",
         clientId: "data-binding-listener-12",
-        pollingInterval: 2
+        pollingInterval: 2,
+        autoSeek: false
     };
     Listener recordListener = check new (DEFAULT_URL, consumerConfiguration);
     check recordListener.attach(invalidRecordService);
@@ -1263,7 +1265,8 @@ function recordCastingErrorPayloadTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "data-binding-listener-group-13",
         clientId: "data-binding-listener-13",
-        pollingInterval: 2
+        pollingInterval: 2,
+        autoSeek: false
     };
     Listener recordListener = check new (DEFAULT_URL, consumerConfiguration);
     check recordListener.attach(invalidRecordService);

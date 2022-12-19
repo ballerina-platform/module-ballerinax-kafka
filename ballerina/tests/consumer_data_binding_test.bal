@@ -287,7 +287,8 @@ function dataBindingErrorConsumerTest() returns error? {
         topics: [topic],
         groupId: "data-binding-consumer-group-12",
         clientId: "data-binding-consumer-id-12",
-        offsetReset: OFFSET_RESET_EARLIEST
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeek: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
     xml[]|Error result = consumer->pollPayload(5);
@@ -504,7 +505,8 @@ function pollErrorWithSeekConsumerRecordTest() returns error? {
         topics: [topic],
         groupId: "data-binding-consumer-group-10",
         clientId: "data-binding-consumer-id-10",
-        offsetReset: OFFSET_RESET_EARLIEST
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeek: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -548,7 +550,8 @@ function recordCastingErrorPollTest() returns error? {
         topics: [topic],
         groupId: "data-binding-consumer-group-10",
         clientId: "data-binding-consumer-id-10",
-        offsetReset: OFFSET_RESET_EARLIEST
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeek: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
     PersonConsumerRecord[]|Error records = consumer->poll(5);
@@ -576,7 +579,8 @@ function recordCastingErrorPollPayloadTest() returns error? {
         topics: [topic],
         groupId: "data-binding-consumer-group-11",
         clientId: "data-binding-consumer-id-11",
-        offsetReset: OFFSET_RESET_EARLIEST
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeek: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
     Person[]|Error records = consumer->pollPayload(5);
