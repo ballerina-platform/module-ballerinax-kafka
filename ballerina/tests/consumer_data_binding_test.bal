@@ -591,3 +591,27 @@ function recordCastingErrorPollPayloadTest() returns error? {
     }
     check consumer->close();
 }
+
+@test:Config {enable: true}
+function intCastingErrorPollPayloadWithAutoSeekTest() returns error? {
+    string topic = "int-casting-error-poll-payload-with-auto-seek-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage(12.toString().toBytes(), topic);
+    check sendMessage("Invalid value".toBytes(), topic);
+    check sendMessage(13.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-12",
+        clientId: "data-binding-consumer-id-12",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    int[] values = check consumer->pollPayload(5);
+    if values.length() != 2 {
+        test:assertFail("Invalid record count");
+    }
+    test:assertEquals(values[0], 12);
+    test:assertEquals(values[1], 13);
+    check consumer->close();
+}

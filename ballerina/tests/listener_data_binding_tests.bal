@@ -83,6 +83,8 @@ anydata[] readOnlyPayloads = [];
 int receivedSeekedValidRecordListenerCount = 0;
 string recordCastErrorConsumerRecordError = "";
 string recordCastErrorPayloadError = "";
+boolean receivedAutoSeekError = false;
+int receivedAutoSeekPayloadValue = 0;
 
 public type IntConsumerRecord record {|
     int key?;
@@ -1274,4 +1276,41 @@ function recordCastingErrorPayloadTest() returns error? {
     runtime:sleep(5);
     check recordListener.gracefulStop();
     test:assertEquals(recordCastErrorPayloadError, "Data binding failed: {ballerina/lang.value}ConversionError");
+}
+
+@test:Config {enable: true}
+function intCastingErrorPayloadWithAutoSeekTest() returns error? {
+    string topic = "int-casting-error-payload-with-auto-seek-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage(12.toString().toBytes(), topic);
+    check sendMessage("Invalid msg".toBytes(), topic);
+    check sendMessage(13.toString().toBytes(), topic);
+
+    Service invalidIntService =
+    service object {
+        remote function onConsumerRecord(int[] values) returns error? {
+            foreach int val in values {
+                receivedAutoSeekPayloadValue += val;
+            }
+        }
+
+        remote function onError(Error e) returns error? {
+            receivedAutoSeekError = true;
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-14",
+        clientId: "data-binding-listener-14",
+        pollingInterval: 2
+    };
+    Listener intListener = check new (DEFAULT_URL, consumerConfiguration);
+    check intListener.attach(invalidIntService);
+    check intListener.'start();
+    runtime:sleep(5);
+    check intListener.gracefulStop();
+    test:assertEquals(receivedAutoSeekPayloadValue, 25);
+    test:assertFalse(receivedAutoSeekError);
 }

@@ -641,13 +641,9 @@ public class KafkaUtils {
                 consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType,
                         validateConstraints));
             } catch (BError bError) {
-                if (!autoSeek) {
-                    if (i == 0) {
-                        throw bError;
-                    }
+                if (handleBError(autoSeek, i, bError)) {
                     break;
                 }
-                logger.error(bError.getMessage());
             }
             if (autoCommit) {
                 updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
@@ -660,6 +656,21 @@ public class KafkaUtils {
         }
         commitAndSeekConsumedRecord(consumer, partitionOffsetMap);
         return consumerRecordsArray;
+    }
+
+    private static boolean handleBError(boolean autoSeek, int i, BError bError) {
+        logger.error(bError.getMessage());
+        if (isPayloadError(bError)) {
+            if (!autoSeek) {
+                if (i == 0) {
+                    throw bError;
+                }
+                return true;
+            }
+        } else {
+            throw bError;
+        }
+        return false;
     }
 
     private static Map<TopicPartition, OffsetAndMetadata> getOffsetsFromMap(HashMap<String, PartitionOffset>
@@ -1020,13 +1031,9 @@ public class KafkaUtils {
                 }
                 bArray.append(value);
             } catch (BError bError) {
-                if (!autoSeek) {
-                    if (i == 0) {
-                        throw bError;
-                    }
+                if (handleBError(autoSeek, i, bError)) {
                     break;
                 }
-                logger.error(bError.getMessage());
             }
             if (autoCommit) {
                 updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
@@ -1039,6 +1046,11 @@ public class KafkaUtils {
         }
         commitAndSeekConsumedRecord(consumer, partitionOffsetMap);
         return bArray;
+    }
+
+    private static boolean isPayloadError(BError bError) {
+        return bError.getType().getName().equals(PAYLOAD_BINDING_ERROR) ||
+                bError.getType().getName().equals(PAYLOAD_VALIDATION_ERROR);
     }
 
     private static void commitAndSeekConsumedRecord(KafkaConsumer consumer,
