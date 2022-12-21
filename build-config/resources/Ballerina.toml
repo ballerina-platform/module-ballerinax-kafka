@@ -16,9 +16,15 @@ version = "@toml.version@"
 path = "../native/build/libs/kafka-native-@project.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "org.apache.kafka"
+artifactId = "kafka-clients"
+version = "@kafka.version@"
 path = "./lib/kafka-clients-@kafka.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "org.apache.kafka"
+artifactId = "kafka_2.12"
+version = "@kafka.version@"
 path = "./lib/kafka_2.12-@kafka.version@.jar"
 
 [[platform.java11.dependency]]

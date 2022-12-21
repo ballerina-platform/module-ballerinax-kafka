@@ -81,6 +81,8 @@ boolean isConsumerRecordReadonly = false;
 boolean isPayloadReadonly = false;
 anydata[] readOnlyPayloads = [];
 int receivedSeekedValidRecordListenerCount = 0;
+string recordCastErrorConsumerRecordError = "";
+string recordCastErrorPayloadError = "";
 
 public type IntConsumerRecord record {|
     int key?;
@@ -1191,4 +1193,82 @@ function invalidRecordPayloadWithSeekListenerTest() returns error? {
     runtime:sleep(5);
     check payloadListener.gracefulStop();
     test:assertEquals(receivedSeekedValidRecordListenerCount, 3);
+}
+
+@test:Config {enable: true}
+function recordCastingErrorConsumerRecordTest() returns error? {
+    string topic = "record-casting-error-consumer-record-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage({
+        name: "ABC",
+        age: 12,
+        address: "test-address",
+        married: false,
+        id: 1231
+    }.toString().toBytes(), topic);
+
+    Service invalidRecordService =
+    service object {
+        remote function onConsumerRecord(PersonConsumerRecord[] records) returns error? {
+        }
+
+        remote function onError(Error e) returns error? {
+            if e is PayloadBindingError {
+                recordCastErrorConsumerRecordError = e.message();
+            }
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-12",
+        clientId: "data-binding-listener-12",
+        pollingInterval: 2
+    };
+    Listener recordListener = check new (DEFAULT_URL, consumerConfiguration);
+    check recordListener.attach(invalidRecordService);
+    check recordListener.'start();
+    runtime:sleep(5);
+    check recordListener.gracefulStop();
+    test:assertEquals(recordCastErrorConsumerRecordError, "Data binding failed: {ballerina/lang.value}ConversionError");
+}
+
+@test:Config {enable: true}
+function recordCastingErrorPayloadTest() returns error? {
+    string topic = "record-casting-error-payload-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage({
+        name: "ABC",
+        age: 12,
+        address: "test-address",
+        married: false,
+        id: 1231
+    }.toString().toBytes(), topic);
+
+    Service invalidRecordService =
+    service object {
+        remote function onConsumerRecord(Person[] records) returns error? {
+        }
+
+        remote function onError(Error e) returns error? {
+            if e is PayloadBindingError {
+                recordCastErrorPayloadError = e.message();
+            }
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "data-binding-listener-group-13",
+        clientId: "data-binding-listener-13",
+        pollingInterval: 2
+    };
+    Listener recordListener = check new (DEFAULT_URL, consumerConfiguration);
+    check recordListener.attach(invalidRecordService);
+    check recordListener.'start();
+    runtime:sleep(5);
+    check recordListener.gracefulStop();
+    test:assertEquals(recordCastErrorPayloadError, "Data binding failed: {ballerina/lang.value}ConversionError");
 }

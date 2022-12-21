@@ -531,3 +531,59 @@ function pollErrorWithSeekConsumerRecordTest() returns error? {
     }
     check consumer->close();
 }
+
+@test:Config {enable: true}
+function recordCastingErrorPollTest() returns error? {
+    string topic = "record-casting-error-poll-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage({
+        name: "ABC",
+        age: 12,
+        address: "test-address",
+        married: false,
+        id: 1231
+    }.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    PersonConsumerRecord[]|Error records = consumer->poll(5);
+    if records is PayloadBindingError {
+        test:assertEquals(records.message(), "Data binding failed: {ballerina/lang.value}ConversionError");
+    } else {
+        test:assertFail("Expected a payload binding error");
+    }
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function recordCastingErrorPollPayloadTest() returns error? {
+    string topic = "record-casting-error-poll-payload-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage({
+        name: "ABC",
+        age: 12,
+        address: "test-address",
+        married: false,
+        id: 1231
+    }.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-11",
+        clientId: "data-binding-consumer-id-11",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    Person[]|Error records = consumer->pollPayload(5);
+    if records is PayloadBindingError {
+        test:assertEquals(records.message(), "Data binding failed: {ballerina/lang.value}ConversionError");
+    } else {
+        test:assertFail("Expected a payload binding error");
+    }
+    check consumer->close();
+}

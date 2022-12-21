@@ -16,9 +16,15 @@ version = "3.6.0"
 path = "../native/build/libs/kafka-native-3.6.0-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
+groupId = "org.apache.kafka"
+artifactId = "kafka-clients"
+version = "2.8.0"
 path = "./lib/kafka-clients-2.8.0.jar"
 
 [[platform.java11.dependency]]
+groupId = "org.apache.kafka"
+artifactId = "kafka_2.12"
+version = "2.8.0"
 path = "./lib/kafka_2.12-2.8.0.jar"
 
 [[platform.java11.dependency]]
