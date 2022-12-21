@@ -27,6 +27,7 @@ import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Field;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.UnionType;
@@ -967,7 +968,8 @@ public class KafkaUtils {
 
     public static Type getAttachedFunctionReturnType(BObject serviceObject, String functionName) {
         MethodType function = null;
-        MethodType[] resourceFunctions = serviceObject.getType().getMethods();
+        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(serviceObject.getType());
+        MethodType[] resourceFunctions = objectType.getMethods();
         for (MethodType resourceFunction : resourceFunctions) {
             if (functionName.equals(resourceFunction.getName())) {
                 function = resourceFunction;
