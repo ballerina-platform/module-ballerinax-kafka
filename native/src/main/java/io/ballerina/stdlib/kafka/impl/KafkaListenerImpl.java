@@ -70,7 +70,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.TYPE_CHECKER_OBJECT
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoCommitConfig;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoSeekConfig;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoSeekOnErrorConfig;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getValuesWithIntendedType;
 
@@ -192,7 +192,7 @@ public class KafkaListenerImpl implements KafkaListener {
                     boolean constraintValidation = (boolean) listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                             .get(CONSTRAINT_VALIDATION);
                     boolean autoCommit = getAutoCommitConfig(listener);
-                    boolean autoSeek = getAutoSeekConfig(listener);
+                    boolean autoSeek = getAutoSeekOnErrorConfig(listener);
                     if (isConsumerRecordsType(parameter, consumerRecordMethodType.getAnnotations())) {
                         if (consumerRecordsExists) {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");

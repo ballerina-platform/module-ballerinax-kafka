@@ -1074,7 +1074,7 @@ public class KafkaUtils {
         return (boolean) consumerConfig.get(CONSUMER_ENABLE_AUTO_COMMIT_CONFIG);
     }
 
-    public static boolean getAutoSeekConfig(BObject bObject) {
+    public static boolean getAutoSeekOnErrorConfig(BObject bObject) {
         return (boolean) bObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME).get(CONSUMER_ENABLE_AUTO_SEEK_CONFIG);
     }
 }

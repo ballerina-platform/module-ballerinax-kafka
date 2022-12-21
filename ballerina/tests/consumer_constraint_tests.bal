@@ -92,7 +92,7 @@ function stringMinLengthConstraintConsumerRecordTest() returns error? {
         groupId: "constraint-consumer-group-01",
         clientId: "constraint-consumer-id-01",
         offsetReset: OFFSET_RESET_EARLIEST,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -116,7 +116,7 @@ function stringMaxLengthConstraintConsumerRecordTest() returns error? {
         groupId: "constraint-consumer-group-02",
         clientId: "constraint-consumer-id-02",
         offsetReset: OFFSET_RESET_EARLIEST,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -140,7 +140,7 @@ function floatMaxValueConstraintPayloadTest() returns error? {
         groupId: "constraint-consumer-group-03",
         clientId: "constraint-consumer-id-03",
         offsetReset: OFFSET_RESET_EARLIEST,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -164,7 +164,7 @@ function arrayMaxLengthConstraintPayloadTest() returns error? {
         groupId: "constraint-consumer-group-04",
         clientId: "constraint-consumer-id-04",
         offsetReset: OFFSET_RESET_EARLIEST,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -188,7 +188,7 @@ function arrayMinLengthConstraintPayloadTest() returns error? {
         groupId: "constraint-consumer-group-05",
         clientId: "constraint-consumer-id-05",
         offsetReset: OFFSET_RESET_EARLIEST,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -212,7 +212,7 @@ function floatMinValueConstraintPayloadTest() returns error? {
         groupId: "constraint-consumer-group-06",
         clientId: "constraint-consumer-id-06",
         offsetReset: OFFSET_RESET_EARLIEST,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -251,7 +251,7 @@ function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
         groupId: "constraint-listener-group-07",
         clientId: "constraint-listener-07",
         pollingInterval: 1,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
     check constraintListener.attach(intConstraintService);
@@ -287,7 +287,7 @@ function intMinValueConstraintListenerConsumerRecordTest() returns error? {
         groupId: "constraint-listener-group-08",
         clientId: "constraint-listener-08",
         pollingInterval: 1,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
     check constraintListener.attach(intConstraintService);
@@ -323,7 +323,7 @@ function numberMaxValueConstraintListenerPayloadTest() returns error? {
         groupId: "constraint-listener-group-09",
         clientId: "constraint-listener-09",
         pollingInterval: 1,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
     check constraintListener.attach(intConstraintService);
@@ -359,7 +359,7 @@ function numberMinValueConstraintListenerPayloadTest() returns error? {
         groupId: "constraint-listener-group-10",
         clientId: "constraint-listener-10",
         pollingInterval: 1,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Listener constraintListener = check new (DEFAULT_URL, consumerConfiguration);
     check constraintListener.attach(intConstraintService);
@@ -450,7 +450,7 @@ function constraintErrorWithSeekConsumerRecordTest() returns error? {
         groupId: "constraint-consumer-group-13",
         clientId: "constraint-consumer-id-13",
         offsetReset: OFFSET_RESET_EARLIEST,
-        autoSeek: false
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 

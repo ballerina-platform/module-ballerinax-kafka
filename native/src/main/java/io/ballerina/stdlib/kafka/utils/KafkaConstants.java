@@ -127,7 +127,8 @@ public class KafkaConstants {
     public static final BString CONSUMER_RECONNECT_BACKOFF_MAX_MS_CONFIG = StringUtils.fromString(
             "reconnectBackoffTimeMax");
     public static final BString CONSUMER_ENABLE_AUTO_COMMIT_CONFIG = StringUtils.fromString("autoCommit");
-    public static final BString CONSUMER_ENABLE_AUTO_SEEK_CONFIG = StringUtils.fromString("autoSeek");
+    public static final BString CONSUMER_ENABLE_AUTO_SEEK_CONFIG = StringUtils
+            .fromString("autoSeekOnValidationFailure");
     public static final BString CONSUMER_CHECK_CRCS_CONFIG = StringUtils.fromString("checkCRCS");
     public static final BString CONSUMER_EXCLUDE_INTERNAL_TOPICS_CONFIG = StringUtils.fromString(
             "excludeInternalTopics");
