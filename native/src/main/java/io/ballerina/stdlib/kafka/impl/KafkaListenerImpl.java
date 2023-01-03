@@ -109,6 +109,8 @@ public class KafkaListenerImpl implements KafkaListener {
         Optional<MethodType> onErrorMethod = getOnErrorMethod(service);
         if (onErrorMethod.isPresent()) {
             executeOnError(onErrorMethod.get(), throwable);
+        } else {
+            throwable.printStackTrace();
         }
     }
 
