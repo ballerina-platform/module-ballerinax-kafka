@@ -101,8 +101,6 @@ import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getModule;
  */
 public class KafkaUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(KafkaUtils.class);
-
     private KafkaUtils() {
     }
 
@@ -660,7 +658,6 @@ public class KafkaUtils {
     }
 
     private static boolean handleBError(boolean autoSeek, int i, BError bError) {
-        logger.error(bError.getMessage());
         if (isPayloadError(bError)) {
             if (!autoSeek) {
                 if (i == 0) {
