@@ -104,13 +104,13 @@ public class KafkaListenerImpl implements KafkaListener {
      * {@inheritDoc}
      */
     @Override
-    public void onError(Throwable throwable) {
+    public void onError(Throwable t) {
         KafkaMetricsUtil.reportConsumerError(listener, KafkaObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
         Optional<MethodType> onErrorMethod = getOnErrorMethod(service);
         if (onErrorMethod.isPresent()) {
-            executeOnError(onErrorMethod.get(), throwable);
+            executeOnError(onErrorMethod.get(), t);
         } else {
-            throwable.printStackTrace();
+            t.printStackTrace();
         }
     }
 
