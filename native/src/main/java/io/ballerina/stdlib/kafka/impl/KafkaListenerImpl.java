@@ -25,10 +25,12 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Parameter;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -123,7 +125,8 @@ public class KafkaListenerImpl implements KafkaListener {
             properties = getNewObserverContextInProperties(listener);
             returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
         }
-        if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
             bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
                     consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
                     getResourceParameters(service, this.listener, records, kafkaConsumer));
@@ -151,7 +154,8 @@ public class KafkaListenerImpl implements KafkaListener {
             arguments[2] = createCaller(this.listener);
             arguments[3] = true;
         }
-        if (service.getType().isIsolated() && service.getType().isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
             bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
                     null, properties, PredefinedTypes.TYPE_NULL, arguments);
         } else {
@@ -252,13 +256,15 @@ public class KafkaListenerImpl implements KafkaListener {
     }
 
     private Optional<MethodType> getOnConsumerRecordMethod(BObject service) {
-        MethodType[] methodTypes = service.getType().getMethods();
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        MethodType[] methodTypes = serviceType.getMethods();
         return Stream.of(methodTypes)
                 .filter(methodType -> KAFKA_RESOURCE_ON_RECORD.equals(methodType.getName())).findFirst();
     }
 
     private Optional<MethodType> getOnErrorMethod(BObject service) {
-        MethodType[] methodTypes = service.getType().getMethods();
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        MethodType[] methodTypes = serviceType.getMethods();
         return Stream.of(methodTypes)
                 .filter(methodType -> KAFKA_RESOURCE_ON_ERROR.equals(methodType.getName())).findFirst();
     }
