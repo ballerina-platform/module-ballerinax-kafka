@@ -639,7 +639,7 @@ public class KafkaUtils {
                 consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType,
                         validateConstraints));
             } catch (BError bError) {
-                if (handleBError(autoSeek, i, bError)) {
+                if (handleBError(consumer, (ConsumerRecord) record, autoSeek, bError, i == 0)) {
                     break;
                 }
             }
@@ -656,10 +656,12 @@ public class KafkaUtils {
         return consumerRecordsArray;
     }
 
-    private static boolean handleBError(boolean autoSeek, int i, BError bError) {
+    private static boolean handleBError(KafkaConsumer consumer, ConsumerRecord record, boolean autoSeek, BError bError,
+                                        boolean firstRecord) {
         if (isPayloadError(bError)) {
             if (!autoSeek) {
-                if (i == 0) {
+                consumer.seek(new TopicPartition(record.topic(), record.partition()), record.offset());
+                if (firstRecord) {
                     throw bError;
                 }
                 return true;
@@ -1031,7 +1033,7 @@ public class KafkaUtils {
                 }
                 bArray.append(value);
             } catch (BError bError) {
-                if (handleBError(autoSeek, i, bError)) {
+                if (handleBError(consumer, (ConsumerRecord) record, autoSeek, bError, i == 0)) {
                     break;
                 }
             }
