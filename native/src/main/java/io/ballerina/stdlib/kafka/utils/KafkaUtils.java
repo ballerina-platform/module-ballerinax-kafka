@@ -663,6 +663,8 @@ public class KafkaUtils {
                     throw bError;
                 }
                 return true;
+            } else {
+                bError.printStackTrace();
             }
         } else {
             throw bError;
