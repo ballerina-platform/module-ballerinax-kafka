@@ -212,7 +212,7 @@ function dataBindingErrorListenerTest() returns error? {
     runtime:sleep(3);
     check dataBindingListener.gracefulStop();
     test:assertTrue(errorReceived);
-    test:assertTrue(errorMsg.startsWith("Data binding failed: "));
+    test:assertTrue(errorMsg.startsWith("Data binding failed."));
 }
 
 @test:Config {enable: true}
@@ -1235,7 +1235,7 @@ function recordCastingErrorConsumerRecordTest() returns error? {
     check recordListener.'start();
     runtime:sleep(5);
     check recordListener.gracefulStop();
-    test:assertEquals(recordCastErrorConsumerRecordError, "Data binding failed: {ballerina/lang.value}ConversionError");
+    test:assertEquals(recordCastErrorConsumerRecordError, "Data binding failed. If needed, please seek past the record to continue consumption.");
 }
 
 @test:Config {enable: true}
@@ -1275,7 +1275,7 @@ function recordCastingErrorPayloadTest() returns error? {
     check recordListener.'start();
     runtime:sleep(5);
     check recordListener.gracefulStop();
-    test:assertEquals(recordCastErrorPayloadError, "Data binding failed: {ballerina/lang.value}ConversionError");
+    test:assertEquals(recordCastErrorPayloadError, "Data binding failed. If needed, please seek past the record to continue consumption.");
 }
 
 @test:Config {enable: true}

@@ -515,7 +515,7 @@ function pollErrorWithSeekConsumerRecordTest() returns error? {
     test:assertEquals(value[0].value, personRecord1);
     PersonConsumerRecord[]|error result = consumer->poll(5);
     if result is PayloadBindingError {
-        test:assertEquals(result.message(), "Data binding failed: unrecognized token 'Invalid' at line: 1 column: 9");
+        test:assertEquals(result.message(), "Data binding failed. If needed, please seek past the record to continue consumption.");
         check consumer->seek({
             partition: result.detail().partition,
             offset: result.detail().offset + 1
@@ -556,7 +556,7 @@ function recordCastingErrorPollTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
     PersonConsumerRecord[]|Error records = consumer->poll(5);
     if records is PayloadBindingError {
-        test:assertEquals(records.message(), "Data binding failed: {ballerina/lang.value}ConversionError");
+        test:assertEquals(records.message(), "Data binding failed. If needed, please seek past the record to continue consumption.");
     } else {
         test:assertFail("Expected a payload binding error");
     }
@@ -585,7 +585,7 @@ function recordCastingErrorPollPayloadTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
     Person[]|Error records = consumer->pollPayload(5);
     if records is PayloadBindingError {
-        test:assertEquals(records.message(), "Data binding failed: {ballerina/lang.value}ConversionError");
+        test:assertEquals(records.message(), "Data binding failed. If needed, please seek past the record to continue consumption.");
     } else {
         test:assertFail("Expected a payload binding error");
     }
