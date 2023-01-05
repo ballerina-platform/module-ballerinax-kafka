@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.kafka.impl;
 
 import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.values.BError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +57,13 @@ public class KafkaPollCycleFutureListener implements Callback {
     @Override
     public void notifySuccess(Object obj) {
         sem.release();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Ballerina engine has completed resource invocation successfully for service " + serviceId +
-                                 ". Semaphore is released to continue next polling cycle.");
+        if (obj instanceof BError) {
+            ((BError) obj).printStackTrace();
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Ballerina engine has completed resource invocation successfully for service "
+                        + serviceId + ". Semaphore is released to continue next polling cycle.");
+            }
         }
     }
 
@@ -66,10 +71,10 @@ public class KafkaPollCycleFutureListener implements Callback {
      * {@inheritDoc}
      */
     @Override
-    public void notifyFailure(io.ballerina.runtime.api.values.BError error) {
+    public void notifyFailure(BError error) {
         sem.release();
         logger.error("Ballerina engine has completed resource invocation with exception for service " + serviceId +
-                             ". Semaphore is released to continue next polling cycle.", error.toString());
+                ". Semaphore is released to continue next polling cycle.", error.toString());
     }
 
 }
