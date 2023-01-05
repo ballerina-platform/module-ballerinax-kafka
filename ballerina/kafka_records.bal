@@ -116,7 +116,8 @@ public type AuthenticationConfiguration record {|
 # + excludeInternalTopics - Whether records from internal topics should be exposed to the consumer
 # + decoupleProcessing - Decouples processing
 # + validation - Configuration related to constraint validation check
-# + autoSeekOnValidationFailure - Enables seeking past any errornous records found when data-binding and validating constraints
+# + autoSeekOnValidationFailure - Automatically seeks past the errornous records in the event of an data-binding or
+#                                 validating constraints failure
 # + secureSocket - Configurations related to SSL/TLS encryption
 # + auth - Authentication-related configurations for the `kafka:Consumer`
 # + securityProtocol - Type of the security protocol to use in the broker connection
