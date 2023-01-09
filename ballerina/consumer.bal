@@ -340,9 +340,8 @@ public client isolated class Consumer {
         if self.consumerConfig?.groupId is string {
             if topics is string {
                 return self.consumerSubscribe([topics]);
-            } else if topics is string[] {
-                return self.consumerSubscribe(topics);
             }
+            return self.consumerSubscribe(topics);
         } else {
             panic createError("The groupId of the consumer must be set to subscribe to the topics");
         }

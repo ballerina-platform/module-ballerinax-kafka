@@ -27,6 +27,7 @@ import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Field;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.UnionType;
@@ -84,6 +85,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ADDITIONAL_PROPERTI
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT_CONFIG;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_SEEK_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_PARTITION_OFFSET;
@@ -601,22 +603,16 @@ public class KafkaUtils {
     }
 
     public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, RecordType recordType,
-                                                               boolean validateConstraints) {
+                                                               boolean validateConstraints, boolean autoSeek) {
         Object key = null;
         Map<String, Field> fieldMap = recordType.getFields();
         Type keyType = getReferredType(fieldMap.get(KAFKA_RECORD_KEY).getFieldType());
         Type valueType = getReferredType(fieldMap.get(KAFKA_RECORD_VALUE).getFieldType());
         if (Objects.nonNull(record.key())) {
-            key = getValueWithIntendedType(keyType, (byte[]) record.key(), record);
-            if (key instanceof BError) {
-                throw (BError) key;
-            }
+            key = getValueWithIntendedType(keyType, (byte[]) record.key(), record, autoSeek);
         }
 
-        Object value = getValueWithIntendedType(valueType, (byte[]) record.value(), record);
-        if (value instanceof BError) {
-            throw (BError) value;
-        }
+        Object value = getValueWithIntendedType(valueType, (byte[]) record.value(), record, autoSeek);
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                                                                               record.partition());
         BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
@@ -626,13 +622,14 @@ public class KafkaUtils {
         consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_PARTITION_OFFSET), ValueCreator.createRecordValue(
                 getPartitionOffsetRecord(), topicPartition, record.offset()));
         if (validateConstraints) {
-            validateConstraints(consumerRecord, ValueCreator.createTypedescValue(recordType), record);
+            validateConstraints(consumerRecord, ValueCreator.createTypedescValue(recordType), record, autoSeek);
         }
         return consumerRecord;
     }
 
     public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly,
-                                            boolean validateConstraints, boolean autoCommit, KafkaConsumer consumer) {
+                                            boolean validateConstraints, boolean autoCommit,
+                                            KafkaConsumer consumer, boolean autoSeek) {
         BArray consumerRecordsArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
         HashMap<String, PartitionOffset> partitionOffsetMap = new HashMap<>();
         int i = 0;
@@ -640,16 +637,15 @@ public class KafkaUtils {
             ConsumerRecord consumerRecord = (ConsumerRecord) record;
             try {
                 consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType,
-                        validateConstraints));
-                if (autoCommit) {
-                    updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
-                            consumerRecord.topic() + "-" + consumerRecord.partition());
-                }
+                        validateConstraints, autoSeek));
             } catch (BError bError) {
-                if (i == 0) {
-                    throw bError;
+                if (handleBError(consumer, (ConsumerRecord) record, autoSeek, bError, i == 0)) {
+                    break;
                 }
-                break;
+            }
+            if (autoCommit) {
+                updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
+                        consumerRecord.topic() + "-" + consumerRecord.partition());
             }
             i++;
         }
@@ -658,6 +654,24 @@ public class KafkaUtils {
         }
         commitAndSeekConsumedRecord(consumer, partitionOffsetMap);
         return consumerRecordsArray;
+    }
+
+    private static boolean handleBError(KafkaConsumer consumer, ConsumerRecord record, boolean autoSeek, BError bError,
+                                        boolean firstRecord) {
+        if (isPayloadError(bError)) {
+            if (!autoSeek) {
+                consumer.seek(new TopicPartition(record.topic(), record.partition()), record.offset());
+                if (firstRecord) {
+                    throw bError;
+                }
+                return true;
+            } else {
+                bError.printStackTrace();
+            }
+        } else {
+            throw bError;
+        }
+        return false;
     }
 
     private static Map<TopicPartition, OffsetAndMetadata> getOffsetsFromMap(HashMap<String, PartitionOffset>
@@ -681,35 +695,47 @@ public class KafkaUtils {
         }
     }
 
-    public static Object getValueWithIntendedType(Type type, byte[] value, ConsumerRecord consumerRecord) {
+    public static Object getValueWithIntendedType(Type type, byte[] value, ConsumerRecord consumerRecord,
+                                                  boolean autoSeek) {
         String strValue = new String(value, StandardCharsets.UTF_8);
+        Object intendedValue;
         try {
             switch (type.getTag()) {
                 case STRING_TAG:
-                    return StringUtils.fromString(strValue);
+                    intendedValue = StringUtils.fromString(strValue);
+                    break;
                 case XML_TAG:
-                    return XmlUtils.parse(strValue);
+                    intendedValue = XmlUtils.parse(strValue);
+                    break;
                 case ANYDATA_TAG:
-                    return ValueCreator.createArrayValue(value);
+                    intendedValue = ValueCreator.createArrayValue(value);
+                    break;
                 case RECORD_TYPE_TAG:
-                    return CloneWithType.convert(type, JsonUtils.parse(strValue));
+                    intendedValue = CloneWithType.convert(type, JsonUtils.parse(strValue));
+                    break;
                 case UNION_TAG:
                     if (hasStringType((UnionType) type)) {
-                        return StringUtils.fromString(strValue);
+                        intendedValue = StringUtils.fromString(strValue);
+                        break;
                     }
-                    return getValueFromJson(type, strValue);
+                    intendedValue = getValueFromJson(type, strValue);
+                    break;
                 case ARRAY_TAG:
                     if (getReferredType(((ArrayType) type).getElementType()).getTag() == BYTE_TAG) {
-                        return ValueCreator.createArrayValue(value);
+                        intendedValue = ValueCreator.createArrayValue(value);
+                        break;
                     }
                     /*-fallthrough*/
                 default:
-                    return getValueFromJson(type, strValue);
+                    intendedValue = getValueFromJson(type, strValue);
             }
         } catch (BError bError) {
-            throw createPayloadBindingError(String.format("Data binding failed: %s", bError.getMessage()), bError,
-                    consumerRecord);
+            throw createPayloadBindingError(bError, consumerRecord, autoSeek);
         }
+        if (intendedValue instanceof BError) {
+            throw createPayloadBindingError((BError) intendedValue, consumerRecord, autoSeek);
+        }
+        return intendedValue;
     }
 
     private static boolean hasStringType(UnionType type) {
@@ -744,18 +770,26 @@ public class KafkaUtils {
                                                  StringUtils.fromString(message), cause);
     }
 
-    public static BError createPayloadValidationError(BError cause, ConsumerRecord record) {
+    public static BError createPayloadValidationError(BError cause, ConsumerRecord record, boolean autoSeek) {
         BMap<BString, Object> partition = populatePartitionOffsetRecord(populateTopicPartitionRecord(record.topic(),
                 record.partition()), record.offset());
+        if (autoSeek) {
+            return ErrorCreator.createError(getModule(), PAYLOAD_VALIDATION_ERROR,
+                    StringUtils.fromString("Failed to validate payload."), cause, partition);
+        }
         return ErrorCreator.createError(getModule(), PAYLOAD_VALIDATION_ERROR, StringUtils.fromString("Failed to " +
                 "validate payload. If needed, please seek past the record to continue consumption."), cause, partition);
     }
 
-    public static BError createPayloadBindingError(String message, BError cause, ConsumerRecord record) {
+    public static BError createPayloadBindingError(BError cause, ConsumerRecord record, boolean autoSeek) {
         BMap<BString, Object> partition = populatePartitionOffsetRecord(populateTopicPartitionRecord(record.topic(),
                 record.partition()), record.offset());
-        return ErrorCreator.createError(getModule(), PAYLOAD_BINDING_ERROR, StringUtils.fromString(message),
-                cause, partition);
+        if (autoSeek) {
+            return ErrorCreator.createError(getModule(), PAYLOAD_BINDING_ERROR,
+                    StringUtils.fromString("Data binding failed."), cause, partition);
+        }
+        return ErrorCreator.createError(getModule(), PAYLOAD_BINDING_ERROR, StringUtils.fromString("Data binding " +
+                "failed. If needed, please seek past the record to continue consumption."), cause, partition);
     }
 
     public static BMap<BString, Object> createKafkaRecord(String recordName) {
@@ -959,7 +993,8 @@ public class KafkaUtils {
 
     public static Type getAttachedFunctionReturnType(BObject serviceObject, String functionName) {
         MethodType function = null;
-        MethodType[] resourceFunctions = serviceObject.getType().getMethods();
+        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(serviceObject.getType());
+        MethodType[] resourceFunctions = objectType.getMethods();
         for (MethodType resourceFunction : resourceFunctions) {
             if (functionName.equals(resourceFunction.getName())) {
                 function = resourceFunction;
@@ -970,10 +1005,11 @@ public class KafkaUtils {
         return function;
     }
 
-    public static Object validateConstraints(Object value, BTypedesc bTypedesc, ConsumerRecord consumerRecord) {
+    public static Object validateConstraints(Object value, BTypedesc bTypedesc, ConsumerRecord consumerRecord,
+                                             boolean autoSeek) {
         Object validationResult = Constraints.validate(value, bTypedesc);
         if (validationResult instanceof BError) {
-            throw createPayloadValidationError((BError) validationResult, consumerRecord);
+            throw createPayloadValidationError((BError) validationResult, consumerRecord, autoSeek);
         }
         return value;
     }
@@ -982,8 +1018,8 @@ public class KafkaUtils {
         return Files.readString(Paths.get(filePath));
     }
 
-    public static BArray getValuesWithIntendedType(Type type, ConsumerRecords records, boolean constraintValidation,
-                                                   boolean autoCommit, KafkaConsumer consumer) {
+    public static BArray getValuesWithIntendedType(Type type, KafkaConsumer consumer, ConsumerRecords records,
+                                                   boolean constraintValidation, boolean autoCommit, boolean autoSeek) {
         ArrayType intendedType;
         if (type.getTag() == INTERSECTION_TAG) {
             intendedType = (ArrayType) ((IntersectionType) type).getConstituentTypes().get(0);
@@ -997,21 +1033,20 @@ public class KafkaUtils {
             ConsumerRecord consumerRecord = (ConsumerRecord) record;
             try {
                 Object value = getValueWithIntendedType(getReferredType(intendedType.getElementType()),
-                        (byte[]) (consumerRecord.value()), consumerRecord);
+                        (byte[]) (consumerRecord.value()), consumerRecord, autoSeek);
                 if (constraintValidation) {
                     validateConstraints(value, ValueCreator.createTypedescValue(intendedType.getElementType()),
-                            consumerRecord);
-                }
-                if (autoCommit) {
-                    updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
-                            consumerRecord.topic() + "-" + consumerRecord.partition());
+                            consumerRecord, autoSeek);
                 }
                 bArray.append(value);
             } catch (BError bError) {
-                if (i == 0) {
-                    throw bError;
+                if (handleBError(consumer, (ConsumerRecord) record, autoSeek, bError, i == 0)) {
+                    break;
                 }
-                break;
+            }
+            if (autoCommit) {
+                updatePartitionOffsetMap(partitionOffsetMap, consumerRecord,
+                        consumerRecord.topic() + "-" + consumerRecord.partition());
             }
             i++;
         }
@@ -1020,6 +1055,11 @@ public class KafkaUtils {
         }
         commitAndSeekConsumedRecord(consumer, partitionOffsetMap);
         return bArray;
+    }
+
+    private static boolean isPayloadError(BError bError) {
+        return bError.getType().getName().equals(PAYLOAD_BINDING_ERROR) ||
+                bError.getType().getName().equals(PAYLOAD_VALIDATION_ERROR);
     }
 
     private static void commitAndSeekConsumedRecord(KafkaConsumer consumer,
@@ -1041,5 +1081,9 @@ public class KafkaUtils {
             }
         }
         return (boolean) consumerConfig.get(CONSUMER_ENABLE_AUTO_COMMIT_CONFIG);
+    }
+
+    public static boolean getAutoSeekOnErrorConfig(BObject bObject) {
+        return (boolean) bObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME).get(CONSUMER_ENABLE_AUTO_SEEK_CONFIG);
     }
 }

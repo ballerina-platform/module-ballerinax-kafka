@@ -395,6 +395,10 @@ public type ConsumerConfiguration record {|
     boolean excludeInternalTopics = true;
     # Decouples processing
     boolean decoupleProcessing = false;
+    # Configuration related to constraint validation check
+    boolean validation = true;
+    # Automatically seeks past the errornous records in the event of an data-binding or validating constraints failure
+    boolean autoSeekOnValidationFailure = true;
     # Configurations related to SSL/TLS encryption
     SecureSocket secureSocket?;
     # Authentication-related configurations for the Kafka consumer
@@ -429,7 +433,7 @@ The Consumer Client provides the ability to pull messages from the Kafka server 
 APIs to manage subscriptions, topic partitions, offsets etc.
 #### 4.2.1. Initialization
 Connection with the Kafka server can be established insecurely or securely as same as the producer.
-##### 4.2.1.1 Insecure Client
+##### 4.2.1.1. Insecure Client
 A simple insecure connection with the Kafka server can be easily established by providing the Kafka server URL and
 basic configuration.
 ```ballerina
@@ -865,6 +869,22 @@ isolated remote function 'commit() returns Error?;
 # + duration - Timeout duration (in seconds) for the commit operation execution
 # + return - `kafka:Error` if an error is encountered or else nil
 isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error?;
+```
+#### 4.3.4. Error handling
+When an error occurs while receiving the messages, like `kafka:PayloadValidationError` or `kafka:PayloadBindingError`, 
+the error will be logged to the console and the `kafka:Consumer` will automatically get seeked to the next record. 
+If the errors need to be handled manually, the `autoSeekOnValidationFailure` configuration can be set to `false` and the 
+resulting errors will be passed to the `onError` method of the `kafka:Service`. 
+```ballerina
+service kafka:Service on kafkaListener {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records) returns error? {
+        // process results
+    }
+    
+    remote function onError(kafka:Error 'error) {
+        // handle the error
+    }
+}
 ```
 ## 5. Samples
 ### 5.1. Produce Messages

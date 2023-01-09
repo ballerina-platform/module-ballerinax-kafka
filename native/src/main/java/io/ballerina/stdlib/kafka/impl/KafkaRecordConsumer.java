@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -72,7 +71,7 @@ public class KafkaRecordConsumer {
         } else {
             this.kafkaConsumer = kafkaConsumer;
         }
-        List<String> topics = (ArrayList<String>) configParams.get(KafkaConstants.ALIAS_TOPICS.getValue());
+        List<String> topics = (List<String>) configParams.get(KafkaConstants.ALIAS_TOPICS.getValue());
         // Subscribe Kafka Consumer to given topics.
         this.kafkaConsumer.subscribe(topics);
         this.kafkaListener = kafkaListener;

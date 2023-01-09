@@ -287,7 +287,8 @@ function dataBindingErrorConsumerTest() returns error? {
         topics: [topic],
         groupId: "data-binding-consumer-group-12",
         clientId: "data-binding-consumer-id-12",
-        offsetReset: OFFSET_RESET_EARLIEST
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
     xml[]|Error result = consumer->pollPayload(5);
@@ -504,7 +505,8 @@ function pollErrorWithSeekConsumerRecordTest() returns error? {
         topics: [topic],
         groupId: "data-binding-consumer-group-10",
         clientId: "data-binding-consumer-id-10",
-        offsetReset: OFFSET_RESET_EARLIEST
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeekOnValidationFailure: false
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
@@ -513,7 +515,7 @@ function pollErrorWithSeekConsumerRecordTest() returns error? {
     test:assertEquals(value[0].value, personRecord1);
     PersonConsumerRecord[]|error result = consumer->poll(5);
     if result is PayloadBindingError {
-        test:assertEquals(result.message(), "Data binding failed: unrecognized token 'Invalid' at line: 1 column: 9");
+        test:assertEquals(result.message(), "Data binding failed. If needed, please seek past the record to continue consumption.");
         check consumer->seek({
             partition: result.detail().partition,
             offset: result.detail().offset + 1
@@ -529,5 +531,87 @@ function pollErrorWithSeekConsumerRecordTest() returns error? {
     } else {
         test:assertFail("Expected a payload binding error");
     }
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function recordCastingErrorPollTest() returns error? {
+    string topic = "record-casting-error-poll-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage({
+        name: "ABC",
+        age: 12,
+        address: "test-address",
+        married: false,
+        id: 1231
+    }.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-10",
+        clientId: "data-binding-consumer-id-10",
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeekOnValidationFailure: false
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    PersonConsumerRecord[]|Error records = consumer->poll(5);
+    if records is PayloadBindingError {
+        test:assertEquals(records.message(), "Data binding failed. If needed, please seek past the record to continue consumption.");
+    } else {
+        test:assertFail("Expected a payload binding error");
+    }
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function recordCastingErrorPollPayloadTest() returns error? {
+    string topic = "record-casting-error-poll-payload-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage({
+        name: "ABC",
+        age: 12,
+        address: "test-address",
+        married: false,
+        id: 1231
+    }.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-11",
+        clientId: "data-binding-consumer-id-11",
+        offsetReset: OFFSET_RESET_EARLIEST,
+        autoSeekOnValidationFailure: false
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    Person[]|Error records = consumer->pollPayload(5);
+    if records is PayloadBindingError {
+        test:assertEquals(records.message(), "Data binding failed. If needed, please seek past the record to continue consumption.");
+    } else {
+        test:assertFail("Expected a payload binding error");
+    }
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function intCastingErrorPollPayloadWithAutoSeekTest() returns error? {
+    string topic = "int-casting-error-poll-payload-with-auto-seek-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage(12.toString().toBytes(), topic);
+    check sendMessage("Invalid value".toBytes(), topic);
+    check sendMessage(13.toString().toBytes(), topic);
+
+    ConsumerConfiguration consumerConfigs = {
+        topics: [topic],
+        groupId: "data-binding-consumer-group-12",
+        clientId: "data-binding-consumer-id-12",
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
+    int[] values = check consumer->pollPayload(5);
+    if values.length() != 2 {
+        test:assertFail("Invalid record count");
+    }
+    test:assertEquals(values[0], 12);
+    test:assertEquals(values[1], 13);
     check consumer->close();
 }

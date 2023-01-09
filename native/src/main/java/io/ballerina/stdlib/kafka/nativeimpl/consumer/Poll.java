@@ -47,6 +47,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIE
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoCommitConfig;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoSeekOnErrorConfig;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getMilliSeconds;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getValuesWithIntendedType;
@@ -71,8 +72,10 @@ public class Poll {
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
+                boolean autoSeek = getAutoSeekOnErrorConfig(consumerObject);
                 BArray consumerRecords = getConsumerRecords(recordsRetrieved, recordType,
-                        bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit, kafkaConsumer);
+                        bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit,
+                        kafkaConsumer, autoSeek);
                 balFuture.complete(consumerRecords);
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
@@ -98,9 +101,10 @@ public class Poll {
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
+                boolean autoSeek = getAutoSeekOnErrorConfig(consumerObject);
                 if (!recordsRetrieved.isEmpty()) {
-                    dataArray = getValuesWithIntendedType(arrayType, recordsRetrieved, constraintValidation,
-                            autoCommit, kafkaConsumer);
+                    dataArray = getValuesWithIntendedType(arrayType, kafkaConsumer, recordsRetrieved,
+                            constraintValidation, autoCommit, autoSeek);
                 }
                 balFuture.complete(dataArray);
             } catch (BError bError) {
@@ -117,10 +121,11 @@ public class Poll {
     private static RecordType getRecordType(BTypedesc bTypedesc) {
         RecordType recordType;
         if (bTypedesc.getDescribingType().isReadOnly()) {
-            recordType = (RecordType) ((IntersectionType) getReferredType(((ArrayType) bTypedesc.getDescribingType())
-                    .getElementType())).getConstituentTypes().get(0);
+            recordType = (RecordType) getReferredType(((IntersectionType) getReferredType(((ArrayType) getReferredType(
+                    bTypedesc.getDescribingType())).getElementType())).getConstituentTypes().get(0));
         } else {
-            recordType = (RecordType) getReferredType(((ArrayType) bTypedesc.getDescribingType()).getElementType());
+            recordType = (RecordType) getReferredType(
+                            ((ArrayType) getReferredType(bTypedesc.getDescribingType())).getElementType());
         }
         return recordType;
     }
