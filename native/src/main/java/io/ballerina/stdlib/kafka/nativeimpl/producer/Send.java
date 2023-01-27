@@ -30,6 +30,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.UNCHECKED;
