@@ -41,30 +41,43 @@ import static io.ballerina.stdlib.kafka.utils.TransactionUtils.handleTransaction
  */
 public class Send {
 
+    private static final ExecutorService executorService = Executors.newCachedThreadPool(new KafkaThreadFactory());
+
     @SuppressWarnings(UNCHECKED)
     protected static Object sendKafkaRecord(Environment env, ProducerRecord record, BObject producerObject) {
         KafkaTracingUtil.traceResourceInvocation(env, producerObject, record.topic());
         final Future balFuture = env.markAsync();
         KafkaProducer producer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
-        try {
-            if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(producerObject);
-            }
-            producer.send(record, (metadata, e) -> {
-                if (Objects.nonNull(e)) {
-                    KafkaMetricsUtil.reportProducerError(producerObject,
-                                                         KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
-                } else {
-                    KafkaMetricsUtil.reportPublish(producerObject, record.topic(), record.value());
-                    balFuture.complete(null);
-                }
-            });
-        } catch (IllegalStateException | KafkaException e) {
-            KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-            balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
-
+        if (TransactionResourceManager.getInstance().isInTransaction()) {
+            handleTransactions(producerObject);
         }
+        executorService.execute(() -> {
+            try {
+                producer.send(record, (metadata, e) -> {
+                    if (Objects.nonNull(e)) {
+                        KafkaMetricsUtil.reportProducerError(producerObject,
+                                KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
+                        balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+                    } else {
+                        KafkaMetricsUtil.reportPublish(producerObject, record.topic(), record.value());
+                        balFuture.complete(null);
+                    }
+                });
+            } catch (IllegalStateException | KafkaException e) {
+                KafkaMetricsUtil.reportProducerError(producerObject, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
+                balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+            }
+        });
         return null;
+    }
+
+    static class KafkaThreadFactory implements ThreadFactory {
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread kafkaProducerThread = new Thread(r);
+            kafkaProducerThread.setName("balx-kafka-producer-network-thread");
+            return kafkaProducerThread;
+        }
     }
 }
