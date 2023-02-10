@@ -12,7 +12,7 @@ on:
                 default: 'kafka-perf-cluster-test'
                 required: false
     schedule:
-        -   cron: '0 17 * * *'
+        -   cron: '0 20 * * *'
 
 jobs:
     call_stdlib_trigger_load_test_workflow:
