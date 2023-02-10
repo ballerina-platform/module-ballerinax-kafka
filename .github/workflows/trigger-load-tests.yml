@@ -9,7 +9,7 @@ on:
                 required: false
             clusterName:
                 description: 'Cluster name'
-                default: 'http-perf-cluster-test'
+                default: 'kafka-perf-cluster-test'
                 required: false
     schedule:
         -   cron: '0 17 * * *'
@@ -18,10 +18,10 @@ jobs:
     call_stdlib_trigger_load_test_workflow:
         name: Run StdLib Load Test Workflow
         if: ${{ github.event_name != 'schedule' || (github.event_name == 'schedule' && github.repository_owner == 'ballerina-platform') }}
-        uses: dilanSachi/ballerina-standard-library/.github/workflows/trigger-load-tests-template.yml@main
+        uses: ballerina-platform/ballerina-standard-library/.github/workflows/trigger-load-tests-template.yml@central-load-test-workflow
         with:
-            repo_name: 'module-ballerina-http'
-            runtime_artifacts_url: 'https://api.github.com/repos/ballerina-platform/module-ballerina-http/actions/artifacts'
-            dispatch_type: 'http-load-test'
+            repo_name: 'module-ballerinax-kafka'
+            runtime_artifacts_url: 'https://api.github.com/repos/ballerina-platform/module-ballerinax-kafka/actions/artifacts'
+            dispatch_type: 'kafka-load-test'
             cluster_name: ${{ inputs.clusterName }}
             tests: ${{ inputs.tests }}
