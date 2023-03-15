@@ -1,3 +1,6 @@
+fixes:
+  - "io/ballerina/stdlib/kafka/compiler/::./compiler-plugin/src/main/java/io/ballerina/stdlib/kafka/plugin/"
+
 ignore:
   - "compiler-plugin-tests"
   - "examples"
