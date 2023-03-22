@@ -965,7 +965,7 @@ function listenerWithPollTimeoutConfigTest() returns error? {
     Service configService =
     service object {
         remote function onConsumerRecord(string[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedTimeoutConfigValue = records[i];
             }
         }
