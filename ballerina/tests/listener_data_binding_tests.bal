@@ -224,7 +224,7 @@ function intConsumerRecordBindingListenerTest() returns error? {
     Service intBindingService =
     service object {
         remote function onConsumerRecord(readonly & IntConsumerRecord[] records, Caller caller) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedIntValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -259,7 +259,7 @@ function floatConsumerRecordBindingListenerTest() returns error? {
     Service floatBindingService =
     service object {
         remote function onConsumerRecord(FloatConsumerRecord[] & readonly records, Caller caller) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedFloatValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -294,7 +294,7 @@ function decimalConsumerRecordBindingListenerTest() returns error? {
     Service decimalBindingService =
     service object {
         remote function onConsumerRecord(DecimalConsumerRecord[] records, Caller caller) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedDecimalValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -329,7 +329,7 @@ function booleanConsumerRecordBindingListenerTest() returns error? {
     Service booleanBindingService =
     service object {
         remote function onConsumerRecord(BooleanConsumerRecord[] records, Caller caller) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedBooleanValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -366,7 +366,7 @@ function stringConsumerRecordListenerTest() returns error? {
     Service stringBindingService =
     service object {
         remote function onConsumerRecord(StringConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedStringValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -404,7 +404,7 @@ function xmlConsumerRecordListenerTest() returns error? {
     Service xmlBindingService =
     service object {
         remote function onConsumerRecord(Caller caller, XmlConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedXmlValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -441,7 +441,7 @@ function recordConsumerRecordListenerTest() returns error? {
     Service recordBindingService =
     service object {
         remote function onConsumerRecord(PersonConsumerRecord[] records, Caller caller) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedPersonValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -478,7 +478,7 @@ function mapConsumerRecordListenerTest() returns error? {
     Service mapBindingService =
     service object {
         remote function onConsumerRecord(MapConsumerRecord[] records, Caller caller) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedMapValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -518,7 +518,7 @@ function tableConsumerRecordListenerTest() returns error? {
     Service tableBindingService =
     service object {
         remote function onConsumerRecord(TableConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedTableValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -555,7 +555,7 @@ function jsonConsumerRecordListenerTest() returns error? {
     Service jsonBindingService =
     service object {
         remote function onConsumerRecord(Caller caller, JsonConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 receivedJsonValue = records[i].value;
                 log:printInfo("Received record: " + records[i].toString());
             }
@@ -630,7 +630,7 @@ function intPayloadBindingListenerTest() returns error? {
     Service intBindingService =
     service object {
         remote function onConsumerRecord(int[] payload) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedIntPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -665,7 +665,7 @@ function floatPayloadBindingListenerTest() returns error? {
     Service floatBindingService =
     service object {
         remote function onConsumerRecord(float[] payload) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedFloatPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -700,7 +700,7 @@ function decimalPayloadBindingListenerTest() returns error? {
     Service decimalBindingService =
     service object {
         remote function onConsumerRecord(decimal[] payload) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedDecimalPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -735,7 +735,7 @@ function booleanPayloadBindingListenerTest() returns error? {
     Service booleanBindingService =
     service object {
         remote function onConsumerRecord(boolean[] payload, Caller caller) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedBooleanPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -772,7 +772,7 @@ function stringPayloadListenerTest() returns error? {
     Service stringBindingService =
     service object {
         remote function onConsumerRecord(StringConsumerRecord[] records, string[] payload) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedStringPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -810,7 +810,7 @@ function xmlPayloadListenerTest() returns error? {
     Service xmlBindingService =
     service object {
         remote function onConsumerRecord(Caller caller, xml[] payload) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedXmlPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -847,7 +847,7 @@ function recordPayloadListenerTest() returns error? {
     Service recordBindingService =
     service object {
         remote function onConsumerRecord(Person[] payload, Caller caller, PersonConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedPersonPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -884,7 +884,7 @@ function mapPayloadListenerTest() returns error? {
     Service mapBindingService =
     service object {
         remote function onConsumerRecord(map<Person>[] payload) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedMapPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -924,7 +924,7 @@ function tablePayloadListenerTest() returns error? {
     Service tableBindingService =
     service object {
         remote function onConsumerRecord(table<Person>[] payload, TableConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedTablePayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -961,7 +961,7 @@ function jsonPayloadListenerTest() returns error? {
     Service jsonBindingService =
     service object {
         remote function onConsumerRecord(json[] payload) returns error? {
-            foreach int i in 0 ... payload.length() {
+            foreach int i in 0 ... payload.length() - 1 {
                 receivedJsonPayload = payload[i];
                 log:printInfo("Received record: " + payload[i].toString());
             }
@@ -998,7 +998,7 @@ function payloadConsumerRecordListenerTest() returns error? {
     Service payloadRecordBindingService =
     service object {
         remote function onConsumerRecord(@Payload PayloadConsumerRecord[] payloadRecords, JsonConsumerRecord[] consumerRecords) returns error? {
-            foreach int i in 0 ... payloadRecords.length() {
+            foreach int i in 0 ... payloadRecords.length() - 1 {
                 receivedPayloadConsumerRecordValue = payloadRecords[i];
                 log:printInfo("Received record: " + payloadRecords[i].toString());
             }
@@ -1166,7 +1166,7 @@ function invalidRecordPayloadWithSeekListenerTest() returns error? {
     Service invalidRecordService =
     service object {
         remote function onConsumerRecord(PersonConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 log:printInfo("Received record: " + records[i].toString());
                 receivedSeekedValidRecordListenerCount += 1;
             }

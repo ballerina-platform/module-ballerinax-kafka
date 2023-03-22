@@ -234,7 +234,7 @@ function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
     Service intConstraintService =
     service object {
         remote function onConsumerRecord(IntConstraintConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 log:printInfo("Received record: " + records[i].toString());
             }
         }
@@ -270,7 +270,7 @@ function intMinValueConstraintListenerConsumerRecordTest() returns error? {
     Service intConstraintService =
     service object {
         remote function onConsumerRecord(IntConstraintConsumerRecord[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 log:printInfo("Received record: " + records[i].toString());
             }
         }
@@ -306,7 +306,7 @@ function numberMaxValueConstraintListenerPayloadTest() returns error? {
     Service intConstraintService =
     service object {
         remote function onConsumerRecord(Weight[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 log:printInfo("Received record: " + records[i].toString());
             }
         }
@@ -342,7 +342,7 @@ function numberMinValueConstraintListenerPayloadTest() returns error? {
     Service intConstraintService =
     service object {
         remote function onConsumerRecord(Weight[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 log:printInfo("Received record: " + records[i].toString());
             }
         }
@@ -381,7 +381,7 @@ function validRecordConstraintPayloadTest() returns error? {
     Service validRecordService =
     service object {
         remote function onConsumerRecord(Child[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 log:printInfo("Received record: " + records[i].toString());
                 receivedValidRecordCount += 1;
             }
@@ -491,7 +491,7 @@ function invalidRecordConstraintWithSeekPayloadTest() returns error? {
     Service invalidRecordService =
     service object {
         remote function onConsumerRecord(Child[] records) returns error? {
-            foreach int i in 0 ... records.length() {
+            foreach int i in 0 ... records.length() - 1 {
                 log:printInfo("Received record: " + records[i].toString());
                 receivedSeekedValidRecordCount += 1;
             }

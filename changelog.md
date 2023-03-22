@@ -4,13 +4,24 @@ This file contains all the notable changes done to the Ballerina Kafka package t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- [Exit the service when a panic occurs inside the service method](https://github.com/ballerina-platform/ballerina-standard-library/issues/4241)
+
+## [3.6.0] - 2023-02-20
 
 ### Added
 - [Added a feature to autoseek when a payload binding fails or constraint validation fails](https://github.com/ballerina-platform/ballerina-standard-library/issues/3827)
 
+### Changed
+- [Stopped Java client logs from appearing in the console](https://github.com/ballerina-platform/ballerina-standard-library/issues/3698)
+
 ### Fixed
 - [Fixed consumer panic when a type casting error occurs](https://github.com/ballerina-platform/ballerina-standard-library/issues/3696)
 - [Fixed not logging errors returned from the kafka `onConsumerRecord` method](https://github.com/ballerina-platform/ballerina-standard-library/issues/3884)
+
+## [3.5.1] - 2023-01-27
+### Changed
+- [Changed the send operation of `kafka:Producer` to be non-blocking](https://github.com/ballerina-platform/ballerina-standard-library/issues/3991)
 
 ## [3.5.0] - 2022-11-29
 

@@ -34,4 +34,12 @@
         <Class name="io.ballerina.stdlib.kafka.utils.KafkaUtils" />
         <Bug pattern="BC_UNCONFIRMED_CAST" />
     </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaListenerImpl$KafkaOnErrorCallback"/>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaPollCycleFutureListener"/>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
 </FindBugsFilter>

@@ -73,8 +73,12 @@ public class KafkaPollCycleFutureListener implements Callback {
     @Override
     public void notifyFailure(BError error) {
         sem.release();
-        logger.error("Ballerina engine has completed resource invocation with exception for service " + serviceId +
-                ". Semaphore is released to continue next polling cycle.", error.toString());
+        if (logger.isDebugEnabled()) {
+            logger.error("Ballerina engine has completed resource invocation with exception for service " + serviceId +
+                    ". Semaphore is released to continue next polling cycle.", error.toString());
+        }
+        error.printStackTrace();
+        System.exit(1);
     }
 
 }
