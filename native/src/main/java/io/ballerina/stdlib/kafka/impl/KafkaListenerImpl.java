@@ -158,28 +158,11 @@ public class KafkaListenerImpl implements KafkaListener {
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
         if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
             bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
-                    getOnErrorCallback(), properties, PredefinedTypes.TYPE_NULL, arguments);
+                    new KafkaOnErrorCallback(), properties, PredefinedTypes.TYPE_NULL, arguments);
         } else {
             bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
-                    getOnErrorCallback(), properties, PredefinedTypes.TYPE_NULL, arguments);
+                    new KafkaOnErrorCallback(), properties, PredefinedTypes.TYPE_NULL, arguments);
         }
-    }
-
-    private Callback getOnErrorCallback() {
-        return new Callback() {
-            @Override
-            public void notifySuccess(Object result) {
-                if (result instanceof BError) {
-                    ((BError) result).printStackTrace();
-                }
-            }
-
-            @Override
-            public void notifyFailure(BError bError) {
-                bError.printStackTrace();
-                System.exit(1);
-            }
-        };
     }
 
     private Map<String, Object> getNewObserverContextInProperties(BObject listener) {
@@ -306,5 +289,20 @@ public class KafkaListenerImpl implements KafkaListener {
     private StrandMetadata getStrandMetadata(String parentFunctionName) {
         return new StrandMetadata(ModuleUtils.getModule().getOrg(),
                     ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), parentFunctionName);
+    }
+
+    static class KafkaOnErrorCallback implements Callback {
+        @Override
+        public void notifySuccess(Object result) {
+            if (result instanceof BError) {
+                ((BError) result).printStackTrace();
+            }
+        }
+
+        @Override
+        public void notifyFailure(BError bError) {
+            bError.printStackTrace();
+            System.exit(1);
+        }
     }
 }
