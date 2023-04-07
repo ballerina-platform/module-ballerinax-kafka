@@ -34,6 +34,7 @@ import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.utils.ValueUtils;
 import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
@@ -56,8 +57,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
-import org.ballerinalang.langlib.value.CloneWithType;
-import org.ballerinalang.langlib.value.FromJsonWithType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -711,7 +710,7 @@ public class KafkaUtils {
                     intendedValue = ValueCreator.createArrayValue(value);
                     break;
                 case RECORD_TYPE_TAG:
-                    intendedValue = CloneWithType.convert(type, JsonUtils.parse(strValue));
+                    intendedValue = ValueUtils.convert(JsonUtils.parse(strValue), type);
                     break;
                 case UNION_TAG:
                     if (hasStringType((UnionType) type)) {
@@ -748,8 +747,7 @@ public class KafkaUtils {
     }
 
     private static Object getValueFromJson(Type type, String stringValue) {
-        BTypedesc typeDesc = ValueCreator.createTypedescValue(type);
-        return FromJsonWithType.fromJsonWithType(JsonUtils.parse(stringValue), typeDesc);
+        return ValueUtils.convert(JsonUtils.parse(stringValue), type);
     }
 
     public static BMap<BString, Object> getPartitionOffsetRecord() {
