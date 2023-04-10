@@ -13,7 +13,7 @@ distribution = "2201.5.0"
 groupId = "io.ballerina.stdlib"
 artifactId = "kafka-native"
 version = "3.7.0"
-path = "../native/build/libs/kafka-native-3.7.0-SNAPSHOT.jar"
+path = "../native/build/libs/kafka-native-3.7.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "org.apache.kafka"
