@@ -1,11 +1,11 @@
+# Order Manager
+
 [![Star on Github](https://img.shields.io/badge/-Star%20on%20Github-blue?style=social&logo=github)](https://github.com/ballerina-platform/module-ballerinax-kafka)
 
 _Authors_: @shafreenAnfar @dilanSachi  
 _Reviewers_: @shafreenAnfar  
 _Created_: 2021/09/10  
 _Updated_: 2023/04/18
-
-# Order Manager
 
 ## Overview
 This usecase is inspired by the [How Kafka Can Make Microservice Planet a Better Place](https://dzone.com/articles/how-kafka-can-make-microservice-planet-better) article.
