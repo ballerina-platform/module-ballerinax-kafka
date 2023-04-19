@@ -1,5 +1,12 @@
 # Secured Word Count Calculator
 
+[![Star on Github](https://img.shields.io/badge/-Star%20on%20Github-blue?style=social&logo=github)](https://github.com/ballerina-platform/module-ballerinax-kafka)
+
+_Authors_: @shafreenAnfar @aashikam  
+_Reviewers_: @shafreenAnfar  
+_Created_: 2021/11/11  
+_Updated_: 2023/04/18
+
 ## Overview
 This usecase is inspired by the [Word Count Lambda](https://github.com/confluentinc/kafka-streams-examples/blob/7.0.0-post/src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java) example.
 In this example, Kafka listener reads from a topic named `streams-plaintext-input`, where the values of messages represent lines of text. This text is processed and the word counts are calculated and the histogram output is written to topic `streams-wordcount-output`.
