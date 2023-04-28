@@ -20,6 +20,7 @@ package io.ballerina.stdlib.kafka.service;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -58,7 +59,7 @@ public class Register {
                 kafkaConsumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
             }
             KafkaListener kafkaListener = new KafkaListenerImpl(listener, service, runtime);
-            String serviceId = service.getType().getQualifiedName();
+            String serviceId = TypeUtils.getType(service).getQualifiedName();
             KafkaServerConnector serverConnector = new KafkaServerConnectorImpl(serviceId, configs, kafkaListener,
                     kafkaConsumer);
             listener.addNativeData(SERVER_CONNECTOR, serverConnector);
