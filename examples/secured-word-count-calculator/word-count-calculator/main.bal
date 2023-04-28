@@ -16,7 +16,6 @@
 
 import ballerinax/kafka;
 import ballerina/log;
-import ballerina/regex;
 import ballerina/crypto;
 
 configurable string INPUT_TOPIC = ?;
@@ -114,7 +113,7 @@ function processRecord(map<int> wordCountMap, kafka:ConsumerRecord 'record) retu
     map<int> tempWordCountMap = {};
     string sentence = check string:fromBytes('record.value);
 
-    _ = check from string word in regex:split(sentence, " ") let int? result = wordCountMap[word] do {
+    _ = check from string word in re`\s`.split(sentence) let int? result = wordCountMap[word] do {
         if result is () {
             // Add a new value if the word does not exist in the map
             wordCountMap[word] = 1;
