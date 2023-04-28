@@ -80,7 +80,6 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:log-ballerina:${stdlibLogVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:regex-ballerina:${stdlibRegexVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:time-ballerina:${stdlibTimeVersion}"
         ballerinaStdLibs "org.ballerinalang:transaction-ballerina:${stdlibTransactionVersion}"
