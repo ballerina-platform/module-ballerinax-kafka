@@ -126,7 +126,7 @@ public class KafkaListenerImpl implements KafkaListener {
             properties = getNewObserverContextInProperties(listener);
             returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
         }
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
             bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
                     consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
@@ -155,7 +155,7 @@ public class KafkaListenerImpl implements KafkaListener {
             arguments[2] = createCaller(this.listener);
             arguments[3] = true;
         }
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
             bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
                     new KafkaOnErrorCallback(), properties, PredefinedTypes.TYPE_NULL, arguments);
@@ -257,14 +257,14 @@ public class KafkaListenerImpl implements KafkaListener {
     }
 
     private Optional<MethodType> getOnConsumerRecordMethod(BObject service) {
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         MethodType[] methodTypes = serviceType.getMethods();
         return Stream.of(methodTypes)
                 .filter(methodType -> KAFKA_RESOURCE_ON_RECORD.equals(methodType.getName())).findFirst();
     }
 
     private Optional<MethodType> getOnErrorMethod(BObject service) {
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         MethodType[] methodTypes = serviceType.getMethods();
         return Stream.of(methodTypes)
                 .filter(methodType -> KAFKA_RESOURCE_ON_ERROR.equals(methodType.getName())).findFirst();
