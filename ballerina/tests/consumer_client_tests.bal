@@ -798,17 +798,9 @@ function manualCommitTest() returns error? {
         check sendMessage(count.toString().toBytes(), topic);
         count += 1;
     }
-    ConsumerRecord[] _ = check consumer->poll(1);
-    TopicPartition topicPartition = {
-        topic: topic,
-        partition: 0
-    };
-    PartitionOffset partitionOffset = {
-        partition: topicPartition,
-        offset: 0
-    };
+    ConsumerRecord[] records = check consumer->poll(1);
 
-    check consumer->commitOffset([partitionOffset]);
+    check consumer->commitOffset([records[0].offset]);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
     int offsetValue = committedPartitionOffset.offset;
