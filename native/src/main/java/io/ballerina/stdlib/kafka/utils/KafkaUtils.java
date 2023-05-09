@@ -614,7 +614,7 @@ public class KafkaUtils {
 
         Object value = getValueWithIntendedType(valueType, (byte[]) record.value(), record, autoSeek);
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
-                                                                              record.partition());
+                                                                              (long) record.partition());
         BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
         consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_KEY), key);
         consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_VALUE), value);
