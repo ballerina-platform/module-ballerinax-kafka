@@ -798,9 +798,17 @@ function manualCommitTest() returns error? {
         check sendMessage(count.toString().toBytes(), topic);
         count += 1;
     }
-    ConsumerRecord[] records = check consumer->poll(1);
+    ConsumerRecord[] _ = check consumer->poll(1);
+    TopicPartition topicPartition = {
+        topic: topic,
+        partition: 0
+    };
+    PartitionOffset partitionOffset = {
+        partition: topicPartition,
+        offset: 0
+    };
 
-    check consumer->commitOffset([records[0].offset]);
+    check consumer->commitOffset([partitionOffset]);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
     int offsetValue = committedPartitionOffset.offset;
@@ -1446,6 +1454,32 @@ function consumerPollFromMultipleTopicsTest() returns error? {
     string message2 = check 'string:fromBytes(consumerRecords[1].value);
     test:assertTrue((message1 == TEST_MESSAGE && message2 == TEST_MESSAGE_II) ||
                             (message2 == TEST_MESSAGE || message1 == TEST_MESSAGE_II));
+    check consumer->close();
+}
+
+@test:Config {enable: true}
+function commitOffsetWithPolledOffsetValue() returns error? {
+    string topic = "commit-offset-polled-offset-value-test-topic";
+    kafkaTopics.push(topic);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "commit-offset-polled-offset-value-test-group",
+        clientId: "test-consumer-60",
+        autoCommit: false
+    };
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    check sendMessage("Hello".toBytes(), topic);
+    check sendMessage("Hello".toBytes(), topic);
+    check sendMessage("Hello".toBytes(), topic);
+    check sendMessage("Hello".toBytes(), topic);
+    ConsumerRecord[] records = check consumer->poll(3);
+    test:assertEquals(records.length(), 4);
+
+    check consumer->commitOffset([records[2].offset]);
+    PartitionOffset? committedOffset = check consumer->getCommittedOffset(records[2].offset.partition);
+    PartitionOffset committedPartitionOffset = <PartitionOffset>committedOffset;
+    test:assertEquals(committedPartitionOffset.offset, 2);
     check consumer->close();
 }
 
