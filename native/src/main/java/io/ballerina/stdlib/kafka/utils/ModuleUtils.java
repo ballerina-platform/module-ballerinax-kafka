@@ -21,9 +21,12 @@ package io.ballerina.stdlib.kafka.utils;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.APACHE_KAFKA_PACKAGE_NAME;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.BALLERINA_KAFKA_PACKAGE_NAME;
 
 /**
  * This class will hold module related utility functions.
@@ -49,8 +52,11 @@ public class ModuleUtils {
     }
 
     public static void initializeLoggingConfigurations() {
-        try (InputStream is = ModuleUtils.class.getClassLoader().getResourceAsStream("kafka_logging.properties")) {
-            LogManager.getLogManager().readConfiguration(is);
-        } catch (IOException e) { }
+        Logger apacheKafkaLogger = Logger.getLogger(APACHE_KAFKA_PACKAGE_NAME);
+        Logger balKafkaLogger = Logger.getLogger(BALLERINA_KAFKA_PACKAGE_NAME);
+        apacheKafkaLogger.setLevel(Level.SEVERE);
+        balKafkaLogger.setLevel(Level.WARNING);
+        LogManager.getLogManager().addLogger(apacheKafkaLogger);
+        LogManager.getLogManager().addLogger(balKafkaLogger);
     }
 }

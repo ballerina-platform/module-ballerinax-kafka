@@ -226,4 +226,7 @@ public class KafkaConstants {
 
     // SSL keystore/truststore type config
     public static final String SSL_STORE_TYPE_CONFIG = "PEM";
+
+    public static final String APACHE_KAFKA_PACKAGE_NAME = "org.apache.kafka";
+    public static final String BALLERINA_KAFKA_PACKAGE_NAME = "io.ballerina.stdlib.kafka";
 }
