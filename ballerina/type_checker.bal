@@ -15,7 +15,7 @@
 // under the License.
 
 # Represents the TypeChecker which is used by the runtime to check whether a type is a subtype of `kafka:AnydataConsumerRecord`
-public isolated class TypeChecker {
+isolated class TypeChecker {
 
     # Gets invoked during object initialization.
     #
