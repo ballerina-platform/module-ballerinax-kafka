@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- [Fixed log manager getting reset by `kafka` module](https://github.com/ballerina-platform/ballerina-standard-library/issues/4493)
+
+## [3.7.1] - 2023-05-09
+
 ### Fixed
 - [Fixed `ClassCastException` when doing `commitOffset` with a polled offset value](https://github.com/ballerina-platform/ballerina-standard-library/issues/4424)
 
