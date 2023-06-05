@@ -13,7 +13,7 @@ distribution = "2201.5.0"
 groupId = "io.ballerina.stdlib"
 artifactId = "kafka-native"
 version = "3.8.0"
-path = "../native/build/libs/kafka-native-3.8.0-SNAPSHOT.jar"
+path = "../native/build/libs/kafka-native-3.8.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "org.apache.kafka"
@@ -31,7 +31,7 @@ path = "./lib/kafka_2.12-2.8.0.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
 version = "1.2.0"
-path = "./lib/constraint-native-1.2.0-20230518-182800-2681a7b.jar"
+path = "./lib/constraint-native-1.2.0.jar"
 
 [build-options]
 observabilityIncluded=true
