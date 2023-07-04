@@ -42,4 +42,27 @@
         <Class name="io.ballerina.stdlib.kafka.impl.KafkaPollCycleFutureListener"/>
         <Bug pattern="DM_EXIT"/>
     </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.plugin.KafkaFunctionValidator"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaListenerImpl"/>
+        <Field name="listener"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaListenerImpl"/>
+        <Field name="service"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaServerConnectorImpl"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaTransactionContext"/>
+        <Field name="kafkaProducer"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>
