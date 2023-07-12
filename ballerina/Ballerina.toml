@@ -16,7 +16,7 @@ graalvmCompatible = true
 groupId = "io.ballerina.stdlib"
 artifactId = "kafka-native"
 version = "3.9.0"
-path = "../native/build/libs/kafka-native-3.9.0-SNAPSHOT.jar"
+path = "../native/build/libs/kafka-native-3.9.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "org.apache.kafka"
@@ -34,7 +34,7 @@ path = "./lib/kafka_2.12-2.8.0.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
 version = "1.3.0"
-path = "./lib/constraint-native-1.3.0-20230620-195700-ca941bc.jar"
+path = "./lib/constraint-native-1.3.0.jar"
 
 [build-options]
 observabilityIncluded=true
