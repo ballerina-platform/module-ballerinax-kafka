@@ -102,7 +102,7 @@ public class CodeSnippetGenerationCodeActionTest extends AbstractCodeActionTest 
                 LinePosition.from(line, offset));
         CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION, lineRange);
         CodeActionInfo codeAction = CodeActionInfo.from(actionName, List.of(locationArg));
-        codeAction.setProviderName("KAFKA_112/ballerinax/kafka/" + templateName);
+        codeAction.setProviderName("KAFKA_111/ballerinax/kafka/" + templateName);
         return codeAction;
     }
 }
