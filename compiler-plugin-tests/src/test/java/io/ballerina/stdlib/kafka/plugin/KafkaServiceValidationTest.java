@@ -154,6 +154,14 @@ public class KafkaServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
+    @Test(enabled = true, description = "Validate `kafka:Service` with `display` annotation")
+    public void testValidService14() {
+        Package currentPackage = loadPackage("valid_service_14");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
     @Test(enabled = true, description = "Validate no remote method")
     public void testInvalidService1() {
         Package currentPackage = loadPackage("invalid_service_1");
