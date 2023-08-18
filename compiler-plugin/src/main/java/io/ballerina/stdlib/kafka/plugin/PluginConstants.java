@@ -73,11 +73,10 @@ public class PluginConstants {
                 "KAFKA_109"),
         INVALID_MULTIPLE_LISTENERS("Multiple listener attachments. Only one kafka:Listener is allowed.",
                 "KAFKA_110"),
-        INVALID_ANNOTATION_NUMBER("No annotations are allowed for kafka services.", "KAFKA_111"),
-        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "KAFKA_112"),
-        MUST_HAVE_ERROR("Must have the required parameter kafka:Error", "KAFKA_113"),
-        ONLY_ERROR_ALLOWED("Invalid method parameter. Only kafka:Error or error is allowed", "KAFKA_114"),
-        ONLY_CALLER_ALLOWED("Invalid method parameter. Only kafka:Caller is allowed", "KAFKA_115");
+        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "KAFKA_111"),
+        MUST_HAVE_ERROR("Must have the required parameter kafka:Error", "KAFKA_112"),
+        ONLY_ERROR_ALLOWED("Invalid method parameter. Only kafka:Error or error is allowed", "KAFKA_113"),
+        ONLY_CALLER_ALLOWED("Invalid method parameter. Only kafka:Caller is allowed", "KAFKA_114");
 
         private final String error;
         private final String errorCode;
