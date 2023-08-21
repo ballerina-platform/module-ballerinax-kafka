@@ -97,12 +97,7 @@ public class Poll {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
                 ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-                ArrayType arrayType;
-                if (bTypedesc.getDescribingType() instanceof IntersectionType) {
-                    arrayType = (ArrayType) TypeUtils.getImpliedType(bTypedesc.getDescribingType());
-                } else {
-                    arrayType = (ArrayType) bTypedesc.getDescribingType();
-                }
+                ArrayType arrayType = (ArrayType) TypeUtils.getImpliedType(bTypedesc.getDescribingType());
                 BArray dataArray = ValueCreator.createArrayValue(arrayType);
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
@@ -127,8 +122,8 @@ public class Poll {
     private static RecordType getRecordType(BTypedesc bTypedesc) {
         RecordType recordType;
         if (bTypedesc.getDescribingType().isReadOnly()) {
-            recordType = (RecordType) getReferredType(((IntersectionType) getReferredType(((ArrayType) getReferredType(
-                    TypeUtils.getImpliedType(bTypedesc.getDescribingType()))).getElementType()))
+            recordType = (RecordType) getReferredType(((IntersectionType) getReferredType(((ArrayType)
+                    TypeUtils.getImpliedType(bTypedesc.getDescribingType())).getElementType()))
                     .getConstituentTypes().get(0));
         } else {
             recordType = (RecordType) getReferredType(
