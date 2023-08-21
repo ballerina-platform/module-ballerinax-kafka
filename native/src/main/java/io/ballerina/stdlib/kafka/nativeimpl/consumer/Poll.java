@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.RecordType;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
@@ -96,7 +97,7 @@ public class Poll {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
                 ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-                ArrayType arrayType = (ArrayType) bTypedesc.getDescribingType();
+                ArrayType arrayType = (ArrayType) TypeUtils.getImpliedType(bTypedesc.getDescribingType());
                 BArray dataArray = ValueCreator.createArrayValue(arrayType);
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
@@ -121,11 +122,12 @@ public class Poll {
     private static RecordType getRecordType(BTypedesc bTypedesc) {
         RecordType recordType;
         if (bTypedesc.getDescribingType().isReadOnly()) {
-            recordType = (RecordType) getReferredType(((IntersectionType) getReferredType(((ArrayType) getReferredType(
-                    bTypedesc.getDescribingType())).getElementType())).getConstituentTypes().get(0));
+            recordType = (RecordType) getReferredType(((IntersectionType) getReferredType(((ArrayType)
+                    TypeUtils.getImpliedType(bTypedesc.getDescribingType())).getElementType()))
+                    .getConstituentTypes().get(0));
         } else {
             recordType = (RecordType) getReferredType(
-                            ((ArrayType) getReferredType(bTypedesc.getDescribingType())).getElementType());
+                    ((ArrayType) getReferredType(bTypedesc.getDescribingType())).getElementType());
         }
         return recordType;
     }
