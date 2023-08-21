@@ -41,7 +41,7 @@ The Kafka consumer can be used as a listener to a set of topics without the need
 
 You can use the `Caller` to manually commit the offsets of the messages that are read by the service. The following code snippet shows how to initialize and define the listener and how to commit the offsets manually.
 ```ballerina
-kafka:ConsumerConfiguration consumerConfigs = {
+kafka:ConsumerConfiguration consumerConfiguration = {
     groupId: "group-id",
     topics: ["kafka-topic-1"],
     pollingInterval: 1,
@@ -50,7 +50,7 @@ kafka:ConsumerConfiguration consumerConfigs = {
 
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfiguration);
 
-service kafka:Service on kafkaListener {
+service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) {
         // processes the records
         ...
@@ -96,7 +96,7 @@ Topic partitions are assigned to consumers automatically or you can manually ass
 
 The following code snippet joins a consumer to the `consumer-group` and assigns it to a topic partition manually.
 ```ballerina
-kafka:ConsumerConfiguration consumerConfigs = {
+kafka:ConsumerConfiguration consumerConfiguration = {
     // `groupId` determines the consumer group
     groupId: "consumer-group",
     pollingInterval: 1,
