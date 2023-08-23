@@ -89,51 +89,6 @@
     ]
   },
   {
-    "name": "com.sun.crypto.provider.ARCFOURCipher",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "com.sun.crypto.provider.DESCipher",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "com.sun.crypto.provider.DESedeCipher",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "com.sun.crypto.provider.GaloisCounterMode$AESGCM",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
     "name": "org.apache.kafka.clients.consumer.CooperativeStickyAssignor",
     "methods": [
       {
