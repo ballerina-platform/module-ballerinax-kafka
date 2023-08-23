@@ -19,7 +19,7 @@ import ballerina/jballerina.java;
 # Represents a Kafka consumer endpoint.
 #
 # + consumerConfig - Stores configurations related to a Kafka connection
-public isolated client class Listener {
+public isolated class Listener {
 
     final ConsumerConfiguration & readonly consumerConfig;
     private final string keyDeserializerType;
