@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 
 - [Changed disallowing service level annotations in the compiler plugin](https://github.com/ballerina-platform/ballerina-standard-library/issues/4731)
+- [Updated Apache Kafka client version to `3.5.1`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4752)
 
 ### Fixed
 - [Removed `client` keyword from the `kafka:Listener`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4750)

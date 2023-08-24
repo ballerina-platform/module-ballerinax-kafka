@@ -26,7 +26,7 @@ function wordCountCalculatorTest() returns error? {
     runtime:sleep(4);
 
     kafka:ConsumerConfiguration testConsumerConfigs = {
-        groupId: "test-consumer",
+        groupId: "test-word-count-consumer",
         offsetReset: kafka:OFFSET_RESET_EARLIEST,
         topics: [OUTPUT_TOPIC]
     };
