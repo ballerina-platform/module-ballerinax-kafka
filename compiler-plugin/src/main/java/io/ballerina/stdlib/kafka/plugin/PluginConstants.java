@@ -42,6 +42,7 @@ public class PluginConstants {
     public static final String CONSUMER_RECORD_OFFSET = "offset";
     public static final String CONSUMER_RECORD_TOPIC = "topic";
     public static final String CONSUMER_RECORD_PARTITION = "partition";
+    public static final String CONSUMER_RECORD_HEADERS = "headers";
 
     // return types error or nil
     public static final String ERROR = "error";
