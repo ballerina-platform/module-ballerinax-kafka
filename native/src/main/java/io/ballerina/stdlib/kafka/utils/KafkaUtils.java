@@ -619,8 +619,8 @@ public class KafkaUtils {
                 (long) record.partition());
         BMap bHeaders = getBHeadersFromRecord(record.headers());
         BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
-        consumerRecord.put(KAFKA_RECORD_KEY, key);
-        consumerRecord.put(KAFKA_RECORD_VALUE, value);
+        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_KEY), key);
+        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_VALUE), value);
         consumerRecord.put(KAFKA_RECORD_TIMESTAMP, record.timestamp());
         consumerRecord.put(KAFKA_RECORD_PARTITION_OFFSET, ValueCreator.createRecordValue(
                 getPartitionOffsetRecord(), topicPartition, record.offset()));

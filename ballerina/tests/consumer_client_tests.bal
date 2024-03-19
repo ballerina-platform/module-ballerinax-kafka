@@ -1483,6 +1483,26 @@ function commitOffsetWithPolledOffsetValue() returns error? {
     check consumer->close();
 }
 
-function sendMessage(anydata message, string topic, anydata? key = ()) returns error? {
-    return producer->send({ topic: topic, value: message, key });
+@test:Config {enable: true}
+function consumerReadHeadersTest() returns error? {
+    string topic = "consumer-read-headers-test-topic";
+    kafkaTopics.push(topic);
+    map<byte[]|byte[][]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
+    check sendMessage(TEST_MESSAGE.toBytes(), topic, (), headers);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-read-headers-test-group",
+        clientId: "test-consumer-61"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1);
+    map<byte[]|byte[][]> receivedHeaders = consumerRecords[0].headers;
+    test:assertEquals(receivedHeaders, headers);
+    check consumer->close();
+}
+
+function sendMessage(anydata message, string topic, anydata? key = (), map<byte[]|byte[][]>? headers = ()) returns error? {
+    return producer->send({ topic: topic, value: message, key, headers });
 }
