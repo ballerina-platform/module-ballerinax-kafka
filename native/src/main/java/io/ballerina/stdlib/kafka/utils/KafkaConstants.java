@@ -64,10 +64,11 @@ public class KafkaConstants {
     public static final String KAFKA_RESOURCE_ON_RECORD = "onConsumerRecord";
     public static final String KAFKA_RESOURCE_ON_ERROR = "onError";
     public static final String KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD = "isAnydataConsumerRecord";
-    public static final String KAFKA_RECORD_KEY = "key";
-    public static final String KAFKA_RECORD_VALUE = "value";
-    public static final String KAFKA_RECORD_TIMESTAMP = "timestamp";
-    public static final String KAFKA_RECORD_PARTITION_OFFSET = "offset";
+    public static final BString KAFKA_RECORD_KEY = StringUtils.fromString("key");
+    public static final BString KAFKA_RECORD_VALUE = StringUtils.fromString("value");
+    public static final BString KAFKA_RECORD_TIMESTAMP = StringUtils.fromString("timestamp");
+    public static final BString KAFKA_RECORD_PARTITION_OFFSET = StringUtils.fromString("offset");
+    public static final BString KAFKA_RECORD_HEADERS = StringUtils.fromString("headers");
 
     public static final String PARAM_ANNOTATION_PREFIX = "$param$.";
     public static final BString PARAM_PAYLOAD_ANNOTATION_NAME = StringUtils.fromString(

@@ -20,11 +20,17 @@ package io.ballerina.stdlib.kafka.nativeimpl.producer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ALIAS_PARTITION;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getIntValue;
@@ -44,22 +50,43 @@ public class SendByteArrayValues extends Send {
 
     // ballerina byte[]
     public static Object sendByteArrayValuesNilKeys(Environment env, BObject producer, BArray value, BString topic,
-                                                    Object partition, Object timestamp) {
+                                                    Object partition, Object timestamp, Object bHeaders) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
+        List<Header> headers = getHeadersFromBHeaders(bHeaders);
         ProducerRecord<?, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue, timestampValue,
-                null, value.getBytes());
+                null, value.getBytes(), headers);
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
     // ballerina byte[] and ballerina byte[]
     public static Object sendByteArrayValuesByteArrayKeys(Environment env, BObject producer, BArray value,
                                                           BString topic, BArray key, Object partition,
-                                                          Object timestamp) {
+                                                          Object timestamp, Object bHeaders) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
+        List<Header> headers = getHeadersFromBHeaders(bHeaders);
         ProducerRecord<byte[], byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
-                timestampValue, key.getBytes(), value.getBytes());
+                timestampValue, key.getBytes(), value.getBytes(), headers);
         return sendKafkaRecord(env, kafkaRecord, producer);
+    }
+
+    private static List<Header> getHeadersFromBHeaders(Object headerObj) {
+        List<Header> headers = new ArrayList<>();
+        if (headerObj instanceof BMap<?, ?>) {
+            BMap bHeaders = (BMap) headerObj;
+            for (BString key : (BString[]) bHeaders.getKeys()) {
+                BArray headerValues = bHeaders.getArrayValue(key);
+                if (!headerValues.isEmpty() && headerValues.get(0) instanceof BArray) {
+                    for (int i = 0; i < headerValues.size(); i++) {
+                        BArray headerValue = (BArray) headerValues.get(i);
+                        headers.add(new RecordHeader(key.getValue(), headerValue.getByteArray()));
+                    }
+                } else if (!headerValues.isEmpty()) {
+                    headers.add(new RecordHeader(key.getValue(), headerValues.getByteArray()));
+                }
+            }
+        }
+        return headers;
     }
 }

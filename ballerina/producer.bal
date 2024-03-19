@@ -116,7 +116,7 @@ public client isolated class Producer {
         } else if anydataKey !is () {
             key = anydataKey.toJsonString().toBytes();
         }
-        return sendByteArrayValues(self, value, producerRecord.topic, key,
+        return sendByteArrayValues(self, value, producerRecord.topic, producerRecord.headers, key,
         producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
     }
 }

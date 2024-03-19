@@ -57,6 +57,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -86,6 +88,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUT
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_SEEK_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_ERROR;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_HEADERS;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_PARTITION_OFFSET;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_TIMESTAMP;
@@ -614,16 +617,43 @@ public class KafkaUtils {
         Object value = getValueWithIntendedType(valueType, (byte[]) record.value(), record, autoSeek);
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                 (long) record.partition());
+        BMap bHeaders = getBHeadersFromRecord(record.headers());
         BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
-        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_KEY), key);
-        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_VALUE), value);
-        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_TIMESTAMP), record.timestamp());
-        consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_PARTITION_OFFSET), ValueCreator.createRecordValue(
+        consumerRecord.put(KAFKA_RECORD_KEY, key);
+        consumerRecord.put(KAFKA_RECORD_VALUE, value);
+        consumerRecord.put(KAFKA_RECORD_TIMESTAMP, record.timestamp());
+        consumerRecord.put(KAFKA_RECORD_PARTITION_OFFSET, ValueCreator.createRecordValue(
                 getPartitionOffsetRecord(), topicPartition, record.offset()));
+        consumerRecord.put(KAFKA_RECORD_HEADERS, bHeaders);
         if (validateConstraints) {
             validateConstraints(consumerRecord, ValueCreator.createTypedescValue(recordType), record, autoSeek);
         }
         return consumerRecord;
+    }
+
+    private static BMap getBHeadersFromRecord(Headers headers) {
+        BMap bHeaderMap = ValueCreator.createMapValue();
+        HashMap<String, BArray> headerMap = new HashMap<>();
+        for (Header header : headers) {
+            if (headerMap.containsKey(header.key())) {
+                BArray values = headerMap.get(header.key());
+                values.add(values.size(), ValueCreator.createArrayValue(header.value()));
+                headerMap.put(header.key(), values);
+            } else {
+                ArrayType arrayOfByteArrayType = TypeCreator.createArrayType(TypeCreator.createArrayType(PredefinedTypes.TYPE_BYTE));
+                BArray arrayOfByteArray = ValueCreator.createArrayValue(arrayOfByteArrayType);
+                arrayOfByteArray.add(0, ValueCreator.createArrayValue(header.value()));
+                headerMap.put(header.key(), arrayOfByteArray);
+            }
+        }
+        headerMap.forEach((key, value) -> {
+            if (value.size() > 1) {
+                bHeaderMap.put(StringUtils.fromString(key), value);
+            } else {
+                bHeaderMap.put(StringUtils.fromString(key), value.get(0));
+            }
+        });
+        return bHeaderMap;
     }
 
     public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly,

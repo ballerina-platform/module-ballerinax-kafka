@@ -197,6 +197,7 @@ public type TopicPartition record {|
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + offset - Topic partition position in which the consumed record is stored
+# + headers - Map of headers included with the record
 # # Deprecated
 # Usage of this record is deprecated. Use subtypes of AnydataConsumerRecord 
 # instead to support data-binding
@@ -206,6 +207,7 @@ public type ConsumerRecord record {|
     byte[] value;
     int timestamp;
     PartitionOffset offset;
+    map<byte[]|byte[][]> headers;
 |};
 
 # Type related to anydata consumer record.
@@ -214,11 +216,13 @@ public type ConsumerRecord record {|
 # + value - Anydata record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + offset - Topic partition position in which the consumed record is stored
+# + headers - Map of headers included with the record
 public type AnydataConsumerRecord record {|
     anydata key?;
     anydata value;
     int timestamp;
     PartitionOffset offset;
+    map<byte[]|byte[][]> headers;
 |};
 
 # Subtype related to `kafka:AnydataConsumerRecord` record.
@@ -250,17 +254,19 @@ public type ProducerRecord record {|
 
 # Details related to the anydata producer record.
 #
-# + topic - Topic to which the record will be appended
-# + key - Key that is included in the record
-# + value - Anydata record content
-# + timestamp - Timestamp of the record, in milliseconds since epoch
-# + partition - Partition to which the record should be sent
+# + topic - Topic to which the record will be appended  
+# + key - Key that is included in the record  
+# + value - Anydata record content  
+# + timestamp - Timestamp of the record, in milliseconds since epoch  
+# + partition - Partition to which the record should be sent  
+# + headers - Map of headers to be included with the record
 public type AnydataProducerRecord record {|
     string topic;
     anydata key?;
     anydata value;
     int timestamp?;
     int partition?;
+    map<byte[]|byte[][]> headers?;
 |};
 
 # Subtype related to `kafka:AnydataProducerRecord` record.
