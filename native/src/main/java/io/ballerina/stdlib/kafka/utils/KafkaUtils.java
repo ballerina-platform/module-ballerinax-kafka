@@ -640,7 +640,8 @@ public class KafkaUtils {
                 values.add(values.size(), ValueCreator.createArrayValue(header.value()));
                 headerMap.put(header.key(), values);
             } else {
-                ArrayType arrayOfByteArrayType = TypeCreator.createArrayType(TypeCreator.createArrayType(PredefinedTypes.TYPE_BYTE));
+                ArrayType arrayOfByteArrayType = TypeCreator.createArrayType(TypeCreator
+                        .createArrayType(PredefinedTypes.TYPE_BYTE));
                 BArray arrayOfByteArray = ValueCreator.createArrayValue(arrayOfByteArrayType);
                 arrayOfByteArray.add(0, ValueCreator.createArrayValue(header.value()));
                 headerMap.put(header.key(), arrayOfByteArray);
