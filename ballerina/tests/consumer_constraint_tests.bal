@@ -32,14 +32,13 @@ public type StringConstraintConsumerRecord record {|
 |};
 
 public type IntConstraintConsumerRecord record {|
+    *AnydataConsumerRecord;
     int key?;
     @constraint:Int {
         maxValue: 100,
         minValue: 10
     }
     int value;
-    int timestamp;
-    PartitionOffset offset;
 |};
 
 @constraint:Float {

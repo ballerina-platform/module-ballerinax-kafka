@@ -1008,9 +1008,7 @@ function listenerWithConsumerHeadersTest() returns error? {
         topics: topic,
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "test-listener-group-29",
-        clientId: "test-listener-29",
-        pollingInterval: 2,
-        pollingTimeout: 1
+        clientId: "test-listener-29"
     };
     Listener headersListener = check new (DEFAULT_URL, consumerConfiguration);
     check headersListener.attach(headersService);
