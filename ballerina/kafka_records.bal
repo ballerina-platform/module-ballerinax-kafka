@@ -240,6 +240,7 @@ public type BytesConsumerRecord record {|
 # + value - Record content
 # + timestamp - Timestamp of the record, in milliseconds since epoch
 # + partition - Partition to which the record should be sent
+# + headers - Map of headers to be included with the record
 # # Deprecated
 # Usage of this record is deprecated. Use subtypes of AnydataProducerRecord 
 # instead to support data-binding
@@ -250,6 +251,7 @@ public type ProducerRecord record {|
     byte[] value;
     int timestamp?;
     int partition?;
+    map<byte[]|byte[][]> headers?;
 |};
 
 # Details related to the anydata producer record.
