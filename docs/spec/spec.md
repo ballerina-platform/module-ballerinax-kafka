@@ -219,6 +219,8 @@ public type AnydataProducerRecord record {|
     int timestamp?;
     # Partition to which the record should be sent
     int partition?;
+    # Map of headers to be included with the record
+    map<byte[]|byte[][]> headers?;
 |};
 ```
 * `kafka:BytesProducerRecord` defines the subtype of `kafka:AnydataProducerRecord` where the value is a `byte[]`;
@@ -418,6 +420,8 @@ public type AnydataConsumerRecord record {|
     int timestamp;
     # Topic partition position in which the consumed record is stored
     PartitionOffset offset;
+    # Map of headers included with the record
+    map<byte[]|byte[][]> headers;
 |};
 ```
 * `kafka:BytesConsumerRecord` defines the subtype of `kafka:AnydataConsumerRecord` where the value is a `byte[]`.
