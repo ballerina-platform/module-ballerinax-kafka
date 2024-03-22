@@ -3,7 +3,7 @@ This package provides an implementation to interact with Kafka Brokers via Kafka
 
 Apache Kafka is an open-source distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
 
-This package supports Kafka 1.x.x and 2.0.0 versions.
+This package supports Kafka 1.x.x, 2.x.x and 3.x.x versions.
 
 ### Consumer and producer
 #### Kafka producer
