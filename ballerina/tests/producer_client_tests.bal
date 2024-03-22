@@ -102,7 +102,7 @@ function producerKeyTypeMismatchErrorTest() returns error? {
     string topic = "key-type-mismatch-error-test-topic";
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
-    error? result = trap sendByteArrayValues(producer, message.toBytes(), topic, (), MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
+    error? result = trap sendByteArrayValues(producer, message.toBytes(), topic, [], MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
     if result is error {
         string expectedErr = "Invalid type found for Kafka key. Expected key type: 'byte[]'.";
         test:assertEquals(result.message(), expectedErr);

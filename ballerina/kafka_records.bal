@@ -207,7 +207,7 @@ public type ConsumerRecord record {|
     byte[] value;
     int timestamp;
     PartitionOffset offset;
-    map<byte[]|byte[][]> headers;
+    map<byte[]|byte[][]|string|string[]> headers;
 |};
 
 # Type related to anydata consumer record.
@@ -222,15 +222,17 @@ public type AnydataConsumerRecord record {|
     anydata value;
     int timestamp;
     PartitionOffset offset;
-    map<byte[]|byte[][]> headers;
+    map<byte[]|byte[][]|string|string[]> headers;
 |};
 
 # Subtype related to `kafka:AnydataConsumerRecord` record.
 #
 # + value - Record content in bytes
+# + headers - Headers as a byte[] or byte[][]
 public type BytesConsumerRecord record {|
     *AnydataConsumerRecord;
     byte[] value;
+    map<byte[]|byte[][]> headers;
 |};
 
 # Details related to the producer record.
@@ -251,7 +253,7 @@ public type ProducerRecord record {|
     byte[] value;
     int timestamp?;
     int partition?;
-    map<byte[]|byte[][]> headers?;
+    map<byte[]|byte[][]|string|string[]> headers?;
 |};
 
 # Details related to the anydata producer record.
@@ -268,15 +270,17 @@ public type AnydataProducerRecord record {|
     anydata value;
     int timestamp?;
     int partition?;
-    map<byte[]|byte[][]> headers?;
+    map<byte[]|byte[][]|string|string[]> headers?;
 |};
 
 # Subtype related to `kafka:AnydataProducerRecord` record.
 #
 # + value - Record content in bytes
+# + headers - Headers as a byte[] or byte[][]
 public type BytesProducerRecord record {|
     *AnydataProducerRecord;
     byte[] value;
+    map<byte[]|byte[][]> headers?;
 |};
 
 // Producer-related records

@@ -26,6 +26,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Field;
 import io.ballerina.runtime.api.types.IntersectionType;
+import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RecordType;
@@ -127,14 +128,6 @@ public class KafkaUtils {
 
         addDeserializerConfigs(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, properties);
         addDeserializerConfigs(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, properties);
-        // TODO: Disabled as the custom SerDes support is to be revisited and improved.
-        //  Fix once the design for that is completed.
-//        addCustomDeserializer(KafkaConstants.CONSUMER_KEY_DESERIALIZER_CONFIG,
-//                              KafkaConstants.CONSUMER_KEY_DESERIALIZER_TYPE_CONFIG, properties,
-//                              configurations);
-//        addCustomDeserializer(KafkaConstants.CONSUMER_VALUE_DESERIALIZER_CONFIG,
-//                              KafkaConstants.CONSUMER_VALUE_DESERIALIZER_TYPE_CONFIG, properties,
-//                              configurations);
         addStringParamIfPresent(KafkaConstants.SCHEMA_REGISTRY_URL, configurations, properties,
                                 KafkaConstants.CONSUMER_SCHEMA_REGISTRY_URL);
 
@@ -238,11 +231,6 @@ public class KafkaUtils {
 
         addSerializerTypeConfigs(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, properties);
         addSerializerTypeConfigs(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, properties);
-        // TODO: Disabled as the custom SerDes support is to be revisited and improved.
-        //  Fix once the design for that is completed.
-//        addCustomKeySerializer(properties, configurations);
-//        addCustomValueSerializer(properties, configurations);
-
         addIntParamIfPresent(ProducerConfig.BUFFER_MEMORY_CONFIG, configurations,
                              properties, KafkaConstants.PRODUCER_BUFFER_MEMORY_CONFIG);
         addIntParamIfPresent(ProducerConfig.RETRIES_CONFIG, configurations,
@@ -402,75 +390,6 @@ public class KafkaUtils {
             configParams.put(paramName, KafkaConstants.BYTE_ARRAY_DESERIALIZER);
     }
 
-    // TODO: Disabled as the SerDes support is to be revisited and improved. Fix once the design for that is completed.
-//    private static void addCustomKeySerializer(Properties properties, BMap<BString, Object> configurations) {
-//        Object serializer = configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG);
-//        String serializerType =
-//                configurations.getStringValue(KafkaConstants.PRODUCER_KEY_SERIALIZER_TYPE_CONFIG).getValue();
-//        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
-//            properties.put(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG.getValue(),
-//                           configurations.get(KafkaConstants.PRODUCER_KEY_SERIALIZER_CONFIG));
-//        }
-//    }
-//
-//    private static void addCustomValueSerializer(Properties properties, BMap<BString, Object> configurations) {
-//        Object serializer = configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG);
-//        String serializerType =
-//                configurations.getStringValue(KafkaConstants.PRODUCER_VALUE_SERIALIZER_TYPE_CONFIG).getValue();
-//        if (Objects.nonNull(serializer) && KafkaConstants.SERDES_CUSTOM.equals(serializerType)) {
-//            properties.put(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG.getValue(),
-//                           configurations.get(KafkaConstants.PRODUCER_VALUE_SERIALIZER_CONFIG));
-//        }
-//    }
-
-//    private static void addCustomDeserializer(BString configParam, BString typeConfig, Properties properties,
-//                                              BMap<BString, Object> configurations) {
-//        Object deserializer = configurations.get(configParam);
-//        String deserializerType = configurations.getStringValue(typeConfig).getValue();
-//        if (Objects.nonNull(deserializer) && KafkaConstants.SERDES_CUSTOM.equals(deserializerType)) {
-//            properties.put(configParam.getValue(), configurations.get(configParam));
-//            properties.put(KafkaConstants.BALLERINA_STRAND, Runtime.getCurrentRuntime());
-//        }
-//    }
-
-//    private static String getSerializerType(String value) {
-//        switch (value) {
-//            case KafkaConstants.SERDES_BYTE_ARRAY:
-//                return KafkaConstants.BYTE_ARRAY_SERIALIZER;
-//            case KafkaConstants.SERDES_STRING:
-//                return KafkaConstants.STRING_SERIALIZER;
-//            case KafkaConstants.SERDES_INT:
-//                return KafkaConstants.INT_SERIALIZER;
-//            case KafkaConstants.SERDES_FLOAT:
-//                return KafkaConstants.FLOAT_SERIALIZER;
-//            case KafkaConstants.SERDES_AVRO:
-//                return KafkaConstants.AVRO_SERIALIZER;
-//            case KafkaConstants.SERDES_CUSTOM:
-//                return KafkaConstants.CUSTOM_SERIALIZER;
-//            default:
-//                return value;
-//        }
-//    }
-//
-//    private static String getDeserializerValue(String value) {
-//        switch (value) {
-//            case KafkaConstants.SERDES_BYTE_ARRAY:
-//                return KafkaConstants.BYTE_ARRAY_DESERIALIZER;
-//            case KafkaConstants.SERDES_STRING:
-//                return KafkaConstants.STRING_DESERIALIZER;
-//            case KafkaConstants.SERDES_INT:
-//                return KafkaConstants.INT_DESERIALIZER;
-//            case KafkaConstants.SERDES_FLOAT:
-//                return KafkaConstants.FLOAT_DESERIALIZER;
-//            case KafkaConstants.SERDES_AVRO:
-//                return KafkaConstants.AVRO_DESERIALIZER;
-//            case KafkaConstants.SERDES_CUSTOM:
-//                return KafkaConstants.CUSTOM_DESERIALIZER;
-//            default:
-//                return value;
-//        }
-//    }
-
     private static void addStringParamIfPresent(String paramName,
                                                 BMap<BString, Object> configs,
                                                 Properties configParams,
@@ -617,7 +536,8 @@ public class KafkaUtils {
         Object value = getValueWithIntendedType(valueType, (byte[]) record.value(), record, autoSeek);
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                 (long) record.partition());
-        BMap bHeaders = getBHeadersFromRecord(record.headers());
+        MapType headerType = (MapType) getReferredType(fieldMap.get(KAFKA_RECORD_HEADERS.getValue()).getFieldType());
+        BMap bHeaders = getBHeadersFromConsumerRecord(record.headers(), headerType.getConstrainedType());
         BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
         consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_KEY), key);
         consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_VALUE), value);
@@ -631,30 +551,79 @@ public class KafkaUtils {
         return consumerRecord;
     }
 
-    private static BMap getBHeadersFromRecord(Headers headers) {
-        BMap bHeaderMap = ValueCreator.createMapValue();
-        HashMap<String, BArray> headerMap = new HashMap<>();
+    private static BMap getBHeadersFromConsumerRecord(Headers headers, Type headerType) {
+        HashMap<String, ArrayList<byte[]>> headerMap = new HashMap<>();
         for (Header header : headers) {
             if (headerMap.containsKey(header.key())) {
-                BArray values = headerMap.get(header.key());
-                values.add(values.size(), ValueCreator.createArrayValue(header.value()));
-                headerMap.put(header.key(), values);
+                ArrayList<byte[]> headerList = headerMap.get(header.key());
+                headerList.add(header.value());
             } else {
-                ArrayType arrayOfByteArrayType = TypeCreator.createArrayType(TypeCreator
-                        .createArrayType(PredefinedTypes.TYPE_BYTE));
-                BArray arrayOfByteArray = ValueCreator.createArrayValue(arrayOfByteArrayType);
-                arrayOfByteArray.add(0, ValueCreator.createArrayValue(header.value()));
-                headerMap.put(header.key(), arrayOfByteArray);
+                ArrayList headerList = new ArrayList<byte[]>();
+                headerList.add(header.value());
+                headerMap.put(header.key(), headerList);
             }
         }
-        headerMap.forEach((key, value) -> {
-            if (value.size() > 1) {
-                bHeaderMap.put(StringUtils.fromString(key), value);
+        BMap bHeaderMap = ValueCreator.createMapValue();
+        headerMap.forEach((key, valueList) -> {
+            if (headerType instanceof UnionType unionType) {
+                Type appropriateType = getMostAppropriateTypeFromUnionType(unionType.getMemberTypes(), valueList.size());
+                handleSupportedTypesForHeaders(key, valueList, appropriateType, bHeaderMap);
             } else {
-                bHeaderMap.put(StringUtils.fromString(key), value.get(0));
+                handleSupportedTypesForHeaders(key, valueList, headerType, bHeaderMap);
             }
         });
         return bHeaderMap;
+    }
+
+    private static void handleSupportedTypesForHeaders(String key, ArrayList<byte[]> list, Type appropriateType, BMap bHeaderMap) {
+        if (appropriateType instanceof ArrayType arrayType) {
+            handleHeaderValuesWithArrayType(key, list, arrayType, bHeaderMap);
+        } else if (appropriateType.getTag() == STRING_TAG) {
+            bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(new String(list.get(0))));
+        }
+    }
+
+    private static void handleHeaderValuesWithArrayType(String key, ArrayList<byte[]> list, ArrayType arrayType, BMap bHeaderMap) {
+        Type elementType = arrayType.getElementType();
+        if (elementType.getTag() == ARRAY_TAG) {
+            BArray valueArray = ValueCreator.createArrayValue(arrayType);
+            for (int i = 0; i < list.size(); i++) {
+                valueArray.add(i, ValueCreator.createArrayValue(list.get(i)));
+            }
+            bHeaderMap.put(StringUtils.fromString(key), valueArray);
+        } else if (elementType.getTag() == STRING_TAG) {
+            BArray valueArray = ValueCreator.createArrayValue(arrayType);
+            for (int i = 0; i < list.size(); i++) {
+                valueArray.add(i, StringUtils.fromString(new String(list.get(i))));
+            }
+            bHeaderMap.put(StringUtils.fromString(key), valueArray);
+        } else if (elementType.getTag() == BYTE_TAG) {
+            bHeaderMap.put(StringUtils.fromString(key), ValueCreator.createArrayValue(list.get(0)));
+        }
+    }
+
+    private static Type getMostAppropriateTypeFromUnionType(List<Type> memberTypes, int size) {
+        Type firstType = memberTypes.get(0);
+        if (memberTypes.size() == 1) {
+            return firstType;
+        }
+        if (size > 1) {
+            if (firstType instanceof ArrayType arrayType) {
+                if (arrayType.getElementType().getTag() == BYTE_TAG) {
+                    return getMostAppropriateTypeFromUnionType(memberTypes.subList(1, memberTypes.size()), size);
+                }
+                return arrayType;
+            }
+            return getMostAppropriateTypeFromUnionType(memberTypes.subList(1, memberTypes.size()), size);
+        } else {
+            if (firstType instanceof ArrayType arrayType) {
+                if (arrayType.getElementType().getTag() == BYTE_TAG) {
+                    return arrayType;
+                }
+                return getMostAppropriateTypeFromUnionType(memberTypes.subList(1, memberTypes.size()), size);
+            }
+            return firstType;
+        }
     }
 
     public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly,
@@ -741,10 +710,10 @@ public class KafkaUtils {
                     intendedValue = ValueCreator.createArrayValue(value);
                     break;
                 case RECORD_TYPE_TAG:
-                    intendedValue = ValueUtils.convert(JsonUtils.parse(strValue), type);
+                    intendedValue = getValueFromJson(type, strValue);
                     break;
                 case UNION_TAG:
-                    if (hasStringType((UnionType) type)) {
+                    if (hasExpectedType((UnionType) type, STRING_TAG)) {
                         intendedValue = StringUtils.fromString(strValue);
                         break;
                     }
@@ -768,9 +737,9 @@ public class KafkaUtils {
         return intendedValue;
     }
 
-    private static boolean hasStringType(UnionType type) {
+    private static boolean hasExpectedType(UnionType type, int typeTag) {
         return type.getMemberTypes().stream().anyMatch(memberType -> {
-            if (memberType.getTag() == STRING_TAG) {
+            if (memberType.getTag() == typeTag) {
                 return true;
             }
             return false;

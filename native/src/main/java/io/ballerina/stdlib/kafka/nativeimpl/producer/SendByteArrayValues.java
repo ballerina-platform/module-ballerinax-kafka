@@ -50,10 +50,10 @@ public class SendByteArrayValues extends Send {
 
     // ballerina byte[]
     public static Object sendByteArrayValuesNilKeys(Environment env, BObject producer, BArray value, BString topic,
-                                                    Object partition, Object timestamp, Object bHeaders) {
+                                                    Object partition, Object timestamp, BArray headerList) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
-        List<Header> headers = getHeadersFromBHeaders(bHeaders);
+        List<Header> headers = getHeadersFromBHeaders(headerList);
         ProducerRecord<?, byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue, timestampValue,
                 null, value.getBytes(), headers);
         return sendKafkaRecord(env, kafkaRecord, producer);
@@ -62,30 +62,20 @@ public class SendByteArrayValues extends Send {
     // ballerina byte[] and ballerina byte[]
     public static Object sendByteArrayValuesByteArrayKeys(Environment env, BObject producer, BArray value,
                                                           BString topic, BArray key, Object partition,
-                                                          Object timestamp, Object bHeaders) {
+                                                          Object timestamp, BArray headerList) {
         Integer partitionValue = getIntValue(partition, ALIAS_PARTITION, logger);
         Long timestampValue = getLongValue(timestamp);
-        List<Header> headers = getHeadersFromBHeaders(bHeaders);
+        List<Header> headers = getHeadersFromBHeaders(headerList);
         ProducerRecord<byte[], byte[]> kafkaRecord = new ProducerRecord<>(topic.getValue(), partitionValue,
                 timestampValue, key.getBytes(), value.getBytes(), headers);
         return sendKafkaRecord(env, kafkaRecord, producer);
     }
 
-    private static List<Header> getHeadersFromBHeaders(Object headerObj) {
+    private static List<Header> getHeadersFromBHeaders(BArray headerList) {
         List<Header> headers = new ArrayList<>();
-        if (headerObj instanceof BMap<?, ?>) {
-            BMap bHeaders = (BMap) headerObj;
-            for (BString key : (BString[]) bHeaders.getKeys()) {
-                BArray headerValues = bHeaders.getArrayValue(key);
-                if (!headerValues.isEmpty() && headerValues.get(0) instanceof BArray) {
-                    for (int i = 0; i < headerValues.size(); i++) {
-                        BArray headerValue = (BArray) headerValues.get(i);
-                        headers.add(new RecordHeader(key.getValue(), headerValue.getByteArray()));
-                    }
-                } else if (!headerValues.isEmpty()) {
-                    headers.add(new RecordHeader(key.getValue(), headerValues.getByteArray()));
-                }
-            }
+        for (int i = 0; i < headerList.size(); i++) {
+            BArray headerItem = (BArray) headerList.get(i);
+            headers.add(new RecordHeader(headerItem.getBString(0).getValue(), ((BArray) headerItem.get(1)).getByteArray()));
         }
         return headers;
     }
