@@ -78,7 +78,6 @@ import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
 import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
-import static io.ballerina.runtime.api.TypeTags.RECORD_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.runtime.api.TypeTags.UNION_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
@@ -566,7 +565,8 @@ public class KafkaUtils {
         BMap bHeaderMap = ValueCreator.createMapValue();
         headerMap.forEach((key, valueList) -> {
             if (headerType instanceof UnionType unionType) {
-                Type appropriateType = getMostAppropriateTypeFromUnionType(unionType.getMemberTypes(), valueList.size());
+                Type appropriateType = getMostAppropriateTypeFromUnionType(unionType.getMemberTypes(),
+                        valueList.size());
                 handleSupportedTypesForHeaders(key, valueList, appropriateType, bHeaderMap);
             } else {
                 handleSupportedTypesForHeaders(key, valueList, headerType, bHeaderMap);
@@ -575,15 +575,18 @@ public class KafkaUtils {
         return bHeaderMap;
     }
 
-    private static void handleSupportedTypesForHeaders(String key, ArrayList<byte[]> list, Type appropriateType, BMap bHeaderMap) {
+    private static void handleSupportedTypesForHeaders(String key, ArrayList<byte[]> list, Type appropriateType,
+                                                       BMap bHeaderMap) {
         if (appropriateType instanceof ArrayType arrayType) {
             handleHeaderValuesWithArrayType(key, list, arrayType, bHeaderMap);
         } else if (appropriateType.getTag() == STRING_TAG) {
-            bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(new String(list.get(0))));
+            bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(new String(list.get(0),
+                    StandardCharsets.UTF_8)));
         }
     }
 
-    private static void handleHeaderValuesWithArrayType(String key, ArrayList<byte[]> list, ArrayType arrayType, BMap bHeaderMap) {
+    private static void handleHeaderValuesWithArrayType(String key, ArrayList<byte[]> list, ArrayType arrayType,
+                                                        BMap bHeaderMap) {
         Type elementType = arrayType.getElementType();
         if (elementType.getTag() == ARRAY_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
@@ -594,7 +597,7 @@ public class KafkaUtils {
         } else if (elementType.getTag() == STRING_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
             for (int i = 0; i < list.size(); i++) {
-                valueArray.add(i, StringUtils.fromString(new String(list.get(i))));
+                valueArray.add(i, StringUtils.fromString(new String(list.get(i), StandardCharsets.UTF_8)));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
         } else if (elementType.getTag() == BYTE_TAG) {
@@ -708,9 +711,6 @@ public class KafkaUtils {
                     break;
                 case ANYDATA_TAG:
                     intendedValue = ValueCreator.createArrayValue(value);
-                    break;
-                case RECORD_TYPE_TAG:
-                    intendedValue = getValueFromJson(type, strValue);
                     break;
                 case UNION_TAG:
                     if (hasExpectedType((UnionType) type, STRING_TAG)) {

@@ -20,7 +20,6 @@ package io.ballerina.stdlib.kafka.nativeimpl.producer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
-import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -75,7 +74,8 @@ public class SendByteArrayValues extends Send {
         List<Header> headers = new ArrayList<>();
         for (int i = 0; i < headerList.size(); i++) {
             BArray headerItem = (BArray) headerList.get(i);
-            headers.add(new RecordHeader(headerItem.getBString(0).getValue(), ((BArray) headerItem.get(1)).getByteArray()));
+            headers.add(new RecordHeader(headerItem.getBString(0).getValue(),
+                    ((BArray) headerItem.get(1)).getByteArray()));
         }
         return headers;
     }
