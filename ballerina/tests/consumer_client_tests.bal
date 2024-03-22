@@ -99,6 +99,7 @@ ProducerConfiguration producerConfiguration = {
     requestTimeout: 2,
     retryCount: 3
 };
+
 Producer producer = check new (DEFAULT_URL, producerConfiguration);
 
 @test:Config {enable: true}
@@ -1483,6 +1484,6 @@ function commitOffsetWithPolledOffsetValue() returns error? {
     check consumer->close();
 }
 
-function sendMessage(anydata message, string topic, anydata? key = ()) returns error? {
-    return producer->send({ topic: topic, value: message, key });
+function sendMessage(anydata message, string topic, anydata? key = (), map<byte[]|byte[][]|string|string[]>? headers = ()) returns error? {
+    return producer->send({ topic: topic, value: message, key, headers });
 }

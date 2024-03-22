@@ -91,6 +91,7 @@ public type IntConsumerRecord record {|
     int value;
     int timestamp;
     PartitionOffset offset;
+    map<byte[]|byte[][]> headers;
 |};
 
 public type FloatConsumerRecord record {|
@@ -139,6 +140,7 @@ public type TableConsumerRecord record {|
     table<Person> value;
     int timestamp;
     PartitionOffset offset;
+    map<byte[]|byte[][]> headers;
 |};
 
 public type JsonConsumerRecord record {|
@@ -146,6 +148,7 @@ public type JsonConsumerRecord record {|
     json key?;
     int timestamp;
     json value;
+    map<byte[]|byte[][]> headers;
 |};
 
 public type PayloadConsumerRecord record {|
@@ -159,6 +162,7 @@ public type PayloadConsumerRecord record {|
             int partition;
         |} partition;
     |} offset;
+    map<byte[]|byte[][]> headers?;
 |};
 
 PayloadConsumerRecord payloadConsumerRecord = {

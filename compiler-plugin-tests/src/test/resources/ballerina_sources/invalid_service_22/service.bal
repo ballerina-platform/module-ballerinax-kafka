@@ -74,6 +74,7 @@ public type PayloadConsumerRecord record {|
             int partition;
         |} partition;
     |} offset;
+    map<byte[]|byte[][]> headers;
 |};
 
 public type PayloadConsumerRecordWithTypeReference record {|
@@ -81,6 +82,7 @@ public type PayloadConsumerRecordWithTypeReference record {|
     string value;
     int timestamp;
     kafka:PartitionOffset offset;
+    map<byte[]|byte[][]> headers;
 |};
 
 public type Person record {|

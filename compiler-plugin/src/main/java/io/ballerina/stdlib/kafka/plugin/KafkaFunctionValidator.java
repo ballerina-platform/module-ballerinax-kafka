@@ -87,6 +87,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TABLE_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNION_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.XML_TYPE_DESC;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CALLER;
+import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_HEADERS;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_KEY;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_OFFSET;
 import static io.ballerina.stdlib.kafka.plugin.PluginConstants.CONSUMER_RECORD_PARTITION;
@@ -393,10 +394,11 @@ public class KafkaFunctionValidator {
     }
 
     private boolean validateConsumerRecordFields(Map<String, RecordFieldSymbol> fieldDescriptors) {
-        if (fieldDescriptors.size() != 4 || !fieldDescriptors.containsKey(CONSUMER_RECORD_KEY) ||
+        if (fieldDescriptors.size() != 5 || !fieldDescriptors.containsKey(CONSUMER_RECORD_KEY) ||
                 !fieldDescriptors.containsKey(CONSUMER_RECORD_VALUE) ||
                 !fieldDescriptors.containsKey(CONSUMER_RECORD_TIMESTAMP) ||
-                !fieldDescriptors.containsKey(CONSUMER_RECORD_OFFSET)) {
+                !fieldDescriptors.containsKey(CONSUMER_RECORD_OFFSET) ||
+                !fieldDescriptors.containsKey(CONSUMER_RECORD_HEADERS)) {
             return false;
         }
         if (fieldDescriptors.get(CONSUMER_RECORD_TIMESTAMP).typeDescriptor().typeKind() != INT) {
@@ -404,6 +406,9 @@ public class KafkaFunctionValidator {
         }
         if (fieldDescriptors.get(CONSUMER_RECORD_OFFSET).typeDescriptor().typeKind() != TYPE_REFERENCE &&
                 fieldDescriptors.get(CONSUMER_RECORD_OFFSET).typeDescriptor().typeKind() != RECORD) {
+            return false;
+        }
+        if (fieldDescriptors.get(CONSUMER_RECORD_HEADERS).typeDescriptor().typeKind() != MAP) {
             return false;
         }
         if (!validateOffsetField(fieldDescriptors.get(CONSUMER_RECORD_OFFSET).typeDescriptor())) {

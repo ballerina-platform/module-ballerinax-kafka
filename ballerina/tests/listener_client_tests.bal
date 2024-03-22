@@ -30,6 +30,7 @@ string detachMsg1 = "";
 string detachMsg2 = "";
 string incorrectEndpointMsg = "";
 string receivedTimeoutConfigValue = "";
+map<byte[]|byte[][]> receivedHeaders = {};
 
 int receivedMsgCount = 0;
 
@@ -985,4 +986,34 @@ function listenerWithPollTimeoutConfigTest() returns error? {
     runtime:sleep(3);
     check configListener.gracefulStop();
     test:assertEquals(receivedTimeoutConfigValue, TEST_MESSAGE);
+}
+
+@test:Config {enable: true}
+function listenerWithConsumerHeadersTest() returns error? {
+    string topic = "listener-consumer-headers-test-topic";
+    kafkaTopics.push(topic);
+    map<byte[]|byte[][]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
+    check sendMessage(TEST_MESSAGE, topic, (), headers);
+
+    Service headersService =
+    service object {
+        remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
+            foreach int i in 0 ... records.length() - 1 {
+                receivedHeaders = records[i].headers;
+            }
+        }
+    };
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: topic,
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "test-listener-group-29",
+        clientId: "test-listener-29"
+    };
+    Listener headersListener = check new (DEFAULT_URL, consumerConfiguration);
+    check headersListener.attach(headersService);
+    check headersListener.'start();
+    runtime:sleep(3);
+    check headersListener.gracefulStop();
+    test:assertEquals(receivedHeaders, headers);
 }

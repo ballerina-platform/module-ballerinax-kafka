@@ -16,14 +16,14 @@
 
 import ballerina/jballerina.java;
 
-isolated function sendByteArrayValues(Producer producer, byte[] value, string topic, anydata? key, int? partition,
+isolated function sendByteArrayValues(Producer producer, byte[] value, string topic, [string, byte[]][] headers, anydata? key, int? partition,
     int? timestamp, string keySerializerType) returns Error? {
     if key is () {
-        return sendByteArrayValuesNilKeys(producer, value, topic, partition, timestamp);
+        return sendByteArrayValuesNilKeys(producer, value, topic, partition, timestamp, headers);
     }
     if keySerializerType == SER_BYTE_ARRAY {
         if key is byte[] {
-            return sendByteArrayValuesByteArrayKeys(producer, value, topic, key, partition, timestamp);
+            return sendByteArrayValuesByteArrayKeys(producer, value, topic, key, partition, timestamp, headers);
         }
         panic getKeyTypeMismatchError(BYTE_ARRAY);
     }
@@ -31,13 +31,13 @@ isolated function sendByteArrayValues(Producer producer, byte[] value, string to
 
 //Send byte[] values with different types of keys
 isolated function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topic, int? partition = (),
-    int? timestamp = ()) returns Error? =
+    int? timestamp = (), [string, byte[]][] headers = []) returns Error? =
 @java:Method {
     'class: "io.ballerina.stdlib.kafka.nativeimpl.producer.SendByteArrayValues"
 } external;
 
 isolated function sendByteArrayValuesByteArrayKeys(Producer producer, byte[] value, string topic, byte[] key,
-    int? partition = (), int? timestamp = ()) returns Error? =
+    int? partition = (), int? timestamp = (), [string, byte[]][] headers = []) returns Error? =
 @java:Method {
     'class: "io.ballerina.stdlib.kafka.nativeimpl.producer.SendByteArrayValues"
 } external;

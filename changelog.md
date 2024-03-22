@@ -5,13 +5,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+- [Added header support for Consumr and Producer](https://github.com/ballerina-platform/ballerina-library/issues/6196)
+
+## [3.10.0] - 2023-09-18
+
 ### Changed
 
-- [Changed disallowing service level annotations in the compiler plugin](https://github.com/ballerina-platform/ballerina-standard-library/issues/4731)
 - [Updated Apache Kafka client version to `3.5.1`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4752)
 
 ### Fixed
 - [Removed `client` keyword from the `kafka:Listener`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4750)
+
+## [3.9.1] - 2023-08-18
+
+### Changed
+
+- [Changed disallowing service level annotations in the compiler plugin](https://github.com/ballerina-platform/ballerina-standard-library/issues/4731)
 
 ## [3.8.0] - 2023-06-01
 

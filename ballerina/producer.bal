@@ -116,7 +116,30 @@ public client isolated class Producer {
         } else if anydataKey !is () {
             key = anydataKey.toJsonString().toBytes();
         }
-        return sendByteArrayValues(self, value, producerRecord.topic, key,
+        return sendByteArrayValues(self, value, producerRecord.topic, self.getHeaderValueAsByteArrayList(producerRecord?.headers), key,
         producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
+    }
+
+    private isolated function getHeaderValueAsByteArrayList(map<byte[]|byte[][]|string|string[]>? headers) returns [string, byte[]][] {
+        [string, byte[]][] bytesHeaderList = [];
+        if headers is map<byte[]|byte[][]|string|string[]> {
+            foreach string key in headers.keys() {
+                byte[]|byte[][]|string|string[] values = headers.get(key);
+                if values is byte[] {
+                    bytesHeaderList.push([key, values]);
+                } else if values is byte[][] {
+                    foreach byte[] headerValue in values {
+                        bytesHeaderList.push([key, headerValue]);
+                    }
+                } else if values is string {
+                    bytesHeaderList.push([key, values.toBytes()]);
+                } else if values is string[] {
+                    foreach string headerValue in values {
+                        bytesHeaderList.push([key, headerValue.toBytes()]);
+                    }
+                }
+            }
+        }
+        return bytesHeaderList;
     }
 }
