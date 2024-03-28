@@ -3,16 +3,19 @@ This file contains all the notable changes done to the Ballerina Kafka package t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+- [Fixed api docs generation issue](https://github.com/ballerina-platform/ballerina-library/issues/6250)
+
 ## [3.10.1] - 2024-03-22
 
 ### Added
-
 - [Added header support for Consumr and Producer](https://github.com/ballerina-platform/ballerina-library/issues/6196)
 
 ## [3.10.0] - 2023-09-18
 
 ### Changed
-
 - [Updated Apache Kafka client version to `3.5.1`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4752)
 
 ### Fixed
@@ -21,13 +24,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [3.9.1] - 2023-08-18
 
 ### Changed
-
 - [Changed disallowing service level annotations in the compiler plugin](https://github.com/ballerina-platform/ballerina-standard-library/issues/4731)
 
 ## [3.8.0] - 2023-06-01
 
 ### Fixed
-
 - [Fixed log manager getting reset by `kafka` module](https://github.com/ballerina-platform/ballerina-standard-library/issues/4493)
 
 ## [3.7.1] - 2023-05-09
@@ -82,7 +83,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [3.1.0] - 2021-10-09
 
 ### Added
-
 - [Add Kafka listener detach functionality.](https://github.com/ballerina-platform/ballerina-standard-library/issues/2211)
 
 ### Changed
@@ -97,13 +97,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [2.1.0-beta.2] - 2021-07-05
 
 ### Added
-
 - [Add public certificate and private key support for Kafka `SecureSocket` record.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1469)
 
 ## [2.1.0-alpha8] - 2021-04-22
 
 ### Added
-
 - [Add compiler plugin validations for Kafka services.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1237)
 
 ## [2.1.0-alpha6] - 2021-04-02
