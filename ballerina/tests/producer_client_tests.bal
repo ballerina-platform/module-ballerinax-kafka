@@ -89,7 +89,7 @@ function producerSendStringTest() returns error? {
         clientId: "test-consumer-46"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 2);
     byte[] messageValue = consumerRecords[0].value;
     string messageConverted = check 'string:fromBytes(messageValue);
@@ -150,7 +150,7 @@ function producerFlushTest() returns error? {
         clientId: "test-consumer-47"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals('string:fromBytes(consumerRecords[0].value), TEST_MESSAGE);
     check consumer->close();
 }
@@ -212,7 +212,7 @@ function transactionalProducerTest() returns error? {
         clientId: "test-consumer-48"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 3, "Expected: 3. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -250,7 +250,7 @@ function transactionalProducerWithAbortTest() returns error? {
         isolationLevel: ISOLATION_COMMITTED
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
     check consumer->close();
 
@@ -299,7 +299,7 @@ function saslProducerTest() returns error? {
         clientId: "test-consumer-49"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -374,7 +374,7 @@ function producerAdditionalPropertiesTest() returns error? {
         clientId: "test-consumer-50"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -404,7 +404,7 @@ function sslProducerTest() returns error? {
         clientId: "test-consumer-51"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -447,7 +447,7 @@ function sslCertKeyProducerTest() returns error? {
         clientId: "test-consumer-52"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -484,7 +484,7 @@ function sslCertOnlyProducerTest() returns error? {
         clientId: "test-consumer-53"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -555,7 +555,7 @@ function SSLWithSASLAuthProducerTest() returns error? {
         clientId: "test-consumer-53"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }

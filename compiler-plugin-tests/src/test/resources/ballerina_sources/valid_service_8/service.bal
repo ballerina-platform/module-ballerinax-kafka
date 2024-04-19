@@ -30,7 +30,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(readonly & kafka:ConsumerRecord[] records) {
+    remote function onConsumerRecord(readonly & kafka:BytesConsumerRecord[] records) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -42,7 +42,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(readonly & kafka:ConsumerRecord[] records) {
+    remote function onConsumerRecord(readonly & kafka:BytesConsumerRecord[] records) {
     }
 
     remote function onError(kafka:Error 'error) returns kafka:Error|() {
@@ -54,7 +54,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] & readonly records) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] & readonly records) {
     }
 
     remote function onError(error 'error) returns kafka:Error|error? {
@@ -66,7 +66,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] & readonly records, kafka:Caller caller) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] & readonly records, kafka:Caller caller) {
     }
 
     remote function onError(kafka:Error 'error) returns kafka:Error? {
@@ -75,7 +75,7 @@ service kafka:Service on kafkaListener {
 
 service kafka:Service on kafkaListener {
 
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] & readonly records) {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] & readonly records) {
     }
 
     remote function onError(kafka:Error 'error) returns error? {

@@ -50,7 +50,7 @@ import static io.ballerina.stdlib.kafka.plugin.PluginUtils.findNode;
 public class KafkaCodeTemplateWithoutCallerParameter implements CodeAction {
 
     private static final String REMOTE_FUNCTION_TEXT = LS + "\tremote function onConsumerRecord(" +
-            "kafka:ConsumerRecord[] records) returns kafka:Error? {" + LS + LS + "\t}" + LS;
+            "kafka:BytesConsumerRecord[] records) returns kafka:Error? {" + LS + LS + "\t}" + LS;
 
     @Override
     public List<String> supportedDiagnosticCodes() {

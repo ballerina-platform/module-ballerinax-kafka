@@ -114,10 +114,10 @@ function consumerCloseTest() returns error? {
         clientId: "test-consumer-11"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close();
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
-    ConsumerRecord[]|Error result = consumer->poll(5);
+    BytesConsumerRecord[]|Error result = consumer->poll(5);
     test:assertTrue(result is Error);
     if result is Error {
         string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
@@ -136,10 +136,10 @@ function consumerCloseWithDurationTest() returns error? {
         clientId: "test-consumer-12"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close(TIMEOUT_DURATION);
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
-    ConsumerRecord[]|Error result = consumer->poll(5);
+    BytesConsumerRecord[]|Error result = consumer->poll(5);
     test:assertTrue(result is Error);
     if result is Error {
         string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
@@ -159,10 +159,10 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close();
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
-    ConsumerRecord[]|Error result = consumer->poll(5);
+    BytesConsumerRecord[]|Error result = consumer->poll(5);
     test:assertTrue(result is Error);
     if result is Error {
         string expectedErr = "Failed to poll from the Kafka server: This consumer has already been closed.";
@@ -186,7 +186,7 @@ function consumerConfigTest() returns error? {
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -203,7 +203,7 @@ function consumerFunctionsTest() returns error? {
         clientId: "test-consumer-15"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     byte[] value = consumerRecords[0].value;
     string message = check 'string:fromBytes(value);
@@ -237,7 +237,7 @@ function consumerSeekTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topicPartition]);
     check consumer->seek(partitionOffset);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 
     Error? result = consumer->seekToBeginning([nonExistingPartition]);
@@ -267,7 +267,7 @@ function consumerSeekToBeginningTest() returns error? {
         partition: 0
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->seekToBeginning([topicPartition]);
     consumerRecords = check consumer->poll(5);
@@ -300,7 +300,7 @@ function consumerSeekToEndTest() returns error? {
         partition: 0
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check consumer->seekToEnd([topicPartition]);
@@ -368,7 +368,7 @@ function consumerPositionOffsetsTest() returns error? {
     test:assertEquals(partitionOffsetBefore, 0, "Expected: 0. Received: " + partitionOffsetBefore.toString());
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     int partitionOffsetAfter = check consumer->getPositionOffset(topicPartition, TIMEOUT_DURATION);
     test:assertEquals(partitionOffsetAfter, 2, "Expected: 2. Received: " + partitionOffsetAfter.toString());
     check consumer->close();
@@ -381,7 +381,7 @@ function consumerPositionOffsetsTest() returns error? {
     consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topicPartition]);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     partitionOffsetAfter = check consumer->getPositionOffset(topicPartition);
     test:assertEquals(partitionOffsetAfter, 3, "Expected: 3. Received: " + partitionOffsetAfter.toString());
     check consumer->close();
@@ -409,11 +409,11 @@ function consumerBeginningOffsetsTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topic1Partition, topic2Partition]);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     PartitionOffset[] partitionEndOffsets = check consumer->getBeginningOffsets([topic1Partition, topic2Partition]);
     test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     partitionEndOffsets = check consumer->getBeginningOffsets([topic1Partition, topic2Partition], TIMEOUT_DURATION);
     test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
@@ -426,7 +426,7 @@ function consumerBeginningOffsetsTest() returns error? {
     };
     consumer = check new (DEFAULT_URL, consumerConfiguration);
     check consumer->assign([topic1Partition, topic2Partition]);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     partitionEndOffsets = check consumer->getBeginningOffsets([topic1Partition, topic2Partition]);
     test:assertEquals(partitionEndOffsets[0].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[0].offset.toString());
     test:assertEquals(partitionEndOffsets[1].offset, 0, "Expected: 0. Received: " + partitionEndOffsets[1].offset.toString());
@@ -543,7 +543,7 @@ function consumerPauseResumePartitionTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     Error? result = consumer->pause([topicPartition]);
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
 
     TopicPartition[] pausedPartitions = check consumer->getPausedPartitions();
@@ -682,7 +682,7 @@ function consumerSubscribeTest() returns error? {
     string[] subscribedTopics = check consumer->getSubscription();
     test:assertEquals(subscribedTopics.length(), 0);
     check consumer->subscribeWithPattern("consumer.*");
-    ConsumerRecord[] _ = check consumer->poll(1); // Polling to force-update the metadata
+    BytesConsumerRecord[] _ = check consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
     test:assertEquals(newSubscribedTopics.sort(), kafkaTopics.filter(function (string topic) returns boolean {
         return topic.startsWith("consumer");
@@ -799,7 +799,7 @@ function manualCommitTest() returns error? {
         check sendMessage(count.toString().toBytes(), topic);
         count += 1;
     }
-    ConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(1);
     TopicPartition topicPartition = {
         topic: topic,
         partition: 0
@@ -838,7 +838,7 @@ function manualCommitWithDurationTest() returns error? {
         autoCommit: false
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(1);
     int manualCommitOffset = 5;
     TopicPartition topicPartition = {
         topic: topic,
@@ -870,7 +870,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(1);
     int manualCommitOffset = 5;
     TopicPartition topicPartition = {
         topic: topic,
@@ -925,14 +925,14 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
         clientId: "test-consumer-51"
     };
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(1);
     TopicPartition[] partitions = check consumer->getAssignment();
     check consumer->unsubscribe();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     check consumer->assign(partitions);
 
     check consumer->seekToEnd(partitions);
-    ConsumerRecord[] consumerRecords = check consumer->poll(1);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(1);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     consumerRecords = check consumer->poll(1);
@@ -990,7 +990,7 @@ function saslConsumerTest() returns error? {
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
     Consumer consumer = check new(SASL_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -1015,7 +1015,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
     Consumer consumer = check new(SASL_URL, consumerConfiguration);
-    ConsumerRecord[]|Error result = consumer->poll(5);
+    BytesConsumerRecord[]|Error result = consumer->poll(5);
     if result is Error {
         string errorMsg = "Failed to poll from the Kafka server: Authentication failed: Invalid username or password";
         test:assertEquals(result.message(), errorMsg);
@@ -1046,7 +1046,7 @@ function consumerAdditionalPropertiesTest() returns error? {
     };
 
     Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(5);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertEquals(committedOffset, ());
     check consumer->close();
@@ -1067,7 +1067,7 @@ function sslKeystoreConsumerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -1100,7 +1100,7 @@ function sslCertKeyConsumerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -1127,7 +1127,7 @@ function sslCertOnlyConsumerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -1148,7 +1148,7 @@ function saslSslConsumerTest() returns error? {
         securityProtocol: PROTOCOL_SASL_SSL
     };
     Consumer consumer = check new (SASL_SSL_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -1165,7 +1165,7 @@ function incorrectKafkaUrlTest() returns error? {
         clientId: "test-consumer-49"
     };
     Consumer consumer = check new (INCORRECT_KAFKA_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
@@ -1185,7 +1185,7 @@ function plaintextToSecuredEndpointsConsumerTest() returns error? {
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
 
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
     check consumer->close();
 
@@ -1216,7 +1216,7 @@ function invalidSecuredEndpointsConsumerTest() returns error? {
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
     check consumer->close();
 
@@ -1278,7 +1278,7 @@ function sslIncorrectStoresConsumerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Consumer consumer = check new (SSL_URL, consumerConfiguration);
-    ConsumerRecord[]|Error result = consumer->poll(5);
+    BytesConsumerRecord[]|Error result = consumer->poll(5);
     test:assertTrue(result is Error);
     if result is Error {
         test:assertEquals(result.message(), "Failed to poll from the Kafka server: SSL handshake failed");
@@ -1449,7 +1449,7 @@ function consumerPollFromMultipleTopicsTest() returns error? {
         clientId: "test-consumer-59"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(5);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 2);
     string message1 = check 'string:fromBytes(consumerRecords[0].value);
     string message2 = check 'string:fromBytes(consumerRecords[1].value);
@@ -1474,7 +1474,7 @@ function commitOffsetWithPolledOffsetValue() returns error? {
     check sendMessage("Hello".toBytes(), topic);
     check sendMessage("Hello".toBytes(), topic);
     check sendMessage("Hello".toBytes(), topic);
-    ConsumerRecord[] records = check consumer->poll(3);
+    BytesConsumerRecord[] records = check consumer->poll(3);
     test:assertEquals(records.length(), 4);
 
     check consumer->commitOffset([records[2].offset]);

@@ -97,15 +97,15 @@ function intProduceTest() returns error? {
         clientId: "data-binding-producer-01"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     int receivedValue = 0;
     int receivedKey = 0;
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         string receivedMsg = checkpanic 'string:fromBytes(cRecord.value);
         receivedValue += checkpanic int:fromString(receivedMsg);
-        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord?.'key);
         receivedKey += checkpanic int:fromString(receivedKeyString);
     });
     test:assertEquals(receivedValue, 30);
@@ -133,15 +133,15 @@ function floatProduceTest() returns error? {
         clientId: "data-binding-producer-02"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     float receivedValue = 0;
     float receivedKey = 0;
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         string receivedMsg = checkpanic 'string:fromBytes(cRecord.value);
         receivedValue = checkpanic float:fromString(receivedMsg);
-        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord?.'key);
         receivedKey = checkpanic float:fromString(receivedKeyString);
     });
     test:assertEquals(receivedValue, 100.9);
@@ -169,15 +169,15 @@ function decimalProduceTest() returns error? {
         clientId: "data-binding-producer-03"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     decimal receivedValue = 0;
     decimal receivedKey = 0;
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         string receivedMsg = checkpanic 'string:fromBytes(cRecord.value);
         receivedValue += checkpanic decimal:fromString(receivedMsg);
-        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        string receivedKeyString = checkpanic 'string:fromBytes(<byte[]>cRecord?.'key);
         receivedKey += checkpanic decimal:fromString(receivedKeyString);
     });
     test:assertEquals(receivedValue, 30.9d);
@@ -205,14 +205,14 @@ function booleanProduceTest() returns error? {
         clientId: "data-binding-producer-04"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     string receivedValue = "false";
     string receivedKey = "";
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         receivedValue = checkpanic 'string:fromBytes(cRecord.value);
-        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord?.'key);
     });
     test:assertEquals(receivedValue, "true");
     test:assertEquals(receivedKey, "true");
@@ -239,14 +239,14 @@ function stringProduceTest() returns error? {
         clientId: "data-binding-producer-05"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     string receivedValue = "";
     string receivedKey = "";
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         receivedValue = checkpanic 'string:fromBytes(cRecord.value);
-        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord?.'key);
     });
     test:assertEquals(receivedValue, TEST_MESSAGE);
     test:assertEquals(receivedKey, TEST_KEY);
@@ -274,14 +274,14 @@ function xmlProduceTest() returns error? {
         clientId: "data-binding-producer-06"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     string[] receivedValues = [];
     string receivedKey = "";
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         receivedValues.push(checkpanic 'string:fromBytes(cRecord.value));
-        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord.'key);
+        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord?.'key);
     });
     test:assertEquals(receivedValues, [xmlData.toString(), xmlData.toString(), xmlData.toString()]);
     test:assertEquals(receivedKey, TEST_KEY);
@@ -307,11 +307,11 @@ function recordProduceTest() returns error? {
         clientId: "data-binding-producer-07"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     Person[] receivedValues = [];
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         Person person = checkpanic value:fromJsonStringWithType(checkpanic 'string:fromBytes(cRecord.value));
         receivedValues.push(person);
     });
@@ -338,11 +338,11 @@ function mapProduceTest() returns error? {
         clientId: "data-binding-producer-08"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     map<Person>[] receivedValues = [];
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         map<Person> personMap = checkpanic value:fromJsonStringWithType(checkpanic 'string:fromBytes(cRecord.value));
         receivedValues.push(personMap);
     });
@@ -371,11 +371,11 @@ function tableProduceTest() returns error? {
         clientId: "data-binding-producer-09"
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] consumerRecords = check consumer->poll(3);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(3);
     test:assertEquals(consumerRecords.length(), 3);
 
     table<Person>[] receivedValues = [];
-    consumerRecords.forEach(function(ConsumerRecord cRecord) {
+    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
         table<Person> personTable = checkpanic value:fromJsonStringWithType(checkpanic 'string:fromBytes(cRecord.value));
         receivedValues.push(personTable);
     });

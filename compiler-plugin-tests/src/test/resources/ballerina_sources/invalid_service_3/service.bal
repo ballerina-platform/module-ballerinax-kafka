@@ -28,6 +28,6 @@ listener kafka:Listener kafkaListener =
 
 service kafka:Service on kafkaListener {
     function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) {
+                                kafka:BytesConsumerRecord[] records) {
     }
 }

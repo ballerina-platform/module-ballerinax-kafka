@@ -27,12 +27,12 @@ listener kafka:Listener kafkaListener =
         new (kafka:DEFAULT_URL, consumerConfigs);
 
 service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(string caller, kafka:ConsumerRecord[] records) {
+    remote function onConsumerRecord(string caller, kafka:BytesConsumerRecord[] records) {
     }
 }
 
 service kafka:Service on kafkaListener {
-    remote function onConsumerRecord(kafka:Consumer caller, kafka:ConsumerRecord[] records) {
+    remote function onConsumerRecord(kafka:Consumer caller, kafka:BytesConsumerRecord[] records) {
     }
 }
 

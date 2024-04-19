@@ -28,30 +28,30 @@ listener kafka:Listener kafkaListener =
 
 service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) {
+                                kafka:BytesConsumerRecord[] records) {
     }
 }
 
 service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns error? {
+                                kafka:BytesConsumerRecord[] records) returns error? {
     }
 }
 
 service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns kafka:Error? {
+                                kafka:BytesConsumerRecord[] records) returns kafka:Error? {
     }
 }
 
 service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns ()|kafka:Error {
+                                kafka:BytesConsumerRecord[] records) returns ()|kafka:Error {
     }
 }
 
 service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns ()|error {
+                                kafka:BytesConsumerRecord[] records) returns ()|error {
     }
 }

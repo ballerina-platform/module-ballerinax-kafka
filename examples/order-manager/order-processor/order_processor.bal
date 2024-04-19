@@ -37,7 +37,7 @@ listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs)
 service kafka:Service on kafkaListener {
 
     // Listens to Kafka topic for any new orders and process them
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
         // Uses Ballerina query expressions to filter out the successful orders and publish to Kafka topic
         error? err = from types:Order 'order in check getOrdersFromRecords(records) where 'order.status == types:SUCCESS do {
             log:printInfo("Sending successful order to " + PUBLISH_TOPIC + " " + 'order.toString());
@@ -50,9 +50,9 @@ service kafka:Service on kafkaListener {
 }
 
 // Convert the byte values in Kafka records to type Order[]
-function getOrdersFromRecords(kafka:ConsumerRecord[] records) returns types:Order[]|error {
+function getOrdersFromRecords(kafka:BytesConsumerRecord[] records) returns types:Order[]|error {
     types:Order[] receivedOrders = [];
-    foreach kafka:ConsumerRecord 'record in records {
+    foreach kafka:BytesConsumerRecord 'record in records {
         string messageContent = check string:fromBytes('record.value);
         json jsonContent = check value:fromJsonString(messageContent);
         json jsonClone = jsonContent.cloneReadOnly();

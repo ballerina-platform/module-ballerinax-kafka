@@ -30,7 +30,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, int[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, int[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -42,7 +42,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, byte[][] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, byte[][] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -54,7 +54,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, string[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, string[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -66,7 +66,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, Person[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, Person[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -78,7 +78,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, map<Person>[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, map<Person>[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -90,7 +90,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, table<Person>[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, table<Person>[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -102,7 +102,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, json[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, json[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -114,7 +114,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, xml[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, xml[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -126,7 +126,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, kafka:Caller caller, anydata[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, kafka:Caller caller, anydata[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -138,7 +138,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, int[] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, int[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -150,7 +150,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(kafka:ConsumerRecord[] records, byte[][] data) {
+    remote function onConsumerRecord(kafka:BytesConsumerRecord[] records, byte[][] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -210,7 +210,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(readonly & kafka:ConsumerRecord[] records, kafka:Caller caller, json[] data) {
+    remote function onConsumerRecord(readonly & kafka:BytesConsumerRecord[] records, kafka:Caller caller, json[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -222,7 +222,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(readonly & kafka:ConsumerRecord[] records, kafka:Caller caller, xml[] data) {
+    remote function onConsumerRecord(readonly & kafka:BytesConsumerRecord[] records, kafka:Caller caller, xml[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {
@@ -234,7 +234,7 @@ service kafka:Service on kafkaListener {
     private final string var1 = "Kafka Service";
     private final int var2 = 54;
 
-    remote function onConsumerRecord(readonly & kafka:ConsumerRecord[] records, anydata[] data) {
+    remote function onConsumerRecord(readonly & kafka:BytesConsumerRecord[] records, anydata[] data) {
     }
 
     remote function onError(kafka:Error 'error) returns error|() {

@@ -31,7 +31,7 @@ function wordCountCalculatorTest() returns error? {
         topics: [OUTPUT_TOPIC]
     };
     kafka:Consumer testConsumer = check new (kafka:DEFAULT_URL, testConsumerConfigs);
-    kafka:ConsumerRecord[] records = check testConsumer->poll(3);
+    kafka:BytesConsumerRecord[] records = check testConsumer->poll(3);
 
     test:assertEquals(records.length(), 7);
 
@@ -45,7 +45,7 @@ function wordCountCalculatorTest() returns error? {
         "examples": 1
     };
 
-    foreach kafka:ConsumerRecord 'record in records {
+    foreach kafka:BytesConsumerRecord 'record in records {
         string countValue = check string:fromBytes('record.value);
         byte[]? key = 'record["key"];
         if key is byte[] {
