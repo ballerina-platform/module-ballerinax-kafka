@@ -47,7 +47,7 @@ function wordCountCalculatorTest() returns error? {
 
     foreach kafka:BytesConsumerRecord 'record in records {
         string countValue = check string:fromBytes('record.value);
-        byte[]? key = 'record["key"];
+        anydata? key = 'record["key"];
         if key is byte[] {
             string word = check string:fromBytes(key);
             int? actualResult = expectedResults[word];
