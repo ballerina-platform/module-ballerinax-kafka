@@ -262,7 +262,7 @@ public client isolated class Consumer {
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.Poll"
     } external;
 
-    # Polls the external broker to retrieve messages in the required data type without the `kafka:ConsumerRecord`
+    # Polls the external broker to retrieve messages in the required data type without the `kafka:AnydataConsumerRecord`
     # information.
     # ```ballerina
     # Person[] persons = check consumer->pollPayload(10);

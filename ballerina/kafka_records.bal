@@ -191,25 +191,6 @@ public type TopicPartition record {|
     int partition;
 |};
 
-# Type related to consumer record.
-#
-# + key - Key that is included in the record
-# + value - Record content
-# + timestamp - Timestamp of the record, in milliseconds since epoch
-# + offset - Topic partition position in which the consumed record is stored
-# + headers - Map of headers included with the record
-# # Deprecated
-# Usage of this record is deprecated. Use subtypes of AnydataConsumerRecord 
-# instead to support data-binding
-@deprecated
-public type ConsumerRecord record {|
-    byte[] key?;
-    byte[] value;
-    int timestamp;
-    PartitionOffset offset;
-    map<byte[]|byte[][]|string|string[]> headers;
-|};
-
 # Type related to anydata consumer record.
 #
 # + key - Key that is included in the record
@@ -233,27 +214,6 @@ public type BytesConsumerRecord record {|
     *AnydataConsumerRecord;
     byte[] value;
     map<byte[]|byte[][]> headers;
-|};
-
-# Details related to the producer record.
-#
-# + topic - Topic to which the record will be appended
-# + key - Key that is included in the record
-# + value - Record content
-# + timestamp - Timestamp of the record, in milliseconds since epoch
-# + partition - Partition to which the record should be sent
-# + headers - Map of headers to be included with the record
-# # Deprecated
-# Usage of this record is deprecated. Use subtypes of AnydataProducerRecord 
-# instead to support data-binding
-@deprecated
-public type ProducerRecord record {|
-    string topic;
-    byte[] key?;
-    byte[] value;
-    int timestamp?;
-    int partition?;
-    map<byte[]|byte[][]|string|string[]> headers?;
 |};
 
 # Details related to the anydata producer record.

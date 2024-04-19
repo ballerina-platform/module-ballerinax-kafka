@@ -52,8 +52,6 @@ public class KafkaConstants {
     public static final String PAYLOAD_BINDING_ERROR = "PayloadBindingError";
     public static final String PAYLOAD_VALIDATION_ERROR = "PayloadValidationError";
 
-    public static final String AVRO_GENERIC_RECORD_NAME = "AvroGenericRecord";
-    public static final String CONSUMER_RECORD_STRUCT_NAME = "ConsumerRecord";
     public static final String CALLER_STRUCT_NAME = "Caller";
     public static final String TYPE_CHECKER_OBJECT_NAME = "TypeChecker";
     public static final String SERVER_CONNECTOR = "serverConnector";

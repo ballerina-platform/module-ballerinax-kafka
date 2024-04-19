@@ -299,7 +299,7 @@ function consumerServiceCommitOffsetTest() returns error? {
         count += 1;
     }
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(1);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertTrue(committedOffset is PartitionOffset);
     if committedOffset is PartitionOffset {
@@ -335,7 +335,7 @@ function consumerServiceCommitTest() returns error? {
         count += 1;
     }
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    ConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(1);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertTrue(committedOffset is PartitionOffset);
     if committedOffset is PartitionOffset {
@@ -795,7 +795,7 @@ function invalidSecurityProtocolListenerTest() returns error? {
 
 Service messageOrderService =
 service object {
-    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] records) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
@@ -806,7 +806,7 @@ service object {
 
 Service consumerService =
 service object {
-    remote function onConsumerRecord(ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
@@ -818,7 +818,7 @@ service object {
 
 Service consumerGracefulStopService =
 service object {
-    remote function onConsumerRecord(readonly & ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(readonly & BytesConsumerRecord[] records) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
@@ -830,7 +830,7 @@ service object {
 
 Service consumerImmediateStopService =
 service object {
-    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] records) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
@@ -842,7 +842,7 @@ service object {
 
 Service consumerServiceWithCommit =
 service object {
-    remote function onConsumerRecord(ConsumerRecord[] records, Caller caller) returns error? {
+    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
@@ -855,7 +855,7 @@ service object {
 
 Service consumerServiceWithCommitOffset =
 service object {
-    remote function onConsumerRecord(readonly & ConsumerRecord[] records, Caller caller) returns error? {
+    remote function onConsumerRecord(readonly & BytesConsumerRecord[] records, Caller caller) returns error? {
         string topic = "listener-commit-offset-test-topic";
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
@@ -878,7 +878,7 @@ service object {
 
 Service consumerConfigService =
 service object {
-    remote function onConsumerRecord(ConsumerRecord[] records, Caller caller) returns error? {
+    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
         foreach var kafkaRecord in records {
             byte[] value = kafkaRecord.value;
             string message = check 'string:fromBytes(value);
@@ -890,7 +890,7 @@ service object {
 
 Service saslConsumerService =
 service object {
-    remote function onConsumerRecord(ConsumerRecord[] records, Caller caller) returns error? {
+    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
@@ -902,7 +902,7 @@ service object {
 Service saslConsumerIncorrectCredentialsService =
 service object {
     remote function onConsumerRecord(Caller caller,
-                                ConsumerRecord[] records) returns error? {
+                                BytesConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
@@ -913,7 +913,7 @@ service object {
 
 Service sslConsumerService =
 service object {
-    remote function onConsumerRecord(Caller caller, ConsumerRecord[] & readonly records) returns error? {
+    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] & readonly records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
@@ -925,7 +925,7 @@ service object {
 Service listenerDetachService1 =
 service object {
     remote function onConsumerRecord(Caller caller,
-                                ConsumerRecord[] records) returns error? {
+                                BytesConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
@@ -936,7 +936,7 @@ service object {
 
 Service listenerDetachService2 =
 service object {
-    remote function onConsumerRecord(ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);
@@ -947,7 +947,7 @@ service object {
 
 Service incorrectEndpointsService =
 service object {
-    remote function onConsumerRecord(ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string messageContent = check 'string:fromBytes(consumerRecord.value);
             log:printInfo(messageContent);

@@ -67,7 +67,7 @@ public function main() returns error? {
 kafka:Service consumerService =
 service object {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns error? {
+                                kafka:BytesConsumerRecord[] records) returns error? {
         // The set of tweets received by the service are processed one by one.
         types:Tweet[] convertedTweets =check getTweetsFromConsumerRecords(records);
 
@@ -89,10 +89,10 @@ service object {
     }
 };
 
-function getTweetsFromConsumerRecords(kafka:ConsumerRecord[] records) returns types:Tweet[]|error {
+function getTweetsFromConsumerRecords(kafka:BytesConsumerRecord[] records) returns types:Tweet[]|error {
     types:Tweet[] tweets = [];
     foreach int i in 0 ..< records.length() {
-        kafka:ConsumerRecord kafkaRecord = records[i];
+        kafka:BytesConsumerRecord kafkaRecord = records[i];
         // The value should be a `byte[]` since the byte[] deserializer is used for the value.
         byte[] value = kafkaRecord.value;
 

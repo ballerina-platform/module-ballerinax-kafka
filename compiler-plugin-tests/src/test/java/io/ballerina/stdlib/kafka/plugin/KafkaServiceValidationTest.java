@@ -74,7 +74,7 @@ public class KafkaServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
-    @Test(enabled = true, description = "Validating using only kafka:ConsumerRecord[]")
+    @Test(enabled = true, description = "Validating using only kafka:BytesConsumerRecord[]")
     public void testValidService4() {
         Package currentPackage = loadPackage("valid_service_4");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -82,7 +82,7 @@ public class KafkaServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
-    @Test(enabled = true, description = "Validate kafka:Caller and kafka:ConsumerRecord[]")
+    @Test(enabled = true, description = "Validate kafka:Caller and kafka:BytesConsumerRecord[]")
     public void testValidService5() {
         Package currentPackage = loadPackage("valid_service_5");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -90,7 +90,7 @@ public class KafkaServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
-    @Test(enabled = true, description = "Validating readonly kafka:ConsumerRecord[]")
+    @Test(enabled = true, description = "Validating readonly kafka:BytesConsumerRecord[]")
     public void testValidService6() {
         Package currentPackage = loadPackage("valid_service_6");
         PackageCompilation compilation = currentPackage.getCompilation();

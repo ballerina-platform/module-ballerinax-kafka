@@ -28,7 +28,7 @@ listener kafka:Listener kafkaListener =
 
 service kafka:Service on kafkaListener {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) returns string {
+                                kafka:BytesConsumerRecord[] records) returns string {
         return "Hello";
     }
 }

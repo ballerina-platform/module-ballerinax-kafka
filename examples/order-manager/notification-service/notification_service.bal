@@ -34,8 +34,8 @@ listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfigs)
 service kafka:Service on kafkaListener {
 
     // Listens to Kafka topic for any successful orders
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
-        foreach kafka:ConsumerRecord 'record in records {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
+        foreach kafka:BytesConsumerRecord 'record in records {
 
             // Convert the byte values in the Kafka record to type Order
             string messageContent = check string:fromBytes('record.value);

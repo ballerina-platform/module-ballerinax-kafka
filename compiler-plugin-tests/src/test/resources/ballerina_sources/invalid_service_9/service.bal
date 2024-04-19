@@ -30,6 +30,6 @@ listener kafka:Listener kafkaListener2 =
 
 service kafka:Service on kafkaListener1, kafkaListener2 {
     remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:ConsumerRecord[] records) {
+                                kafka:BytesConsumerRecord[] records) {
     }
 }

@@ -38,7 +38,7 @@ function orderProcessorTest() returns error? {
         topics: [PUBLISH_TOPIC]
     };
     kafka:Consumer testConsumer = check new (kafka:DEFAULT_URL, testConsumerConfigs);
-    kafka:ConsumerRecord[] records = check testConsumer->poll(3);
+    kafka:BytesConsumerRecord[] records = check testConsumer->poll(3);
 
     test:assertEquals(records.length(), 1);
 

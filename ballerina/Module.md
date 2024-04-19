@@ -52,7 +52,7 @@ kafka:ConsumerConfiguration consumerConfiguration = {
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, consumerConfiguration);
 
 service on kafkaListener {
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) {
         // processes the records
         ...
         // commits the offsets manually
@@ -78,7 +78,7 @@ string key = "my-key";
 check kafkaProducer->send({ topic: "test-kafka-topic", key: key.toBytes(), value: message.toBytes() });
 ```
 ```ballerina
-kafka:ConsumerRecord[] records = check kafkaConsumer->poll(1);
+kafka:BytesConsumerRecord[] records = check kafkaConsumer->poll(1);
 
 foreach var kafkaRecord in records {
     byte[] messageContent = kafkaRecord.value;

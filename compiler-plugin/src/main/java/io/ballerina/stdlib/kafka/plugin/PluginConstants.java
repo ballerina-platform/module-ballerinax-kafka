@@ -31,7 +31,6 @@ public class PluginConstants {
 
     // parameters
     public static final String CALLER = "Caller";
-    public static final String RECORD_PARAM = "ConsumerRecord";
     public static final String ERROR_PARAM = "Error";
     public static final String PAYLOAD_ANNOTATION = "kafka:Payload ";
 

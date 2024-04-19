@@ -92,9 +92,9 @@ service kafka:Service on new kafka:Listener(KAFKA_SECURED_URL, consumerConfigs) 
         self.kafkaProducer = check new (KAFKA_SECURED_URL, producerConfigs);
     }
 
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
         map<int> countResults;
-        foreach kafka:ConsumerRecord 'record in records {
+        foreach kafka:BytesConsumerRecord 'record in records {
             // Process the input sentences one by one
             countResults = check processRecord(self.wordCountMap, 'record);
         }
@@ -108,7 +108,7 @@ service kafka:Service on new kafka:Listener(KAFKA_SECURED_URL, consumerConfigs) 
     }
 }
 
-function processRecord(map<int> wordCountMap, kafka:ConsumerRecord 'record) returns map<int>|error {
+function processRecord(map<int> wordCountMap, kafka:BytesConsumerRecord 'record) returns map<int>|error {
     // A temporary word count map is created to count the words in one sentence
     map<int> tempWordCountMap = {};
     string sentence = check string:fromBytes('record.value);

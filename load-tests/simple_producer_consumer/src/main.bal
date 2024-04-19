@@ -119,7 +119,7 @@ function startListener() returns error? {
 
 kafka:Service kafkaService =
 service object {
-    remote function onConsumerRecord(kafka:Caller caller, kafka:ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
         foreach var consumerRecord in records {
             string|error messageContent = 'string:fromBytes(consumerRecord.value);
             if messageContent is error {
