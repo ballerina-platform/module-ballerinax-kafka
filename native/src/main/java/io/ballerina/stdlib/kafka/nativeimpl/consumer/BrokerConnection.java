@@ -78,7 +78,8 @@ public class BrokerConnection {
         int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         try {
             synchronized (kafkaConsumer) {
-                if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value
+                // API timeout should given the priority over the default value
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
                     closeWithDuration(kafkaConsumer, apiTimeout);
                 } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
                     closeWithDuration(kafkaConsumer, defaultApiTimeout);

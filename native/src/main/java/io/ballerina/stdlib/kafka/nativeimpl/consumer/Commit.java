@@ -91,7 +91,8 @@ public class Commit {
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = getPartitionToMetadataMap(offsets);
         try {
             synchronized (kafkaConsumer) {
-                if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value
+                // API timeout should given the priority over the default value
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
                     consumerCommitSyncWithDuration(kafkaConsumer, partitionToMetadataMap, apiTimeout);
                 } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
                     consumerCommitSyncWithDuration(kafkaConsumer, partitionToMetadataMap, defaultApiTimeout);
