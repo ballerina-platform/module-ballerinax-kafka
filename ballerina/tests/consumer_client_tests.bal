@@ -1484,6 +1484,49 @@ function commitOffsetWithPolledOffsetValue() returns error? {
     check consumer->close();
 }
 
+@test:Config {enable: true}
+function clientConcurrentPollTest() returns error? {
+    string topic = "client-concurrent-poll-test-topic";
+    kafkaTopics.push(topic);
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        groupId: "client-concurrent-poll-test-group",
+        clientId: "test-consumer-61",
+        offsetReset: OFFSET_RESET_EARLIEST,
+        maxPollRecords: 1
+    };
+    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    check sendMessage("Hello1".toBytes(), topic);
+    check sendMessage("Hello2".toBytes(), topic);
+    check sendMessage("Hello3".toBytes(), topic);
+    check sendMessage("Hello4".toBytes(), topic);
+    check sendMessage("Hello5".toBytes(), topic);
+
+    future<string|error> f1 = start pollForData(consumer);
+    future<string|error> f2 = start pollForData(consumer);
+    future<string|error> f3 = start pollForData(consumer);
+    future<string|error> f4 = start pollForData(consumer);
+    future<string|error> f5 = start pollForData(consumer);
+    string s1 = check wait f1;
+    string s2 = check wait f2;
+    string s3 = check wait f3;
+    string s4 = check wait f4;
+    string s5 = check wait f5;
+    string[] results = [s1, s2, s3, s4, s5];
+
+    check consumer->close();
+    test:assertTrue(results.indexOf("Hello1") != ());
+    test:assertTrue(results.indexOf("Hello2") != ());
+    test:assertTrue(results.indexOf("Hello3") != ());
+    test:assertTrue(results.indexOf("Hello4") != ());
+    test:assertTrue(results.indexOf("Hello5") != ());
+}
+
+isolated function pollForData(Consumer consumer) returns string|error {
+    string[] results = check consumer->pollPayload(3);
+    return results.length() > 0 ? results[0] : "";
+}
+
 function sendMessage(anydata message, string topic, anydata? key = (), map<byte[]|byte[][]|string|string[]>? headers = ()) returns error? {
     return producer->send({ topic: topic, value: message, key, headers });
 }
