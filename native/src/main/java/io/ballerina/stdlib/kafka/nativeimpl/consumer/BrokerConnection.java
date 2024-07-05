@@ -77,12 +77,14 @@ public class BrokerConnection {
         int defaultApiTimeout = getDefaultApiTimeout(consumerProperties);
         int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         try {
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value
-                closeWithDuration(kafkaConsumer, apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                closeWithDuration(kafkaConsumer, defaultApiTimeout);
-            } else {
-                kafkaConsumer.close();
+            synchronized (kafkaConsumer) {
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value
+                    closeWithDuration(kafkaConsumer, apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    closeWithDuration(kafkaConsumer, defaultApiTimeout);
+                } else {
+                    kafkaConsumer.close();
+                }
             }
             KafkaMetricsUtil.reportConsumerClose(consumerObject);
         } catch (KafkaException e) {
@@ -162,7 +164,9 @@ public class BrokerConnection {
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
 
         try {
-            kafkaConsumer.resume(partitionList);
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.resume(partitionList);
+            }
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_RESUME);
             return createKafkaError("Failed to resume topic partitions for the consumer: " + e.getMessage());
