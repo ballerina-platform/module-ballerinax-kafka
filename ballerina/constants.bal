@@ -123,6 +123,8 @@ public const COMPRESSION_ZSTD = "zstd";
 // SASL Authentication mechanisms
 # Kafka SASL_PLAIN authentication mechanism
 public const AUTH_SASL_PLAIN = "PLAIN";
+# Kafka SASL_SCRAM authentication mechanism
+public const AUTH_SASL_SCRAM_SHA_256 = "SCRAM-SHA-256";
 
 
 // Security Protocols

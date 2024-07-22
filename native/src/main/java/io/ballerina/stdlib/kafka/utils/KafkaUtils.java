@@ -349,11 +349,13 @@ public class KafkaUtils {
 
         // protocol
         BMap<BString, Object> protocol = (BMap<BString, Object>) secureSocket.get(KafkaConstants.PROTOCOL_CONFIG);
-        addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG, protocol, configParams,
-                                KafkaConstants.SSL_PROTOCOL_NAME);
-        addStringArrayAsStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
-                                protocol, configParams,
-                                KafkaConstants.SSL_PROTOCOL_VERSIONS);
+        if (protocol != null) {
+            addStringParamIfPresent(SslConfigs.SSL_PROTOCOL_CONFIG, protocol, configParams,
+                    KafkaConstants.SSL_PROTOCOL_NAME);
+            addStringArrayAsStringParamIfPresent(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG,
+                    protocol, configParams,
+                    KafkaConstants.SSL_PROTOCOL_VERSIONS);
+        }
     }
 
     @SuppressWarnings(KafkaConstants.UNCHECKED)
@@ -371,6 +373,17 @@ public class KafkaUtils {
                                     KafkaConstants.AUTHENTICATION_MECHANISM);
             addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, authenticationConfig, properties,
                                     KafkaConstants.SECURITY_PROTOCOL_CONFIG);
+            properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfigValue);
+        } else if (KafkaConstants.SASL_SCRAM_SHA_256.equals(mechanism)) {
+            String username = authenticationConfig.getStringValue(KafkaConstants.USERNAME).getValue();
+            String password = authenticationConfig.getStringValue(KafkaConstants.PASSWORD).getValue();
+            String jaasConfigValue =
+                    "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"" + username +
+                            "\" password=\"" + password + "\";";
+            addStringParamIfPresent(SaslConfigs.SASL_MECHANISM, authenticationConfig, properties,
+                    KafkaConstants.AUTHENTICATION_MECHANISM);
+            addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, authenticationConfig, properties,
+                    KafkaConstants.SECURITY_PROTOCOL_CONFIG);
             properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfigValue);
         }
     }
