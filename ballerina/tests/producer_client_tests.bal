@@ -316,8 +316,7 @@ function saslScram256ProducerTest() returns error? {
     };
 
     Producer kafkaProducer = check new (SASL_URL, producerConfigs);
-    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
-    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    check kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
     check kafkaProducer->close();
 
     ConsumerConfiguration consumerConfiguration = {
@@ -328,7 +327,7 @@ function saslScram256ProducerTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
     check consumer->close();
 }
 
@@ -356,7 +355,7 @@ function saslScram512ProducerTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
     check consumer->close();
 }
 
