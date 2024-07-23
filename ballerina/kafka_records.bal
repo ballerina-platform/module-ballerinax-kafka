@@ -60,7 +60,8 @@ public enum Protocol {
 
 # Configurations related to Kafka authentication mechanisms.
 #
-# + mechanism - Type of the authentication mechanism. Currently only `SASL_PLAIN` is supported
+# + mechanism - Type of the authentication mechanism. Currently `SASL_PLAIN`, `SASL_SCRAM_256` & `SASL_SCRAM_512`
+#               is supported
 # + username - The username to authenticate the Kafka producer/consumer
 # + password - The password to authenticate the Kafka producer/consumer
 public type AuthenticationConfiguration record {|

@@ -374,7 +374,8 @@ public class KafkaUtils {
             addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, authenticationConfig, properties,
                                     KafkaConstants.SECURITY_PROTOCOL_CONFIG);
             properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfigValue);
-        } else if (KafkaConstants.SASL_SCRAM_SHA_256.equals(mechanism)) {
+        } else if (KafkaConstants.SASL_SCRAM_SHA_256.equals(mechanism) ||
+                KafkaConstants.SASL_SCRAM_SHA_512.equals(mechanism)) {
             String username = authenticationConfig.getStringValue(KafkaConstants.USERNAME).getValue();
             String password = authenticationConfig.getStringValue(KafkaConstants.PASSWORD).getValue();
             String jaasConfigValue =

@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Added
-- [Add SASL-SCRAM-256 authentication support](https://github.com/ballerina-platform/ballerina-library/issues/6766)
+- [Add SASL-SCRAM authentication support](https://github.com/ballerina-platform/ballerina-library/issues/6766)
 
 ## [4.0.0] - 2024-05-05
 
