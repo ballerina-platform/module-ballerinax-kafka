@@ -1028,7 +1028,7 @@ function saslScram256ConsumerTest() returns error? {
     };
     Consumer consumer = check new(SASL_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
     check consumer->close();
 }
 
@@ -1049,7 +1049,7 @@ function saslScram512ConsumerTest() returns error? {
     };
     Consumer consumer = check new(SASL_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
     check consumer->close();
 }
 
