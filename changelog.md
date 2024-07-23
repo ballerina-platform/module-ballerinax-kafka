@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - [Add SASL-SCRAM authentication support](https://github.com/ballerina-platform/ballerina-library/issues/6766)
 
+### Fixed
+- [Fixed NPE when secure socket protocol is not provided](https://github.com/ballerina-platform/ballerina-library/issues/6763)
+
 ## [4.0.0] - 2024-05-05
 
 ### Removed
