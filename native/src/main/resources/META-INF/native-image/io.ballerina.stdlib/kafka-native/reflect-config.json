@@ -45,6 +45,24 @@
     ]
   },
   {
+    "name": "org.apache.kafka.common.security.scram.ScramLoginModule",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.security.scram.internals.ScramSaslClient$ScramSaslClientFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
     "name": "org.apache.kafka.common.security.plain.PlainLoginModule",
     "methods": [
       {
