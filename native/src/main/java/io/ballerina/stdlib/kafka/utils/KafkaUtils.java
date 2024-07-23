@@ -366,9 +366,8 @@ public class KafkaUtils {
         if (KafkaConstants.SASL_PLAIN.equals(mechanism)) {
             String username = authenticationConfig.getStringValue(KafkaConstants.USERNAME).getValue();
             String password = authenticationConfig.getStringValue(KafkaConstants.PASSWORD).getValue();
-            String jaasConfigValue =
-                    "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"" + username +
-                            "\" password=\"" + password + "\";";
+            String jaasConfigValue = String.format("org.apache.kafka.common.security.plain.PlainLoginModule " +
+                    "required username=\"%s\" password=\"%s\";", username, password);
             addStringParamIfPresent(SaslConfigs.SASL_MECHANISM, authenticationConfig, properties,
                                     KafkaConstants.AUTHENTICATION_MECHANISM);
             addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, authenticationConfig, properties,
@@ -378,9 +377,8 @@ public class KafkaUtils {
                 KafkaConstants.SASL_SCRAM_SHA_512.equals(mechanism)) {
             String username = authenticationConfig.getStringValue(KafkaConstants.USERNAME).getValue();
             String password = authenticationConfig.getStringValue(KafkaConstants.PASSWORD).getValue();
-            String jaasConfigValue =
-                    "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"" + username +
-                            "\" password=\"" + password + "\";";
+            String jaasConfigValue = String.format("org.apache.kafka.common.security.scram.ScramLoginModule " +
+                    "required username=\"%s\" password=\"%s\";", username, password);
             addStringParamIfPresent(SaslConfigs.SASL_MECHANISM, authenticationConfig, properties,
                     KafkaConstants.AUTHENTICATION_MECHANISM);
             addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, authenticationConfig, properties,
