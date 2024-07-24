@@ -390,7 +390,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "kafka"
-version = "4.0.1"
+version = "4.1.0"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "crypto"},

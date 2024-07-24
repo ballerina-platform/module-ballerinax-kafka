@@ -305,6 +305,61 @@ function saslProducerTest() returns error? {
 }
 
 @test:Config{enable: true}
+function saslScram256ProducerTest() returns error? {
+    string topic = "sasl-scram-256-producer-test-topic";
+    kafkaTopics.push(topic);
+
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-06",
+        auth: authScram256Config,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+
+    Producer kafkaProducer = check new (SASL_URL, producerConfigs);
+    check kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    check kafkaProducer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "sasl-scram-256-producer-test-group",
+        clientId: "test-consumer-49"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
+    check consumer->close();
+}
+
+@test:Config{enable: true}
+function saslScram512ProducerTest() returns error? {
+    string topic = "sasl-scram-512-producer-test-topic";
+    kafkaTopics.push(topic);
+
+    ProducerConfiguration producerConfigs = {
+        clientId: "test-producer-06",
+        auth: authScram512Config,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+
+    Producer kafkaProducer = check new (SASL_URL, producerConfigs);
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    check kafkaProducer->close();
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "sasl-scram-512-producer-test-group",
+        clientId: "test-consumer-49"
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
+    check consumer->close();
+}
+
+@test:Config{enable: true}
 function saslProducerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
     kafkaTopics.push(topic);

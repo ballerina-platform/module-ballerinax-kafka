@@ -35,7 +35,11 @@ const string INVALID_URL = "127.0.0.1.1:9099";
 const string INCORRECT_KAFKA_URL = "localhost:9099";
 
 const string SASL_USER = "admin";
+const string SASL_SCRAM_256_USER = "scram256user";
+const string SASL_SCRAM_512_USER = "scram512user";
 const string SASL_PASSWORD = "password";
+const string SASL_SCRAM_256_PASSWORD = "scram256password";
+const string SASL_SCRAM_512_PASSWORD = "scram512password";
 const string SASL_INCORRECT_PASSWORD = "incorrect_password";
 
 const string SSL_KEYSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.keystore.jks";
@@ -64,6 +68,18 @@ AuthenticationConfiguration authConfig = {
     mechanism: AUTH_SASL_PLAIN,
     username: SASL_USER,
     password: SASL_PASSWORD
+};
+
+AuthenticationConfiguration authScram256Config = {
+    mechanism: AUTH_SASL_SCRAM_SHA_256,
+    username: SASL_SCRAM_256_USER,
+    password: SASL_SCRAM_256_PASSWORD
+};
+
+AuthenticationConfiguration authScram512Config = {
+    mechanism: AUTH_SASL_SCRAM_SHA_512,
+    username: SASL_SCRAM_512_USER,
+    password: SASL_SCRAM_512_PASSWORD
 };
 
 crypto:TrustStore trustStore = {
@@ -992,6 +1008,48 @@ function saslConsumerTest() returns error? {
     Consumer consumer = check new(SASL_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
+    check consumer->close();
+}
+
+@test:Config{enable: true}
+function saslScram256ConsumerTest() returns error? {
+    string topic = "sasl-scram-256-consumer-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-sasl-scram-256-test-group",
+        clientId: "test-consumer-42",
+        autoCommit: false,
+        auth: authScram256Config,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
+    check consumer->close();
+}
+
+@test:Config{enable: true}
+function saslScram512ConsumerTest() returns error? {
+    string topic = "sasl-scram-512-consumer-test-topic";
+    kafkaTopics.push(topic);
+    check sendMessage(TEST_MESSAGE.toBytes(), topic);
+
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-sasl-scram-512-test-group",
+        clientId: "test-consumer-42",
+        autoCommit: false,
+        auth: authScram512Config,
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+    };
+    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
+    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
     check consumer->close();
 }
 

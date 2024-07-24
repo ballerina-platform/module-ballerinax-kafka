@@ -199,6 +199,8 @@ public class KafkaConstants {
 
     // Authentication Mechanisms
     public static final String SASL_PLAIN = "PLAIN";
+    public static final String SASL_SCRAM_SHA_256 = "SCRAM-SHA-256";
+    public static final String SASL_SCRAM_SHA_512 = "SCRAM-SHA-512";
 
     // Serializer - Deserializer names
     // Ballerina String Names
