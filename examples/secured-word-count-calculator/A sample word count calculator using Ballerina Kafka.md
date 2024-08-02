@@ -21,7 +21,7 @@ The difference in this example is that, we use a secured kafka cluster and commu
 2. [Use Kafka with docker](https://hub.docker.com/r/confluentinc/cp-kafka/)
 
 * You can refer [here](https://docs.confluent.io/platform/current/kafka/authentication_ssl.html) to learn how to deploy a secured Kafka cluster.
-* You can find the docker file used to set up the cluster for this example in [here](../../ballerina/tests/docker-compose.yaml).
+* You can find the docker file used to set up the cluster for this example in [here](../../ballerina/tests/compose.yaml).
 
 ## Run the Example
 
