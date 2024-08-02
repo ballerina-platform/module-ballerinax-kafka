@@ -1,5 +1,3 @@
-version: '2'
-
 services:
     zookeeper-add-kafka-users:
         image: 'confluentinc/cp-kafka:latest'
