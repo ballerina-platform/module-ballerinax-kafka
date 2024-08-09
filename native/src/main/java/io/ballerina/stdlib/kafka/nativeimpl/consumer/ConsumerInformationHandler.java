@@ -77,7 +77,9 @@ public class ConsumerInformationHandler {
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         List<TopicPartition> partitions = getTopicPartitionList(topicPartitions, logger);
         try {
-            kafkaConsumer.assign(partitions);
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.assign(partitions);
+            }
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_ASSIGN);
             return createKafkaError("Failed to assign topics for the consumer: " + e.getMessage());
@@ -97,7 +99,10 @@ public class ConsumerInformationHandler {
         BArray topicPartitionArray =
                 ValueCreator.createArrayValue(TypeCreator.createArrayType(getTopicPartitionRecord().getType()));
         try {
-            Set<TopicPartition> topicPartitions = kafkaConsumer.assignment();
+            Set<TopicPartition> topicPartitions;
+            synchronized (kafkaConsumer) {
+                topicPartitions = kafkaConsumer.assignment();
+            }
             for (TopicPartition partition : topicPartitions) {
                 BMap<BString, Object> tp = populateTopicPartitionRecord(partition.topic(), partition.partition());
                 topicPartitionArray.append(tp);
@@ -124,12 +129,14 @@ public class ConsumerInformationHandler {
         int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         Map<String, List<PartitionInfo>> topics;
         try {
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) {
-                topics = getAvailableTopicWithDuration(kafkaConsumer, apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                topics = getAvailableTopicWithDuration(kafkaConsumer, defaultApiTimeout);
-            } else {
-                topics = kafkaConsumer.listTopics();
+            synchronized (kafkaConsumer) {
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
+                    topics = getAvailableTopicWithDuration(kafkaConsumer, apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    topics = getAvailableTopicWithDuration(kafkaConsumer, defaultApiTimeout);
+                } else {
+                    topics = kafkaConsumer.listTopics();
+                }
             }
             return getBArrayFromMap(topics);
         } catch (KafkaException e) {
@@ -150,7 +157,10 @@ public class ConsumerInformationHandler {
         BArray topicPartitionArray =
                 ValueCreator.createArrayValue(TypeCreator.createArrayType(getTopicPartitionRecord().getType()));
         try {
-            Set<TopicPartition> pausedPartitions = kafkaConsumer.paused();
+            Set<TopicPartition> pausedPartitions;
+            synchronized (kafkaConsumer) {
+                pausedPartitions = kafkaConsumer.paused();
+            }
             for (TopicPartition partition : pausedPartitions) {
                 BMap<BString, Object> tp = populateTopicPartitionRecord(partition.topic(), partition.partition());
                 topicPartitionArray.append(tp);
@@ -182,12 +192,14 @@ public class ConsumerInformationHandler {
 
         try {
             List<PartitionInfo> partitionInfoList;
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) {
-                partitionInfoList = getPartitionInfoList(kafkaConsumer, topic.getValue(), apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                partitionInfoList = getPartitionInfoList(kafkaConsumer, topic.getValue(), defaultApiTimeout);
-            } else {
-                partitionInfoList = kafkaConsumer.partitionsFor(topic.getValue());
+            synchronized (kafkaConsumer) {
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
+                    partitionInfoList = getPartitionInfoList(kafkaConsumer, topic.getValue(), apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    partitionInfoList = getPartitionInfoList(kafkaConsumer, topic.getValue(), defaultApiTimeout);
+                } else {
+                    partitionInfoList = kafkaConsumer.partitionsFor(topic.getValue());
+                }
             }
             BArray topicPartitionArray =
                     ValueCreator.createArrayValue(TypeCreator.createArrayType(getTopicPartitionRecord().getType()));
@@ -215,7 +227,10 @@ public class ConsumerInformationHandler {
         KafkaConsumer<byte[], byte[]> kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
 
         try {
-            Set<String> subscriptions = kafkaConsumer.subscription();
+            Set<String> subscriptions;
+            synchronized (kafkaConsumer) {
+                subscriptions = kafkaConsumer.subscription();
+            }
             BArray arrayValue = ValueCreator.createArrayValue(stringArrayType);
             if (!subscriptions.isEmpty()) {
                 for (String subscription : subscriptions) {

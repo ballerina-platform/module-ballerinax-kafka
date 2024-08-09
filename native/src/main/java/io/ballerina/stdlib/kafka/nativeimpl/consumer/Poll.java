@@ -69,14 +69,17 @@ public class Poll {
         executorService.execute(()-> {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
-                ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
                 boolean autoSeek = getAutoSeekOnErrorConfig(consumerObject);
-                BArray consumerRecords = getConsumerRecords(recordsRetrieved, recordType,
-                        bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit,
-                        kafkaConsumer, autoSeek);
+                BArray consumerRecords;
+                synchronized (kafkaConsumer) {
+                    ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
+                    consumerRecords = getConsumerRecords(recordsRetrieved, recordType,
+                            bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit,
+                            kafkaConsumer, autoSeek);
+                }
                 balFuture.complete(consumerRecords);
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
@@ -96,16 +99,19 @@ public class Poll {
         executorService.execute(()-> {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
-                ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
                 ArrayType arrayType = (ArrayType) TypeUtils.getImpliedType(bTypedesc.getDescribingType());
                 BArray dataArray = ValueCreator.createArrayValue(arrayType);
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
                         .get(CONSTRAINT_VALIDATION);
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
                 boolean autoSeek = getAutoSeekOnErrorConfig(consumerObject);
-                if (!recordsRetrieved.isEmpty()) {
-                    dataArray = getValuesWithIntendedType(arrayType, kafkaConsumer, recordsRetrieved,
-                            constraintValidation, autoCommit, autoSeek);
+                ConsumerRecords recordsRetrieved;
+                synchronized (kafkaConsumer) {
+                    recordsRetrieved = kafkaConsumer.poll(duration);
+                    if (!recordsRetrieved.isEmpty()) {
+                        dataArray = getValuesWithIntendedType(arrayType, kafkaConsumer, recordsRetrieved,
+                                constraintValidation, autoCommit, autoSeek);
+                    }
                 }
                 balFuture.complete(dataArray);
             } catch (BError bError) {

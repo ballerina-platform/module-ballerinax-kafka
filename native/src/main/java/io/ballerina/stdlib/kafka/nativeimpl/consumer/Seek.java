@@ -61,7 +61,9 @@ public class Seek {
         Long offset = partitionOffset.getIntValue(ALIAS_OFFSET);
 
         try {
-            kafkaConsumer.seek(topicPartition, offset);
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.seek(topicPartition, offset);
+            }
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SEEK);
             return createKafkaError("Failed to seek the consumer: " + e.getMessage());
@@ -81,7 +83,9 @@ public class Seek {
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
         try {
-            kafkaConsumer.seekToBeginning(partitionList);
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.seekToBeginning(partitionList);
+            }
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SEEK_BEG);
             return createKafkaError("Failed to seek the consumer to the beginning: " + e.getMessage());
@@ -101,7 +105,9 @@ public class Seek {
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         ArrayList<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
         try {
-            kafkaConsumer.seekToEnd(partitionList);
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.seekToEnd(partitionList);
+            }
         } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_SEEK_END);
             return createKafkaError("Failed to seek the consumer to the end: " + e.getMessage());

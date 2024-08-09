@@ -81,12 +81,14 @@ public class GetOffsets {
         List<TopicPartition> partitionList = getTopicPartitionList(topicPartitions, logger);
         Map<TopicPartition, Long> offsetMap;
         try {
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) {
-                offsetMap = getBeginningOffsetsWithDuration(kafkaConsumer, partitionList, apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                offsetMap = getBeginningOffsetsWithDuration(kafkaConsumer, partitionList, defaultApiTimeout);
-            } else {
-                offsetMap = kafkaConsumer.beginningOffsets(partitionList);
+            synchronized (kafkaConsumer) {
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
+                    offsetMap = getBeginningOffsetsWithDuration(kafkaConsumer, partitionList, apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    offsetMap = getBeginningOffsetsWithDuration(kafkaConsumer, partitionList, defaultApiTimeout);
+                } else {
+                    offsetMap = kafkaConsumer.beginningOffsets(partitionList);
+                }
             }
             return getPartitionOffsetArrayFromOffsetMap(offsetMap);
         } catch (KafkaException e) {
@@ -118,12 +120,14 @@ public class GetOffsets {
         try {
             OffsetAndMetadata offsetAndMetadata;
             BMap<BString, Object> offset;
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) {
-                offsetAndMetadata = getOffsetAndMetadataWithDuration(kafkaConsumer, tp, apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                offsetAndMetadata = getOffsetAndMetadataWithDuration(kafkaConsumer, tp, defaultApiTimeout);
-            } else {
-                offsetAndMetadata = kafkaConsumer.committed(tp);
+            synchronized (kafkaConsumer) {
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
+                    offsetAndMetadata = getOffsetAndMetadataWithDuration(kafkaConsumer, tp, apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    offsetAndMetadata = getOffsetAndMetadataWithDuration(kafkaConsumer, tp, defaultApiTimeout);
+                } else {
+                    offsetAndMetadata = kafkaConsumer.committed(tp);
+                }
             }
             if (Objects.isNull(offsetAndMetadata)) {
                 return null;
@@ -156,12 +160,14 @@ public class GetOffsets {
         Map<TopicPartition, Long> offsetMap;
 
         try {
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) {
-                offsetMap = getEndOffsetsWithDuration(kafkaConsumer, partitionList, apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                offsetMap = getEndOffsetsWithDuration(kafkaConsumer, partitionList, defaultApiTimeout);
-            } else {
-                offsetMap = kafkaConsumer.endOffsets(partitionList);
+            synchronized (kafkaConsumer) {
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
+                    offsetMap = getEndOffsetsWithDuration(kafkaConsumer, partitionList, apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    offsetMap = getEndOffsetsWithDuration(kafkaConsumer, partitionList, defaultApiTimeout);
+                } else {
+                    offsetMap = kafkaConsumer.endOffsets(partitionList);
+                }
             }
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
@@ -193,12 +199,14 @@ public class GetOffsets {
 
         try {
             long position;
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) {
-                position = getPositionWithDuration(kafkaConsumer, tp, apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                position = getPositionWithDuration(kafkaConsumer, tp, defaultApiTimeout);
-            } else {
-                position = kafkaConsumer.position(tp);
+            synchronized (kafkaConsumer) {
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
+                    position = getPositionWithDuration(kafkaConsumer, tp, apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    position = getPositionWithDuration(kafkaConsumer, tp, defaultApiTimeout);
+                } else {
+                    position = kafkaConsumer.position(tp);
+                }
             }
             return position;
         } catch (IllegalStateException | KafkaException e) {

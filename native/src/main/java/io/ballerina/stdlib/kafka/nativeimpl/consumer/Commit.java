@@ -62,7 +62,9 @@ public class Commit {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         try {
-            kafkaConsumer.commitSync();
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.commitSync();
+            }
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);
             return createKafkaError("Failed to commit offsets: " + e.getMessage());
@@ -88,12 +90,15 @@ public class Commit {
         int apiTimeout = getIntFromBDecimal(duration, logger, ALIAS_DURATION);
         Map<TopicPartition, OffsetAndMetadata> partitionToMetadataMap = getPartitionToMetadataMap(offsets);
         try {
-            if (apiTimeout > DURATION_UNDEFINED_VALUE) { // API timeout should given the priority over the default value
-                consumerCommitSyncWithDuration(kafkaConsumer, partitionToMetadataMap, apiTimeout);
-            } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
-                consumerCommitSyncWithDuration(kafkaConsumer, partitionToMetadataMap, defaultApiTimeout);
-            } else {
-                kafkaConsumer.commitSync(partitionToMetadataMap);
+            synchronized (kafkaConsumer) {
+                // API timeout should given the priority over the default value
+                if (apiTimeout > DURATION_UNDEFINED_VALUE) {
+                    consumerCommitSyncWithDuration(kafkaConsumer, partitionToMetadataMap, apiTimeout);
+                } else if (defaultApiTimeout > DURATION_UNDEFINED_VALUE) {
+                    consumerCommitSyncWithDuration(kafkaConsumer, partitionToMetadataMap, defaultApiTimeout);
+                } else {
+                    kafkaConsumer.commitSync(partitionToMetadataMap);
+                }
             }
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_COMMIT);

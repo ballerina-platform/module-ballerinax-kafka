@@ -60,7 +60,9 @@ public class SubscriptionHandler {
         List<String> topicsList = getStringListFromStringBArray(topics);
         consumerObject.addNativeData("topics", topicsList);
         try {
-            kafkaConsumer.subscribe(topicsList);
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.subscribe(topicsList);
+            }
             Set<String> subscribedTopics = kafkaConsumer.subscription();
             KafkaMetricsUtil.reportBulkSubscription(consumerObject, subscribedTopics);
         } catch (IllegalArgumentException | IllegalStateException | KafkaException e) {
@@ -84,7 +86,9 @@ public class SubscriptionHandler {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         try {
-            kafkaConsumer.subscribe(Pattern.compile(topicRegex.getValue()));
+            synchronized (kafkaConsumer) {
+                kafkaConsumer.subscribe(Pattern.compile(topicRegex.getValue()));
+            }
             // TODO: This sometimes not updating since Kafka not updates the subscription tight away
             Set<String> topicsList = kafkaConsumer.subscription();
             KafkaMetricsUtil.reportBulkSubscription(consumerObject, topicsList);
@@ -106,8 +110,11 @@ public class SubscriptionHandler {
         KafkaTracingUtil.traceResourceInvocation(environment, consumerObject);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         try {
-            Set<String> topics = kafkaConsumer.subscription();
-            kafkaConsumer.unsubscribe();
+            Set<String> topics;
+            synchronized (kafkaConsumer) {
+                topics = kafkaConsumer.subscription();
+                kafkaConsumer.unsubscribe();
+            }
             KafkaMetricsUtil.reportBulkUnsubscription(consumerObject, topics);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_UNSUBSCRIBE);
