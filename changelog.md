@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [4.2.0] - 2024-08-20
+
 ### Fixed
 - [Fixed `ConcurrentModificationException` when accessing `kafka:Consumer` concurrently](https://github.com/ballerina-platform/ballerina-library/issues/6700)
 

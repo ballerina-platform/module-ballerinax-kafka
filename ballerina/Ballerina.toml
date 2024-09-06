@@ -16,7 +16,7 @@ graalvmCompatible = true
 groupId = "io.ballerina.stdlib"
 artifactId = "kafka-native"
 version = "4.2.0"
-path = "../native/build/libs/kafka-native-4.2.0-SNAPSHOT.jar"
+path = "../native/build/libs/kafka-native-4.2.0.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.apache.kafka"
