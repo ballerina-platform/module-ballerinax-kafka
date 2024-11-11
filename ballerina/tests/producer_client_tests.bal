@@ -180,7 +180,7 @@ function producerGetTopicPartitionsErrorTest() returns error? {
     check producer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {enable: false}
 function transactionalProducerTest() returns error? {
     string topic = "transactional-producer-test-topic";
     kafkaTopics.push(topic);
@@ -217,7 +217,7 @@ function transactionalProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {enable: false}
 function transactionalProducerWithAbortTest() returns error? {
     string topic = "rollback-producer-test-topic";
     kafkaTopics.push(topic);

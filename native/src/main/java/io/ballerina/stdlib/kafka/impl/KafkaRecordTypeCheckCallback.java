@@ -18,15 +18,13 @@
 
 package io.ballerina.stdlib.kafka.impl;
 
-import io.ballerina.runtime.api.async.Callback;
-
 import java.util.concurrent.Semaphore;
 
 /**
  * {@code KafkaRecordTypeCheckCallback} provides ability to check whether a given type is a subtype of
  * kafka:AnydataConsumerRecord.
  */
-public class KafkaRecordTypeCheckCallback implements Callback {
+public class KafkaRecordTypeCheckCallback {
 
     private final Semaphore semaphore;
     private Boolean isConsumerRecordType = false;
@@ -38,7 +36,6 @@ public class KafkaRecordTypeCheckCallback implements Callback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void notifySuccess(Object obj) {
         isConsumerRecordType = (Boolean) obj;
         semaphore.release();
@@ -47,7 +44,6 @@ public class KafkaRecordTypeCheckCallback implements Callback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void notifyFailure(io.ballerina.runtime.api.values.BError error) {
         semaphore.release();
         error.printStackTrace();

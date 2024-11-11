@@ -18,7 +18,6 @@
 
 package io.ballerina.stdlib.kafka.impl;
 
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.values.BError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ import java.util.concurrent.Semaphore;
  * {@code KafkaPollCycleFutureListener} listener provides ability control poll cycle flow by notifications received from
  * Ballerina side.
  */
-public class KafkaPollCycleFutureListener implements Callback {
+public class KafkaPollCycleFutureListener {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaPollCycleFutureListener.class);
 
@@ -54,7 +53,6 @@ public class KafkaPollCycleFutureListener implements Callback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void notifySuccess(Object obj) {
         sem.release();
         if (obj instanceof BError) {
@@ -70,7 +68,6 @@ public class KafkaPollCycleFutureListener implements Callback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void notifyFailure(BError error) {
         sem.release();
         if (logger.isDebugEnabled()) {
@@ -78,7 +75,6 @@ public class KafkaPollCycleFutureListener implements Callback {
                     ". Semaphore is released to continue next polling cycle.", error.toString());
         }
         error.printStackTrace();
-        System.exit(1);
     }
 
 }

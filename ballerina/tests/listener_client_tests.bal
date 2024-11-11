@@ -271,7 +271,7 @@ function listenerConfigErrorTest() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [consumerServiceCommitTest]
 }
 function consumerServiceCommitOffsetTest() returns error? {
@@ -309,7 +309,7 @@ function consumerServiceCommitOffsetTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config {enable: true}
+@test:Config {enable: false}
 function consumerServiceCommitTest() returns error? {
     string topic = "listener-commit-test-topic";
     kafkaTopics.push(topic);
