@@ -18,9 +18,7 @@
 
 package io.ballerina.stdlib.kafka.impl;
 
-import io.ballerina.runtime.api.PredefinedTypes;
-import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
@@ -71,7 +69,6 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PARAM_ANNOTATION_PR
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PARAM_PAYLOAD_ANNOTATION_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.TYPE_CHECKER_OBJECT_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
-import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAttachedFunctionReturnType;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoCommitConfig;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getAutoSeekOnErrorConfig;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getConsumerRecords;
@@ -84,10 +81,10 @@ public class KafkaListenerImpl implements KafkaListener {
 
     private final BObject service;
     private final BObject listener;
-    private final Runtime bRuntime;
+    private final Environment env;
 
-    public KafkaListenerImpl(BObject listener, BObject service, Runtime bRuntime) {
-        this.bRuntime = bRuntime;
+    public KafkaListenerImpl(BObject listener, BObject service, Environment env) {
+        this.env = env;
         this.listener = listener;
         this.service = service;
     }
@@ -119,50 +116,61 @@ public class KafkaListenerImpl implements KafkaListener {
 
     private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records) {
         StrandMetadata metadata = getStrandMetadata(KAFKA_RESOURCE_ON_RECORD);
-        Map<String, Object> properties = null;
-        Type returnType = null;
         KafkaConsumer kafkaConsumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
-        if (ObserveUtils.isTracingEnabled()) {
-            properties = getNewObserverContextInProperties(listener);
-            returnType = getAttachedFunctionReturnType(service, KAFKA_RESOURCE_ON_RECORD);
-        }
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
-        if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
-            bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                    consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
-                    getResourceParameters(service, this.listener, records, kafkaConsumer));
-        } else {
-            bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                    consumer, properties, returnType == null ? PredefinedTypes.TYPE_NULL : returnType,
-                    getResourceParameters(service, this.listener, records, kafkaConsumer));
-        }
+        Thread.startVirtualThread(() -> {
+            Map<String, Object> properties = null;
+            if (ObserveUtils.isTracingEnabled()) {
+                properties = getNewObserverContextInProperties(listener);
+            }
+            Object result;
+            try {
+                if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
+                    result = env.getRuntime().startIsolatedWorker(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                            properties, getResourceParameters(service, this.listener, records, kafkaConsumer)).get();
+                } else {
+                    result = env.getRuntime().startNonIsolatedWorker(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
+                            properties, getResourceParameters(service, this.listener, records, kafkaConsumer)).get();
+                }
+                consumer.notifySuccess(result);
+            } catch (BError bError) {
+                consumer.notifyFailure(bError);
+                onError(bError);
+            }
+        });
     }
 
     private void executeOnError(MethodType onErrorMethod, Throwable throwable) {
         StrandMetadata metadata = getStrandMetadata(KAFKA_RESOURCE_ON_ERROR);
-        Map<String, Object> properties = null;
-        if (ObserveUtils.isTracingEnabled()) {
-            properties = getNewObserverContextInProperties(listener);
-        }
-        Object[] arguments = new Object[onErrorMethod.getParameters().length * 2];
+        Object[] arguments = new Object[onErrorMethod.getParameters().length];
         if (throwable instanceof BError) {
             arguments[0] = throwable;
         } else {
-            arguments[0] = KafkaUtils.createKafkaError(throwable.getMessage());
+            arguments[0] = createKafkaError(throwable.getMessage());
         }
-        arguments[1] = true;
-        if (arguments.length == 4) {
-            arguments[2] = createCaller(this.listener);
-            arguments[3] = true;
+        if (arguments.length == 2) {
+            arguments[1] = createCaller(this.listener);
         }
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
-        if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
-            bRuntime.invokeMethodAsyncConcurrently(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
-                    new KafkaOnErrorCallback(), properties, PredefinedTypes.TYPE_NULL, arguments);
-        } else {
-            bRuntime.invokeMethodAsyncSequentially(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
-                    new KafkaOnErrorCallback(), properties, PredefinedTypes.TYPE_NULL, arguments);
-        }
+        Thread.startVirtualThread(() -> {
+            Map<String, Object> properties = null;
+            if (ObserveUtils.isTracingEnabled()) {
+                properties = getNewObserverContextInProperties(listener);
+            }
+            Object result;
+            try {
+                if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
+                    result = env.getRuntime().startIsolatedWorker(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
+                            properties, arguments).get();
+                } else {
+                    result = env.getRuntime().startNonIsolatedWorker(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
+                            properties, arguments).get();
+                }
+                (new KafkaOnErrorCallback()).notifySuccess(result);
+            } catch (BError bError) {
+                (new KafkaOnErrorCallback()).notifyFailure(bError);
+            }
+        });
     }
 
     private Map<String, Object> getNewObserverContextInProperties(BObject listener) {
@@ -181,18 +189,17 @@ public class KafkaListenerImpl implements KafkaListener {
         boolean callerExists = false;
         boolean consumerRecordsExists = false;
         boolean payloadExists = false;
-        Object[] arguments = new Object[parameters.length * 2];
+        Object[] arguments = new Object[parameters.length];
         int index = 0;
         for (Parameter parameter : parameters) {
             Type referredType = getReferredType(parameter.type);
             switch (referredType.getTag()) {
                 case OBJECT_TYPE_TAG:
                     if (callerExists) {
-                        throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                        throw createKafkaError("Invalid remote function signature");
                     }
                     callerExists = true;
                     arguments[index++] = createCaller(listener);
-                    arguments[index++] = true;
                     break;
                 case INTERSECTION_TAG:
                 case ARRAY_TAG:
@@ -202,27 +209,25 @@ public class KafkaListenerImpl implements KafkaListener {
                     boolean autoSeek = getAutoSeekOnErrorConfig(listener);
                     if (isConsumerRecordsType(parameter, consumerRecordMethodType.getAnnotations())) {
                         if (consumerRecordsExists) {
-                            throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                            throw createKafkaError("Invalid remote function signature");
                         }
                         consumerRecordsExists = true;
                         BArray consumerRecords = getConsumerRecords(records,
                                 (RecordType) getIntendedType(referredType), referredType.isReadOnly(),
                                 constraintValidation, autoCommit, kafkaConsumer, autoSeek);
                         arguments[index++] = consumerRecords;
-                        arguments[index++] = true;
                     } else {
                         if (payloadExists) {
-                            throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                            throw createKafkaError("Invalid remote function signature");
                         }
                         payloadExists = true;
                         BArray payload = getValuesWithIntendedType(referredType, kafkaConsumer, records,
                                 constraintValidation, autoCommit, autoSeek);
                         arguments[index++] = payload;
-                        arguments[index++] = true;
                     }
                     break;
                 default:
-                    throw KafkaUtils.createKafkaError("Invalid remote function signature");
+                    throw createKafkaError("Invalid remote function signature");
             }
         }
         return arguments;
@@ -275,9 +280,16 @@ public class KafkaListenerImpl implements KafkaListener {
         Semaphore sem = new Semaphore(0);
         KafkaRecordTypeCheckCallback recordTypeCheckCallback = new KafkaRecordTypeCheckCallback(sem);
         StrandMetadata metadata = getStrandMetadata(KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD);
-        bRuntime.invokeMethodAsyncSequentially(client, KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD, null, metadata,
-                recordTypeCheckCallback, null, PredefinedTypes.TYPE_BOOLEAN,
-                ValueCreator.createTypedescValue(paramType), true);
+        Thread.startVirtualThread(() -> {
+            try {
+                Object result = env.getRuntime().startNonIsolatedWorker(client,
+                        KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD,
+                        null, metadata, null, ValueCreator.createTypedescValue(paramType)).get();
+                recordTypeCheckCallback.notifySuccess(result);
+            } catch (BError bError) {
+                recordTypeCheckCallback.notifyFailure(bError);
+            }
+        });
         try {
             sem.acquire();
         } catch (InterruptedException e) {
@@ -291,15 +303,13 @@ public class KafkaListenerImpl implements KafkaListener {
                     ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), parentFunctionName);
     }
 
-    static class KafkaOnErrorCallback implements Callback {
-        @Override
+    static class KafkaOnErrorCallback {
         public void notifySuccess(Object result) {
             if (result instanceof BError) {
                 ((BError) result).printStackTrace();
             }
         }
 
-        @Override
         public void notifyFailure(BError bError) {
             bError.printStackTrace();
             System.exit(1);
