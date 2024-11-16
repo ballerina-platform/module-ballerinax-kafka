@@ -154,8 +154,7 @@ public class KafkaListenerImpl implements KafkaListener {
             try {
                 boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR);
                 StrandMetadata metadata = new StrandMetadata(isIsolated, properties);
-                Object result = env.getRuntime().callMethod(service, KAFKA_RESOURCE_ON_ERROR, metadata,
-                            properties, arguments);
+                Object result = env.getRuntime().callMethod(service, KAFKA_RESOURCE_ON_ERROR, metadata, arguments);
                 (new KafkaOnErrorCallback()).notifySuccess(result);
             } catch (BError bError) {
                 (new KafkaOnErrorCallback()).notifyFailure(bError);

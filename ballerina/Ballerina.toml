@@ -33,8 +33,8 @@ path = "./lib/kafka_2.12-3.5.1.jar"
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
-version = "1.5.1"
-path = "./lib/constraint-native-1.5.1-20240930-123400-5ecd396.jar"
+version = "1.6.0"
+path = "./lib/constraint-native-1.6.0-20241113-090900-d276ad5.jar"
 
 [build-options]
 observabilityIncluded=true
