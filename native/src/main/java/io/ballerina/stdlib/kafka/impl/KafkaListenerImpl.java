@@ -19,7 +19,7 @@
 package io.ballerina.stdlib.kafka.impl;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.IntersectionType;
@@ -54,9 +54,9 @@ import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Stream;
 
-import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
-import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
-import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.INTERSECTION_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
@@ -115,7 +115,6 @@ public class KafkaListenerImpl implements KafkaListener {
     }
 
     private void executeResource(BObject listener, KafkaPollCycleFutureListener consumer, ConsumerRecords records) {
-        StrandMetadata metadata = getStrandMetadata(KAFKA_RESOURCE_ON_RECORD);
         KafkaConsumer kafkaConsumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         Thread.startVirtualThread(() -> {
@@ -123,15 +122,11 @@ public class KafkaListenerImpl implements KafkaListener {
             if (ObserveUtils.isTracingEnabled()) {
                 properties = getNewObserverContextInProperties(listener);
             }
-            Object result;
             try {
-                if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_RECORD)) {
-                    result = env.getRuntime().startIsolatedWorker(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                            properties, getResourceParameters(service, this.listener, records, kafkaConsumer)).get();
-                } else {
-                    result = env.getRuntime().startNonIsolatedWorker(service, KAFKA_RESOURCE_ON_RECORD, null, metadata,
-                            properties, getResourceParameters(service, this.listener, records, kafkaConsumer)).get();
-                }
+                boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_RECORD);
+                StrandMetadata metadata = new StrandMetadata(isIsolated, properties);
+                Object result = env.getRuntime().callMethod(service, KAFKA_RESOURCE_ON_RECORD, metadata,
+                            getResourceParameters(service, this.listener, records, kafkaConsumer));
                 consumer.notifySuccess(result);
             } catch (BError bError) {
                 consumer.notifyFailure(bError);
@@ -141,7 +136,6 @@ public class KafkaListenerImpl implements KafkaListener {
     }
 
     private void executeOnError(MethodType onErrorMethod, Throwable throwable) {
-        StrandMetadata metadata = getStrandMetadata(KAFKA_RESOURCE_ON_ERROR);
         Object[] arguments = new Object[onErrorMethod.getParameters().length];
         if (throwable instanceof BError) {
             arguments[0] = throwable;
@@ -157,15 +151,11 @@ public class KafkaListenerImpl implements KafkaListener {
             if (ObserveUtils.isTracingEnabled()) {
                 properties = getNewObserverContextInProperties(listener);
             }
-            Object result;
             try {
-                if (serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR)) {
-                    result = env.getRuntime().startIsolatedWorker(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
-                            properties, arguments).get();
-                } else {
-                    result = env.getRuntime().startNonIsolatedWorker(service, KAFKA_RESOURCE_ON_ERROR, null, metadata,
-                            properties, arguments).get();
-                }
+                boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(KAFKA_RESOURCE_ON_ERROR);
+                StrandMetadata metadata = new StrandMetadata(isIsolated, properties);
+                Object result = env.getRuntime().callMethod(service, KAFKA_RESOURCE_ON_ERROR, metadata,
+                            properties, arguments);
                 (new KafkaOnErrorCallback()).notifySuccess(result);
             } catch (BError bError) {
                 (new KafkaOnErrorCallback()).notifyFailure(bError);
@@ -279,12 +269,11 @@ public class KafkaListenerImpl implements KafkaListener {
         BObject client = ValueCreator.createObjectValue(ModuleUtils.getModule(), TYPE_CHECKER_OBJECT_NAME);
         Semaphore sem = new Semaphore(0);
         KafkaRecordTypeCheckCallback recordTypeCheckCallback = new KafkaRecordTypeCheckCallback(sem);
-        StrandMetadata metadata = getStrandMetadata(KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD);
         Thread.startVirtualThread(() -> {
             try {
-                Object result = env.getRuntime().startNonIsolatedWorker(client,
-                        KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD,
-                        null, metadata, null, ValueCreator.createTypedescValue(paramType)).get();
+                Object result = env.getRuntime().callMethod(client,
+                        KAFKA_RESOURCE_IS_ANYDATA_CONSUMER_RECORD, new StrandMetadata(false, null),
+                        ValueCreator.createTypedescValue(paramType));
                 recordTypeCheckCallback.notifySuccess(result);
             } catch (BError bError) {
                 recordTypeCheckCallback.notifyFailure(bError);
@@ -296,11 +285,6 @@ public class KafkaListenerImpl implements KafkaListener {
             throw createKafkaError(e.getMessage());
         }
         return recordTypeCheckCallback.getIsConsumerRecordType();
-    }
-
-    private StrandMetadata getStrandMetadata(String parentFunctionName) {
-        return new StrandMetadata(ModuleUtils.getModule().getOrg(),
-                    ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), parentFunctionName);
     }
 
     static class KafkaOnErrorCallback {
