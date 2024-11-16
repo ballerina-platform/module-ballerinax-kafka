@@ -52,10 +52,10 @@ public class Send {
         KafkaTracingUtil.traceResourceInvocation(env, producerObject, record.topic());
         final CompletableFuture<Object> balFuture = new CompletableFuture<>();
         KafkaProducer producer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
+        if (TransactionResourceManager.getInstance().isInTransaction()) {
+            handleTransactions(producerObject);
+        }
         Thread.startVirtualThread(() -> {
-            if (TransactionResourceManager.getInstance().isInTransaction()) {
-                handleTransactions(producerObject);
-            }
             try {
                 producer.send(record, (metadata, e) -> {
                     if (Objects.nonNull(e)) {
