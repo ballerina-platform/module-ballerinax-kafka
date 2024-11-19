@@ -19,7 +19,6 @@
 package io.ballerina.stdlib.kafka.service;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -51,14 +50,13 @@ public class Register {
         Object bootStrapServer = listener.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> listenerConfigurations = listener.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
         Properties configs = KafkaUtils.processKafkaConsumerConfig(bootStrapServer, listenerConfigurations);
-        Runtime runtime = env.getRuntime();
 
         try {
             KafkaConsumer kafkaConsumer = null;
             if (Objects.nonNull(listener.getNativeData(NATIVE_CONSUMER))) {
                 kafkaConsumer = (KafkaConsumer) listener.getNativeData(NATIVE_CONSUMER);
             }
-            KafkaListener kafkaListener = new KafkaListenerImpl(listener, service, runtime);
+            KafkaListener kafkaListener = new KafkaListenerImpl(listener, service, env);
             String serviceId = TypeUtils.getType(service).getQualifiedName();
             KafkaServerConnector serverConnector = new KafkaServerConnectorImpl(serviceId, configs, kafkaListener,
                     kafkaConsumer);

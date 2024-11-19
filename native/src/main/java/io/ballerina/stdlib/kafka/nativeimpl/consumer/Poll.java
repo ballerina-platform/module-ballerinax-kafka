@@ -19,7 +19,6 @@
 package io.ballerina.stdlib.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.IntersectionType;
@@ -33,11 +32,13 @@ import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
+import io.ballerina.stdlib.kafka.utils.ModuleUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -63,10 +64,10 @@ public class Poll {
 
     public static Object poll(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
-        Future balFuture = env.markAsync();
+        CompletableFuture<Object> balFuture = new CompletableFuture<>();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
         RecordType recordType = getRecordType(bTypedesc);
-        executorService.execute(()-> {
+        Thread.startVirtualThread(() -> {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
                 boolean constraintValidation = (boolean) consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME)
@@ -89,14 +90,14 @@ public class Poll {
                 balFuture.complete(e);
             }
         });
-        return null;
+        return ModuleUtils.getResult(balFuture);
     }
 
     public static Object pollPayload(Environment env, BObject consumerObject, BDecimal timeout, BTypedesc bTypedesc) {
         KafkaTracingUtil.traceResourceInvocation(env, consumerObject);
-        Future balFuture = env.markAsync();
+        CompletableFuture<Object> balFuture = new CompletableFuture<>();
         KafkaConsumer kafkaConsumer = (KafkaConsumer) consumerObject.getNativeData(NATIVE_CONSUMER);
-        executorService.execute(()-> {
+        Thread.startVirtualThread(() -> {
             try {
                 Duration duration = Duration.ofMillis(getMilliSeconds(timeout));
                 ArrayType arrayType = (ArrayType) TypeUtils.getImpliedType(bTypedesc.getDescribingType());
@@ -122,7 +123,7 @@ public class Poll {
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             }
         });
-        return null;
+        return ModuleUtils.getResult(balFuture);
     }
 
     private static RecordType getRecordType(BTypedesc bTypedesc) {

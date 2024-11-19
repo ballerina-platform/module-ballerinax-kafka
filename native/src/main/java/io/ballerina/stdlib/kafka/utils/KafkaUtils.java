@@ -18,8 +18,6 @@
 
 package io.ballerina.stdlib.kafka.utils;
 
-import io.ballerina.runtime.api.PredefinedTypes;
-import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -29,8 +27,10 @@ import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
+import io.ballerina.runtime.api.types.PredefinedTypes;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
@@ -74,13 +74,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
-import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
-import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
-import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
-import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
-import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
-import static io.ballerina.runtime.api.TypeTags.UNION_TAG;
-import static io.ballerina.runtime.api.TypeTags.XML_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.ANYDATA_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.BYTE_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.INTERSECTION_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.STRING_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.UNION_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.XML_TAG;
 import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ADDITIONAL_PROPERTIES_MAP_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;

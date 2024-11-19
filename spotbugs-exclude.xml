@@ -65,4 +65,12 @@
         <Field name="kafkaProducer"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaServerConnectorImpl"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.impl.KafkaListenerImpl"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>

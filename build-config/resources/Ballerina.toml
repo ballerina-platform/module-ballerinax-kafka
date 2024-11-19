@@ -7,30 +7,30 @@ keywords = ["kafka", "event streaming", "network", "messaging"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-kafka"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.11.0"
+distribution = "2201.10.0-20241025-103700-5c9e6a27"
 
-[platform.java17]
+[platform.java21]
 graalvmCompatible = true
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "kafka-native"
 version = "@toml.version@"
 path = "../native/build/libs/kafka-native-@project.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.apache.kafka"
 artifactId = "kafka-clients"
 version = "@kafka.version@"
 path = "./lib/kafka-clients-@kafka.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.apache.kafka"
 artifactId = "kafka_2.12"
 version = "@kafka.version@"
 path = "./lib/kafka_2.12-@kafka.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
 version = "@constraint.version@"

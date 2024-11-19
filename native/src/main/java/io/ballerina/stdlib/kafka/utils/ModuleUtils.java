@@ -20,8 +20,11 @@ package io.ballerina.stdlib.kafka.utils;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
+import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.values.BError;
 
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -80,5 +83,18 @@ public class ModuleUtils {
 
         LogManager.getLogManager().addLogger(apacheKafkaLogger);
         LogManager.getLogManager().addLogger(balKafkaLogger);
+    }
+
+    public static Object getResult(CompletableFuture<Object> balFuture) {
+        try {
+            return balFuture.get();
+        } catch (BError error) {
+            throw error;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw ErrorCreator.createError(e);
+        } catch (Throwable throwable) {
+            throw ErrorCreator.createError(throwable);
+        }
     }
 }

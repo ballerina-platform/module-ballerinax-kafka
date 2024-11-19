@@ -19,17 +19,18 @@
 package io.ballerina.stdlib.kafka.nativeimpl.producer;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.transactions.TransactionResourceManager;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
+import io.ballerina.stdlib.kafka.utils.ModuleUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -49,12 +50,12 @@ public class Send {
     @SuppressWarnings(UNCHECKED)
     protected static Object sendKafkaRecord(Environment env, ProducerRecord record, BObject producerObject) {
         KafkaTracingUtil.traceResourceInvocation(env, producerObject, record.topic());
-        final Future balFuture = env.markAsync();
+        final CompletableFuture<Object> balFuture = new CompletableFuture<>();
         KafkaProducer producer = (KafkaProducer) producerObject.getNativeData(NATIVE_PRODUCER);
         if (TransactionResourceManager.getInstance().isInTransaction()) {
             handleTransactions(producerObject);
         }
-        executorService.execute(() -> {
+        Thread.startVirtualThread(() -> {
             try {
                 producer.send(record, (metadata, e) -> {
                     if (Objects.nonNull(e)) {
@@ -71,7 +72,7 @@ public class Send {
                 balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
             }
         });
-        return null;
+        return ModuleUtils.getResult(balFuture);
     }
 
     static class KafkaThreadFactory implements ThreadFactory {
