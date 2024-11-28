@@ -7,7 +7,7 @@ keywords = ["kafka", "event streaming", "network", "messaging"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-kafka"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.10.0-20241025-103700-5c9e6a27"
+distribution = "2201.11.0"
 
 [platform.java21]
 graalvmCompatible = true
