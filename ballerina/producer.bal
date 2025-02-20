@@ -24,8 +24,8 @@ import ballerina/jballerina.java;
 public client isolated class Producer {
 
     final ProducerConfiguration? & readonly producerConfig;
-    private final string keySerializerType;
-    private final string valueSerializerType;
+    private final SerializerType keySerializerType;
+    private final SerializerType valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
 
     private string connectorId = uuid:createType4AsString();
@@ -38,8 +38,8 @@ public client isolated class Producer {
     public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers.cloneReadOnly();
         self.producerConfig = config.cloneReadOnly();
-        self.keySerializerType = SER_BYTE_ARRAY;
-        self.valueSerializerType = SER_BYTE_ARRAY;
+        self.keySerializerType = config.keySerializerType;
+        self.valueSerializerType = config.valueSerializerType;
 
         check self.producerInit();
     }
