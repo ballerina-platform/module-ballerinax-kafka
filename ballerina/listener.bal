@@ -34,8 +34,8 @@ public isolated class Listener {
     public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers.cloneReadOnly();
         self.consumerConfig = config.cloneReadOnly();
-        self.keyDeserializerType = DES_BYTE_ARRAY;
-        self.valueDeserializerType = DES_BYTE_ARRAY;
+        self.keyDeserializerType = config.keyDeserializerType;
+        self.valueDeserializerType = config.valueDeserializerType;
         check self.listenerInit();
 
         string|string[]? topics = config?.topics;

@@ -31,9 +31,6 @@ public const DEFAULT_URL = "localhost:9092";
 //         Consumer-Related constants         *
 // ********************************************
 // Deserializer types.
-# In-built Kafka byte array deserializer.
-public const DES_BYTE_ARRAY = "BYTE_ARRAY";
-
 # In-built Kafka string deserializer.
 public const DES_STRING = "STRING";
 
@@ -45,9 +42,6 @@ public const DES_FLOAT = "FLOAT";
 
 # User-defined deserializer.
 public const DES_CUSTOM = "CUSTOM";
-
-# Apache Avro deserializer.
-public const DES_AVRO = "AVRO";
 
 // Isolation levels.
 # Configures the consumer to read the committed messages only in the transactional mode when poll() is called.

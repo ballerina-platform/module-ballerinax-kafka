@@ -22,8 +22,8 @@ import ballerina/jballerina.java;
 public client isolated class Consumer {
 
     final ConsumerConfiguration & readonly consumerConfig;
-    private final string keyDeserializerType;
-    private final string valueDeserializerType;
+    private final DeserializerType keyDeserializerType;
+    private final DeserializerType valueDeserializerType;
     private final string|string[] & readonly bootstrapServers;
 
     # Creates a new `kafka:Consumer`.
@@ -34,8 +34,8 @@ public client isolated class Consumer {
     public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers.cloneReadOnly();
         self.consumerConfig = config.cloneReadOnly();
-        self.keyDeserializerType = DES_BYTE_ARRAY;
-        self.valueDeserializerType = DES_BYTE_ARRAY;
+        self.keyDeserializerType = config.keyDeserializerType;
+        self.valueDeserializerType = config.valueDeserializerType;
         check self.consumerInit();
 
         string|string[]? topics = config?.topics;

@@ -45,3 +45,8 @@ public type SecurityProtocol PROTOCOL_PLAINTEXT|PROTOCOL_SASL_PLAINTEXT|PROTOCOL
 public type Service distinct service object {
     // To be completed when support for optional params in remote functions is available in lang
 };
+public enum DeserializerType {
+    DES_BYTE_ARRAY,
+    DES_AVRO
+}
+

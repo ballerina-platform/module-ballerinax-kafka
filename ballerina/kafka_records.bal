@@ -136,7 +136,8 @@ public type ConsumerConfiguration record {|
     string schemaRegistryUrl?;
 
     map<string> additionalProperties?;
-
+    DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
+    DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
     decimal sessionTimeout?;
     decimal heartBeatInterval?;
     decimal metadataMaxAge?;
