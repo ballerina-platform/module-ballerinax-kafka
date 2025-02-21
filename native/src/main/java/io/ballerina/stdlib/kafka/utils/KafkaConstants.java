@@ -85,6 +85,10 @@ public class KafkaConstants {
     public static final String ALIAS_DURATION = "duration";
 
     // Consumer Configuration.
+    public static final BString SCHEMA_REGISTRY_BASE_URL = StringUtils.fromString("baseUrl");
+    public static final BString SCHEMA_REGISTRY_ORIGINALS = StringUtils.fromString("originals");
+    public static final BString SCHEMA_REGISTRY_HEADERS = StringUtils.fromString("headers");
+    public static final BString AVRO_SCHEMA = StringUtils.fromString("avroSchema");
     public static final BString CONSUMER_BOOTSTRAP_SERVERS_CONFIG = StringUtils.fromString("bootstrapServers");
     public static final BString CONSUMER_GROUP_ID_CONFIG = StringUtils.fromString("groupId");
     public static final BString CONSUMER_AUTO_OFFSET_RESET_CONFIG = StringUtils.fromString("offsetReset");
@@ -98,6 +102,9 @@ public class KafkaConstants {
     public static final BString CONSUMER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
     public static final BString CONSUMER_ISOLATION_LEVEL_CONFIG = StringUtils.fromString("isolationLevel");
     public static final BString CONSUMER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
+    public static final BString CONSUMER_AUTH_SOURCE = StringUtils.fromString("basicAuthCredentialSource");
+    public static final BString CONSUMER_AUTH_SOURCE_USER_INFO = StringUtils.fromString("basicAuthUserInfo");
+    public static final BString CONSUMER_BOOTSTRAP_SERVER = StringUtils.fromString("bootstrapServer");
 
     public static final BString CONSUMER_SESSION_TIMEOUT_MS_CONFIG = StringUtils.fromString("sessionTimeout");
     public static final BString CONSUMER_HEARTBEAT_INTERVAL_MS_CONFIG = StringUtils.fromString(
@@ -148,6 +155,11 @@ public class KafkaConstants {
     public static final BString PRODUCER_INTERCEPTOR_CLASSES_CONFIG = StringUtils.fromString("interceptorClasses");
     public static final BString PRODUCER_TRANSACTIONAL_ID_CONFIG = StringUtils.fromString("transactionalId");
     public static final BString PRODUCER_SCHEMA_REGISTRY_URL = StringUtils.fromString("schemaRegistryUrl");
+    public static final BString PRODUCER_AVRO_SCHEMA = StringUtils.fromString("avroSchema");
+    public static final BString KEY_SERIALIZER_TYPE = StringUtils.fromString("keySerializerType");
+    public static final BString KEY_DESERIALIZER_TYPE = StringUtils.fromString("keyDeserializerType");
+    public static final BString VALUE_SERIALIZER_TYPE = StringUtils.fromString("valueSerializerType");
+    public static final BString VALUE_DESERIALIZER_TYPE = StringUtils.fromString("valueDeserializerType");
     public static final BString PRODUCER_BUFFER_MEMORY_CONFIG = StringUtils.fromString("bufferMemory");
     public static final BString PRODUCER_RETRIES_CONFIG = StringUtils.fromString("retryCount");
     public static final BString PRODUCER_BATCH_SIZE_CONFIG = StringUtils.fromString("batchSize");
@@ -182,6 +194,7 @@ public class KafkaConstants {
     public static final BString PROTOCOL_CONFIG = StringUtils.fromString("protocol");
     public static final BString LOCATION_CONFIG = StringUtils.fromString("path");
     public static final BString PASSWORD_CONFIG = StringUtils.fromString("password");
+    public static final BString SCHEMA_REGISTRY_CONFIG = StringUtils.fromString("schemaRegistryConfig");
     public static final BString SSL_PROTOCOL_VERSIONS = StringUtils.fromString("versions");
     public static final BString SECURITY_PROTOCOL_CONFIG = StringUtils.fromString("securityProtocol");
     public static final BString SSL_PROTOCOL_NAME = StringUtils.fromString("name");
@@ -209,9 +222,11 @@ public class KafkaConstants {
     // Default class names
     // Serializers
     public static final String BYTE_ARRAY_SERIALIZER = "org.apache.kafka.common.serialization.ByteArraySerializer";
+    public static final String AVRO_SERIALIZER = "SER_AVRO";
 
     // Deserializers
     public static final String BYTE_ARRAY_DESERIALIZER = "org.apache.kafka.common.serialization.ByteArrayDeserializer";
+    public static final String AVRO_DESERIALIZER = "DES_AVRO";
 
     // Warning suppression
     public static final String UNCHECKED = "unchecked";
