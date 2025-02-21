@@ -293,8 +293,6 @@ public type ProducerConfiguration record {|
     string partitionerClass?;
     string interceptorClasses?;
     string transactionalId?;
-    
-    Serializer & readonly serializer?;
     string schemaRegistryUrl?;
     SerializerType keySerializerType = SER_BYTE_ARRAY;
     SerializerType valueSerializerType = SER_BYTE_ARRAY;
