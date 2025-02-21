@@ -1042,13 +1042,17 @@ public class KafkaUtils {
         for (Object record: records) {
             ConsumerRecord consumerRecord = (ConsumerRecord) record;
             try {
-                Object value = getValueWithIntendedType(getReferredType(intendedType.getElementType()),
-                        (byte[]) (consumerRecord.value()), consumerRecord, autoSeek);
-                if (constraintValidation) {
-                    validateConstraints(value, ValueCreator.createTypedescValue(intendedType.getElementType()),
-                            consumerRecord, autoSeek);
+                if (!(consumerRecord.value() instanceof byte[])) {
+                    bArray.append(consumerRecord.value());
+                } else {
+                    Object value = getValueWithIntendedType(getReferredType(intendedType.getElementType()),
+                            (byte[]) (consumerRecord.value()), consumerRecord, autoSeek);
+                    if (constraintValidation) {
+                        validateConstraints(value, ValueCreator.createTypedescValue(intendedType.getElementType()),
+                                consumerRecord, autoSeek);
+                    }
+                    bArray.append(value);
                 }
-                bArray.append(value);
             } catch (BError bError) {
                 if (handleBError(consumer, (ConsumerRecord) record, autoSeek, bError, i == 0)) {
                     break;

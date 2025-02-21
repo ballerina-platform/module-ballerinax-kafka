@@ -50,3 +50,28 @@ public enum DeserializerType {
     DES_AVRO
 }
 
+
+public type Deserializer object {
+    public function configure(string schemaRegistryUrl) returns error?;
+    public function deserialize(byte[] value) returns anydata|error;
+};
+
+class KafkaAvroDeserializer {
+    *Deserializer;
+    cregistry:Client registry;
+
+    public function init(string baseUrl, map<anydata> originals, map<string> headers) returns error? {
+        self.registry = check new({
+            baseUrl,
+            originals,
+            headers
+        });
+    }
+
+    public function configure(string schemaRegistryUrl) returns error? {
+    }
+
+    public function deserialize(byte[] value) returns anydata|error {
+        return cavroserdes:deserialize(self.registry, value, anydata);
+    }
+};
