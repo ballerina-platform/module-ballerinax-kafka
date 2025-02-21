@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/crypto;
-import ballerinax/confluent.cregistry;
 
 // Security-related records
 # Configurations for secure communication with the Kafka server.
@@ -134,8 +133,8 @@ public type ConsumerConfiguration record {|
     IsolationLevel isolationLevel?;
 
     string schemaRegistryUrl?;
-    cregistry:ConnectionConfig schemaRegistryConfig?;
     map<string> additionalProperties?;
+    map<anydata> schemaRegistryConfig?;
     DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
     DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
     decimal sessionTimeout?;
@@ -294,6 +293,8 @@ public type ProducerConfiguration record {|
     string interceptorClasses?;
     string transactionalId?;
     string schemaRegistryUrl?;
+    string avroSchema?;
+    map<anydata> schemaRegistryConfig?;
     SerializerType keySerializerType = SER_BYTE_ARRAY;
     SerializerType valueSerializerType = SER_BYTE_ARRAY;
     map<string> additionalProperties?;
