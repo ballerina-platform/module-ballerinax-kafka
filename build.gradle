@@ -98,6 +98,8 @@ subprojects {
         ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
         ballerinaStdLibs "io.ballerina.lib:data.jsondata-ballerina:${stdlibDataJsonDataVersion}"
         ballerinaStdLibs "io.ballerina.lib:avro-ballerina:${stdlibAvroVersion}"
+        ballerinaStdLibs "io.ballerina.lib:confluent.cregistry-ballerina:${confluentRegistryVersion}"
+        ballerinaStdLibs "io.ballerina.lib:confluent.cavroserdes-ballerina:${confluentAvroSerDesVersion}"
     }
 }
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
