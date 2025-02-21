@@ -35,6 +35,8 @@ import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 public class KafkaAvroDeserializer implements Deserializer<Object> {
     BObject deserializer = null;
     public static final String DESERIALIZER_CLASS = "KafkaAvroDeserializer";
+    public static final String DESERIALIZE_FUNCTION = "deserialize";
+    public static final String DESERIALIZER_NOT_FOUND_ERROR = "Deserializer is not found";
 
     public KafkaAvroDeserializer(BString schemaRegistryUrl, BMap<BString, Object> originals,
                                  BMap<BString, Object> headers) throws BError {
@@ -50,12 +52,12 @@ public class KafkaAvroDeserializer implements Deserializer<Object> {
     @Override
     public Object deserialize(String topic, byte[] data) {
         if (this.deserializer == null) {
-            return createKafkaError("Deserializer is not found");
+            return createKafkaError(DESERIALIZER_NOT_FOUND_ERROR);
         }
         BArray value = ValueCreator.createArrayValue(data);
         Object[] arguments = new Object[]{value};
         return ModuleUtils.getEnvironment()
-                .getRuntime().callMethod(this.deserializer, "deserialize", null, arguments);
+                .getRuntime().callMethod(this.deserializer, DESERIALIZE_FUNCTION, null, arguments);
     }
 
     @Override
