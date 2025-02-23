@@ -82,6 +82,9 @@ public type AuthenticationConfiguration record {|
 # + clientId - Identifier to be used for server side logging
 # + interceptorClasses - Interceptor classes to be used before sending the records
 # + isolationLevel - Transactional message reading method
+# + schemaRegistryConfig - Configurations to initialize a schema registry
+# + keyDeserializerType - Key deserialization type
+# + valueDeserializerType - Value deserialization type
 # + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL, if the Avro serializer
 #                       is used
 # + additionalProperties - Additional properties for the property fields not provided by the Ballerina `kafka` module. Use
@@ -134,6 +137,9 @@ public type ConsumerConfiguration record {|
     IsolationLevel isolationLevel?;
 
     string schemaRegistryUrl?;
+    map<anydata> schemaRegistryConfig?;
+    DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
+    DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
 
     map<string> additionalProperties?;
 
