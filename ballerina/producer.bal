@@ -98,7 +98,7 @@ public client isolated class Producer {
     isolated remote function send(AnydataProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
         anydata anydataValue = producerRecord.value;
-        byte[] value = anydataValue.toJsonString().toBytes();
+        byte[] value = anydataValue.toString().toBytes();
         byte[]? key = ();
         anydata anydataKey = producerRecord?.key;
 
@@ -139,6 +139,8 @@ public client isolated class Producer {
                 value = anydataValue.toString().toBytes();
             } else if anydataValue is string {
                 value = anydataValue.toBytes();
+            } else {
+                value = anydataValue.toJsonString().toBytes();
             }
             if anydataKey is byte[] {
                 key = anydataKey;
