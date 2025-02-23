@@ -76,7 +76,7 @@ public class Poll {
                 BArray consumerRecords;
                 synchronized (kafkaConsumer) {
                     ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-                    consumerRecords = getConsumerRecords(recordsRetrieved, recordType,
+                    consumerRecords = getConsumerRecords(consumerObject, recordsRetrieved, recordType,
                             bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit,
                             kafkaConsumer, autoSeek);
                 }
@@ -109,8 +109,8 @@ public class Poll {
                 synchronized (kafkaConsumer) {
                     recordsRetrieved = kafkaConsumer.poll(duration);
                     if (!recordsRetrieved.isEmpty()) {
-                        dataArray = getValuesWithIntendedType(arrayType, kafkaConsumer, recordsRetrieved,
-                                constraintValidation, autoCommit, autoSeek);
+                        dataArray = getValuesWithIntendedType(consumerObject, arrayType, kafkaConsumer,
+                                recordsRetrieved, constraintValidation, autoCommit, autoSeek);
                     }
                 }
                 balFuture.complete(dataArray);

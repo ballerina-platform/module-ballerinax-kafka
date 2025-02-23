@@ -205,7 +205,7 @@ public class KafkaListenerImpl implements KafkaListener {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");
                         }
                         consumerRecordsExists = true;
-                        BArray consumerRecords = getConsumerRecords(records,
+                        BArray consumerRecords = getConsumerRecords(listener, records,
                                 (RecordType) getIntendedType(referredType), referredType.isReadOnly(),
                                 constraintValidation, autoCommit, kafkaConsumer, autoSeek);
                         arguments[index++] = consumerRecords;
@@ -215,7 +215,7 @@ public class KafkaListenerImpl implements KafkaListener {
                             throw KafkaUtils.createKafkaError("Invalid remote function signature");
                         }
                         payloadExists = true;
-                        BArray payload = getValuesWithIntendedType(referredType, kafkaConsumer, records,
+                        BArray payload = getValuesWithIntendedType(listener, referredType, kafkaConsumer, records,
                                 constraintValidation, autoCommit, autoSeek);
                         arguments[index++] = payload;
                         arguments[index++] = true;
