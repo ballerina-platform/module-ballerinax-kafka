@@ -28,7 +28,7 @@ public client isolated class Producer {
     private final SerializerType valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
     private final anydata schemaRegistryConfig;
-    private final string schema;
+    private final string? schema;
 
     private string connectorId = uuid:createType4AsString();
 
@@ -43,7 +43,7 @@ public client isolated class Producer {
         self.keySerializerType = config.keySerializerType;
         self.valueSerializerType = config.valueSerializerType;
         self.schemaRegistryConfig = config.schemaRegistryConfig.cloneReadOnly();
-        self.schema = config.schema;
+        self.schema = config?.avroSchema;
         check self.producerInit();
     }
 
@@ -97,29 +97,35 @@ public client isolated class Producer {
     # + return - A `kafka:Error` if send action fails to send data or else '()'
     isolated remote function send(AnydataProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
-        byte[] value;
         anydata anydataValue = producerRecord.value;
+        byte[] value = anydataValue.toJsonString().toBytes();
         byte[]? key = ();
         anydata anydataKey = producerRecord?.key;
 
         boolean isKeyAvro = self.keySerializerType == SER_AVRO;
         boolean isValueAvro = self.valueSerializerType == SER_AVRO;
         anydata & readonly schemaRegistryConfig;
-        string schema;
+        string? schema;
         lock {
             schemaRegistryConfig = self.schemaRegistryConfig.cloneReadOnly();
             schema = self.schema.cloneReadOnly();
         }
         if isKeyAvro && anydataKey != () {
             do {
+                if schema is () {
+                    return error Error("The field `schema` cannot be empty for Avro serialization");
+                }
                 Serializer serializer = check new AvroSerializer(schemaRegistryConfig, schema);
                 key = check serializer.serialize(anydataKey, schema);
             } on fail error err {
                 return error Error(err.message());
             }
         }
-        if isValueAvro && anydataValue != () {
+        if isValueAvro {
             do {
+                if schema is () {
+                    return error Error("The field `schema` cannot be empty for Avro serialization");
+                }
                 Serializer serializer = check new AvroSerializer(schemaRegistryConfig, schema);
                 value = check serializer.serialize(anydataValue, schema);
             } on fail error err {
@@ -133,8 +139,6 @@ public client isolated class Producer {
                 value = anydataValue.toString().toBytes();
             } else if anydataValue is string {
                 value = anydataValue.toBytes();
-            } else {
-                value = anydataValue.toJsonString().toBytes();
             }
             if anydataKey is byte[] {
                 key = anydataKey;
