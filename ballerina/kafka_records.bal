@@ -294,7 +294,12 @@ public type ProducerConfiguration record {|
     string transactionalId?;
 
     string schemaRegistryUrl?;
-
+    string avroSchema?;
+    map<anydata> schemaRegistryConfig?;
+    string schema;
+    SerializerType keySerializerType = SER_BYTE_ARRAY;
+    SerializerType valueSerializerType = SER_BYTE_ARRAY;
+    
     map<string> additionalProperties?;
 
     int bufferMemory?;

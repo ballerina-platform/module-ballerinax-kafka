@@ -32,7 +32,6 @@ public const DEFAULT_URL = "localhost:9092";
 // ********************************************
 // Deserializer types.
 # In-built Kafka byte array deserializer.
-public const DES_BYTE_ARRAY = "BYTE_ARRAY";
 
 # In-built Kafka string deserializer.
 public const DES_STRING = "STRING";
@@ -45,9 +44,6 @@ public const DES_FLOAT = "FLOAT";
 
 # User-defined deserializer.
 public const DES_CUSTOM = "CUSTOM";
-
-# Apache Avro deserializer.
-public const DES_AVRO = "AVRO";
 
 // Isolation levels.
 # Configures the consumer to read the committed messages only in the transactional mode when poll() is called.
@@ -83,8 +79,6 @@ public const ACKS_NONE = "0";
 public const ACKS_SINGLE = "1";
 
 // Serializer types.
-# In-built Kafka Byte Array serializer.
-public const SER_BYTE_ARRAY = "BYTE_ARRAY";
 
 # In-built Kafka string serializer.
 public const SER_STRING = "STRING";
@@ -97,9 +91,6 @@ public const SER_FLOAT = "FLOAT";
 
 # User-defined serializer.
 public const SER_CUSTOM = "CUSTOM";
-
-# Apache Avro serializer.
-public const SER_AVRO = "AVRO";
 
 // Compression types.
 # No compression.

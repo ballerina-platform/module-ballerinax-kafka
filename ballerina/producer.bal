@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/uuid;
 import ballerina/jballerina.java;
+import ballerina/uuid;
 
 # Represents a Kafka producer endpoint.
 #
@@ -24,9 +24,11 @@ import ballerina/jballerina.java;
 public client isolated class Producer {
 
     final ProducerConfiguration? & readonly producerConfig;
-    private final string keySerializerType;
-    private final string valueSerializerType;
+    private final SerializerType keySerializerType;
+    private final SerializerType valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
+    private final anydata schemaRegistryConfig;
+    private final string schema;
 
     private string connectorId = uuid:createType4AsString();
 
@@ -38,9 +40,10 @@ public client isolated class Producer {
     public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers.cloneReadOnly();
         self.producerConfig = config.cloneReadOnly();
-        self.keySerializerType = SER_BYTE_ARRAY;
-        self.valueSerializerType = SER_BYTE_ARRAY;
-
+        self.keySerializerType = config.keySerializerType;
+        self.valueSerializerType = config.valueSerializerType;
+        self.schemaRegistryConfig = config.schemaRegistryConfig.cloneReadOnly();
+        self.schema = config.schema;
         check self.producerInit();
     }
 
@@ -98,26 +101,53 @@ public client isolated class Producer {
         anydata anydataValue = producerRecord.value;
         byte[]? key = ();
         anydata anydataKey = producerRecord?.key;
-        if anydataValue is byte[] {
-            value = anydataValue;
-        } else if anydataValue is xml {
-            value = anydataValue.toString().toBytes();
-        } else if anydataValue is string {
-            value = anydataValue.toBytes();
-        } else {
-            value = anydataValue.toJsonString().toBytes();
+
+        boolean isKeyAvro = self.keySerializerType == SER_AVRO;
+        boolean isValueAvro = self.valueSerializerType == SER_AVRO;
+        anydata & readonly schemaRegistryConfig;
+        string schema;
+        lock {
+            schemaRegistryConfig = self.schemaRegistryConfig.cloneReadOnly();
+            schema = self.schema.cloneReadOnly();
         }
-        if anydataKey is byte[] {
-            key = anydataKey;
-        } else if anydataKey is xml {
-            key = anydataKey.toString().toBytes();
-        } else if anydataKey is string {
-            key = anydataKey.toBytes();
-        } else if anydataKey !is () {
-            key = anydataKey.toJsonString().toBytes();
+        if isKeyAvro && anydataKey != () {
+            do {
+                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, schema);
+                key = check serializer.serialize(anydataKey, schema);
+            } on fail error err {
+                return error Error(err.message());
+            }
+        }
+        if isValueAvro && anydataValue != () {
+            do {
+                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, schema);
+                value = check serializer.serialize(anydataValue, schema);
+            } on fail error err {
+                return error Error(err.message());
+            }
+        }
+        if !isKeyAvro && !isValueAvro {
+            if anydataValue is byte[] {
+                value = anydataValue;
+            } else if anydataValue is xml {
+                value = anydataValue.toString().toBytes();
+            } else if anydataValue is string {
+                value = anydataValue.toBytes();
+            } else {
+                value = anydataValue.toJsonString().toBytes();
+            }
+            if anydataKey is byte[] {
+                key = anydataKey;
+            } else if anydataKey is xml {
+                key = anydataKey.toString().toBytes();
+            } else if anydataKey is string {
+                key = anydataKey.toBytes();
+            } else if anydataKey !is () {
+                key = anydataKey.toJsonString().toBytes();
+            }
         }
         return sendByteArrayValues(self, value, producerRecord.topic, self.getHeaderValueAsByteArrayList(producerRecord?.headers), key,
-        producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
+                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
     }
 
     private isolated function getHeaderValueAsByteArrayList(map<byte[]|byte[][]|string|string[]>? headers) returns [string, byte[]][] {
