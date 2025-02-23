@@ -21,9 +21,6 @@ import ballerinax/confluent.cavroserdes;
 # Represents the different types of offset-reset methods of the Kafka consumer.
 public type OffsetResetMethod OFFSET_RESET_EARLIEST|OFFSET_RESET_LATEST|OFFSET_RESET_NONE;
 
-# Kafka in-built deserializer type.
-public type DeserializerType DES_BYTE_ARRAY;
-
 # `kafka:Consumer` isolation level type.
 public type IsolationLevel ISOLATION_COMMITTED|ISOLATION_UNCOMMITTED;
 
@@ -52,30 +49,80 @@ public enum SerializerType {
     SER_AVRO
 }
 
+# Kafka in-built deserializer type.
+public enum DeserializerType {
+    DES_BYTE_ARRAY,
+    DES_AVRO
+}
 
+# Interface for serializing a given value
 public type Serializer isolated object {
-    public isolated function configure(string baseUrl, map<anydata> originals, map<string> headers) returns error?;
-    public isolated function serialize(anydata value, string schema) returns byte[]|error;
+
+    # Serializes a given value using the provided schema
+    # 
+    # + value - Data to be serialized  
+    # + schema - The schema used for serialization  
+    # + subject - The subject under which the schema is registered (default: "subject")  
+    # + return - The serialized `byte[]` on success, otherwise an error 
+    public isolated function serialize(anydata value, string schema, string subject = "subject") returns byte[]|error;
 };
 
+# Implementation of the `Serializer` interface for Avro serialization
 public isolated class AvroSerializer {
     *Serializer;
     private final cregistry:Client registry;
     private final string schema;
 
     public isolated function init(anydata & readonly schemaRegistryConfig, string schema) returns error? {
-        // TODO: create proper error message for missing values
-        cregistry:ConnectionConfig config = check schemaRegistryConfig.cloneWithType(cregistry:ConnectionConfig);
-        cregistry:Client registry = check new(config);
-        self.registry = registry;
+        self.registry = check initiateSchemaRegistry(schemaRegistryConfig);
         self.schema = schema;
     }
-
-    public isolated function configure(string baseUrl, map<anydata> originals, map<string> headers) returns error? {
-        return;
-    }
     
-    public isolated function serialize(anydata value, string schema) returns byte[]|error {
-        return cavroserdes:serialize(self.registry, schema, value, "");
+    public isolated function serialize(anydata value, string schema, string subject) returns byte[]|error {
+        return cavroserdes:serialize(self.registry, schema, value, subject);
+    }
+}
+
+# Interface for deserializing a given value
+public type Deserializer object {
+
+    # Deserializes the provided value
+    # 
+    # + value - Data to be deserialized  
+    # + return - Deserialized value as `anydata` on success, otherwise an error  
+    public function deserialize(byte[] value) returns anydata|error;
+};
+
+
+# Implementation of the `Deserializer` interface for Avro deserialization
+public isolated class AvroDeserializer {
+    *Deserializer;
+    private final cregistry:Client registry;
+
+    public isolated function init(anydata & readonly schemaRegistryConfig) returns error? {
+        self.registry = check initiateSchemaRegistry(schemaRegistryConfig);
+    }
+
+    public isolated function deserialize(byte[] value) returns anydata|error {
+        return cavroserdes:deserialize(self.registry, value, anydata);
+    }
+}
+
+isolated function getSchemaRegistryConfig(anydata & readonly schemaRegistryConfig)
+    returns cregistry:ConnectionConfig|error {
+    do {
+        return check schemaRegistryConfig.cloneWithType(cregistry:ConnectionConfig);
+    } on fail error registryError {
+        string errorMessage = string `The provided values for 'schemaRegistryConfig' 
+            do not match the expected schema registry properties: ${registryError.message()}`;
+        return error(errorMessage);
+    }
+}
+
+isolated function initiateSchemaRegistry(anydata & readonly schemaRegistryConfig) returns cregistry:Client|error {
+    do {
+        return check new (check getSchemaRegistryConfig(schemaRegistryConfig));
+    } on fail error err {
+        return error(string `Error occurred while initializing the confluent registry: ${err.message()}`);
     }
 }
