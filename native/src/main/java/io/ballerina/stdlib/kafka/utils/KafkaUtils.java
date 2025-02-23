@@ -727,8 +727,8 @@ public class KafkaUtils {
                                                   ConsumerRecord consumerRecord,
                                                   boolean autoSeek) {
         if (deserializer != null) {
-            Object avroResponse = getEnvironment().getRuntime().callMethod(deserializer, KafkaConstants.DESERIALIZE_FUNCTION,
-                    null, ValueCreator.createArrayValue(value));
+            Object avroResponse = getEnvironment().getRuntime().callMethod(deserializer,
+                    KafkaConstants.DESERIALIZE_FUNCTION, null, ValueCreator.createArrayValue(value));
             return ValueUtils.convert(avroResponse, type);
         }
         String strValue = new String(value, StandardCharsets.UTF_8);
