@@ -247,41 +247,45 @@ public type BytesProducerRecord record {|
 // Producer-related records
 # Represents the `kafka:Producer` configuration.
 #
-# + acks - Number of acknowledgments
-# + compressionType - Compression type to be used for messages
-# + clientId - Identifier to be used for server side logging
-# + metricsRecordingLevel - Metrics recording level
-# + metricReporterClasses - Metrics reporter classes
-# + partitionerClass - Partitioner class to be used to select the partition to which the message is sent
-# + interceptorClasses - Interceptor classes to be used before sending the records
-# + transactionalId - Transactional ID to be used in transactional delivery
-# + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro
-#                       serializer is used
-# + additionalProperties - Additional properties for the property fields not provided by the Ballerina `kafka` module. Use
-#                          this with caution since this can override any of the fields. It is not recomendded to use
-#                          this field except in an extreme situation
-# + bufferMemory - Total bytes of memory the producer can use to buffer records
-# + retryCount - Number of retries to resend a record
-# + batchSize - Maximum number of bytes to be batched together when sending the records. Records exceeding this limit will
-#               not be batched. Setting this to 0 will disable batching
-# + linger - Delay (in seconds) to allow other records to be batched before sending them to the Kafka server
-# + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)
-# + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)
-# + maxRequestSize - The maximum size of a request in bytes
-# + reconnectBackoffTime - Time (in seconds) to wait before attempting to reconnect
-# + reconnectBackoffMaxTime - Maximum amount of time in seconds to wait when reconnecting
-# + retryBackoffTime - Time (in seconds) to wait before attempting to retry a failed request
-# + maxBlock - Maximum block time (in seconds) during which the sending is blocked when the buffer is full
-# + requestTimeout - Wait time (in seconds) for the response of a request
-# + metadataMaxAge - Maximum time (in seconds) to force a refresh of metadata
-# + metricsSampleWindow - Time (in seconds) window for a metrics sample to compute over
-# + metricsNumSamples - Number of samples maintained to compute the metrics
-# + maxInFlightRequestsPerConnection - Maximum number of unacknowledged requests on a single connection
-# + connectionsMaxIdleTime - Close the idle connections after this number of seconds
-# + transactionTimeout - Timeout (in seconds) for transaction status update from the producer
-# + enableIdempotence - Exactly one copy of each message is written to the stream when enabled
-# + secureSocket - Configurations related to SSL/TLS encryption
-# + auth - Authentication-related configurations for the `kafka:Producer`
+# + acks - Number of acknowledgments  
+# + compressionType - Compression type to be used for messages  
+# + clientId - Identifier to be used for server side logging  
+# + metricsRecordingLevel - Metrics recording level  
+# + metricReporterClasses - Metrics reporter classes  
+# + partitionerClass - Partitioner class to be used to select the partition to which the message is sent  
+# + interceptorClasses - Interceptor classes to be used before sending the records  
+# + transactionalId - Transactional ID to be used in transactional delivery  
+# + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro  
+# serializer is used  
+# + avroSchema - The schema used for key/value serialization
+# + schemaRegistryConfig - Configurations to initialize a schema registry
+# + keySerializerType - Key serialization type
+# + valueSerializerType - Value serialization type
+# + additionalProperties - Additional properties for the property fields not provided by the Ballerina `kafka` module. Use  
+# this with caution since this can override any of the fields. It is not recomendded to use  
+# this field except in an extreme situation  
+# + bufferMemory - Total bytes of memory the producer can use to buffer records  
+# + retryCount - Number of retries to resend a record  
+# + batchSize - Maximum number of bytes to be batched together when sending the records. Records exceeding this limit will  
+# not be batched. Setting this to 0 will disable batching  
+# + linger - Delay (in seconds) to allow other records to be batched before sending them to the Kafka server  
+# + sendBuffer - Size of the TCP send buffer (SO_SNDBUF)  
+# + receiveBuffer - Size of the TCP receive buffer (SO_RCVBUF)  
+# + maxRequestSize - The maximum size of a request in bytes  
+# + reconnectBackoffTime - Time (in seconds) to wait before attempting to reconnect  
+# + reconnectBackoffMaxTime - Maximum amount of time in seconds to wait when reconnecting  
+# + retryBackoffTime - Time (in seconds) to wait before attempting to retry a failed request  
+# + maxBlock - Maximum block time (in seconds) during which the sending is blocked when the buffer is full  
+# + requestTimeout - Wait time (in seconds) for the response of a request  
+# + metadataMaxAge - Maximum time (in seconds) to force a refresh of metadata  
+# + metricsSampleWindow - Time (in seconds) window for a metrics sample to compute over  
+# + metricsNumSamples - Number of samples maintained to compute the metrics  
+# + maxInFlightRequestsPerConnection - Maximum number of unacknowledged requests on a single connection  
+# + connectionsMaxIdleTime - Close the idle connections after this number of seconds  
+# + transactionTimeout - Timeout (in seconds) for transaction status update from the producer  
+# + enableIdempotence - Exactly one copy of each message is written to the stream when enabled  
+# + secureSocket - Configurations related to SSL/TLS encryption  
+# + auth - Authentication-related configurations for the `kafka:Producer`  
 # + securityProtocol - Type of the security protocol to use in the broker connection
 public type ProducerConfiguration record {|
     ProducerAcks acks = ACKS_SINGLE;
@@ -294,6 +298,10 @@ public type ProducerConfiguration record {|
     string transactionalId?;
 
     string schemaRegistryUrl?;
+    string avroSchema?;
+    map<anydata> schemaRegistryConfig?;
+    SerializerType keySerializerType = SER_BYTE_ARRAY;
+    SerializerType valueSerializerType = SER_BYTE_ARRAY;
 
     map<string> additionalProperties?;
 
