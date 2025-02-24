@@ -551,7 +551,7 @@ public class KafkaUtils {
         String valueDeserializerType = consumer.getNativeData(VALUE_DESERIALIZER_TYPE).toString();
         BObject keyDeserializer = (keyDeserializerType.equals(AVRO_DESERIALIZATION_TYPE))
                 ? (BObject) consumer.getNativeData(KEY_DESERIALIZER) : null;
-        BObject valueDeserializer = (valueDeserializerType.equals("DES_AVRO"))
+        BObject valueDeserializer = (valueDeserializerType.equals(AVRO_DESERIALIZATION_TYPE))
                 ? (BObject) consumer.getNativeData(VALUE_DESERIALIZER) : null;
         if (Objects.nonNull(record.key())) {
             key = getValueWithIntendedType(keyDeserializer, keyType, (byte[]) record.key(), record, autoSeek);
