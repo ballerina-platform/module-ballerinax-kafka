@@ -25,9 +25,6 @@ public type IsolationLevel ISOLATION_COMMITTED|ISOLATION_UNCOMMITTED;
 # `kafka:Producer` acknowledgement types.
 public type ProducerAcks ACKS_ALL|ACKS_NONE|ACKS_SINGLE;
 
-# Kafka in-built serializer types.
-public type SerializerType SER_BYTE_ARRAY;
-
 # Kafka compression types to compress the messages.
 public type CompressionType COMPRESSION_NONE|COMPRESSION_GZIP|COMPRESSION_SNAPPY|COMPRESSION_LZ4|COMPRESSION_ZSTD;
 
