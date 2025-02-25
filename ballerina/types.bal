@@ -14,6 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerinax/confluent.cavroserdes;
+import ballerinax/confluent.cregistry;
+
 // Consumer-related types
 # Represents the different types of offset-reset methods of the Kafka consumer.
 public type OffsetResetMethod OFFSET_RESET_EARLIEST|OFFSET_RESET_LATEST|OFFSET_RESET_NONE;
