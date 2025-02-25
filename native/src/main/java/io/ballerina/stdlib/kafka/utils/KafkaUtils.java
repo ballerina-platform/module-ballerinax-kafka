@@ -18,8 +18,10 @@
 
 package io.ballerina.stdlib.kafka.utils;
 
+import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.TypeTags;
+import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -74,6 +76,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import static io.ballerina.runtime.api.PredefinedTypes.TYPE_ANYDATA;
+import static io.ballerina.runtime.api.PredefinedTypes.TYPE_ERROR;
 import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
@@ -727,9 +731,13 @@ public class KafkaUtils {
                                                   ConsumerRecord consumerRecord,
                                                   boolean autoSeek) {
         if (deserializer != null) {
-            Object avroResponse = getEnvironment().getRuntime().callMethod(deserializer,
-                    KafkaConstants.DESERIALIZE_FUNCTION, null, ValueCreator.createArrayValue(value));
-            return ValueUtils.convert(avroResponse, type);
+            Future balFuture = getEnvironment().markAsync();
+            Callback executionCallback = new ExecutionCallback(balFuture);
+            Type returnType = TypeCreator.createUnionType(TYPE_ANYDATA, TYPE_ERROR);
+            getEnvironment().getRuntime().invokeMethodAsyncSequentially(deserializer,
+                    KafkaConstants.DESERIALIZE_FUNCTION, null, null, executionCallback, null,
+                    returnType, ValueCreator.createArrayValue(value));
+            return null;
         }
         String strValue = new String(value, StandardCharsets.UTF_8);
         Object intendedValue;
