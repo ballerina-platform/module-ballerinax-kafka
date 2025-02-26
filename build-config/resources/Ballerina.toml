@@ -36,5 +36,11 @@ artifactId = "constraint-native"
 version = "@constraint.version@"
 path = "./lib/constraint-native-@constraint.native.version@.jar"
 
+[[platform.java21.dependency]]
+groupId = "com.google.guava"
+artifactId = "guava"
+version = "32.0.1-jre"
+path = "./lib/guava-32.0.1-jre.jar"
+
 [build-options]
 observabilityIncluded=true
