@@ -137,7 +137,7 @@ public type ConsumerConfiguration record {|
     IsolationLevel isolationLevel?;
 
     string schemaRegistryUrl?;
-    map<anydata> schemaRegistryConfig?;
+    readonly map<anydata> schemaRegistryConfig?;
     DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
     DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
 
