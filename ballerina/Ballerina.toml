@@ -1,7 +1,7 @@
 [package]
 org = "ballerinax"
 name = "kafka"
-version = "4.4.1"
+version = "4.4.2"
 authors = ["Ballerina"]
 keywords = ["kafka", "event streaming", "network", "messaging"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-kafka"
@@ -15,8 +15,8 @@ graalvmCompatible = true
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "kafka-native"
-version = "4.4.1"
-path = "../native/build/libs/kafka-native-4.4.1.jar"
+version = "4.4.2"
+path = "../native/build/libs/kafka-native-4.4.2-SNAPSHOT.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.apache.kafka"
