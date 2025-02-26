@@ -202,9 +202,14 @@ public class KafkaConstants {
     public static final String SASL_SCRAM_SHA_256 = "SCRAM-SHA-256";
     public static final String SASL_SCRAM_SHA_512 = "SCRAM-SHA-512";
 
-    // Serializer - Deserializer names
-    // Ballerina String Names
-    public static final String SERDES_BYTE_ARRAY = "BYTE_ARRAY";
+    // Avro Deserialization names
+    public static final String AVRO_DESERIALIZATION_TYPE = "DES_AVRO";
+    public static final String DESERIALIZE_FUNCTION = "deserialize";
+    public static final String KEY_DESERIALIZER = "keyDeserializer";
+    public static final String KEY_DESERIALIZER_TYPE = "keyDeserializerType";
+    public static final String VALUE_DESERIALIZER = "valueDeserializer";
+    public static final String VALUE_DESERIALIZER_TYPE = "valueDeserializerType";
+
 
     // Default class names
     // Serializers

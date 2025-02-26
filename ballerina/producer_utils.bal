@@ -20,13 +20,10 @@ isolated function sendByteArrayValues(Producer producer, byte[] value, string to
     int? timestamp, string keySerializerType) returns Error? {
     if key is () {
         return sendByteArrayValuesNilKeys(producer, value, topic, partition, timestamp, headers);
+    } else if key is byte[] {
+        return sendByteArrayValuesByteArrayKeys(producer, value, topic, key, partition, timestamp, headers);
     }
-    if keySerializerType == SER_BYTE_ARRAY {
-        if key is byte[] {
-            return sendByteArrayValuesByteArrayKeys(producer, value, topic, key, partition, timestamp, headers);
-        }
-        panic getKeyTypeMismatchError(BYTE_ARRAY);
-    }
+    panic getKeyTypeMismatchError(BYTE_ARRAY);
 }
 
 //Send byte[] values with different types of keys

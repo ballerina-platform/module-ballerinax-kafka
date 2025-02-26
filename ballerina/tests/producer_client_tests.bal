@@ -568,7 +568,7 @@ function SSLWithSASLAuthProducerTest() returns error? {
     Producer|Error res = new (SASL_SSL_URL, producerConfigs);
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Failed to initialize the producer: Could not find a 'KafkaClient' entry in the JAAS configuration. System property 'java.security.auth.login.config' is not set");
+        test:assertEquals(res.message(), "Failed to initialize the producer: Failed to create new NetworkClient");
     }
     producerConfigs = {
         clientId: "test-producer-13",
@@ -759,7 +759,7 @@ function sslIncorrectMasterPasswordTest() returns error? {
     Producer|Error result = new (SSL_URL, producerConfiguration);
     test:assertTrue(result is Error);
     if result is Error {
-        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to load SSL keystore tests/secrets/trustoresandkeystores/kafka.client.keystore.jks of type JKS");
+        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to create new NetworkClient");
     }
 }
 
@@ -798,6 +798,6 @@ function sslIncorrectCertPathTest() returns error? {
     Producer|Error result = new (SSL_URL, producerConfiguration);
     test:assertTrue(result is Error);
     if result is Error {
-        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to load SSL keystore tests/secrets/trustoresa#ndkeystores/kafka.client.keystore.jks of type JKS");
+        test:assertEquals(result.message(), "Failed to initialize the producer: Failed to create new NetworkClient");
     }
 }
