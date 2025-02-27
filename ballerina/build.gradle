@@ -75,10 +75,13 @@ dependencies {
     externalJars(group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafkaVersion}") {
         transitive = false
     }
-    externalJars(group: 'com.google.guava', name: 'guava', version: '32.0.1-jre') {
+    externalJars(group: 'com.google.guava', name: 'guava', version: "${guavaVersion}") {
         transitive = false
     }
     externalJars(group: 'io.ballerina.stdlib', name: 'constraint-native', version: "${stdlibConstraintVersion}")
+    externalJars(group: 'org.xerial.snappy', name: 'snappy-java', version: "${snappyJavaVersion}") {
+        transitive = false
+    }
 }
 
 task updateTomlFiles {
@@ -88,6 +91,8 @@ task updateTomlFiles {
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@kafka.version@", kafkaVersion)
         newConfig = newConfig.replace("@constraint.native.version@", stdlibConstraintVersion)
+        newConfig = newConfig.replace("@guava.version@", guavaVersion)
+        newConfig = newConfig.replace("@snappy.version@", snappyJavaVersion)
         newConfig = newConfig.replace("@constraint.version@", constraintVersion)
         ballerinaConfigFile.text = newConfig
 
