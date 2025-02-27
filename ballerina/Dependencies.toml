@@ -411,7 +411,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "confluent.cavroserdes"
-version = "1.0.4"
+version = "1.0.2"
 dependencies = [
 	{org = "ballerina", name = "avro"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -436,7 +436,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "kafka"
-version = "4.4.1"
+version = "4.4.2"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "crypto"},
