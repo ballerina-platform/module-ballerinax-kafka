@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
@@ -40,14 +41,19 @@ import java.util.Objects;
 import java.util.Properties;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ALIAS_DURATION;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.AVRO_DESERIALIZATION_TYPE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.BOOTSTRAP_SERVERS;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_BOOTSTRAP_SERVERS_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_SERVERS;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER_TYPE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.UNCHECKED;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER_TYPE;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getClientIdFromProperties;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getDefaultApiTimeout;
@@ -114,12 +120,23 @@ public class BrokerConnection {
         Object bootStrapServers = consumerObject.get(CONSUMER_BOOTSTRAP_SERVERS_CONFIG);
         BMap<BString, Object> configs = consumerObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME);
         Properties consumerProperties = processKafkaConsumerConfig(bootStrapServers, configs);
+        String keyDeserializerType = configs.get(StringUtils.fromString(KEY_DESERIALIZER_TYPE)).toString();
+        String valueDeserializerType = configs.get(StringUtils.fromString(VALUE_DESERIALIZER_TYPE)).toString();
+        BObject keyDeserializer = keyDeserializerType.equals(AVRO_DESERIALIZATION_TYPE)
+                ? (BObject) consumerObject.get(StringUtils.fromString(KEY_DESERIALIZER)) : null;
+        BObject valueDeserializer = valueDeserializerType.equals(AVRO_DESERIALIZATION_TYPE)
+                ? (BObject) consumerObject.get(StringUtils.fromString(VALUE_DESERIALIZER)) : null;
         try {
             KafkaConsumer kafkaConsumer = new KafkaConsumer<>(consumerProperties);
             consumerObject.addNativeData(NATIVE_CONSUMER, kafkaConsumer);
             consumerObject.addNativeData(NATIVE_CONSUMER_CONFIG, consumerProperties);
             consumerObject.addNativeData(BOOTSTRAP_SERVERS, consumerProperties.getProperty(BOOTSTRAP_SERVERS));
             consumerObject.addNativeData(KafkaConstants.CLIENT_ID, getClientIdFromProperties(consumerProperties));
+            consumerObject.addNativeData(KEY_DESERIALIZER_TYPE, keyDeserializerType);
+            consumerObject.addNativeData(VALUE_DESERIALIZER_TYPE, valueDeserializerType);
+            consumerObject.addNativeData(KEY_DESERIALIZER, keyDeserializer);
+            consumerObject.addNativeData(VALUE_DESERIALIZER, valueDeserializer);
+
             KafkaMetricsUtil.reportNewConsumer(consumerObject);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_CONNECTION);
