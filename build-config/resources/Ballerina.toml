@@ -39,8 +39,14 @@ path = "./lib/constraint-native-@constraint.native.version@.jar"
 [[platform.java21.dependency]]
 groupId = "com.google.guava"
 artifactId = "guava"
-version = "32.0.1-jre"
-path = "./lib/guava-32.0.1-jre.jar"
+version = "@guava.version@"
+path = "./lib/guava-@guava.version@.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.xerial.snappy"
+artifactId = "snappy-java"
+version = "@snappy.version@"
+path = "./lib/snappy-java-@snappy.version@.jar"
 
 [build-options]
 observabilityIncluded=true
