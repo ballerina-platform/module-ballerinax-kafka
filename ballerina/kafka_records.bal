@@ -263,10 +263,12 @@ public type BytesProducerRecord record {|
 # + transactionalId - Transactional ID to be used in transactional delivery  
 # + schemaRegistryUrl - Avro schema registry URL. Use this field to specify the schema registry URL if the Avro  
 # serializer is used  
-# + avroSchema - The schema used for key/value serialization
-# + schemaRegistryConfig - Configurations to initialize a schema registry
-# + keySerializerType - Key serialization type
-# + valueSerializerType - Value serialization type
+# + avroSchema - The schema used for key/value serialization (Deprecated) 
+# + keySchema - The schema used to serializate the key
+# + valueSchema - The schema used to serialize the value
+# + schemaRegistryConfig - Configurations to initialize a schema registry  
+# + keySerializerType - Key serialization type  
+# + valueSerializerType - Value serialization type  
 # + additionalProperties - Additional properties for the property fields not provided by the Ballerina `kafka` module. Use  
 # this with caution since this can override any of the fields. It is not recomendded to use  
 # this field except in an extreme situation  
@@ -305,6 +307,8 @@ public type ProducerConfiguration record {|
 
     string schemaRegistryUrl?;
     string avroSchema?;
+    string keySchema?;
+    string valueSchema?;
     map<anydata> schemaRegistryConfig?;
     SerializerType keySerializerType = SER_BYTE_ARRAY;
     SerializerType valueSerializerType = SER_BYTE_ARRAY;
