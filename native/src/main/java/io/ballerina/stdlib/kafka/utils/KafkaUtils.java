@@ -731,6 +731,9 @@ public class KafkaUtils {
             Object avroResponse = getEnvironment().getRuntime().callMethod(deserializer,
                     KafkaConstants.DESERIALIZE_FUNCTION, new StrandMetadata(true, new HashMap<>()),
                     ValueCreator.createArrayValue(value));
+            if (avroResponse instanceof Exception) {
+                return ValueUtils.convert(avroResponse, TypeCreator.createErrorType("Error", getModule()));
+            }
             return ValueUtils.convert(avroResponse, type);
         }
         String strValue = new String(value, StandardCharsets.UTF_8);
