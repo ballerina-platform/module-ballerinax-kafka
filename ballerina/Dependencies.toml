@@ -89,7 +89,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.13.3"
+version = "2.13.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "auth"},
@@ -436,7 +436,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "kafka"
-version = "4.4.3"
+version = "4.4.4"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "crypto"},
