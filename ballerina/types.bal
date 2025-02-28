@@ -104,7 +104,10 @@ public isolated class AvroDeserializer {
     }
 
     public isolated function deserialize(byte[] value) returns anydata|error {
-        return cavroserdes:deserialize(self.registry, value, anydata);
+        anydata|error response = cavroserdes:deserialize(self.registry, value, anydata);
+        if response is error {
+            return error Error(response.message(), response.cause());
+        }
     }
 }
 
