@@ -64,7 +64,7 @@ public type Serializer isolated object {
     # + schema - The schema used for serialization  
     # + subject - The subject under which the schema is registered (default: "subject")  
     # + return - The serialized `byte[]` on success, otherwise an error 
-    public isolated function serialize(anydata value, string schema, string subject = "subject") returns byte[]|error;
+    public isolated function serialize(anydata value, string schema, string subject) returns byte[]|error;
 };
 
 # Implementation of the `Serializer` interface for Avro serialization
@@ -108,6 +108,7 @@ public isolated class AvroDeserializer {
         if response is error {
             return error Error(response.message(), response.cause());
         }
+        return response;
     }
 }
 

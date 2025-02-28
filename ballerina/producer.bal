@@ -117,7 +117,7 @@ public client isolated class Producer {
                     return error Error("The field `keySchema` can't be empty for serializing keys in Avro format");
                 }
                 Serializer serializer = check new AvroSerializer(schemaRegistryConfig, keySchema);
-                key = check serializer.serialize(anydataKey, keySchema);
+                key = check serializer.serialize(anydataKey, keySchema, "key-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
             }
@@ -129,7 +129,7 @@ public client isolated class Producer {
                     return error Error("The field `valueSchema` can't be empty for serializing values in Avro format");
                 }
                 Serializer serializer = check new AvroSerializer(schemaRegistryConfig, valueSchema);
-                value = check serializer.serialize(anydataValue, valueSchema);
+                value = check serializer.serialize(anydataValue, valueSchema, "value-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
             }
