@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.kafka.utils;
 
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -728,7 +729,8 @@ public class KafkaUtils {
                                                   boolean autoSeek) {
         if (deserializer != null) {
             Object avroResponse = getEnvironment().getRuntime().callMethod(deserializer,
-                    KafkaConstants.DESERIALIZE_FUNCTION, null, ValueCreator.createArrayValue(value));
+                    KafkaConstants.DESERIALIZE_FUNCTION, new StrandMetadata(true, new HashMap<>()),
+                    ValueCreator.createArrayValue(value));
             return ValueUtils.convert(avroResponse, type);
         }
         String strValue = new String(value, StandardCharsets.UTF_8);
