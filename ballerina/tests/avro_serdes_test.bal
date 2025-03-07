@@ -173,7 +173,6 @@ function valueSerializationErrorTest() returns error? {
 function keySerializationErrorTest() returns error? {
     string topic = "value-error-test-topic";
     string value = "message";
-    kafkaTopics.push(topic);
     ProducerConfiguration producerConfiguration = {
         keySerializerType: SER_AVRO,
         keySchema: string `{"namespace": "example.avro.test", "type": "record", "name": "testStudent", 
