@@ -27,7 +27,7 @@ public client isolated class Producer {
     private final SerializerType keySerializerType;
     private final SerializerType valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
-    private final anydata schemaRegistryConfig;
+    private final anydata & readonly schemaRegistryConfig;
     private final string? keySchema;
     private final string? valueSchema;
 
@@ -106,17 +106,13 @@ public client isolated class Producer {
 
         boolean isKeyAvro = self.keySerializerType == SER_AVRO;
         boolean isValueAvro = self.valueSerializerType == SER_AVRO;
-        anydata & readonly schemaRegistryConfig;
-        lock {
-            schemaRegistryConfig = self.schemaRegistryConfig.cloneReadOnly();
-        }
         if isKeyAvro && anydataKey != () {
             do {
                 string? keySchema = self.keySchema.cloneReadOnly();
                 if keySchema is () {
                     return error Error("The field `keySchema` can't be empty for serializing keys in Avro format");
                 }
-                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, keySchema);
+                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, keySchema);
                 key = check serializer.serialize(anydataKey, keySchema, "key-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
@@ -128,7 +124,7 @@ public client isolated class Producer {
                 if valueSchema is () {
                     return error Error("The field `valueSchema` can't be empty for serializing values in Avro format");
                 }
-                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, valueSchema);
+                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, valueSchema);
                 value = check serializer.serialize(anydataValue, valueSchema, "value-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
