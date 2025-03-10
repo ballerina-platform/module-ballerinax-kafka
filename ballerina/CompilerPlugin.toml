@@ -3,4 +3,4 @@ id = "kafka-compiler-plugin"
 class = "io.ballerina.stdlib.kafka.plugin.KafkaCompilerPlugin"
 
 [[dependency]]
-path = "../compiler-plugin/build/libs/kafka-compiler-plugin-4.4.7-SNAPSHOT.jar"
+path = "../compiler-plugin/build/libs/kafka-compiler-plugin-4.5.0-SNAPSHOT.jar"
