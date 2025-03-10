@@ -1,7 +1,7 @@
 [package]
 org = "ballerinax"
 name = "kafka"
-version = "4.3.0"
+version = "4.4.7"
 authors = ["Ballerina"]
 keywords = ["kafka", "event streaming", "network", "messaging"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-kafka"
@@ -15,8 +15,8 @@ graalvmCompatible = true
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "kafka-native"
-version = "4.3.0"
-path = "../native/build/libs/kafka-native-4.3.0.jar"
+version = "4.4.7"
+path = "../native/build/libs/kafka-native-4.4.7-SNAPSHOT.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.apache.kafka"
@@ -35,6 +35,18 @@ groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
 version = "1.6.0"
 path = "./lib/constraint-native-1.6.0.jar"
+
+[[platform.java21.dependency]]
+groupId = "com.google.guava"
+artifactId = "guava"
+version = "32.0.1-jre"
+path = "./lib/guava-32.0.1-jre.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.xerial.snappy"
+artifactId = "snappy-java"
+version = "1.1.10.7"
+path = "./lib/snappy-java-1.1.10.7.jar"
 
 [build-options]
 observabilityIncluded=true

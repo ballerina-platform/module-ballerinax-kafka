@@ -22,8 +22,10 @@ import ballerina/jballerina.java;
 public client isolated class Consumer {
 
     final ConsumerConfiguration & readonly consumerConfig;
-    private final string keyDeserializerType;
-    private final string valueDeserializerType;
+    private final DeserializerType keyDeserializerType;
+    private final DeserializerType valueDeserializerType;
+    private final Deserializer? keyDeserializer;
+    private final Deserializer? valueDeserializer;
     private final string|string[] & readonly bootstrapServers;
 
     # Creates a new `kafka:Consumer`.
@@ -34,8 +36,16 @@ public client isolated class Consumer {
     public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers.cloneReadOnly();
         self.consumerConfig = config.cloneReadOnly();
-        self.keyDeserializerType = DES_BYTE_ARRAY;
-        self.valueDeserializerType = DES_BYTE_ARRAY;
+        self.keyDeserializerType = config.keyDeserializerType;
+        self.valueDeserializerType = config.valueDeserializerType;
+        do {
+            self.keyDeserializer = self.keyDeserializerType == DES_AVRO 
+                ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
+            self.valueDeserializer = self.valueDeserializerType == DES_AVRO
+                ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
+        } on fail error err {
+            return error Error("Failed to initialize the deserializers", err);
+        }
         check self.consumerInit();
 
         string|string[]? topics = config?.topics;

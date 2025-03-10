@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/uuid;
 import ballerina/jballerina.java;
+import ballerina/uuid;
 
 # Represents a Kafka producer endpoint.
 #
@@ -24,9 +24,12 @@ import ballerina/jballerina.java;
 public client isolated class Producer {
 
     final ProducerConfiguration? & readonly producerConfig;
-    private final string keySerializerType;
-    private final string valueSerializerType;
+    private final SerializerType keySerializerType;
+    private final SerializerType valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
+    private final anydata & readonly schemaRegistryConfig;
+    private final string? keySchema;
+    private final string? valueSchema;
 
     private string connectorId = uuid:createType4AsString();
 
@@ -38,9 +41,11 @@ public client isolated class Producer {
     public isolated function init(string|string[] bootstrapServers, *ProducerConfiguration config) returns Error? {
         self.bootstrapServers = bootstrapServers.cloneReadOnly();
         self.producerConfig = config.cloneReadOnly();
-        self.keySerializerType = SER_BYTE_ARRAY;
-        self.valueSerializerType = SER_BYTE_ARRAY;
-
+        self.keySerializerType = config.keySerializerType;
+        self.valueSerializerType = config.valueSerializerType;
+        self.schemaRegistryConfig = config.schemaRegistryConfig.cloneReadOnly();
+        self.keySchema = config?.keySchema;
+        self.valueSchema = config?.valueSchema;
         check self.producerInit();
     }
 
@@ -94,30 +99,59 @@ public client isolated class Producer {
     # + return - A `kafka:Error` if send action fails to send data or else '()'
     isolated remote function send(AnydataProducerRecord producerRecord) returns Error? {
         // Only producing byte[] values is handled at the moment
-        byte[] value;
         anydata anydataValue = producerRecord.value;
+        byte[] value = anydataValue.toString().toBytes();
         byte[]? key = ();
         anydata anydataKey = producerRecord?.key;
-        if anydataValue is byte[] {
-            value = anydataValue;
-        } else if anydataValue is xml {
-            value = anydataValue.toString().toBytes();
-        } else if anydataValue is string {
-            value = anydataValue.toBytes();
-        } else {
-            value = anydataValue.toJsonString().toBytes();
+
+        boolean isKeyAvro = self.keySerializerType == SER_AVRO;
+        boolean isValueAvro = self.valueSerializerType == SER_AVRO;
+        if isKeyAvro && anydataKey != () {
+            do {
+                string? keySchema = self.keySchema.cloneReadOnly();
+                if keySchema is () {
+                    return error Error("The field `keySchema` can't be empty for serializing keys in Avro format");
+                }
+                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, keySchema);
+                key = check serializer.serialize(anydataKey, keySchema, "key-" + producerRecord.topic);
+            } on fail error err {
+                return error Error(err.message());
+            }
         }
-        if anydataKey is byte[] {
-            key = anydataKey;
-        } else if anydataKey is xml {
-            key = anydataKey.toString().toBytes();
-        } else if anydataKey is string {
-            key = anydataKey.toBytes();
-        } else if anydataKey !is () {
-            key = anydataKey.toJsonString().toBytes();
+        if isValueAvro {
+            do {
+                string? valueSchema = self.valueSchema.cloneReadOnly();
+                if valueSchema is () {
+                    return error Error("The field `valueSchema` can't be empty for serializing values in Avro format");
+                }
+                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, valueSchema);
+                value = check serializer.serialize(anydataValue, valueSchema, "value-" + producerRecord.topic);
+            } on fail error err {
+                return error Error(err.message());
+            }
+        }
+        if !isKeyAvro && !isValueAvro {
+            if anydataValue is byte[] {
+                value = anydataValue;
+            } else if anydataValue is xml {
+                value = anydataValue.toString().toBytes();
+            } else if anydataValue is string {
+                value = anydataValue.toBytes();
+            } else {
+                value = anydataValue.toJsonString().toBytes();
+            }
+            if anydataKey is byte[] {
+                key = anydataKey;
+            } else if anydataKey is xml {
+                key = anydataKey.toString().toBytes();
+            } else if anydataKey is string {
+                key = anydataKey.toBytes();
+            } else if anydataKey !is () {
+                key = anydataKey.toJsonString().toBytes();
+            }
         }
         return sendByteArrayValues(self, value, producerRecord.topic, self.getHeaderValueAsByteArrayList(producerRecord?.headers), key,
-        producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
+                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
     }
 
     private isolated function getHeaderValueAsByteArrayList(map<byte[]|byte[][]|string|string[]>? headers) returns [string, byte[]][] {

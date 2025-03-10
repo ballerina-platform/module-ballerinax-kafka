@@ -96,6 +96,9 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:constraint-ballerina:${stdlibConstraintVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
         ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
+        ballerinaStdLibs "io.ballerina.lib:avro-ballerina:${stdlibAvroVersion}"
+        ballerinaStdLibs "io.ballerina.lib:confluent.cregistry-ballerina:${confluentRegistryVersion}"
+        ballerinaStdLibs "io.ballerina.lib:confluent.cavroserdes-ballerina:${confluentAvroSerDesVersion}"
         ballerinaStdLibs "io.ballerina.lib:data.jsondata-ballerina:${stdlibDataJsonDataVersion}"
     }
 }
