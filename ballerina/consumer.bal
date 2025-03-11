@@ -40,11 +40,11 @@ public client isolated class Consumer {
         self.valueDeserializerType = config.valueDeserializerType;
         do {
             self.keyDeserializer = self.keyDeserializerType == DES_AVRO 
-                ? check new AvroDeserializer(config.schemaRegistryConfig.cloneReadOnly()) : ();
+                ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
             self.valueDeserializer = self.valueDeserializerType == DES_AVRO
-                ? check new AvroDeserializer(config.schemaRegistryConfig.cloneReadOnly()) : ();
+                ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
         } on fail error err {
-            return error Error(err.message());
+            return error Error("Failed to initialize the deserializers", err);
         }
         check self.consumerInit();
 
