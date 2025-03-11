@@ -137,7 +137,7 @@ public type ConsumerConfiguration record {|
     IsolationLevel isolationLevel?;
 
     string schemaRegistryUrl?;
-    map<anydata> schemaRegistryConfig?;
+    readonly map<anydata> schemaRegistryConfig?;
     DeserializerType keyDeserializerType = DES_BYTE_ARRAY;
     DeserializerType valueDeserializerType = DES_BYTE_ARRAY;
 
@@ -304,7 +304,8 @@ public type ProducerConfiguration record {|
     string transactionalId?;
 
     string schemaRegistryUrl?;
-    string avroSchema?;
+    string keySchema?;
+    string valueSchema?;
     map<anydata> schemaRegistryConfig?;
     SerializerType keySerializerType = SER_BYTE_ARRAY;
     SerializerType valueSerializerType = SER_BYTE_ARRAY;

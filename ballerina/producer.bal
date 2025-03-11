@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/uuid;
 import ballerina/jballerina.java;
+import ballerina/uuid;
 
 # Represents a Kafka producer endpoint.
 #
@@ -24,11 +24,12 @@ import ballerina/jballerina.java;
 public client isolated class Producer {
 
     final ProducerConfiguration? & readonly producerConfig;
-    private final string keySerializerType;
-    private final string valueSerializerType;
+    private final SerializerType keySerializerType;
+    private final SerializerType valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
-    private final anydata schemaRegistryConfig;
-    private final string? schema;
+    private final anydata & readonly schemaRegistryConfig;
+    private final string? keySchema;
+    private final string? valueSchema;
 
     private string connectorId = uuid:createType4AsString();
 
@@ -43,7 +44,8 @@ public client isolated class Producer {
         self.keySerializerType = config.keySerializerType;
         self.valueSerializerType = config.valueSerializerType;
         self.schemaRegistryConfig = config.schemaRegistryConfig.cloneReadOnly();
-        self.schema = config?.avroSchema;
+        self.keySchema = config?.keySchema;
+        self.valueSchema = config?.valueSchema;
         check self.producerInit();
     }
 
@@ -104,30 +106,26 @@ public client isolated class Producer {
 
         boolean isKeyAvro = self.keySerializerType == SER_AVRO;
         boolean isValueAvro = self.valueSerializerType == SER_AVRO;
-        anydata & readonly schemaRegistryConfig;
-        string? schema;
-        lock {
-            schemaRegistryConfig = self.schemaRegistryConfig.cloneReadOnly();
-            schema = self.schema.cloneReadOnly();
-        }
         if isKeyAvro && anydataKey != () {
             do {
-                if schema is () {
-                    return error Error("The field `schema` cannot be empty for Avro serialization");
+                string? keySchema = self.keySchema.cloneReadOnly();
+                if keySchema is () {
+                    return error Error("The field `keySchema` can't be empty for serializing keys in Avro format");
                 }
-                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, schema);
-                key = check serializer.serialize(anydataKey, schema);
+                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, keySchema);
+                key = check serializer.serialize(anydataKey, keySchema, "key-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
             }
         }
         if isValueAvro {
             do {
-                if schema is () {
-                    return error Error("The field `schema` cannot be empty for Avro serialization");
+                string? valueSchema = self.valueSchema.cloneReadOnly();
+                if valueSchema is () {
+                    return error Error("The field `valueSchema` can't be empty for serializing values in Avro format");
                 }
-                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, schema);
-                value = check serializer.serialize(anydataValue, schema);
+                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, valueSchema);
+                value = check serializer.serialize(anydataValue, valueSchema, "value-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
             }
@@ -153,7 +151,7 @@ public client isolated class Producer {
             }
         }
         return sendByteArrayValues(self, value, producerRecord.topic, self.getHeaderValueAsByteArrayList(producerRecord?.headers), key,
-        producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
+                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
     }
 
     private isolated function getHeaderValueAsByteArrayList(map<byte[]|byte[][]|string|string[]>? headers) returns [string, byte[]][] {
