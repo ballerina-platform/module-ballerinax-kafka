@@ -18,8 +18,10 @@
 
 package io.ballerina.stdlib.kafka.utils;
 
+import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.TypeTags;
+import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -74,6 +76,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import static io.ballerina.runtime.api.PredefinedTypes.TYPE_ANYDATA;
+import static io.ballerina.runtime.api.PredefinedTypes.TYPE_ERROR;
 import static io.ballerina.runtime.api.TypeTags.ANYDATA_TAG;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
@@ -83,6 +87,7 @@ import static io.ballerina.runtime.api.TypeTags.UNION_TAG;
 import static io.ballerina.runtime.api.TypeTags.XML_TAG;
 import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ADDITIONAL_PROPERTIES_MAP_FIELD;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.AVRO_DESERIALIZATION_TYPE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_ENABLE_AUTO_COMMIT_CONFIG;
@@ -93,8 +98,13 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_KEY;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_PARTITION_OFFSET;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_TIMESTAMP;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_VALUE;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER_TYPE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_BINDING_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_VALIDATION_ERROR;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER_TYPE;
+import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getEnvironment;
 import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getModule;
 
 /**
@@ -534,17 +544,24 @@ public class KafkaUtils {
         return ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, offset);
     }
 
-    public static BMap<BString, Object> populateConsumerRecord(ConsumerRecord record, RecordType recordType,
+    public static BMap<BString, Object> populateConsumerRecord(BObject consumer, ConsumerRecord record,
+                                                               RecordType recordType,
                                                                boolean validateConstraints, boolean autoSeek) {
         Object key = null;
         Map<String, Field> fieldMap = recordType.getFields();
         Type keyType = getReferredType(fieldMap.get(KAFKA_RECORD_KEY).getFieldType());
         Type valueType = getReferredType(fieldMap.get(KAFKA_RECORD_VALUE).getFieldType());
+        String keyDeserializerType = consumer.getNativeData(KEY_DESERIALIZER_TYPE).toString();
+        String valueDeserializerType = consumer.getNativeData(VALUE_DESERIALIZER_TYPE).toString();
+        BObject keyDeserializer = (keyDeserializerType.equals(AVRO_DESERIALIZATION_TYPE))
+                ? (BObject) consumer.getNativeData(KEY_DESERIALIZER) : null;
+        BObject valueDeserializer = (valueDeserializerType.equals(AVRO_DESERIALIZATION_TYPE))
+                ? (BObject) consumer.getNativeData(VALUE_DESERIALIZER) : null;
         if (Objects.nonNull(record.key())) {
-            key = getValueWithIntendedType(keyType, (byte[]) record.key(), record, autoSeek);
+            key = getValueWithIntendedType(keyDeserializer, keyType, (byte[]) record.key(), record, autoSeek);
         }
-
-        Object value = getValueWithIntendedType(valueType, (byte[]) record.value(), record, autoSeek);
+        Object value = getValueWithIntendedType(valueDeserializer, valueType,
+                                                (byte[]) record.value(), record, autoSeek);
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                 (long) record.partition());
         MapType headerType = (MapType) getReferredType(fieldMap.get(KAFKA_RECORD_HEADERS.getValue()).getFieldType());
@@ -641,7 +658,8 @@ public class KafkaUtils {
         }
     }
 
-    public static BArray getConsumerRecords(ConsumerRecords records, RecordType recordType, boolean readonly,
+    public static BArray getConsumerRecords(BObject deserializer, ConsumerRecords records, RecordType recordType,
+                                            boolean readonly,
                                             boolean validateConstraints, boolean autoCommit,
                                             KafkaConsumer consumer, boolean autoSeek) {
         BArray consumerRecordsArray = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
@@ -650,7 +668,7 @@ public class KafkaUtils {
         for (Object record : records) {
             ConsumerRecord consumerRecord = (ConsumerRecord) record;
             try {
-                consumerRecordsArray.append(populateConsumerRecord((ConsumerRecord) record, recordType,
+                consumerRecordsArray.append(populateConsumerRecord(deserializer, (ConsumerRecord) record, recordType,
                         validateConstraints, autoSeek));
             } catch (BError bError) {
                 if (handleBError(consumer, (ConsumerRecord) record, autoSeek, bError, i == 0)) {
@@ -709,8 +727,18 @@ public class KafkaUtils {
         }
     }
 
-    public static Object getValueWithIntendedType(Type type, byte[] value, ConsumerRecord consumerRecord,
+    public static Object getValueWithIntendedType(BObject deserializer, Type type, byte[] value,
+                                                  ConsumerRecord consumerRecord,
                                                   boolean autoSeek) {
+        if (deserializer != null) {
+            Future balFuture = getEnvironment().markAsync();
+            Callback executionCallback = new ExecutionCallback(balFuture);
+            Type returnType = TypeCreator.createUnionType(TYPE_ANYDATA, TYPE_ERROR);
+            getEnvironment().getRuntime().invokeMethodAsyncSequentially(deserializer,
+                    KafkaConstants.DESERIALIZE_FUNCTION, null, null, executionCallback, null,
+                    returnType, ValueCreator.createArrayValue(value));
+            return null;
+        }
         String strValue = new String(value, StandardCharsets.UTF_8);
         Object intendedValue;
         try {
@@ -1028,7 +1056,8 @@ public class KafkaUtils {
         return Files.readString(Paths.get(filePath));
     }
 
-    public static BArray getValuesWithIntendedType(Type type, KafkaConsumer consumer, ConsumerRecords records,
+    public static BArray getValuesWithIntendedType(BObject consumerObject, Type type, KafkaConsumer consumer,
+                                                   ConsumerRecords records,
                                                    boolean constraintValidation, boolean autoCommit, boolean autoSeek) {
         ArrayType intendedType;
         if (type.getTag() == INTERSECTION_TAG) {
@@ -1038,12 +1067,16 @@ public class KafkaUtils {
         }
         BArray bArray = ValueCreator.createArrayValue(intendedType);
         HashMap<String, PartitionOffset> partitionOffsetMap = new HashMap<>();
+        Object valueDeserializerType = consumerObject.getNativeData("valueDeserializerType");
+        BObject valueDeserializer = (valueDeserializerType != null)
+                ? (BObject) consumerObject.getNativeData("valueDeserializer") : null;
         int i = 0;
         for (Object record: records) {
             ConsumerRecord consumerRecord = (ConsumerRecord) record;
             try {
-                Object value = getValueWithIntendedType(getReferredType(intendedType.getElementType()),
-                        (byte[]) (consumerRecord.value()), consumerRecord, autoSeek);
+                Object value = getValueWithIntendedType(valueDeserializer,
+                        getReferredType(intendedType.getElementType()), (byte[]) (consumerRecord.value()),
+                        consumerRecord, autoSeek);
                 if (constraintValidation) {
                     validateConstraints(value, ValueCreator.createTypedescValue(intendedType.getElementType()),
                             consumerRecord, autoSeek);
