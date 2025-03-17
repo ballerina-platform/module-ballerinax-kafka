@@ -182,7 +182,8 @@ function consumerServiceSubscribeErrorTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
         offsetReset: OFFSET_RESET_EARLIEST,
-        clientId: "test-listener-06"
+        clientId: "test-listener-06",
+        autoCommit: false
     };
     Listener|error result = trap new (DEFAULT_URL, consumerConfiguration);
 
