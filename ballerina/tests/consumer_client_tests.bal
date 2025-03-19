@@ -784,7 +784,8 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
 function consumerSubscribeErrorTest() returns error? {
     string topic = "consumer-subsribe-error-test-topic";
     Consumer consumer = check new (DEFAULT_URL, {
-        clientId: "test-consumer-37"
+        clientId: "test-consumer-37",
+        autoCommit: false
     });
     error? result = trap consumer->subscribe([topic]);
 

@@ -189,7 +189,8 @@ public class KafkaUtils {
         addIntParamIfPresent(KafkaConstants.ALIAS_CONCURRENT_CONSUMERS.getValue(), configurations, properties,
                              KafkaConstants.ALIAS_CONCURRENT_CONSUMERS);
 
-        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
+                       configurations.getBooleanValue(KafkaConstants.AUTO_COMMIT));
         addBooleanParamIfPresent(ConsumerConfig.CHECK_CRCS_CONFIG, configurations, properties,
                                  KafkaConstants.CONSUMER_CHECK_CRCS_CONFIG, true);
         addBooleanParamIfPresent(ConsumerConfig.EXCLUDE_INTERNAL_TOPICS_CONFIG, configurations, properties,

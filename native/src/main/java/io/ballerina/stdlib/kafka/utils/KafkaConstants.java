@@ -55,6 +55,7 @@ public class KafkaConstants {
     public static final String CALLER_STRUCT_NAME = "Caller";
     public static final String TYPE_CHECKER_OBJECT_NAME = "TypeChecker";
     public static final String SERVER_CONNECTOR = "serverConnector";
+    public static final BString AUTO_COMMIT = StringUtils.fromString("autoCommit");
 
     public static final BString CONSUMER_CONFIG_FIELD_NAME = StringUtils.fromString("consumerConfig");
     public static final BString PRODUCER_CONFIG_FIELD_NAME = StringUtils.fromString("producerConfig");
