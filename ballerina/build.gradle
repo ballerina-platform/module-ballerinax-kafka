@@ -126,7 +126,7 @@ task startKafkaServer() {
             if (!stdOut.toString().contains("kafka-test")) {
                 println "Starting Kafka server."
                 exec {
-                    commandLine 'sh', '-c', "docker compose -f tests/compose.yaml up -d"
+                    commandLine 'sh', '-c', "docker compose -f tests/compose.yaml up"
                     standardOutput = stdOut
                 }
                 println stdOut.toString()
