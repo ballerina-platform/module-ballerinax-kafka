@@ -89,7 +89,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.14.0"
+version = "2.14.2"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "auth"},
@@ -411,7 +411,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "confluent.cavroserdes"
-version = "1.0.4"
+version = "1.0.2"
 dependencies = [
 	{org = "ballerina", name = "avro"},
 	{org = "ballerina", name = "jballerina.java"},
