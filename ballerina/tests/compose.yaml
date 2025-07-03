@@ -1,6 +1,6 @@
 services:
     zookeeper-add-kafka-users:
-        image: 'confluentinc/cp-kafka:latest'
+        image: 'confluentinc/cp-kafka:7.9.2'
         container_name: "zookeeper-add-kafka-users"
         depends_on:
             - zookeeper
@@ -9,7 +9,7 @@ services:
                               kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[iterations=4096,password=scram256password]' --entity-type users --entity-name scram256user && \
                               kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-512=[iterations=4096,password=scram512password]' --entity-type users --entity-name scram512user'"
     zookeeper:
-        image: 'confluentinc/cp-zookeeper:latest'
+        image: 'confluentinc/cp-zookeeper:7.9.2'
         hostname: zookeeper
         container_name: kafka-test-zookeeper
         ports:
@@ -21,7 +21,7 @@ services:
         volumes:
             - ./configs/zookeeper_jaas.conf:/opt/confluentinc/kafka/config/zookeeper_jaas.conf
     broker:
-        image: 'confluentinc/cp-server:latest'
+        image: 'confluentinc/cp-server:7.9.2'
         hostname: broker
         container_name: kafka-test-broker
         depends_on:
@@ -59,7 +59,7 @@ services:
             - ./secrets/trustoresandkeystores/kafka.broker.truststore.jks:/etc/kafka/secrets/kafka.broker.truststore.jks
             - ./configs/kafka_server_jaas.conf:/opt/confluentinc/kafka/config/kafka_server_jaas.conf
     schema-registry:
-        image: 'confluentinc/cp-schema-registry:latest'
+        image: 'confluentinc/cp-schema-registry:7.9.2'
         container_name: kafka-schema-registry
         depends_on:
             - broker
