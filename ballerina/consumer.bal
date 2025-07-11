@@ -39,7 +39,7 @@ public client isolated class Consumer {
         self.keyDeserializerType = config.keyDeserializerType;
         self.valueDeserializerType = config.valueDeserializerType;
         do {
-            self.keyDeserializer = self.keyDeserializerType == DES_AVRO 
+            self.keyDeserializer = self.keyDeserializerType == DES_AVRO
                 ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
             self.valueDeserializer = self.valueDeserializerType == DES_AVRO
                 ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
@@ -109,7 +109,7 @@ public client isolated class Consumer {
     # kafka:Error? result = consumer->commitOffset([partitionOffset1, partitionOffset2]);
     # ```
     #
-    # + offsets - Offsets to be commited
+    # + offsets - Offsets to be committed
     # + duration - Timeout duration (in seconds) for the commit operation execution
     # + return - A `kafka:Error` if an error is encountered or else `()`
     isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? =
@@ -298,6 +298,11 @@ public client isolated class Consumer {
     @java:Method {
         name: "resume",
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.BrokerConnection"
+    } external;
+
+    isolated remote function offsetsForTimes(TopicPartitionTimestamp[] topicPartitionTimestamps, decimal? duration = ())
+    returns TopicPartitionOffset[]|Error = @java:Method {
+        'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.GetOffsets"
     } external;
 
     # Seeks for a given offset in a topic partition.

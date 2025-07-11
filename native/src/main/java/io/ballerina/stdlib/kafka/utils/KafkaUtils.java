@@ -54,6 +54,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
@@ -97,8 +98,10 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_TIMEST
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_VALUE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER_TYPE;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.OFFSET_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_BINDING_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_VALIDATION_ERROR;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.TIMESTAMP_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER_TYPE;
 import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getEnvironment;
@@ -116,88 +119,88 @@ public class KafkaUtils {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getServerUrls(bootStrapServers));
         addStringParamIfPresent(ConsumerConfig.GROUP_ID_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_GROUP_ID_CONFIG);
+                KafkaConstants.CONSUMER_GROUP_ID_CONFIG);
         addStringParamIfPresent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_AUTO_OFFSET_RESET_CONFIG);
+                KafkaConstants.CONSUMER_AUTO_OFFSET_RESET_CONFIG);
         addStringParamIfPresent(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_PARTITION_ASSIGNMENT_STRATEGY_CONFIG);
+                KafkaConstants.CONSUMER_PARTITION_ASSIGNMENT_STRATEGY_CONFIG);
         addStringParamIfPresent(ConsumerConfig.METRICS_RECORDING_LEVEL_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_METRICS_RECORDING_LEVEL_CONFIG);
+                KafkaConstants.CONSUMER_METRICS_RECORDING_LEVEL_CONFIG);
         addStringParamIfPresent(ConsumerConfig.METRIC_REPORTER_CLASSES_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_METRIC_REPORTER_CLASSES_CONFIG);
+                KafkaConstants.CONSUMER_METRIC_REPORTER_CLASSES_CONFIG);
         addStringParamIfPresent(ConsumerConfig.CLIENT_ID_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_CLIENT_ID_CONFIG);
+                KafkaConstants.CONSUMER_CLIENT_ID_CONFIG);
         addStringParamIfPresent(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_INTERCEPTOR_CLASSES_CONFIG);
+                KafkaConstants.CONSUMER_INTERCEPTOR_CLASSES_CONFIG);
         addStringParamIfPresent(ConsumerConfig.ISOLATION_LEVEL_CONFIG, configurations, properties,
-                                KafkaConstants.CONSUMER_ISOLATION_LEVEL_CONFIG);
+                KafkaConstants.CONSUMER_ISOLATION_LEVEL_CONFIG);
 
         addDeserializerConfigs(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, properties);
         addDeserializerConfigs(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, properties);
         addStringParamIfPresent(KafkaConstants.SCHEMA_REGISTRY_URL, configurations, properties,
-                                KafkaConstants.CONSUMER_SCHEMA_REGISTRY_URL);
+                KafkaConstants.CONSUMER_SCHEMA_REGISTRY_URL);
 
         addStringOrStringArrayParamIfPresent(KafkaConstants.ALIAS_TOPICS.getValue(), configurations, properties,
-                                     KafkaConstants.ALIAS_TOPICS);
+                KafkaConstants.ALIAS_TOPICS);
 
         addTimeParamIfPresent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_SESSION_TIMEOUT_MS_CONFIG);
+                KafkaConstants.CONSUMER_SESSION_TIMEOUT_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_HEARTBEAT_INTERVAL_MS_CONFIG);
+                KafkaConstants.CONSUMER_HEARTBEAT_INTERVAL_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.METADATA_MAX_AGE_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_METADATA_MAX_AGE_CONFIG);
+                KafkaConstants.CONSUMER_METADATA_MAX_AGE_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_AUTO_COMMIT_INTERVAL_MS_CONFIG);
+                KafkaConstants.CONSUMER_AUTO_COMMIT_INTERVAL_MS_CONFIG);
         addIntParamIfPresent(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_MAX_PARTITION_FETCH_BYTES_CONFIG);
+                KafkaConstants.CONSUMER_MAX_PARTITION_FETCH_BYTES_CONFIG);
         addIntParamIfPresent(ConsumerConfig.SEND_BUFFER_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_SEND_BUFFER_CONFIG);
+                KafkaConstants.CONSUMER_SEND_BUFFER_CONFIG);
         addIntParamIfPresent(ConsumerConfig.RECEIVE_BUFFER_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_RECEIVE_BUFFER_CONFIG);
+                KafkaConstants.CONSUMER_RECEIVE_BUFFER_CONFIG);
         addIntParamIfPresent(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_FETCH_MIN_BYTES_CONFIG);
+                KafkaConstants.CONSUMER_FETCH_MIN_BYTES_CONFIG);
         addIntParamIfPresent(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_FETCH_MAX_BYTES_CONFIG);
+                KafkaConstants.CONSUMER_FETCH_MAX_BYTES_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_FETCH_MAX_WAIT_MS_CONFIG);
+                KafkaConstants.CONSUMER_FETCH_MAX_WAIT_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.RECONNECT_BACKOFF_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_RECONNECT_BACKOFF_MS_CONFIG);
+                KafkaConstants.CONSUMER_RECONNECT_BACKOFF_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.RETRY_BACKOFF_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_RETRY_BACKOFF_MS_CONFIG);
+                KafkaConstants.CONSUMER_RETRY_BACKOFF_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_METRICS_SAMPLE_WINDOW_MS_CONFIG);
+                KafkaConstants.CONSUMER_METRICS_SAMPLE_WINDOW_MS_CONFIG);
 
         addIntParamIfPresent(ConsumerConfig.METRICS_NUM_SAMPLES_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_METRICS_NUM_SAMPLES_CONFIG);
+                KafkaConstants.CONSUMER_METRICS_NUM_SAMPLES_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_REQUEST_TIMEOUT_MS_CONFIG);
+                KafkaConstants.CONSUMER_REQUEST_TIMEOUT_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
+                KafkaConstants.CONSUMER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
         addIntParamIfPresent(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_MAX_POLL_RECORDS_CONFIG);
+                KafkaConstants.CONSUMER_MAX_POLL_RECORDS_CONFIG);
         addIntParamIfPresent(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG);
+                KafkaConstants.CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_RECONNECT_BACKOFF_MAX_MS_CONFIG);
+                KafkaConstants.CONSUMER_RECONNECT_BACKOFF_MAX_MS_CONFIG);
         addTimeParamIfPresent(ConsumerConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, configurations, properties,
-                             KafkaConstants.CONSUMER_DEFAULT_API_TIMEOUT_CONFIG);
+                KafkaConstants.CONSUMER_DEFAULT_API_TIMEOUT_CONFIG);
 
         addTimeParamIfPresent(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue(), configurations, properties,
-                             KafkaConstants.ALIAS_POLLING_TIMEOUT);
+                KafkaConstants.ALIAS_POLLING_TIMEOUT);
         addTimeParamIfPresent(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue(), configurations, properties,
-                             KafkaConstants.ALIAS_POLLING_INTERVAL);
+                KafkaConstants.ALIAS_POLLING_INTERVAL);
         addIntParamIfPresent(KafkaConstants.ALIAS_CONCURRENT_CONSUMERS.getValue(), configurations, properties,
-                             KafkaConstants.ALIAS_CONCURRENT_CONSUMERS);
+                KafkaConstants.ALIAS_CONCURRENT_CONSUMERS);
 
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
-                       configurations.getBooleanValue(KafkaConstants.AUTO_COMMIT));
+                configurations.getBooleanValue(KafkaConstants.AUTO_COMMIT));
         addBooleanParamIfPresent(ConsumerConfig.CHECK_CRCS_CONFIG, configurations, properties,
-                                 KafkaConstants.CONSUMER_CHECK_CRCS_CONFIG, true);
+                KafkaConstants.CONSUMER_CHECK_CRCS_CONFIG, true);
         addBooleanParamIfPresent(ConsumerConfig.EXCLUDE_INTERNAL_TOPICS_CONFIG, configurations, properties,
-                                 KafkaConstants.CONSUMER_EXCLUDE_INTERNAL_TOPICS_CONFIG, true);
+                KafkaConstants.CONSUMER_EXCLUDE_INTERNAL_TOPICS_CONFIG, true);
 
         addBooleanParamIfPresent(KafkaConstants.ALIAS_DECOUPLE_PROCESSING.getValue(), configurations, properties,
-                                 KafkaConstants.ALIAS_DECOUPLE_PROCESSING, false);
+                KafkaConstants.ALIAS_DECOUPLE_PROCESSING, false);
         addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, configurations,
                 properties, KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
@@ -209,7 +212,7 @@ public class KafkaUtils {
         }
         if (Objects.nonNull(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD))) {
             processAdditionalProperties(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD),
-                                        properties);
+                    properties);
         }
         return properties;
     }
@@ -218,66 +221,66 @@ public class KafkaUtils {
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getServerUrls(bootstrapServers));
         addStringParamIfPresent(ProducerConfig.ACKS_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_ACKS_CONFIG);
+                properties, KafkaConstants.PRODUCER_ACKS_CONFIG);
         addStringParamIfPresent(ProducerConfig.COMPRESSION_TYPE_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_COMPRESSION_TYPE_CONFIG);
+                properties, KafkaConstants.PRODUCER_COMPRESSION_TYPE_CONFIG);
         addStringParamIfPresent(ProducerConfig.CLIENT_ID_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_CLIENT_ID_CONFIG);
+                properties, KafkaConstants.PRODUCER_CLIENT_ID_CONFIG);
         addStringParamIfPresent(ProducerConfig.METRICS_RECORDING_LEVEL_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_METRICS_RECORDING_LEVEL_CONFIG);
+                properties, KafkaConstants.PRODUCER_METRICS_RECORDING_LEVEL_CONFIG);
         addStringParamIfPresent(ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_METRIC_REPORTER_CLASSES_CONFIG);
+                properties, KafkaConstants.PRODUCER_METRIC_REPORTER_CLASSES_CONFIG);
         addStringParamIfPresent(ProducerConfig.PARTITIONER_CLASS_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_PARTITIONER_CLASS_CONFIG);
+                properties, KafkaConstants.PRODUCER_PARTITIONER_CLASS_CONFIG);
         addStringParamIfPresent(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_INTERCEPTOR_CLASSES_CONFIG);
+                properties, KafkaConstants.PRODUCER_INTERCEPTOR_CLASSES_CONFIG);
         addStringParamIfPresent(ProducerConfig.TRANSACTIONAL_ID_CONFIG, configurations,
-                                properties, KafkaConstants.PRODUCER_TRANSACTIONAL_ID_CONFIG);
+                properties, KafkaConstants.PRODUCER_TRANSACTIONAL_ID_CONFIG);
         addStringParamIfPresent(KafkaConstants.SCHEMA_REGISTRY_URL, configurations, properties,
-                                KafkaConstants.PRODUCER_SCHEMA_REGISTRY_URL);
+                KafkaConstants.PRODUCER_SCHEMA_REGISTRY_URL);
 
         addSerializerTypeConfigs(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, properties);
         addSerializerTypeConfigs(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, properties);
         addIntParamIfPresent(ProducerConfig.BUFFER_MEMORY_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_BUFFER_MEMORY_CONFIG);
+                properties, KafkaConstants.PRODUCER_BUFFER_MEMORY_CONFIG);
         addIntParamIfPresent(ProducerConfig.RETRIES_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_RETRIES_CONFIG);
+                properties, KafkaConstants.PRODUCER_RETRIES_CONFIG);
         addIntParamIfPresent(ProducerConfig.BATCH_SIZE_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_BATCH_SIZE_CONFIG);
+                properties, KafkaConstants.PRODUCER_BATCH_SIZE_CONFIG);
         addTimeParamIfPresent(ProducerConfig.LINGER_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_LINGER_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_LINGER_MS_CONFIG);
         addIntParamIfPresent(ProducerConfig.SEND_BUFFER_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_SEND_BUFFER_CONFIG);
+                properties, KafkaConstants.PRODUCER_SEND_BUFFER_CONFIG);
         addIntParamIfPresent(ProducerConfig.RECEIVE_BUFFER_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_RECEIVE_BUFFER_CONFIG);
+                properties, KafkaConstants.PRODUCER_RECEIVE_BUFFER_CONFIG);
         addIntParamIfPresent(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_MAX_REQUEST_SIZE_CONFIG);
+                properties, KafkaConstants.PRODUCER_MAX_REQUEST_SIZE_CONFIG);
         addTimeParamIfPresent(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_RECONNECT_BACKOFF_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_RECONNECT_BACKOFF_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_RECONNECT_BACKOFF_MAX_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_RECONNECT_BACKOFF_MAX_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_RETRY_BACKOFF_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_RETRY_BACKOFF_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.MAX_BLOCK_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_MAX_BLOCK_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_MAX_BLOCK_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_REQUEST_TIMEOUT_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_REQUEST_TIMEOUT_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.METADATA_MAX_AGE_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_METADATA_MAX_AGE_CONFIG);
+                properties, KafkaConstants.PRODUCER_METADATA_MAX_AGE_CONFIG);
         addTimeParamIfPresent(ProducerConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_METRICS_SAMPLE_WINDOW_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_METRICS_SAMPLE_WINDOW_MS_CONFIG);
         addIntParamIfPresent(ProducerConfig.METRICS_NUM_SAMPLES_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_METRICS_NUM_SAMPLES_CONFIG);
+                properties, KafkaConstants.PRODUCER_METRICS_NUM_SAMPLES_CONFIG);
         addIntParamIfPresent(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, configurations,
-                             properties, KafkaConstants.PRODUCER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION);
+                properties, KafkaConstants.PRODUCER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION);
         addTimeParamIfPresent(ProducerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
+                properties, KafkaConstants.PRODUCER_CONNECTIONS_MAX_IDLE_MS_CONFIG);
         addTimeParamIfPresent(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, configurations,
-                             properties, KafkaConstants.PRODUCER_TRANSACTION_TIMEOUT_CONFIG);
+                properties, KafkaConstants.PRODUCER_TRANSACTION_TIMEOUT_CONFIG);
         addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, configurations,
-                             properties, KafkaConstants.SECURITY_PROTOCOL_CONFIG);
+                properties, KafkaConstants.SECURITY_PROTOCOL_CONFIG);
         addBooleanParamIfPresent(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, configurations,
-                                 properties, KafkaConstants.PRODUCER_ENABLE_IDEMPOTENCE_CONFIG);
+                properties, KafkaConstants.PRODUCER_ENABLE_IDEMPOTENCE_CONFIG);
         if (Objects.nonNull(configurations.get(KafkaConstants.SECURE_SOCKET))) {
             processSslProperties(configurations, properties);
         }
@@ -286,7 +289,7 @@ public class KafkaUtils {
         }
         if (Objects.nonNull(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD))) {
             processAdditionalProperties(configurations.getMapValue(ADDITIONAL_PROPERTIES_MAP_FIELD),
-                                        properties);
+                    properties);
         }
         return properties;
     }
@@ -377,9 +380,9 @@ public class KafkaUtils {
             String jaasConfigValue = String.format("org.apache.kafka.common.security.plain.PlainLoginModule " +
                     "required username=\"%s\" password=\"%s\";", username, password);
             addStringParamIfPresent(SaslConfigs.SASL_MECHANISM, authenticationConfig, properties,
-                                    KafkaConstants.AUTHENTICATION_MECHANISM);
+                    KafkaConstants.AUTHENTICATION_MECHANISM);
             addStringParamIfPresent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, authenticationConfig, properties,
-                                    KafkaConstants.SECURITY_PROTOCOL_CONFIG);
+                    KafkaConstants.SECURITY_PROTOCOL_CONFIG);
             properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfigValue);
         } else if (KafkaConstants.SASL_SCRAM_SHA_256.equals(mechanism) ||
                 KafkaConstants.SASL_SCRAM_SHA_512.equals(mechanism)) {
@@ -406,7 +409,7 @@ public class KafkaUtils {
     }
 
     private static void addDeserializerConfigs(String paramName, Properties configParams) {
-            configParams.put(paramName, KafkaConstants.BYTE_ARRAY_DESERIALIZER);
+        configParams.put(paramName, KafkaConstants.BYTE_ARRAY_DESERIALIZER);
     }
 
     private static void addStringParamIfPresent(String paramName,
@@ -422,9 +425,9 @@ public class KafkaUtils {
     }
 
     private static void addStringOrStringArrayParamIfPresent(String paramName,
-                                                     BMap<BString, Object> configs,
-                                                     Properties configParams,
-                                                     BString key) {
+                                                             BMap<BString, Object> configs,
+                                                             Properties configParams,
+                                                             BString key) {
         if (configs.containsKey(key)) {
             List<String> values;
             Object paramValues = configs.get(key);
@@ -439,9 +442,9 @@ public class KafkaUtils {
     }
 
     private static void addStringArrayAsStringParamIfPresent(String paramName,
-                                                     BMap<BString, Object> configs,
-                                                     Properties configParams,
-                                                     BString key) {
+                                                             BMap<BString, Object> configs,
+                                                             Properties configParams,
+                                                             BString key) {
         if (configs.containsKey(key)) {
             BArray stringArray = (BArray) configs.get(key);
             String values = getStringFromStringBArray(stringArray);
@@ -459,9 +462,9 @@ public class KafkaUtils {
     }
 
     private static void addTimeParamIfPresent(String paramName,
-                                             BMap<BString, Object> configs,
-                                             Properties configParams,
-                                             BString key) {
+                                              BMap<BString, Object> configs,
+                                              Properties configParams,
+                                              BString key) {
         if (configs.containsKey(key)) {
             BigDecimal configValueInSeconds = ((BDecimal) configs.get(key)).decimalValue();
             int valueInMilliSeconds = (configValueInSeconds).multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
@@ -502,14 +505,18 @@ public class KafkaUtils {
         ArrayList<TopicPartition> partitionList = new ArrayList<>();
         if (partitions != null) {
             for (int counter = 0; counter < partitions.size(); counter++) {
-                BMap<BString, Object> partition = (BMap<BString, Object>) partitions.get(counter);
-                String topic = partition.get(KafkaConstants.ALIAS_TOPIC).toString();
-                int partitionValue = getIntFromLong((Long) partition.get(KafkaConstants.ALIAS_PARTITION), logger,
-                                                    KafkaConstants.ALIAS_PARTITION.getValue());
-                partitionList.add(new TopicPartition(topic, partitionValue));
+                TopicPartition partition = getTopicPartition((BMap<BString, Object>) partitions.get(counter), logger);
+                partitionList.add(partition);
             }
         }
         return partitionList;
+    }
+
+    public static TopicPartition getTopicPartition(BMap<BString, Object> bTopicPartition, Logger logger) {
+        String topic = bTopicPartition.get(KafkaConstants.ALIAS_TOPIC).toString();
+        int partition = getIntFromLong((Long) bTopicPartition.get(KafkaConstants.ALIAS_PARTITION), logger,
+                KafkaConstants.ALIAS_PARTITION.getValue());
+        return new TopicPartition(topic, partition);
     }
 
     public static List<String> getStringListFromStringBArray(BArray stringArray) {
@@ -537,8 +544,19 @@ public class KafkaUtils {
         return ValueCreator.createRecordValue(getTopicPartitionRecord(), topic, partition);
     }
 
+    public static BMap<BString, Object> populateOffsetAndTimestampRecord(OffsetAndTimestamp offsetAndTimestamp) {
+        BMap<BString, Object> offsetAndTimestampRecord = ValueCreator.createRecordValue(getOffsetAndTimestampRecord());
+        offsetAndTimestampRecord.put(OFFSET_FIELD, offsetAndTimestamp.offset());
+        offsetAndTimestampRecord.put(TIMESTAMP_FIELD, offsetAndTimestamp.timestamp());
+        if (offsetAndTimestamp.leaderEpoch().isPresent()) {
+            offsetAndTimestampRecord.put(KafkaConstants.LEADER_EPOCH_FIELD,
+                    offsetAndTimestamp.leaderEpoch().get().longValue());
+        }
+        return offsetAndTimestampRecord;
+    }
+
     public static BMap<BString, Object> populatePartitionOffsetRecord(BMap<BString, Object> topicPartition,
-                                                                          long offset) {
+                                                                      long offset) {
         return ValueCreator.createRecordValue(getPartitionOffsetRecord(), topicPartition, offset);
     }
 
@@ -559,7 +577,7 @@ public class KafkaUtils {
             key = getValueWithIntendedType(keyDeserializer, keyType, (byte[]) record.key(), record, autoSeek);
         }
         Object value = getValueWithIntendedType(valueDeserializer, valueType,
-                                                (byte[]) record.value(), record, autoSeek);
+                (byte[]) record.value(), record, autoSeek);
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                 (long) record.partition());
         MapType headerType = (MapType) getReferredType(fieldMap.get(KAFKA_RECORD_HEADERS.getValue()).getFieldType());
@@ -793,17 +811,21 @@ public class KafkaUtils {
     }
 
     public static BMap<BString, Object> getTopicPartitionRecord() {
-        return createKafkaRecord(KafkaConstants.TOPIC_PARTITION_STRUCT_NAME);
+        return createKafkaRecord(KafkaConstants.TOPIC_PARTITION_TYPE_NAME);
+    }
+
+    private static BMap<BString, Object> getOffsetAndTimestampRecord() {
+        return createKafkaRecord(KafkaConstants.OFFSET_AND_TIMESTAMP_TYPE_NAME);
     }
 
     public static BError createKafkaError(String message) {
         return ErrorCreator.createDistinctError(KAFKA_ERROR, getModule(),
-                                                StringUtils.fromString(message));
+                StringUtils.fromString(message));
     }
 
-    public static BError createKafkaError(String message, BError cause) {
-        return ErrorCreator.createDistinctError(KAFKA_ERROR, getModule(),
-                                                 StringUtils.fromString(message), cause);
+    public static BError createKafkaError(String message, Throwable throwable) {
+        BError cause = ErrorCreator.createError(StringUtils.fromString(throwable.getMessage()));
+        return ErrorCreator.createDistinctError(KAFKA_ERROR, getModule(), StringUtils.fromString(message), cause);
     }
 
     public static BError createPayloadValidationError(BError cause, ConsumerRecord record, boolean autoSeek) {
@@ -908,7 +930,7 @@ public class KafkaUtils {
             return Math.toIntExact(longValue);
         } catch (ArithmeticException e) {
             logger.warn("The value set for {} needs to be less than {}. The {} value is set to {}", name,
-                        Integer.MAX_VALUE, name, Integer.MAX_VALUE);
+                    Integer.MAX_VALUE, name, Integer.MAX_VALUE);
             return Integer.MAX_VALUE;
         }
     }
@@ -974,7 +996,7 @@ public class KafkaUtils {
         producerObject.addNativeData(KafkaConstants.NATIVE_PRODUCER, kafkaProducer);
         producerObject.addNativeData(KafkaConstants.NATIVE_PRODUCER_CONFIG, producerProperties);
         producerObject.addNativeData(KafkaConstants.BOOTSTRAP_SERVERS,
-                                     producerProperties.getProperty(KafkaConstants.BOOTSTRAP_SERVERS));
+                producerProperties.getProperty(KafkaConstants.BOOTSTRAP_SERVERS));
         producerObject.addNativeData(KafkaConstants.CLIENT_ID, getClientIdFromProperties(producerProperties));
         KafkaMetricsUtil.reportNewProducer(producerObject);
     }
@@ -1069,7 +1091,7 @@ public class KafkaUtils {
         BObject valueDeserializer = (valueDeserializerType != null)
                 ? (BObject) consumerObject.getNativeData("valueDeserializer") : null;
         int i = 0;
-        for (Object record: records) {
+        for (Object record : records) {
             ConsumerRecord consumerRecord = (ConsumerRecord) record;
             try {
                 Object value = getValueWithIntendedType(valueDeserializer,

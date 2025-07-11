@@ -118,7 +118,9 @@ ProducerConfiguration producerConfiguration = {
 
 Producer producer = check new (DEFAULT_URL, producerConfiguration);
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerCloseTest() returns error? {
     string topic = "close-test-topic";
     kafkaTopics.push(topic);
@@ -141,7 +143,9 @@ function consumerCloseTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerCloseWithDurationTest() returns error? {
     string topic = "close-with-duration-test-topic";
     kafkaTopics.push(topic);
@@ -163,7 +167,9 @@ function consumerCloseWithDurationTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerCloseWithDefaultTimeoutTest() returns error? {
     string topic = "close-with-default-timeout-test-topic";
     kafkaTopics.push(topic);
@@ -186,7 +192,9 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerConfigTest() returns error? {
     string topic = "consumer-config-test-topic";
     kafkaTopics.push(topic);
@@ -207,7 +215,9 @@ function consumerConfigTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerFunctionsTest() returns error? {
     string topic = "consumer-functions-test-topic";
     kafkaTopics.push(topic);
@@ -227,7 +237,9 @@ function consumerFunctionsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerSeekTest() returns error? {
     string topic = "consumer-seek-test-topic";
     kafkaTopics.push(topic);
@@ -267,7 +279,9 @@ function consumerSeekTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerSeekToBeginningTest() returns error? {
     string topic = "consumer-seek-to-beginning-test-topic";
     kafkaTopics.push(topic);
@@ -300,7 +314,9 @@ function consumerSeekToBeginningTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerSeekToEndTest() returns error? {
     string topic = "consumer-seek-to-end-test-topic";
     kafkaTopics.push(topic);
@@ -334,7 +350,9 @@ function consumerSeekToEndTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerSeekToNegativeValueTest() returns error? {
     string topic = "consumer-seek-negative-value-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -363,7 +381,7 @@ function consumerSeekToNegativeValueTest() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    groups: ["consumer"],
     dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerPositionOffsetsTest() returns error? {
@@ -404,7 +422,7 @@ function consumerPositionOffsetsTest() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    groups: ["consumer"],
     dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerBeginningOffsetsTest() returns error? {
@@ -458,7 +476,7 @@ function consumerBeginningOffsetsTest() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    groups: ["consumer"],
     dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
 }
 function consumerEndOffsetsTest() returns error? {
@@ -509,7 +527,9 @@ function consumerEndOffsetsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerTopicPartitionsTest() returns error? {
     string topic1 = "consumer-topic-partitions-test-topic-1";
     string topic2 = "consumer-topic-partitions-test-topic-2";
@@ -540,7 +560,9 @@ function consumerTopicPartitionsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerPauseResumePartitionTest() returns error? {
     string topic = "consumer-pause-resume-partition-test-topic";
     kafkaTopics.push(topic);
@@ -573,7 +595,9 @@ function consumerPauseResumePartitionTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerPauseResumePartitionErrorTest() returns error? {
     string topic1 = "consumer-pause-resume-partition-error-test-topic-1";
     string topic2 = "consumer-pause-resume-partition-error-test-topic-2";
@@ -615,7 +639,9 @@ function consumerPauseResumePartitionErrorTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerAssignToEmptyTopicTest() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -637,7 +663,9 @@ function consumerAssignToEmptyTopicTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerGetAssignedPartitionsTest() returns error? {
     string topic = "consumer-assigned-partitions-test-topic";
     ConsumerConfiguration consumerConfiguration = {
@@ -659,7 +687,7 @@ function consumerGetAssignedPartitionsTest() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    groups: ["consumer"],
     dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeUnsubscribeTest() returns error? {
@@ -681,7 +709,7 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    groups: ["consumer"],
     dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
 }
 function consumerSubscribeTest() returns error? {
@@ -706,7 +734,9 @@ function consumerSubscribeTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscribe-closed-consumer-group",
@@ -723,7 +753,9 @@ function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerSubscribeToEmptyTopicTest() returns error? {
     string topic = "consumer-subscribe-topic";
     Consumer consumer = check new (DEFAULT_URL, {
@@ -749,7 +781,15 @@ function consumerSubscribeToEmptyTopicTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"],
+    dependsOn: [
+        floatBindingConsumerTest,
+        decimalBindingConsumerTest,
+        dataBindingErrorConsumerTest,
+        dataBindingErrorListenerTest
+    ]
+}
 function consumerTopicsAvailableWithTimeoutTest() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-topics-available-timeout-test-group-1",
@@ -778,7 +818,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    groups: ["consumer"],
     dependsOn: [consumerFunctionsTest]
 }
 function consumerSubscribeErrorTest() returns error? {
@@ -798,7 +838,9 @@ function consumerSubscribeErrorTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function manualCommitTest() returns error? {
     string topic = "manual-commit-test-topic";
     kafkaTopics.push(topic);
@@ -843,7 +885,9 @@ function manualCommitTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function manualCommitWithDurationTest() returns error? {
     string topic = "manual-commit-with-duration-test-topic";
     kafkaTopics.push(topic);
@@ -874,7 +918,9 @@ function manualCommitWithDurationTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function manualCommitWithDefaultTimeoutTest() returns error? {
     string topic = "manual-commit-with-default-timeout-test-topic";
     kafkaTopics.push(topic);
@@ -906,7 +952,9 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function nonExistingTopicPartitionOffsetsTest() returns error? {
     string existingTopic = "existing-test-topic";
     kafkaTopics.push(existingTopic);
@@ -931,7 +979,9 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     string topic = "operations-with-received-topic-partitions-test-topic-7";
     kafkaTopics.push(topic);
@@ -991,7 +1041,9 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
 }
 
-@test:Config{enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function saslConsumerTest() returns error? {
     string topic = "sasl-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1012,7 +1064,9 @@ function saslConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function saslScram256ConsumerTest() returns error? {
     string topic = "sasl-scram-256-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1033,7 +1087,9 @@ function saslScram256ConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function saslScram512ConsumerTest() returns error? {
     string topic = "sasl-scram-512-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1054,7 +1110,9 @@ function saslScram512ConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function saslConsumerIncorrectCredentialsTest() returns error? {
     string topic = "sasl-consumer-incorrect-credentials-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1084,7 +1142,9 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerAdditionalPropertiesTest() returns error? {
     string topic = "consumer-additional-properties-test-topic";
     kafkaTopics.push(topic);
@@ -1111,7 +1171,9 @@ function consumerAdditionalPropertiesTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function sslKeystoreConsumerTest() returns error? {
     string topic = "ssl-keystore-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1131,7 +1193,9 @@ function sslKeystoreConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function sslCertKeyConsumerTest() returns error? {
     string topic = "ssl-cert-key-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1164,7 +1228,9 @@ function sslCertKeyConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function sslCertOnlyConsumerTest() returns error? {
     string topic = "ssl-cert-only-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1191,7 +1257,9 @@ function sslCertOnlyConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function saslSslConsumerTest() returns error? {
     string topic = "sasl-ssl-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1212,7 +1280,9 @@ function saslSslConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function incorrectKafkaUrlTest() returns error? {
     string topic = "incorrect-kafka-url-test-topic";
     kafkaTopics.push(topic);
@@ -1229,7 +1299,9 @@ function incorrectKafkaUrlTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function plaintextToSecuredEndpointsConsumerTest() returns error? {
     string topic = "plaintext-secured-endpoints-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1259,7 +1331,9 @@ function plaintextToSecuredEndpointsConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function invalidSecuredEndpointsConsumerTest() returns error? {
     string topic = "invalid-secured-endpoints-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -1304,7 +1378,9 @@ function invalidSecuredEndpointsConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function sslIncorrectStoresConsumerTest() returns error? {
     string topic = "ssl-incorrect-stores-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -1345,7 +1421,9 @@ function sslIncorrectStoresConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function sslIncorrectMasterPasswordConsumerTest() returns error? {
     string topic = "ssl-incorrect-master-password-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -1384,7 +1462,9 @@ function sslIncorrectMasterPasswordConsumerTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function sslIncorrectCertPathConsumerTest() returns error? {
     string topic = "ssl-incorrect-cert-path-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
@@ -1423,7 +1503,9 @@ function sslIncorrectCertPathConsumerTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function invalidSecurityProtocolConsumerTest() returns error? {
     string topic = "invalid-security-protocol-consumer-test-topic";
 
@@ -1493,7 +1575,9 @@ function invalidSecurityProtocolConsumerTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function consumerPollFromMultipleTopicsTest() returns error? {
     string topic1 = "consumer-multiple-topic-1";
     string topic2 = "consumer-multiple-topic-2";
@@ -1517,7 +1601,9 @@ function consumerPollFromMultipleTopicsTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function commitOffsetWithPolledOffsetValue() returns error? {
     string topic = "commit-offset-polled-offset-value-test-topic";
     kafkaTopics.push(topic);
@@ -1543,7 +1629,9 @@ function commitOffsetWithPolledOffsetValue() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer"]
+}
 function clientConcurrentPollTest() returns error? {
     string topic = "client-concurrent-poll-test-topic";
     kafkaTopics.push(topic);

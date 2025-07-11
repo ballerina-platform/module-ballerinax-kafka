@@ -45,7 +45,8 @@ public class KafkaConstants {
 
     public static final String TRANSACTION_CONTEXT = "TransactionInitiated";
 
-    public static final String TOPIC_PARTITION_STRUCT_NAME = "TopicPartition";
+    public static final String TOPIC_PARTITION_TYPE_NAME = "TopicPartition";
+    public static final String OFFSET_AND_TIMESTAMP_TYPE_NAME = "OffsetAndTimestamp";
     public static final String OFFSET_STRUCT_NAME = "PartitionOffset";
 
     public static final String KAFKA_ERROR = "Error";
@@ -68,6 +69,10 @@ public class KafkaConstants {
     public static final BString KAFKA_RECORD_TIMESTAMP = StringUtils.fromString("timestamp");
     public static final BString KAFKA_RECORD_PARTITION_OFFSET = StringUtils.fromString("offset");
     public static final BString KAFKA_RECORD_HEADERS = StringUtils.fromString("headers");
+
+    public static final BString OFFSET_FIELD = StringUtils.fromString("offset");
+    public static final BString TIMESTAMP_FIELD = StringUtils.fromString("timestamp");
+    public static final BString LEADER_EPOCH_FIELD = StringUtils.fromString("leaderEpoch");
 
     public static final String PARAM_ANNOTATION_PREFIX = "$param$.";
     public static final BString PARAM_PAYLOAD_ANNOTATION_NAME = StringUtils.fromString(

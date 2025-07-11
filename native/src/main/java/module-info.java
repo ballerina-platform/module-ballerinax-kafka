@@ -20,6 +20,7 @@ module io.ballerina.stdlib.kafka.runtime {
     requires kafka.clients;
     requires io.ballerina.runtime;
     requires io.ballerina.lang.value;
+    requires io.ballerina.stdlib.time;
     requires java.transaction.xa;
     requires org.slf4j;
     requires java.logging;
