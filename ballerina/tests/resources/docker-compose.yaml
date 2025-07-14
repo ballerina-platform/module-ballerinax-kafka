@@ -1,3 +1,4 @@
+
 services:
     zookeeper-add-kafka-users:
         image: 'confluentinc/cp-kafka:7.9.2'

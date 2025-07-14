@@ -119,5 +119,7 @@ release {
 }
 
 task build {
-    dependsOn('kafka-ballerina:build')
+    dependsOn(':kafka-compiler-plugin:build')
+    dependsOn(':kafka-native:build')
+    dependsOn(':kafka-ballerina:build')
 }

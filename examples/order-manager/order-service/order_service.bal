@@ -14,17 +14,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
-import ballerinax/kafka;
-import ballerina/log;
 import order_service.types;
+
+import ballerina/http;
+import ballerina/log;
 import ballerina/random;
+import ballerinax/kafka;
 
 configurable string TOPIC = ?;
 configurable int LISTENER_PORT = ?;
 
 // Creates a Kafka producer with default configurations
-kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
+final kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 
 @http:ServiceConfig {
     auth: [
@@ -48,13 +49,13 @@ service /kafka on new http:Listener(LISTENER_PORT) {
             status: paymentStatus
         };
         check publishOrder(randomOrder);
-        return "Message sent to the Kafka topic " + TOPIC + " successfully. Order " + message + " with status " + paymentStatus;
+        return string `Message sent to the Kafka topic ${TOPIC} successfully. Order ${message} with status ${paymentStatus}`;
     }
 }
 
 function publishOrder(types:Order 'order) returns error? {
-    log:printInfo("Publishing order " + 'order.toString());
+    log:printInfo(string `Publishing order ${'order.toString()}`);
 
     // Publish the order to the Kafka topic
-    check kafkaProducer->send({ topic: TOPIC, value: 'order.toString().toBytes()});
+    check kafkaProducer->send({topic: TOPIC, value: 'order.toString().toBytes()});
 }

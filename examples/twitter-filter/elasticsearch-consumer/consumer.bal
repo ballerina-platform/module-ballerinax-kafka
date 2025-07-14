@@ -15,9 +15,10 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/lang.value;
 import ballerina/log;
 import ballerinax/kafka;
-import ballerina/lang.value;
+
 import example/esConsumer.types as types;
 
 // Topic to which the filtered tweets are published.
@@ -33,8 +34,8 @@ configurable string password = "password";
 // Creates a new HTTP client for the Elasticsearch node.
 final http:Client elkClient = check new (URL,
     auth = {
-        username: username,
-        password: password
+        username,
+        password
     }
 );
 
@@ -66,13 +67,14 @@ public function main() returns error? {
 
 kafka:Service consumerService =
 service object {
-    remote function onConsumerRecord(kafka:Caller caller,
-                                kafka:BytesConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
         // The set of tweets received by the service are processed one by one.
-        types:Tweet[] convertedTweets =check getTweetsFromConsumerRecords(records);
+        types:Tweet[] convertedTweets = check getTweetsFromConsumerRecords(records);
 
         // Filters tweets with the ID greater than 50000.
-        types:Tweet[] filteredTweets = from var tweet in convertedTweets where tweet.id > 50000 select tweet;
+        types:Tweet[] filteredTweets = from var tweet in convertedTweets
+            where tweet.id > 50000
+            select tweet;
 
         foreach var filteredTweet in filteredTweets {
             // Sends the JSON value of the tweet to the `twitter` Elasticsearch index.
@@ -100,7 +102,7 @@ function getTweetsFromConsumerRecords(kafka:BytesConsumerRecord[] records) retur
         string messageContent = check string:fromBytes(value);
         json content = check value:fromJsonString(messageContent);
         json jsonTweet = content.cloneReadOnly();
-        tweets[i] = <types:Tweet> jsonTweet;
+        tweets[i] = check jsonTweet.ensureType();
     }
     return tweets;
 }

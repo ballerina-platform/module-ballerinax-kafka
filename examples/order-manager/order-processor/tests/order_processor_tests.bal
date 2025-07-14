@@ -14,13 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
 import order_processor.types;
-import ballerinax/kafka;
+
 import ballerina/lang.runtime;
 import ballerina/lang.value;
+import ballerina/test;
+import ballerinax/kafka;
 
-@test:Config{}
+@test:Config {}
 function orderProcessorTest() returns error? {
     kafka:Producer testProducer = check new (kafka:DEFAULT_URL);
 
@@ -29,7 +30,7 @@ function orderProcessorTest() returns error? {
         name: "Test Order",
         status: types:SUCCESS
     };
-    check testProducer->send({ topic: LISTENING_TOPIC, value: 'order.toString().toBytes()});
+    check testProducer->send({topic: LISTENING_TOPIC, value: 'order.toString().toBytes()});
     runtime:sleep(4);
 
     kafka:ConsumerConfiguration testConsumerConfigs = {
@@ -45,7 +46,7 @@ function orderProcessorTest() returns error? {
     string messageContent = check string:fromBytes(records[0].value);
     json content = check value:fromJsonString(messageContent);
     json jsonTweet = content.cloneReadOnly();
-    types:Order neworder = <types:Order> jsonTweet;
+    types:Order newOrder = check jsonTweet.ensureType();
 
-    test:assertEquals(neworder, 'order);
+    test:assertEquals(newOrder, 'order);
 }

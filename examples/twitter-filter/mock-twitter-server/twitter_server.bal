@@ -15,9 +15,10 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/lang.runtime as runtime;
 import ballerina/random;
 import ballerina/time;
-import ballerina/lang.runtime as runtime;
+
 import example/twitterServer.types as types;
 
 @http:ServiceConfig {
@@ -40,7 +41,7 @@ service / on new http:Listener(9090) {
             response[i] = check generateTweet();
             i += 1;
         }
-        decimal sleepTimer = <decimal> check random:createIntInRange(1, 10);
+        decimal sleepTimer = <decimal>check random:createIntInRange(1, 10);
         runtime:sleep(sleepTimer);
         return response;
     }
@@ -59,7 +60,6 @@ function generateTweet() returns types:Tweet|error {
     int tweetCount = check random:createIntInRange(1, 10000000);
     int listedCount = check random:createIntInRange(1, 10000000);
 
-
     // Gets the current instant of the system clock (seconds from the epoch of
     // 1970-01-01T00:00:00).
     time:Utc currentUtc = time:utcNow();
@@ -70,8 +70,8 @@ function generateTweet() returns types:Tweet|error {
 
     types:Tweet tweet = {
         created_at: utcString,
-        id: id,
-        text: text,
+        id,
+        text,
         user: {
             id: userId,
             name: "Twitter Developer",

@@ -86,6 +86,26 @@ task buildExamples {
     }
 }
 
+task startKafkaServer() {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=kafka-test"
+                standardOutput = stdOut
+            }
+            if (!stdOut.toString().contains("kafka-test")) {
+                println "Starting Kafka server and waiting for it to be healthy..."
+                exec {
+                    commandLine 'sh', '-c', "docker compose -f ../ballerina/tests/resources/docker-compose.yaml up --wait"
+                    standardOutput = stdOut
+                }
+            }
+            println "Kafka server is ready."
+        }
+    }
+}
+
 task stopKafkaServer() {
     doLast {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -97,11 +117,10 @@ task stopKafkaServer() {
             if (stdOut.toString().contains("kafka-test")) {
                 println "Stopping Kafka server."
                 exec {
-                    commandLine 'sh', '-c', "docker compose -f ../ballerina/tests/compose.yaml rm -svf"
+                    commandLine 'sh', '-c', "docker compose -f ../ballerina/tests/resources/docker-compose.yaml down"
                     standardOutput = stdOut
                 }
                 println stdOut.toString()
-                sleep(5 * 1000)
             } else {
                 println "Kafka server is not started."
             }
@@ -111,6 +130,8 @@ task stopKafkaServer() {
 
 buildExamples.dependsOn ":${packageName}-ballerina:build"
 testExamples.dependsOn ":${packageName}-ballerina:build"
+testExamples.dependsOn startKafkaServer
+testExamples.finalizedBy stopKafkaServer
+
 build.dependsOn buildExamples
 test.dependsOn testExamples
-build.finalizedBy stopKafkaServer

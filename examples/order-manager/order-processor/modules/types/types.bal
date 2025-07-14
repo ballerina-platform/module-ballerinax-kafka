@@ -21,5 +21,5 @@ public type Order record {|
 |};
 
 public enum PaymentStatus {
-    SUCCESS,FAIL
+    SUCCESS, FAIL
 }

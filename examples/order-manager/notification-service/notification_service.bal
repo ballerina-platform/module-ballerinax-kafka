@@ -14,10 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/kafka;
+import notification_service.types;
+
 import ballerina/lang.value;
 import ballerina/log;
-import notification_service.types;
+import ballerinax/kafka;
 
 configurable string LISTENING_TOPIC = ?;
 
@@ -41,13 +42,13 @@ service kafka:Service on kafkaListener {
             string messageContent = check string:fromBytes('record.value);
             json content = check value:fromJsonString(messageContent);
             json jsonTweet = content.cloneReadOnly();
-            types:Order neworder = check jsonTweet.ensureType(types:Order);
-            log:printInfo("We have successfully ordered and going to send success message: " + neworder.toString());
+            types:Order newOrder = check jsonTweet.ensureType();
+            log:printInfo(string `We have successfully ordered and going to send success message: ${newOrder.toString()}`);
         }
         kafka:Error? commitResult = caller->commit();
 
         if commitResult is error {
-            log:printError("Error occurred while committing the offsets for the consumer.", 'error = commitResult);
+            log:printError("Error occurred while committing the offsets for the consumer.", commitResult);
         }
     }
 }

@@ -14,10 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/kafka;
 import order_processor.types;
+
 import ballerina/lang.value;
 import ballerina/log;
+import ballerinax/kafka;
 
 configurable string LISTENING_TOPIC = ?;
 configurable string PUBLISH_TOPIC = ?;
@@ -39,12 +40,14 @@ service kafka:Service on kafkaListener {
     // Listens to Kafka topic for any new orders and process them
     remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
         // Uses Ballerina query expressions to filter out the successful orders and publish to Kafka topic
-        error? err = from types:Order 'order in check getOrdersFromRecords(records) where 'order.status == types:SUCCESS do {
-            log:printInfo("Sending successful order to " + PUBLISH_TOPIC + " " + 'order.toString());
-            check kafkaProducer->send({ topic: PUBLISH_TOPIC, value: 'order.toString().toBytes()});
-        };
+        error? err = from types:Order 'order in check getOrdersFromRecords(records)
+            where 'order.status == types:SUCCESS
+            do {
+                log:printInfo(string `Sending successful order to ${PUBLISH_TOPIC} ${'order.toString()}`);
+                check kafkaProducer->send({topic: PUBLISH_TOPIC, value: 'order.toString().toBytes()});
+            };
         if err is error {
-            log:printError("Unknown error occured", err);
+            log:printError("Unknown error occurred", err);
         }
     }
 }
@@ -56,7 +59,7 @@ function getOrdersFromRecords(kafka:BytesConsumerRecord[] records) returns types
         string messageContent = check string:fromBytes('record.value);
         json jsonContent = check value:fromJsonString(messageContent);
         json jsonClone = jsonContent.cloneReadOnly();
-        types:Order receivedOrder = check jsonClone.ensureType(types:Order);
+        types:Order receivedOrder = check jsonClone.ensureType();
         receivedOrders.push(receivedOrder);
     }
     return receivedOrders;

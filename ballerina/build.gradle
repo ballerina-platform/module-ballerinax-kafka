@@ -111,16 +111,13 @@ task startKafkaServer() {
                 standardOutput = stdOut
             }
             if (!stdOut.toString().contains("kafka-test")) {
-                println "Starting Kafka server."
+                println "Starting Kafka server and waiting for it to be healthy..."
                 exec {
-                    commandLine 'sh', '-c', "docker compose -f tests/compose.yaml up -d"
+                    commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml up --wait"
                     standardOutput = stdOut
                 }
-                println stdOut.toString()
-                sleep(50 * 1000)
-            } else {
-                println "Kafka server is already running."
             }
+            println "Kafka server is ready."
         }
     }
 }
@@ -136,11 +133,10 @@ task stopKafkaServer() {
             if (stdOut.toString().contains("kafka-test")) {
                 println "Stopping Kafka server."
                 exec {
-                    commandLine 'sh', '-c', "docker compose -f tests/compose.yaml rm -svf"
+                    commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml down"
                     standardOutput = stdOut
                 }
                 println stdOut.toString()
-                sleep(5 * 1000)
             } else {
                 println "Kafka server is not started."
             }
@@ -176,6 +172,7 @@ build.dependsOn ":${packageName}-native:build"
 build.dependsOn ":${packageName}-compiler-plugin:build"
 test.dependsOn ":${packageName}-native:build"
 test.dependsOn ":${packageName}-compiler-plugin:build"
+test.finalizedBy stopKafkaServer
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build

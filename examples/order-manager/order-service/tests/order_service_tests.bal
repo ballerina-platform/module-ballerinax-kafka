@@ -14,30 +14,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
-import ballerina/http;
-import ballerinax/kafka;
-import ballerina/lang.value;
 import order_service.types;
+
+import ballerina/http;
+import ballerina/lang.value;
+import ballerina/test;
+import ballerinax/kafka;
+import ballerina/io;
 
 configurable string username = "user";
 configurable string password = "password";
 
-@test:Config{}
+@test:Config {}
 function orderServiceTest() returns error? {
     http:Client orderClient = check new ("http://localhost:9090",
         auth = {
-            username: username,
-            password: password
+            username,
+            password
         }
     );
 
     string orderName = "PS5";
     string orderStatus = "SUCCESS";
 
+    io:println("Requesting order from the order service");
     string response = check orderClient->get("/kafka/publish?message=PS5&status=SUCCESS");
-    string expectedResponse = "Message sent to the Kafka topic " + TOPIC + " successfully. Order " + orderName
-                + " with status " + orderStatus;
+    string expectedResponse = string `Message sent to the Kafka topic ${TOPIC} successfully. Order ${orderName} with status ${orderStatus}`;
     test:assertEquals(response, expectedResponse);
 
     kafka:ConsumerConfiguration testConsumerConfigs = {
@@ -47,15 +49,13 @@ function orderServiceTest() returns error? {
     };
 
     kafka:Consumer testConsumer = check new (kafka:DEFAULT_URL, testConsumerConfigs);
-    kafka:BytesConsumerRecord[] records = check testConsumer->poll(3);
-
+    kafka:BytesConsumerRecord[] records = check testConsumer->poll(5);
     test:assertEquals(records.length(), 1);
 
     string messageContent = check string:fromBytes(records[0].value);
     json jsonContent = check value:fromJsonString(messageContent);
-    json jsonClone = jsonContent.cloneReadOnly();
-    types:Order neworder = <types:Order> jsonClone;
+    types:Order newOrder = check jsonContent.fromJsonWithType(types:Order);
 
-    test:assertEquals(neworder.name, orderName);
-    test:assertEquals(neworder.status, orderStatus);
+    test:assertEquals(newOrder.name, orderName);
+    test:assertEquals(newOrder.status, orderStatus);
 }

@@ -42,15 +42,15 @@ const string SASL_SCRAM_256_PASSWORD = "scram256password";
 const string SASL_SCRAM_512_PASSWORD = "scram512password";
 const string SASL_INCORRECT_PASSWORD = "incorrect_password";
 
-const string SSL_KEYSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.keystore.jks";
-const string SSL_TRUSTSTORE_PATH = "tests/secrets/trustoresandkeystores/kafka.client.truststore.jks";
-const string SSL_KEYSTORE_INCORRECT_PATH = "tests/secrets/trustoresa#ndkeystores/kafka.client.keystore.jks";
-const string SSL_TRUSTSTORE_INCORRECT_PATH = "tests/secrets/trustores#andkeystores/kafka.client.truststore.jks";
-const string SSL_INCORRECT_KEYSTORE_PATH = "tests/secrets/incorrecttrustoresandkeystores/kafka.client.keystore.jks";
-const string SSL_INCORRECT_TRUSTSTORE_PATH = "tests/secrets/incorrecttrustoresandkeystores/kafka.client.truststore.jks";
-const string SSL_CLIENT_PRIVATE_KEY_FILE_PATH = "tests/secrets/certsandkeys/client.private.key";
-const string SSL_CLIENT_PUBLIC_CERT_FILE_PATH = "tests/secrets/certsandkeys/client.public.crt";
-const string SSL_BROKER_PUBLIC_CERT_FILE_PATH = "tests/secrets/certsandkeys/broker.public.crt";
+const string SSL_KEYSTORE_PATH = "tests/resources/secrets/trustoresandkeystores/kafka.client.keystore.jks";
+const string SSL_TRUSTSTORE_PATH = "tests/resources/secrets/trustoresandkeystores/kafka.client.truststore.jks";
+const string SSL_KEYSTORE_INCORRECT_PATH = "tests/resources/secrets/trustoresa#ndkeystores/kafka.client.keystore.jks";
+const string SSL_TRUSTSTORE_INCORRECT_PATH = "tests/resources/secrets/trustores#andkeystores/kafka.client.truststore.jks";
+const string SSL_INCORRECT_KEYSTORE_PATH = "tests/resources/secrets/incorrecttrustoresandkeystores/kafka.client.keystore.jks";
+const string SSL_INCORRECT_TRUSTSTORE_PATH = "tests/resources/secrets/incorrecttrustoresandkeystores/kafka.client.truststore.jks";
+const string SSL_CLIENT_PRIVATE_KEY_FILE_PATH = "tests/resources/secrets/certsandkeys/client.private.key";
+const string SSL_CLIENT_PUBLIC_CERT_FILE_PATH = "tests/resources/secrets/certsandkeys/client.public.crt";
+const string SSL_BROKER_PUBLIC_CERT_FILE_PATH = "tests/resources/secrets/certsandkeys/broker.public.crt";
 const string SSL_MASTER_PASSWORD = "password";
 const string INCORRECT_SSL_MASTER_PASSWORD = "PASSWORD";
 

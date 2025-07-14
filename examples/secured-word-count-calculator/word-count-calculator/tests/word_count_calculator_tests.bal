@@ -14,15 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/lang.runtime;
 import ballerina/test;
 import ballerinax/kafka;
-import ballerina/lang.runtime;
 
-@test:Config{}
+@test:Config {}
 function wordCountCalculatorTest() returns error? {
     kafka:Producer testProducer = check new (kafka:DEFAULT_URL);
 
-    check testProducer->send({ topic: INPUT_TOPIC, value: "Test message for kafka topic in kafka examples".toBytes()});
+    check testProducer->send({topic: INPUT_TOPIC, value: "Test message for kafka topic in kafka examples".toBytes()});
     runtime:sleep(4);
 
     kafka:ConsumerConfiguration testConsumerConfigs = {
