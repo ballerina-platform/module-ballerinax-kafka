@@ -52,6 +52,7 @@ services:
             KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.broker.truststore.jks
             KAFKA_SSL_TRUSTSTORE_CREDENTIALS: broker_truststore_creds
             KAFKA_OPTS: '-Djava.security.auth.login.config=/opt/confluentinc/kafka/config/kafka_server_jaas.conf'
+            KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
         volumes:
             - ./secrets/trustoresandkeystores/broker_keystore_creds:/etc/kafka/secrets/broker_keystore_creds
             - ./secrets/trustoresandkeystores/broker_sslkey_creds:/etc/kafka/secrets/broker_sslkey_creds

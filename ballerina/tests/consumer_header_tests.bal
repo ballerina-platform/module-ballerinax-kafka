@@ -22,8 +22,10 @@ type StringHeaderConsumerRecord record {|
     string value;
 |};
 
-@test:Config {enable: true}
-function consumerReadStringHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadStringHeaders() returns error? {
     string topic = "consumer-read-string-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -48,8 +50,10 @@ type StringArrayHeaderConsumerRecord record {|
     string value;
 |};
 
-@test:Config {enable: true}
-function consumerReadStringArrayHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadStringArrayHeaders() returns error? {
     string topic = "consumer-read-string-array-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -74,8 +78,10 @@ type ByteHeaderConsumerRecord record {|
     string value;
 |};
 
-@test:Config {enable: true}
-function consumerReadByteHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadByteHeaders() returns error? {
     string topic = "consumer-read-byte-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -100,8 +106,10 @@ type ByteArrayHeaderConsumerRecord record {|
     string value;
 |};
 
-@test:Config {enable: true}
-function consumerReadByteArrayHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadByteArrayHeaders() returns error? {
     string topic = "consumer-read-byte-array-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -126,8 +134,10 @@ type StringAndStringArrayHeaderConsumerRecord record {|
     string value;
 |};
 
-@test:Config {enable: true}
-function consumerReadStringAndStringArrayHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadStringAndStringArrayHeaders() returns error? {
     string topic = "consumer-read-string-string-array-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -152,8 +162,10 @@ type StringAndByteArrayHeaderConsumerRecord record {|
     string value;
 |};
 
-@test:Config {enable: true}
-function consumerReadStringAndByteArrayHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadStringAndByteArrayHeaders() returns error? {
     string topic = "consumer-read-string-and-byte-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -178,8 +190,10 @@ type ByteAndStringArrayHeaderConsumerRecord record {|
     string value;
 |};
 
-@test:Config {enable: true}
-function consumerReadByteAndStringArrayHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadByteAndStringArrayHeaders() returns error? {
     string topic = "consumer-read-byte-and-string-array-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -198,8 +212,10 @@ function consumerReadByteAndStringArrayHeadersTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function consumerReadByteAndByteArrayHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadByteAndByteArrayHeaders() returns error? {
     string topic = "consumer-read-byte-and-byte-array-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -218,8 +234,10 @@ function consumerReadByteAndByteArrayHeadersTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function consumerReadAllSupportedTypesHeadersTest() returns error? {
+@test:Config {
+    groups: ["consumer", "header"]
+}
+function testConsumerReadAllSupportedTypesHeaders() returns error? {
     string topic = "consumer-read-all-types-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]|string|string[]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};

@@ -117,6 +117,7 @@ task startKafkaServer() {
                     standardOutput = stdOut
                 }
             }
+            sleep(50 * 1000)
             println "Kafka server is ready."
         }
     }

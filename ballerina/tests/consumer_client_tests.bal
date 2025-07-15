@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
 import ballerina/lang.'string;
 import ballerina/test;
-import ballerina/crypto;
 
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
@@ -58,8 +58,6 @@ string emptyTopic = "empty-topic";
 string nonExistingTopic = "non-existing-topic";
 
 string receivedMessage = "";
-string receivedMessageWithCommit = "";
-string receivedMessageWithCommitOffset = "";
 string receivedConfigMessage = "";
 
 string[] kafkaTopics = [emptyTopic, nonExistingTopic];
@@ -121,7 +119,7 @@ Producer producer = check new (DEFAULT_URL, producerConfiguration);
 @test:Config {
     groups: ["consumer"]
 }
-function consumerCloseTest() returns error? {
+function testConsumerClose() returns error? {
     string topic = "close-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -131,7 +129,7 @@ function consumerCloseTest() returns error? {
         groupId: "consumer-close-test-group",
         clientId: "test-consumer-11"
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close();
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
@@ -146,7 +144,7 @@ function consumerCloseTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerCloseWithDurationTest() returns error? {
+function testConsumerCloseWithDuration() returns error? {
     string topic = "close-with-duration-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -155,7 +153,7 @@ function consumerCloseWithDurationTest() returns error? {
         groupId: "consumer-close-with-duration-test-group",
         clientId: "test-consumer-12"
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close(TIMEOUT_DURATION);
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
@@ -170,7 +168,7 @@ function consumerCloseWithDurationTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerCloseWithDefaultTimeoutTest() returns error? {
+function testConsumerCloseWithDefaultTimeout() returns error? {
     string topic = "close-with-default-timeout-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -180,7 +178,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
         clientId: "test-consumer-13",
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] _ = check consumer->poll(5);
     Error? closeresult = consumer->close();
     test:assertFalse(closeresult is Error, closeresult is Error ? closeresult.toString() : closeresult.toString());
@@ -195,7 +193,7 @@ function consumerCloseWithDefaultTimeoutTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerConfigTest() returns error? {
+function testConsumerConfig() returns error? {
     string topic = "consumer-config-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -208,7 +206,7 @@ function consumerConfigTest() returns error? {
         concurrentConsumers: 5,
         decoupleProcessing: true
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
@@ -218,7 +216,7 @@ function consumerConfigTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerFunctionsTest() returns error? {
+function testConsumerFunctions() returns error? {
     string topic = "consumer-functions-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -240,7 +238,7 @@ function consumerFunctionsTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerSeekTest() returns error? {
+function testConsumerSeek() returns error? {
     string topic = "consumer-seek-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -282,7 +280,7 @@ function consumerSeekTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerSeekToBeginningTest() returns error? {
+function testConsumerSeekToBeginning() returns error? {
     string topic = "consumer-seek-to-beginning-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -317,7 +315,7 @@ function consumerSeekToBeginningTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerSeekToEndTest() returns error? {
+function testConsumerSeekToEnd() returns error? {
     string topic = "consumer-seek-to-end-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -353,7 +351,7 @@ function consumerSeekToEndTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerSeekToNegativeValueTest() returns error? {
+function testConsumerSeekToNegativeValue() returns error? {
     string topic = "consumer-seek-negative-value-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -382,9 +380,9 @@ function consumerSeekToNegativeValueTest() returns error? {
 
 @test:Config {
     groups: ["consumer"],
-    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
+    dependsOn: [testConsumerSeek, testConsumerSeekToBeginning, testConsumerSeekToEnd]
 }
-function consumerPositionOffsetsTest() returns error? {
+function testConsumerPositionOffsets() returns error? {
     string topic = "consumer-position-offsets-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -423,9 +421,9 @@ function consumerPositionOffsetsTest() returns error? {
 
 @test:Config {
     groups: ["consumer"],
-    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
+    dependsOn: [testConsumerSeek, testConsumerSeekToBeginning, testConsumerSeekToEnd]
 }
-function consumerBeginningOffsetsTest() returns error? {
+function testConsumerBeginningOffsets() returns error? {
     string topic = "consumer-beginning-offsets-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -477,9 +475,9 @@ function consumerBeginningOffsetsTest() returns error? {
 
 @test:Config {
     groups: ["consumer"],
-    dependsOn: [consumerSeekTest, consumerSeekToBeginningTest, consumerSeekToEndTest]
+    dependsOn: [testConsumerSeek, testConsumerSeekToBeginning, testConsumerSeekToEnd]
 }
-function consumerEndOffsetsTest() returns error? {
+function testConsumerEndOffsets() returns error? {
     string topic = "consumer-end-offsets-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -530,7 +528,7 @@ function consumerEndOffsetsTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerTopicPartitionsTest() returns error? {
+function testConsumerTopicPartitions() returns error? {
     string topic1 = "consumer-topic-partitions-test-topic-1";
     string topic2 = "consumer-topic-partitions-test-topic-2";
     kafkaTopics.push(topic1);
@@ -549,11 +547,11 @@ function consumerTopicPartitionsTest() returns error? {
     topic1Partitions = check consumer->getTopicPartitions(topic1, TIMEOUT_DURATION);
     test:assertEquals(topic1Partitions[0].partition, 0, "Expected: 0. Received: " + topic1Partitions[0].partition.toString());
     consumer = check new (DEFAULT_URL, {
-       topics: [topic1, topic2],
-       offsetReset: OFFSET_RESET_EARLIEST,
-       groupId: "consumer-topic-partitions-test-group-2",
-       clientId: "test-consumer-26",
-       defaultApiTimeout: DEFAULT_TIMEOUT
+        topics: [topic1, topic2],
+        offsetReset: OFFSET_RESET_EARLIEST,
+        groupId: "consumer-topic-partitions-test-group-2",
+        clientId: "test-consumer-26",
+        defaultApiTimeout: DEFAULT_TIMEOUT
     });
     topic1Partitions = check consumer->getTopicPartitions(topic1);
     test:assertEquals(topic1Partitions[0].partition, 0, "Expected: 0. Received: " + topic1Partitions[0].partition.toString());
@@ -563,7 +561,7 @@ function consumerTopicPartitionsTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerPauseResumePartitionTest() returns error? {
+function testConsumerPauseResumePartition() returns error? {
     string topic = "consumer-pause-resume-partition-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -598,7 +596,7 @@ function consumerPauseResumePartitionTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerPauseResumePartitionErrorTest() returns error? {
+function testConsumerPauseResumePartitionError() returns error? {
     string topic1 = "consumer-pause-resume-partition-error-test-topic-1";
     string topic2 = "consumer-pause-resume-partition-error-test-topic-2";
     ConsumerConfiguration consumerConfiguration = {
@@ -642,7 +640,7 @@ function consumerPauseResumePartitionErrorTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerAssignToEmptyTopicTest() returns error? {
+function testConsumerAssignToEmptyTopic() returns error? {
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "consumer-assign-empty-topic-test-group",
@@ -666,7 +664,7 @@ function consumerAssignToEmptyTopicTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerGetAssignedPartitionsTest() returns error? {
+function testConsumerGetAssignedPartitions() returns error? {
     string topic = "consumer-assigned-partitions-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         offsetReset: OFFSET_RESET_EARLIEST,
@@ -688,9 +686,9 @@ function consumerGetAssignedPartitionsTest() returns error? {
 
 @test:Config {
     groups: ["consumer"],
-    dependsOn: [consumerFunctionsTest]
+    dependsOn: [testConsumerFunctions]
 }
-function consumerSubscribeUnsubscribeTest() returns error? {
+function testConsumerSubscribeUnsubscribe() returns error? {
     string topic1 = "consumer-subscribe-unsubscribe-test-topic-1";
     string topic2 = "consumer-subscribe-unsubscribe-test-topic-2";
     Consumer consumer = check new (DEFAULT_URL, {
@@ -710,16 +708,16 @@ function consumerSubscribeUnsubscribeTest() returns error? {
 
 @test:Config {
     groups: ["consumer"],
-    dependsOn: [consumerFunctionsTest, consumerServiceTest, producerSendStringTest, manualCommitTest]
+    dependsOn: [testConsumerFunctions, testConsumerService, testProducerSendString, testManualCommit]
 }
-function consumerSubscribeTest() returns error? {
+function testConsumerSubscribe() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscriber-test-group",
         clientId: "test-consumer-32",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics();
-    string[] formattedTopics = availableTopics.filter(function (string topic) returns boolean {
+    string[] formattedTopics = availableTopics.filter(function(string topic) returns boolean {
         return !topic.startsWith("_");
     });
     test:assertEquals(formattedTopics.sort(), kafkaTopics.sort());
@@ -728,16 +726,16 @@ function consumerSubscribeTest() returns error? {
     check consumer->subscribeWithPattern("consumer.*");
     BytesConsumerRecord[] _ = check consumer->poll(1); // Polling to force-update the metadata
     string[] newSubscribedTopics = check consumer->getSubscription();
-    test:assertEquals(newSubscribedTopics.sort(), kafkaTopics.filter(function (string topic) returns boolean {
-        return topic.startsWith("consumer");
-    }).sort());
+    test:assertEquals(newSubscribedTopics.sort(), kafkaTopics.filter(function(string topic) returns boolean {
+                return topic.startsWith("consumer");
+            }).sort());
     check consumer->close();
 }
 
 @test:Config {
     groups: ["consumer"]
 }
-function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
+function testConsumerSubscribeWithPatternToClosedConsumer() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscribe-closed-consumer-group",
         clientId: "test-consumer-33",
@@ -756,7 +754,7 @@ function consumerSubscribeWithPatternToClosedConsumerTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerSubscribeToEmptyTopicTest() returns error? {
+function testConsumerSubscribeToEmptyTopic() returns error? {
     string topic = "consumer-subscribe-topic";
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-subscribe-empty-topic-test-group",
@@ -784,20 +782,20 @@ function consumerSubscribeToEmptyTopicTest() returns error? {
 @test:Config {
     groups: ["consumer"],
     dependsOn: [
-        floatBindingConsumerTest,
-        decimalBindingConsumerTest,
-        dataBindingErrorConsumerTest,
-        dataBindingErrorListenerTest
+        testFloatBindingConsumer,
+        testDecimalBindingConsumer,
+        testDataBindingErrorConsumer,
+        testDataBindingErrorListener
     ]
 }
-function consumerTopicsAvailableWithTimeoutTest() returns error? {
+function testConsumerTopicsAvailableWithTimeout() returns error? {
     Consumer consumer = check new (DEFAULT_URL, {
         groupId: "consumer-topics-available-timeout-test-group-1",
         clientId: "test-consumer-35",
         metadataMaxAge: 2
     });
     string[] availableTopics = check consumer->getAvailableTopics(TIMEOUT_DURATION);
-    string[] formattedTopics = availableTopics.filter(function (string topic) returns boolean {
+    string[] formattedTopics = availableTopics.filter(function(string topic) returns boolean {
         return !topic.startsWith("_");
     });
     test:assertEquals(formattedTopics.sort(), kafkaTopics.sort());
@@ -810,7 +808,7 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
         defaultApiTimeout: DEFAULT_TIMEOUT
     });
     availableTopics = check consumer->getAvailableTopics();
-    formattedTopics = availableTopics.filter(function (string topic) returns boolean {
+    formattedTopics = availableTopics.filter(function(string topic) returns boolean {
         return !topic.startsWith("_");
     });
     test:assertEquals(formattedTopics.sort(), kafkaTopics.sort());
@@ -819,9 +817,9 @@ function consumerTopicsAvailableWithTimeoutTest() returns error? {
 
 @test:Config {
     groups: ["consumer"],
-    dependsOn: [consumerFunctionsTest]
+    dependsOn: [testConsumerFunctions]
 }
-function consumerSubscribeErrorTest() returns error? {
+function testConsumerSubscribeError() returns error? {
     string topic = "consumer-subsribe-error-test-topic";
     Consumer consumer = check new (DEFAULT_URL, {
         clientId: "test-consumer-37",
@@ -841,7 +839,7 @@ function consumerSubscribeErrorTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function manualCommitTest() returns error? {
+function testManualCommit() returns error? {
     string topic = "manual-commit-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -851,7 +849,7 @@ function manualCommitTest() returns error? {
         clientId: "test-consumer-38",
         autoCommit: false
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     int messageCount = 10;
     int count = 0;
     while count < messageCount {
@@ -888,7 +886,7 @@ function manualCommitTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function manualCommitWithDurationTest() returns error? {
+function testManualCommitWithDuration() returns error? {
     string topic = "manual-commit-with-duration-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -898,7 +896,7 @@ function manualCommitWithDurationTest() returns error? {
         clientId: "test-consumer-39",
         autoCommit: false
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] _ = check consumer->poll(1);
     int manualCommitOffset = 5;
     TopicPartition topicPartition = {
@@ -921,7 +919,7 @@ function manualCommitWithDurationTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function manualCommitWithDefaultTimeoutTest() returns error? {
+function testManualCommitWithDefaultTimeout() returns error? {
     string topic = "manual-commit-with-default-timeout-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -932,7 +930,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
         autoCommit: false,
         defaultApiTimeout: DEFAULT_TIMEOUT
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] _ = check consumer->poll(1);
     int manualCommitOffset = 5;
     TopicPartition topicPartition = {
@@ -955,7 +953,7 @@ function manualCommitWithDefaultTimeoutTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function nonExistingTopicPartitionOffsetsTest() returns error? {
+function testNonExistingTopicPartitionOffsets() returns error? {
     string existingTopic = "existing-test-topic";
     kafkaTopics.push(existingTopic);
     ConsumerConfiguration consumerConfiguration = {
@@ -965,7 +963,7 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
         clientId: "test-consumer-41",
         autoCommit: false
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
 
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(nonExistingPartition);
     test:assertEquals(committedOffset, ());
@@ -982,7 +980,7 @@ function nonExistingTopicPartitionOffsetsTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
+function testConsumerOperationsWithReceivedTopicPartitions() returns error? {
     string topic = "operations-with-received-topic-partitions-test-topic-7";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -991,7 +989,7 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
         groupId: "operations-with-received-topic-partitions-test-group-7",
         clientId: "test-consumer-51"
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] _ = check consumer->poll(1);
     TopicPartition[] partitions = check consumer->getAssignment();
     check consumer->unsubscribe();
@@ -1025,7 +1023,7 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
     int offsetCount = 0;
     foreach var partition in partitions {
         PartitionOffset? pOffset = check consumer->getCommittedOffset(partition);
-        offsetCount += pOffset is PartitionOffset ? pOffset.offset: -10;
+        offsetCount += pOffset is PartitionOffset ? pOffset.offset : -10;
     }
     test:assertEquals(offsetCount, 4, "Expected: 4. Received: " + offsetCount.toString());
 
@@ -1042,9 +1040,9 @@ function consumerOperationsWithReceivedTopicPartitionsTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "sasl"]
 }
-function saslConsumerTest() returns error? {
+function testSaslConsumer() returns error? {
     string topic = "sasl-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1058,16 +1056,16 @@ function saslConsumerTest() returns error? {
         auth: authConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
-    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    Consumer consumer = check new (SASL_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, "Expected: 1. Received: " + consumerRecords.length().toString());
     check consumer->close();
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "sasl"]
 }
-function saslScram256ConsumerTest() returns error? {
+function testSaslScram256Consumer() returns error? {
     string topic = "sasl-scram-256-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1081,16 +1079,16 @@ function saslScram256ConsumerTest() returns error? {
         auth: authScram256Config,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
-    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    Consumer consumer = check new (SASL_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
     check consumer->close();
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "sasl"]
 }
-function saslScram512ConsumerTest() returns error? {
+function testSaslScram512Consumer() returns error? {
     string topic = "sasl-scram-512-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1104,16 +1102,16 @@ function saslScram512ConsumerTest() returns error? {
         auth: authScram512Config,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
-    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    Consumer consumer = check new (SASL_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
     test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
     check consumer->close();
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "sasl"]
 }
-function saslConsumerIncorrectCredentialsTest() returns error? {
+function testSaslConsumerIncorrectCredentials() returns error? {
     string topic = "sasl-consumer-incorrect-credentials-test-topic";
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     AuthenticationConfiguration invalidAuthConfig = {
@@ -1131,7 +1129,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
         auth: invalidAuthConfig,
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
-    Consumer consumer = check new(SASL_URL, consumerConfiguration);
+    Consumer consumer = check new (SASL_URL, consumerConfiguration);
     BytesConsumerRecord[]|Error result = consumer->poll(5);
     if result is Error {
         string errorMsg = "Failed to poll from the Kafka server: Authentication failed: Invalid username or password";
@@ -1145,7 +1143,7 @@ function saslConsumerIncorrectCredentialsTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerAdditionalPropertiesTest() returns error? {
+function testConsumerAdditionalProperties() returns error? {
     string topic = "consumer-additional-properties-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1164,7 +1162,7 @@ function consumerAdditionalPropertiesTest() returns error? {
         partition: 0
     };
 
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     BytesConsumerRecord[] _ = check consumer->poll(5);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertEquals(committedOffset, ());
@@ -1172,9 +1170,9 @@ function consumerAdditionalPropertiesTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "ssl"]
 }
-function sslKeystoreConsumerTest() returns error? {
+function testSslKeystoreConsumer() returns error? {
     string topic = "ssl-keystore-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1194,9 +1192,9 @@ function sslKeystoreConsumerTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "ssl"]
 }
-function sslCertKeyConsumerTest() returns error? {
+function testSslCertKeyConsumer() returns error? {
     string topic = "ssl-cert-key-consumer-test-topic";
     kafkaTopics.push(topic);
 
@@ -1229,9 +1227,9 @@ function sslCertKeyConsumerTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "ssl"]
 }
-function sslCertOnlyConsumerTest() returns error? {
+function testSslCertOnlyConsumer() returns error? {
     string topic = "ssl-cert-only-consumer-test-topic";
     kafkaTopics.push(topic);
 
@@ -1258,9 +1256,9 @@ function sslCertOnlyConsumerTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "sasl", "ssl"]
 }
-function saslSslConsumerTest() returns error? {
+function testSaslSslConsumer() returns error? {
     string topic = "sasl-ssl-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1283,7 +1281,7 @@ function saslSslConsumerTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function incorrectKafkaUrlTest() returns error? {
+function testIncorrectKafkaUrl() returns error? {
     string topic = "incorrect-kafka-url-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -1302,7 +1300,7 @@ function incorrectKafkaUrlTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function plaintextToSecuredEndpointsConsumerTest() returns error? {
+function testPlaintextToSecuredEndpointsConsumer() returns error? {
     string topic = "plaintext-secured-endpoints-consumer-test-topic";
     kafkaTopics.push(topic);
 
@@ -1334,7 +1332,7 @@ function plaintextToSecuredEndpointsConsumerTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function invalidSecuredEndpointsConsumerTest() returns error? {
+function testInvalidSecuredEndpointsConsumer() returns error? {
     string topic = "invalid-secured-endpoints-consumer-test-topic";
     kafkaTopics.push(topic);
 
@@ -1379,9 +1377,9 @@ function invalidSecuredEndpointsConsumerTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "ssl"]
 }
-function sslIncorrectStoresConsumerTest() returns error? {
+function testSslIncorrectStoresConsumer() returns error? {
     string topic = "ssl-incorrect-stores-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_INCORRECT_TRUSTSTORE_PATH,
@@ -1422,9 +1420,9 @@ function sslIncorrectStoresConsumerTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "ssl"]
 }
-function sslIncorrectMasterPasswordConsumerTest() returns error? {
+function testSslIncorrectMasterPasswordConsumer() returns error? {
     string topic = "ssl-incorrect-master-password-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
@@ -1463,9 +1461,9 @@ function sslIncorrectMasterPasswordConsumerTest() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "ssl"]
 }
-function sslIncorrectCertPathConsumerTest() returns error? {
+function testSslIncorrectCertPathConsumer() returns error? {
     string topic = "ssl-incorrect-cert-path-consumer-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
@@ -1506,7 +1504,7 @@ function sslIncorrectCertPathConsumerTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function invalidSecurityProtocolConsumerTest() returns error? {
+function testInvalidSecurityProtocolConsumer() returns error? {
     string topic = "invalid-security-protocol-consumer-test-topic";
 
     crypto:TrustStore invalidTrustStore = {
@@ -1578,7 +1576,7 @@ function invalidSecurityProtocolConsumerTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function consumerPollFromMultipleTopicsTest() returns error? {
+function testConsumerPollFromMultipleTopics() returns error? {
     string topic1 = "consumer-multiple-topic-1";
     string topic2 = "consumer-multiple-topic-2";
     kafkaTopics.push(topic1);
@@ -1604,7 +1602,7 @@ function consumerPollFromMultipleTopicsTest() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function commitOffsetWithPolledOffsetValue() returns error? {
+function testCommitOffsetWithPolledOffsetValue() returns error? {
     string topic = "commit-offset-polled-offset-value-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -1614,7 +1612,7 @@ function commitOffsetWithPolledOffsetValue() returns error? {
         clientId: "test-consumer-60",
         autoCommit: false
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     check sendMessage("Hello".toBytes(), topic);
     check sendMessage("Hello".toBytes(), topic);
     check sendMessage("Hello".toBytes(), topic);
@@ -1632,7 +1630,7 @@ function commitOffsetWithPolledOffsetValue() returns error? {
 @test:Config {
     groups: ["consumer"]
 }
-function clientConcurrentPollTest() returns error? {
+function testClientConcurrentPoll() returns error? {
     string topic = "client-concurrent-poll-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -1642,7 +1640,7 @@ function clientConcurrentPollTest() returns error? {
         offsetReset: OFFSET_RESET_EARLIEST,
         maxPollRecords: 1
     };
-    Consumer consumer = check new(DEFAULT_URL, consumerConfiguration);
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
     check sendMessage("Hello1".toBytes(), topic);
     check sendMessage("Hello2".toBytes(), topic);
     check sendMessage("Hello3".toBytes(), topic);
@@ -1675,5 +1673,5 @@ isolated function pollForData(Consumer consumer) returns string|error {
 }
 
 function sendMessage(anydata message, string topic, anydata? key = (), map<byte[]|byte[][]|string|string[]>? headers = ()) returns error? {
-    return producer->send({ topic: topic, value: message, key, headers });
+    return producer->send({topic: topic, value: message, key, headers});
 }

@@ -77,8 +77,10 @@ public type JsonProducerRecord record {|
     json value;
 |};
 
-@test:Config {enable: true}
-function intProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testIntProduce() returns error? {
     string topic = "int-produce-test-topic";
     kafkaTopics.push(topic);
     IntProducerRecord producerRecord = {
@@ -113,8 +115,10 @@ function intProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function floatProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testFloatProduce() returns error? {
     string topic = "float-produce-test-topic";
     kafkaTopics.push(topic);
     FloatProducerRecord producerRecord = {
@@ -149,8 +153,10 @@ function floatProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function decimalProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testDecimalProduce() returns error? {
     string topic = "decimal-produce-test-topic";
     kafkaTopics.push(topic);
     DecimalProducerRecord producerRecord = {
@@ -185,8 +191,10 @@ function decimalProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function booleanProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testBooleanProduce() returns error? {
     string topic = "boolean-produce-test-topic";
     kafkaTopics.push(topic);
     BooleanProducerRecord producerRecord = {
@@ -219,8 +227,10 @@ function booleanProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function stringProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testStringProduce() returns error? {
     string topic = "string-produce-test-topic";
     kafkaTopics.push(topic);
     StringProducerRecord producerRecord = {
@@ -253,8 +263,10 @@ function stringProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function xmlProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testXmlProduce() returns error? {
     string topic = "xml-produce-test-topic";
     kafkaTopics.push(topic);
     xml xmlData = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
@@ -288,8 +300,10 @@ function xmlProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function recordProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testRecordProduce() returns error? {
     string topic = "record-produce-test-topic";
     kafkaTopics.push(topic);
     PersonProducerRecord producerRecord = {
@@ -319,8 +333,10 @@ function recordProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function mapProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testMapProduce() returns error? {
     string topic = "map-produce-test-topic";
     kafkaTopics.push(topic);
     MapProducerRecord producerRecord = {
@@ -350,8 +366,10 @@ function mapProduceTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function tableProduceTest() returns error? {
+@test:Config {
+    groups: ["producer", "data-binding"]
+}
+function testTableProduce() returns error? {
     string topic = "table-produce-test-topic";
     kafkaTopics.push(topic);
     table<Person> personMapTable = table [];
