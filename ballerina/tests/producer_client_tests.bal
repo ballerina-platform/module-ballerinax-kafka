@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/crypto;
-import ballerina/io;
 import ballerina/lang.'string;
 import ballerina/test;
 
@@ -211,11 +210,7 @@ function testTransactionalProducer() returns error? {
         check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
         check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
         var commitResult = commit;
-        if commitResult is () {
-            io:println("Commit successful");
-        } else {
-            test:assertFail(msg = "Commit Failed");
-        }
+        test:assertTrue(commitResult is ());
     }
     check producer->close();
 
@@ -254,7 +249,7 @@ function testTransactionalProducerWithAbort() returns error? {
             check commit;
         }
     } on fail var e {
-        io:println(e.toString());
+        test:assertEquals(e.message(), "Fail!");
     }
     check producer->close();
 

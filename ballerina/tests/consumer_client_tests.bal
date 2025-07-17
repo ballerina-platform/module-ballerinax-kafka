@@ -17,6 +17,7 @@
 import ballerina/crypto;
 import ballerina/lang.'string;
 import ballerina/test;
+import ballerina/time;
 
 const TEST_MESSAGE = "Hello, Ballerina";
 const TEST_MESSAGE_II = "Hello, World";
@@ -114,7 +115,7 @@ ProducerConfiguration producerConfiguration = {
     retryCount: 3
 };
 
-Producer producer = check new (DEFAULT_URL, producerConfiguration);
+final Producer producer = check new (DEFAULT_URL, producerConfiguration);
 
 @test:Config {
     groups: ["consumer"]
@@ -236,7 +237,7 @@ function testConsumerFunctions() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "seek"]
 }
 function testConsumerSeek() returns error? {
     string topic = "consumer-seek-test-topic";
@@ -278,7 +279,7 @@ function testConsumerSeek() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "seek"]
 }
 function testConsumerSeekToBeginning() returns error? {
     string topic = "consumer-seek-to-beginning-test-topic";
@@ -313,7 +314,7 @@ function testConsumerSeekToBeginning() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "seek"]
 }
 function testConsumerSeekToEnd() returns error? {
     string topic = "consumer-seek-to-end-test-topic";
@@ -349,7 +350,7 @@ function testConsumerSeekToEnd() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "seek"]
 }
 function testConsumerSeekToNegativeValue() returns error? {
     string topic = "consumer-seek-negative-value-test-topic";
@@ -978,7 +979,7 @@ function testNonExistingTopicPartitionOffsets() returns error? {
 }
 
 @test:Config {
-    groups: ["consumer"]
+    groups: ["consumer", "seek"]
 }
 function testConsumerOperationsWithReceivedTopicPartitions() returns error? {
     string topic = "operations-with-received-topic-partitions-test-topic-7";
@@ -1667,11 +1668,69 @@ function testClientConcurrentPoll() returns error? {
     test:assertTrue(results.indexOf("Hello5") != ());
 }
 
+@test:Config {
+    groups: ["consumer", "seek", "tests"]
+}
+function testOffsetsForTimes() returns error? {
+    string topic = "offsets-for-times-test-topic";
+    kafkaTopics.push(topic);
+    // Send 5 messages at first set timestamp and 5 messages at second set timestamp.
+    // This is to find the offset for the half of the messages.
+    time:Utc firstSetTimestamp = time:utcNow();
+    time:Utc timestampToSeek = time:utcAddSeconds(firstSetTimestamp, 5);
+    time:Utc secondSetTimestamp = time:utcAddSeconds(firstSetTimestamp, 10);
+    foreach int i in 0 ..< 10 {
+        int timestamp = i < 5 ? firstSetTimestamp[0] : secondSetTimestamp[0];
+        check sendMessage(string `Message ${i}`.toBytes(), topic, timestamp = timestamp);
+    }
+    ConsumerConfiguration consumerConfiguration = {
+        topics: [topic],
+        groupId: "client-offsets-for-times-test-group",
+        clientId: "test-consumer-62",
+        maxPollRecords: 1,
+        pollingTimeout: 10,
+        pollingInterval: 5,
+        offsetReset: OFFSET_RESET_EARLIEST
+    };
+    Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
+    TopicPartition[] topicPartitions = check consumer->getTopicPartitions(topic);
+    foreach int i in 0 ..< 10 {
+        string[] message = check consumer->pollPayload(1);
+        test:assertTrue(message.length() == 1, string `Failed to read the message ${i}. Expected 1 message, received ${message.length()} messages`);
+        test:assertEquals(message[0], string `Message ${i}`, string `Incorrect message read for ${i}. `);
+    }
+    string[] nextMessage = check consumer->pollPayload(1);
+    test:assertTrue(nextMessage == [], "Expected no messages, received ${nextMessage.length()} messages");
+    TopicPartitionTimestamp[] topicPartitionTimestamps = [];
+    foreach TopicPartition partition in topicPartitions {
+        topicPartitionTimestamps.push([partition, timestampToSeek]);
+    }
+    TopicPartitionOffset[] offsets = check consumer->offsetsForTimes(topicPartitionTimestamps);
+    test:assertEquals(offsets.length(), topicPartitions.length());
+    foreach TopicPartitionOffset offset in offsets {
+        OffsetAndTimestamp? offsetAndTimestamp = offset[1];
+        if offsetAndTimestamp is () {
+            continue;
+        }
+        check consumer->seek({
+            partition: offset[0],
+            offset: offsetAndTimestamp.offset
+        });
+    }
+    // Read the messages after the reset time.
+    foreach int i in 5 ..< 10 {
+        string[] message = check consumer->pollPayload(1);
+        test:assertTrue(message.length() == 1);
+        test:assertEquals(message[0], string `Message ${i}`);
+    }
+    check consumer->close();
+}
+
 isolated function pollForData(Consumer consumer) returns string|error {
     string[] results = check consumer->pollPayload(3);
     return results.length() > 0 ? results[0] : "";
 }
 
-function sendMessage(anydata message, string topic, anydata? key = (), map<byte[]|byte[][]|string|string[]>? headers = ()) returns error? {
-    return producer->send({topic: topic, value: message, key, headers});
+isolated function sendMessage(anydata message, string topic, anydata? key = (), map<byte[]|byte[][]|string|string[]>? headers = (), int? timestamp = ()) returns error? {
+    return producer->send({topic: topic, value: message, key, headers, timestamp});
 }

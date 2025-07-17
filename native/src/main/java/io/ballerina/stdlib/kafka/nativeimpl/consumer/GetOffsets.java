@@ -294,9 +294,7 @@ public class GetOffsets {
         offsetForTimes.add(0, topicPartitionRecord);
         if (offsetAndTimestamp != null) {
             BMap<BString, Object> offsetAndTimestampRecord = populateOffsetAndTimestampRecord(offsetAndTimestamp);
-            offsetForTimes.append(offsetAndTimestampRecord);
-        } else {
-            offsetForTimes.append(null);
+            offsetForTimes.add(1, offsetAndTimestampRecord);
         }
         return offsetForTimes;
     }

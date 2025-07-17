@@ -98,10 +98,10 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_TIMEST
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KAFKA_RECORD_VALUE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.KEY_DESERIALIZER_TYPE;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.OFFSET_AND_TIMESTAMP_TYPE_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.OFFSET_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_BINDING_ERROR;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.PAYLOAD_VALIDATION_ERROR;
-import static io.ballerina.stdlib.kafka.utils.KafkaConstants.TIMESTAMP_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.VALUE_DESERIALIZER_TYPE;
 import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getEnvironment;
@@ -545,14 +545,13 @@ public class KafkaUtils {
     }
 
     public static BMap<BString, Object> populateOffsetAndTimestampRecord(OffsetAndTimestamp offsetAndTimestamp) {
-        BMap<BString, Object> offsetAndTimestampRecord = ValueCreator.createRecordValue(getOffsetAndTimestampRecord());
-        offsetAndTimestampRecord.put(OFFSET_FIELD, offsetAndTimestamp.offset());
-        offsetAndTimestampRecord.put(TIMESTAMP_FIELD, offsetAndTimestamp.timestamp());
+        BMap<BString, Object> valueMap = ValueCreator.createMapValue();
+        valueMap.put(OFFSET_FIELD, offsetAndTimestamp.offset());
+        valueMap.put(KafkaConstants.TIMESTAMP_FIELD, offsetAndTimestamp.timestamp());
         if (offsetAndTimestamp.leaderEpoch().isPresent()) {
-            offsetAndTimestampRecord.put(KafkaConstants.LEADER_EPOCH_FIELD,
-                    offsetAndTimestamp.leaderEpoch().get().longValue());
+            valueMap.put(KafkaConstants.LEADER_EPOCH_FIELD, offsetAndTimestamp.leaderEpoch().get().longValue());
         }
-        return offsetAndTimestampRecord;
+        return ValueCreator.createRecordValue(getModule(), OFFSET_AND_TIMESTAMP_TYPE_NAME, valueMap);
     }
 
     public static BMap<BString, Object> populatePartitionOffsetRecord(BMap<BString, Object> topicPartition,
@@ -812,10 +811,6 @@ public class KafkaUtils {
 
     public static BMap<BString, Object> getTopicPartitionRecord() {
         return createKafkaRecord(KafkaConstants.TOPIC_PARTITION_TYPE_NAME);
-    }
-
-    private static BMap<BString, Object> getOffsetAndTimestampRecord() {
-        return createKafkaRecord(KafkaConstants.OFFSET_AND_TIMESTAMP_TYPE_NAME);
     }
 
     public static BError createKafkaError(String message) {
