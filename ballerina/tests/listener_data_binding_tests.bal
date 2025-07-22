@@ -343,9 +343,8 @@ function testBooleanConsumerRecordBindingListener() returns error? {
     Service booleanBindingService =
     service object {
         remote function onConsumerRecord(BooleanConsumerRecord[] records, Caller caller) returns error? {
-            foreach int i in 0 ... records.length() - 1 {
-                receivedBooleanValue = records[i].value;
-                log:printInfo("Received record: " + records[i].toString());
+            foreach BooleanConsumerRecord booleanConsumerRecord in records {
+                receivedBooleanValue = booleanConsumerRecord.value;
             }
         }
 

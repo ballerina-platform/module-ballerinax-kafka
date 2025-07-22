@@ -33,7 +33,6 @@ dependencies {
     implementation group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafkaVersion}"
     implementation group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
     implementation group: 'com.google.guava', name: 'guava', version: "${guavaVersion}"
-    implementation group: 'io.ballerina.stdlib', name: 'time-native', version: "${stdlibTimeVersion}"
 }
 
 checkstyle {

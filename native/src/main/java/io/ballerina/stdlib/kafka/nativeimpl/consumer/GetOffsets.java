@@ -34,7 +34,6 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
-import io.ballerina.stdlib.time.nativeimpl.Utc;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
@@ -280,8 +279,7 @@ public class GetOffsets {
             BArray topicPartitionTimestamp = (BArray) topicPartitionTimestamps.get(i);
             TopicPartition topicPartition = getTopicPartition((BMap<BString, Object>) topicPartitionTimestamp.get(0),
                     logger);
-            Utc utc = new Utc((BArray) topicPartitionTimestamp.get(1));
-            Long timestamp = utc.generateInstant().getEpochSecond();
+            Long timestamp = topicPartitionTimestamp.getInt(1);
             result.put(topicPartition, timestamp);
         }
         return result;

@@ -17,6 +17,7 @@
 import ballerina/crypto;
 import ballerina/lang.'string;
 import ballerina/test;
+import ballerina/time;
 
 string MESSAGE_KEY = "TEST-KEY";
 
@@ -98,23 +99,6 @@ function testProducerSendString() returns error? {
     string messageConverted = check 'string:fromBytes(messageValue);
     test:assertEquals(messageConverted, TEST_MESSAGE);
     check consumer->close();
-}
-
-@test:Config {
-    groups: ["producer"]
-}
-function testProducerKeyTypeMismatchError() returns error? {
-    string topic = "key-type-mismatch-error-test-topic";
-    Producer producer = check new (DEFAULT_URL, producerConfiguration);
-    string message = "Hello, Ballerina";
-    error? result = trap sendByteArrayValues(producer, message.toBytes(), topic, [], MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
-    if result is error {
-        string expectedErr = "Invalid type found for Kafka key. Expected key type: 'byte[]'.";
-        test:assertEquals(result.message(), expectedErr);
-    } else {
-        test:assertFail(msg = "Expected an error");
-    }
-    check producer->close();
 }
 
 @test:Config {
@@ -841,4 +825,20 @@ function testSslIncorrectCertPath() returns error? {
     if result is Error {
         test:assertEquals(result.message(), "Failed to initialize the producer: Failed to create new NetworkClient");
     }
+}
+
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerSendWithMetadata() returns error? {
+    string topic = "producer-send-with-metadata-test-topic";
+    kafkaTopics.push(topic);
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
+    int timestamp = time:utcNow()[0];
+    RecordMetadata metadata = check producer->sendWithMetadata({topic: topic, value: TEST_MESSAGE.toBytes(), timestamp: timestamp});
+    test:assertEquals(metadata.topic, topic);
+    test:assertEquals(metadata.partition, 0);
+    test:assertEquals(metadata.offset, 0);
+    test:assertEquals(metadata.timestamp, timestamp);
+    check producer->close();
 }

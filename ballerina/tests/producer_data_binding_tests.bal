@@ -218,12 +218,12 @@ function testBooleanProduce() returns error? {
 
     string receivedValue = "false";
     string receivedKey = "";
-    consumerRecords.forEach(function(BytesConsumerRecord cRecord) {
-        receivedValue = checkpanic 'string:fromBytes(cRecord.value);
-        receivedKey = checkpanic 'string:fromBytes(<byte[]>cRecord?.'key);
-    });
-    test:assertEquals(receivedValue, "true");
-    test:assertEquals(receivedKey, "true");
+    foreach BytesConsumerRecord cRecord in consumerRecords {
+        receivedValue = check 'string:fromBytes(cRecord.value);
+        test:assertEquals(receivedValue, "true", string `Expected "true" for valuebut got "${receivedValue}"`);
+        receivedKey = check 'string:fromBytes(<byte[]>cRecord?.'key);
+        test:assertEquals(receivedKey, "true", string `Expected "true" for key but got "${receivedKey}"`);
+    }
     check consumer->close();
 }
 

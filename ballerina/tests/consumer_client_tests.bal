@@ -1703,7 +1703,7 @@ function testOffsetsForTimes() returns error? {
     test:assertTrue(nextMessage == [], "Expected no messages, received ${nextMessage.length()} messages");
     TopicPartitionTimestamp[] topicPartitionTimestamps = [];
     foreach TopicPartition partition in topicPartitions {
-        topicPartitionTimestamps.push([partition, timestampToSeek]);
+        topicPartitionTimestamps.push([partition, timestampToSeek[0]]);
     }
     TopicPartitionOffset[] offsets = check consumer->offsetsForTimes(topicPartitionTimestamps);
     test:assertEquals(offsets.length(), topicPartitions.length());

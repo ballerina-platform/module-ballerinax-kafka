@@ -300,6 +300,14 @@ public client isolated class Consumer {
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.BrokerConnection"
     } external;
 
+    # Retrieves the offsets for the given topic partitions and timestamps.
+    # ```ballerina
+    # kafka:TopicPartitionOffset[] result = check consumer->offsetsForTimes([[topicPartition1, timestamp1], [topicPartition2, timestamp2]]);
+    # ```
+    #
+    # + topicPartitionTimestamps - Array of topic partitions with required timestamps
+    # + duration - Timeout duration (in seconds) for the `offsetsForTimes` operation to execute
+    # + return - Array of topic partition offsets if executed successfully or else a `kafka:Error`
     isolated remote function offsetsForTimes(TopicPartitionTimestamp[] topicPartitionTimestamps, decimal? duration = ())
     returns TopicPartitionOffset[]|Error = @java:Method {
         'class: "io.ballerina.stdlib.kafka.nativeimpl.consumer.GetOffsets"

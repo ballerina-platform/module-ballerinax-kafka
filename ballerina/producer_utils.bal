@@ -16,25 +16,47 @@
 
 import ballerina/jballerina.java;
 
-isolated function sendByteArrayValues(Producer producer, byte[] value, string topic, [string, byte[]][] headers, anydata? key, int? partition,
-    int? timestamp, string keySerializerType) returns Error? {
-    if key is () {
-        return sendByteArrayValuesNilKeys(producer, value, topic, partition, timestamp, headers);
-    } else if key is byte[] {
-        return sendByteArrayValuesByteArrayKeys(producer, value, topic, key, partition, timestamp, headers);
+isolated function getHeaderValueAsByteArrayList(map<byte[]|byte[][]|string|string[]>? headers) returns [string, byte[]][] {
+    [string, byte[]][] bytesHeaderList = [];
+    if headers is map<byte[]|byte[][]|string|string[]> {
+        foreach string key in headers.keys() {
+            byte[]|byte[][]|string|string[] values = headers.get(key);
+            if values is byte[] {
+                bytesHeaderList.push([key, values]);
+            } else if values is byte[][] {
+                foreach byte[] headerValue in values {
+                    bytesHeaderList.push([key, headerValue]);
+                }
+            } else if values is string {
+                bytesHeaderList.push([key, values.toBytes()]);
+            } else if values is string[] {
+                foreach string headerValue in values {
+                    bytesHeaderList.push([key, headerValue.toBytes()]);
+                }
+            }
+        }
     }
-    panic getKeyTypeMismatchError(BYTE_ARRAY);
+    return bytesHeaderList;
 }
 
-//Send byte[] values with different types of keys
-isolated function sendByteArrayValuesNilKeys(Producer producer, byte[] value, string topic, int? partition = (),
-    int? timestamp = (), [string, byte[]][] headers = []) returns Error? =
-@java:Method {
-    'class: "io.ballerina.stdlib.kafka.nativeimpl.producer.SendByteArrayValues"
+isolated function getByteValue(anydata value) returns byte[] {
+    if value is byte[] {
+        return value;
+    } else if value is xml {
+        return value.toString().toBytes();
+    } else if value is string {
+        return value.toBytes();
+    } else {
+        return value.toJsonString().toBytes();
+    }
+}
+
+isolated function sendExternal(Producer producer, byte[] value, string topic, [string, byte[]][] headers, byte[]? key,
+        int? partition, int? timestamp) returns Error? = @java:Method {
+    'class: "io.ballerina.stdlib.kafka.nativeimpl.producer.Send"
 } external;
 
-isolated function sendByteArrayValuesByteArrayKeys(Producer producer, byte[] value, string topic, byte[] key,
-    int? partition = (), int? timestamp = (), [string, byte[]][] headers = []) returns Error? =
-@java:Method {
-    'class: "io.ballerina.stdlib.kafka.nativeimpl.producer.SendByteArrayValues"
+isolated function sendWithMetadataExternal(Producer producer, byte[] value, string topic, [string, byte[]][] headers,
+        byte[]? key, int? partition, int? timestamp) returns RecordMetadata|Error = @java:Method {
+    'class: "io.ballerina.stdlib.kafka.nativeimpl.producer.Send"
 } external;

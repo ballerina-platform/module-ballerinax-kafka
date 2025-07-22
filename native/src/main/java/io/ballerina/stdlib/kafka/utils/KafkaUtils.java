@@ -896,22 +896,6 @@ public class KafkaUtils {
     }
 
     /**
-     * Get the Integer value from an Object, if possible.
-     *
-     * @param value  the {@code Object} which needs to be converted to int
-     * @param name   name of the parameter, for logging purposes
-     * @param logger {@code Logger} instance to log if there's an issue
-     * @return Integer value of the {@code Object}, {@code null} otherwise
-     */
-    public static Integer getIntValue(Object value, BString name, Logger logger) {
-        Long longValue = getLongValue(value);
-        if (Objects.isNull(longValue)) {
-            return null;
-        }
-        return getIntFromLong(longValue, logger, name.getValue());
-    }
-
-    /**
      * Get the {@code int} value from a {@code long} value.
      *
      * @param longValue {@code long} value, which we want to convert
@@ -958,19 +942,6 @@ public class KafkaUtils {
     public static int getMilliSeconds(BDecimal longValue) {
         BigDecimal valueInSeconds = longValue.decimalValue();
         return valueInSeconds.multiply(KafkaConstants.MILLISECOND_MULTIPLIER).intValue();
-    }
-
-    /**
-     * Get the {@code Long} value from an {@code Object}.
-     *
-     * @param value Object from which we want to get the Long value
-     * @return Long value of the Object, if present. {@code null} otherwise
-     */
-    public static Long getLongValue(Object value) {
-        if (Objects.isNull(value)) {
-            return null;
-        }
-        return (Long) value;
     }
 
     /**

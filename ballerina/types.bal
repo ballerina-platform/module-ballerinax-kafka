@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/time;
 import ballerinax/confluent.cavroserdes;
 import ballerinax/confluent.cregistry;
 
@@ -132,7 +131,7 @@ isolated function initiateSchemaRegistry(anydata & readonly schemaRegistryConfig
 }
 
 # Represents a topic partition and a timestamp.
-public type TopicPartitionTimestamp [TopicPartition, time:Utc];
+public type TopicPartitionTimestamp [TopicPartition, int];
 
 # Represents an offset and a timestamp for a topic partition.
 public type OffsetAndTimestamp record {|
@@ -146,3 +145,19 @@ public type OffsetAndTimestamp record {|
 
 # Represents a topic partition and an offset with a timestamp.
 public type TopicPartitionOffset [TopicPartition, OffsetAndTimestamp?];
+
+# Represents metadata of a Kafka record.
+public type RecordMetadata record {|
+    # The offset of the record in the topic partition
+    int? offset = ();
+    # The timestamp of the record in the topic partition
+    int? timestamp = ();
+    # The size of the serialized, uncompressed key in bytes. If key is null, the returned size is -1.
+    int serializedKeySize;
+    # The size of the serialized, uncompressed value in bytes. If value is null, the returned size is -1.
+    int serializedValueSize;
+    # The topic the record is appended to
+    string topic;
+    # The partition the record is sent to
+    int partition;
+|};
