@@ -21,9 +21,9 @@ This example simulates a stock trading system using Kafka and Ballerina. It demo
 
 1. [Install Kafka locally](https://kafka.apache.org/downloads)
 2. Or run Kafka using Docker:
-   ```sh
+```sh
    docker-compose -f ballerina/tests/resources/docker-compose.yaml up -d
-````
+```
 
 This setup includes a basic Kafka broker and Zookeeper using the Confluent platform.
 
