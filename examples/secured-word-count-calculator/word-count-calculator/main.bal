@@ -113,7 +113,7 @@ function processRecord(map<int> wordCountMap, kafka:BytesConsumerRecord 'record)
     map<int> tempWordCountMap = {};
     string sentence = check string:fromBytes('record.value);
 
-    _ = check from string word in re `\s`.split(sentence)
+    _ = from string word in re `\s`.split(sentence)
         let int? result = wordCountMap[word]
         do {
             if result is () {
