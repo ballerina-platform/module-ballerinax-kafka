@@ -1078,11 +1078,12 @@ function testSaslScram256Consumer() returns error? {
         clientId: "test-consumer-42",
         autoCommit: false,
         auth: authScram256Config,
-        securityProtocol: PROTOCOL_SASL_PLAINTEXT
+        securityProtocol: PROTOCOL_SASL_PLAINTEXT,
+        maxPollRecords: 1
     };
     Consumer consumer = check new (SASL_URL, consumerConfiguration);
     BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 1, string `Expected: 1. Received: ${consumerRecords.length()}`);
+    test:assertEquals(consumerRecords.length(), 1);
     check consumer->close();
 }
 

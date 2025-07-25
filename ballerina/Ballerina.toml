@@ -21,14 +21,14 @@ path = "../native/build/libs/kafka-native-4.6.0-SNAPSHOT.jar"
 [[platform.java21.dependency]]
 groupId = "org.apache.kafka"
 artifactId = "kafka-clients"
-version = "3.7.2"
-path = "./lib/kafka-clients-3.7.2.jar"
+version = "3.9.1"
+path = "./lib/kafka-clients-3.9.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.apache.kafka"
 artifactId = "kafka_2.12"
-version = "3.7.2"
-path = "./lib/kafka_2.12-3.7.2.jar"
+version = "3.9.1"
+path = "./lib/kafka_2.12-3.9.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
