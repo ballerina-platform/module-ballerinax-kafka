@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerinax/kafka;
+
 import example/twitterProducer.types as types;
 
 // Topic to publish the filtered tweets.
@@ -33,8 +34,8 @@ public function main() returns error? {
     // Creates a new HTTP client for the mock Twitter server.
     final http:Client twitterClient = check new ("http://localhost:9090",
         auth = {
-            username: username,
-            password: password
+            username,
+            password
         }
     );
     while true {
@@ -44,7 +45,7 @@ public function main() returns error? {
         foreach var tweet in response {
             json jsonTweet = tweet.toJson();
             string message = jsonTweet.toJsonString();
-            check kafkaProducer->send({ topic: TOPIC, value: message.toBytes() });
+            check kafkaProducer->send({topic: TOPIC, value: message.toBytes()});
         }
     }
 }

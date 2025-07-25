@@ -14,11 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'string;
-import ballerina/log;
-import ballerina/lang.runtime as runtime;
-import ballerina/test;
 import ballerina/crypto;
+import ballerina/lang.'string;
+import ballerina/lang.runtime as runtime;
+import ballerina/log;
+import ballerina/test;
 
 string messagesReceivedInOrder = "";
 string receivedGracefulStopMessage = "";
@@ -34,8 +34,10 @@ map<byte[]|byte[][]> receivedHeaders = {};
 
 int receivedMsgCount = 0;
 
-@test:Config {enable: true}
-function consumerServiceTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testConsumerService() returns error? {
     string topic = "service-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -54,8 +56,10 @@ function consumerServiceTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config {enable: true}
-function consumerServiceInvalidUrlTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testConsumerServiceInvalidUrl() returns error? {
     string topic = "consumer-service-invalid-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -74,8 +78,10 @@ function consumerServiceInvalidUrlTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config {enable: true}
-function attachDetachToClosedListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testAttachDetachToClosedListener() returns error? {
     string topic = "attach-detach-closed-listener-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -128,8 +134,10 @@ function attachDetachToClosedListenerTest() returns error? {
     incorrectEndpointMsg = "";
 }
 
-@test:Config {enable: true}
-function consumerServiceGracefulStopTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testConsumerServiceGracefulStop() returns error? {
     string topic = "listener-graceful-stop-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -151,13 +159,15 @@ function consumerServiceGracefulStopTest() returns error? {
     test:assertNotEquals(receivedGracefulStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config {enable: true}
-function consumerServiceImmediateStopTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testConsumerServiceImmediateStop() returns error? {
     string topic = "listener-immediate-stop-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
+        topics: topic,
         offsetReset: OFFSET_RESET_EARLIEST,
         groupId: "listener-immediate-stop-service-test-group",
         clientId: "test-listener-05"
@@ -174,13 +184,15 @@ function consumerServiceImmediateStopTest() returns error? {
     test:assertNotEquals(receivedImmediateStopMessage, TEST_MESSAGE_II);
 }
 
-@test:Config {enable: true}
-function consumerServiceSubscribeErrorTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testConsumerServiceSubscribeError() returns error? {
     string topic = "listener-subscribe-error-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     ConsumerConfiguration consumerConfiguration = {
-        topics: [topic],
+        topics: topic,
         offsetReset: OFFSET_RESET_EARLIEST,
         clientId: "test-listener-06",
         autoCommit: false
@@ -199,22 +211,23 @@ function consumerServiceSubscribeErrorTest() returns error? {
         groupId: "listener-immediate-stop-service-test-group",
         clientId: "test-listener-07"
     };
-    
+
     Listener 'listener = check new (DEFAULT_URL, consumerConfiguration);
     check 'listener.attach(incorrectEndpointsService);
     error? res = 'listener.'start();
+    test:assertTrue(res is error);
     if res is error {
         string expectedErr = "Error creating Kafka consumer to connect with remote broker and subscribe to " +
         "provided topics";
         test:assertEquals(res.message(), expectedErr);
-    } else {
-        test:assertFail(msg = "Expected an error");
     }
     check 'listener.detach(incorrectEndpointsService);
 }
 
-@test:Config {enable: true}
-function listenerConfigTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testListenerConfig() returns error? {
     string topic = "listener-config-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -225,7 +238,7 @@ function listenerConfigTest() returns error? {
         pollingInterval: 3
     };
 
-    Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
+    Listener serviceConsumer = check new (DEFAULT_URL, consumerConfiguration);
     check serviceConsumer.attach(consumerConfigService);
     check serviceConsumer.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -234,8 +247,10 @@ function listenerConfigTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config {enable: true}
-function listenerConfigErrorTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testListenerConfigError() returns error? {
     string topic = "listener-config-error-test-topic";
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -244,7 +259,7 @@ function listenerConfigErrorTest() returns error? {
         clientId: "test-listener-09",
         concurrentConsumers: -5
     };
-    Listener serviceConsumer = check new(DEFAULT_URL, consumerConfiguration);
+    Listener serviceConsumer = check new (DEFAULT_URL, consumerConfiguration);
     error? result = serviceConsumer.attach(consumerConfigService);
     if result is Error {
         string expectedErrorMsg = "Number of Concurrent consumers should be a positive integer" +
@@ -262,7 +277,7 @@ function listenerConfigErrorTest() returns error? {
         clientId: "test-listener-10",
         partitionAssignmentStrategy: strategy
     };
-    Listener|Error result2 = new(DEFAULT_URL, consumerConfiguration);
+    Listener|Error result2 = new (DEFAULT_URL, consumerConfiguration);
     if (result2 is Error) {
         string expectedErrorMsg = "Cannot connect to the kafka server: Failed to construct kafka consumer";
         test:assertEquals(result2.message(), expectedErrorMsg);
@@ -272,10 +287,10 @@ function listenerConfigErrorTest() returns error? {
 }
 
 @test:Config {
-    enable: false,
-    dependsOn: [consumerServiceCommitTest]
+    groups: ["listener", "service"],
+    dependsOn: [testConsumerServiceCommit]
 }
-function consumerServiceCommitOffsetTest() returns error? {
+function testConsumerServiceCommitOffset() returns error? {
     string topic = "listener-commit-offset-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -294,13 +309,13 @@ function consumerServiceCommitOffsetTest() returns error? {
     check serviceConsumer.'start();
 
     int messageCount = 10;
-    int count = 0;
-    while count < messageCount {
-        check sendMessage(count.toString().toBytes(), topic);
-        count += 1;
+    foreach int i in 0 ..< messageCount {
+        check sendMessage(i.toString().toBytes(), topic);
     }
+    // Wait for the service consumer to process all messages and commit offsets
+    runtime:sleep(5);
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    BytesConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertTrue(committedOffset is PartitionOffset);
     if committedOffset is PartitionOffset {
@@ -310,8 +325,10 @@ function consumerServiceCommitOffsetTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config {enable: false}
-function consumerServiceCommitTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testConsumerServiceCommit() returns error? {
     string topic = "listener-commit-test-topic";
     kafkaTopics.push(topic);
     ConsumerConfiguration consumerConfiguration = {
@@ -328,15 +345,15 @@ function consumerServiceCommitTest() returns error? {
     Listener serviceConsumer = check new (DEFAULT_URL, consumerConfiguration);
     check serviceConsumer.attach(consumerServiceWithCommit);
     check serviceConsumer.'start();
-
+    runtime:sleep(3);
     int messageCount = 10;
-    int count = 0;
-    while count < messageCount {
-        check sendMessage(count.toString().toBytes(), topic);
-        count += 1;
+    foreach int i in 0 ..< messageCount {
+        check sendMessage(i.toString().toBytes(), topic);
     }
+    // Wait for the service consumer to process all messages and commit offsets
+    runtime:sleep(5);
     Consumer consumer = check new (DEFAULT_URL, consumerConfiguration);
-    BytesConsumerRecord[] _ = check consumer->poll(1);
+    BytesConsumerRecord[] _ = check consumer->poll(5);
     PartitionOffset? committedOffset = check consumer->getCommittedOffset(topicPartition);
     test:assertTrue(committedOffset is PartitionOffset);
     if committedOffset is PartitionOffset {
@@ -346,13 +363,15 @@ function consumerServiceCommitTest() returns error? {
     check serviceConsumer.gracefulStop();
 }
 
-@test:Config {enable: true}
-function saslListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testSaslListener() returns error? {
     string topic = "sasl-listener-test-topic";
     kafkaTopics.push(topic);
 
     ConsumerConfiguration consumerConfig = {
-        groupId:"listener-sasl-test-group",
+        groupId: "listener-sasl-test-group",
         clientId: "test-listener-13",
         offsetReset: "earliest",
         topics: [topic],
@@ -360,7 +379,7 @@ function saslListenerTest() returns error? {
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
 
-    Listener saslListener = check new(SASL_URL, consumerConfig);
+    Listener saslListener = check new (SASL_URL, consumerConfig);
     check saslListener.attach(saslConsumerService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -369,8 +388,10 @@ function saslListenerTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config {enable: true}
-function saslListenerIncorrectCredentialsTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testSaslListenerIncorrectCredentials() returns error? {
     string topic = "sasl-listener-incorrect-credentials-test-topic";
     AuthenticationConfiguration invalidAuthConfig = {
         mechanism: AUTH_SASL_PLAIN,
@@ -379,7 +400,7 @@ function saslListenerIncorrectCredentialsTest() returns error? {
     };
 
     ConsumerConfiguration consumerConfig = {
-        groupId:"listener-sasl-incorrect-credentials-test-group",
+        groupId: "listener-sasl-incorrect-credentials-test-group",
         clientId: "test-listener-14",
         offsetReset: "earliest",
         topics: [topic],
@@ -387,22 +408,24 @@ function saslListenerIncorrectCredentialsTest() returns error? {
         securityProtocol: PROTOCOL_SASL_PLAINTEXT
     };
 
-    Listener saslListener = check new(SASL_URL, consumerConfig);
+    Listener saslListener = check new (SASL_URL, consumerConfig);
     check saslListener.attach(saslConsumerIncorrectCredentialsService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
     runtime:sleep(3);
-    test:assertEquals(saslMsg, EMPTY_MESSAGE);
+    test:assertEquals(saslIncorrectCredentialsMsg, EMPTY_MESSAGE);
     check saslListener.gracefulStop();
 }
 
-@test:Config {enable: true}
-function sslListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testSslListener() returns error? {
     string topic = "ssl-listener-test-topic";
     kafkaTopics.push(topic);
 
     ConsumerConfiguration consumerConfig = {
-        groupId:"listener-sasl-test-group",
+        groupId: "listener-sasl-test-group",
         clientId: "test-listener-15",
         offsetReset: "earliest",
         topics: [topic],
@@ -410,7 +433,7 @@ function sslListenerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
 
-    Listener saslListener = check new(SSL_URL, consumerConfig);
+    Listener saslListener = check new (SSL_URL, consumerConfig);
     check saslListener.attach(sslConsumerService);
     check saslListener.'start();
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -419,8 +442,10 @@ function sslListenerTest() returns error? {
     check saslListener.gracefulStop();
 }
 
-@test:Config {enable: true}
-function basicMessageOrderTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testBasicMessageOrder() returns error? {
     string topic = "message-order-test-topic";
     kafkaTopics.push(topic);
     int i = 0;
@@ -452,8 +477,10 @@ function basicMessageOrderTest() returns error? {
     check consumer.gracefulStop();
 }
 
-@test:Config {enable: true}
-function listenerDetachTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testListenerDetach() returns error? {
     string topic1 = "listener-detach-test-topic";
     kafkaTopics.push(topic1);
     ConsumerConfiguration consumerConfiguration1 = {
@@ -512,8 +539,10 @@ function listenerDetachTest() returns error? {
     check listener2.gracefulStop();
 }
 
-@test:Config {enable: true}
-function plaintextToSecuredEndpointsListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testPlaintextToSecuredEndpointsListener() returns error? {
     string topic = "plaintext-secured-endpoints-listener-test-topic";
     kafkaTopics.push(topic);
 
@@ -549,8 +578,10 @@ function plaintextToSecuredEndpointsListenerTest() returns error? {
     check testListener.gracefulStop();
 }
 
-@test:Config {enable: true}
-function invalidSecuredEndpointsListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testInvalidSecuredEndpointsListener() returns error? {
     string topic = "invalid-secured-endpoints-listener-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -605,8 +636,10 @@ function invalidSecuredEndpointsListenerTest() returns error? {
     check testListener.gracefulStop();
 }
 
-@test:Config {enable: true}
-function sslIncorrectStoresListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testSslIncorrectStoresListener() returns error? {
     string topic = "ssl-incorrect-stores-listener-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_INCORRECT_TRUSTSTORE_PATH,
@@ -646,8 +679,10 @@ function sslIncorrectStoresListenerTest() returns error? {
     check testListener.gracefulStop();
 }
 
-@test:Config {enable: true}
-function sslIncorrectMasterPasswordListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testSslIncorrectMasterPasswordListener() returns error? {
     string topic = "ssl-incorrect-master-password-listener-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
@@ -685,8 +720,10 @@ function sslIncorrectMasterPasswordListenerTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
-function sslIncorrectCertPathListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testSslIncorrectCertPathListener() returns error? {
     string topic = "ssl-incorrect-cert-path-listener-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
@@ -724,8 +761,10 @@ function sslIncorrectCertPathListenerTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
-function invalidSecurityProtocolListenerTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testInvalidSecurityProtocolListener() returns error? {
     string topic = "invalid-security-protocol-listener-test-topic";
 
     crypto:TrustStore invalidTrustStore = {
@@ -794,171 +833,10 @@ function invalidSecurityProtocolListenerTest() returns error? {
     }
 }
 
-Service messageOrderService =
-service object {
-    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] records) returns error? {
-        foreach var kafkaRecord in records {
-            byte[] value = kafkaRecord.value;
-            string message = check 'string:fromBytes(value);
-            messagesReceivedInOrder = messagesReceivedInOrder + message;
-        }
-    }
-};
-
-Service consumerService =
-service object {
-    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
-        foreach var kafkaRecord in records {
-            byte[] value = kafkaRecord.value;
-            string message = check 'string:fromBytes(value);
-            log:printInfo("Message received: " + message);
-            receivedMessage = message;
-        }
-    }
-};
-
-Service consumerGracefulStopService =
-service object {
-    remote function onConsumerRecord(readonly & BytesConsumerRecord[] records) returns error? {
-        foreach var kafkaRecord in records {
-            byte[] value = kafkaRecord.value;
-            string message = check 'string:fromBytes(value);
-            log:printInfo("Message received: " + message);
-            receivedGracefulStopMessage = message;
-        }
-    }
-};
-
-Service consumerImmediateStopService =
-service object {
-    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] records) returns error? {
-        foreach var kafkaRecord in records {
-            byte[] value = kafkaRecord.value;
-            string message = check 'string:fromBytes(value);
-            log:printInfo("Message received: " + message);
-            receivedImmediateStopMessage = message;
-        }
-    }
-};
-
-Service consumerServiceWithCommit =
-service object {
-    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
-        foreach var kafkaRecord in records {
-            byte[] value = kafkaRecord.value;
-            string message = check 'string:fromBytes(value);
-            log:printInfo("Message received: " + message);
-            receivedMessageWithCommit = message;
-        }
-        check caller->'commit();
-    }
-};
-
-Service consumerServiceWithCommitOffset =
-service object {
-    remote function onConsumerRecord(readonly & BytesConsumerRecord[] records, Caller caller) returns error? {
-        string topic = "listener-commit-offset-test-topic";
-        foreach var kafkaRecord in records {
-            byte[] value = kafkaRecord.value;
-            string message = check 'string:fromBytes(value);
-            log:printInfo("Message received: " + message);
-            receivedMsgCount = receivedMsgCount + 1;
-            receivedMessageWithCommitOffset = message;
-        }
-        TopicPartition topicPartition = {
-            topic: topic,
-            partition: 0
-        };
-        PartitionOffset partitionOffset = {
-            partition: topicPartition,
-            offset: receivedMsgCount
-        };
-        check caller->commitOffset([partitionOffset]);
-    }
-};
-
-Service consumerConfigService =
-service object {
-    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
-        foreach var kafkaRecord in records {
-            byte[] value = kafkaRecord.value;
-            string message = check 'string:fromBytes(value);
-            log:printInfo("Message received: " + message);
-            receivedConfigMessage = message;
-        }
-    }
-};
-
-Service saslConsumerService =
-service object {
-    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
-        foreach var consumerRecord in records {
-            string messageContent = check 'string:fromBytes(consumerRecord.value);
-            log:printInfo(messageContent);
-            saslMsg = messageContent;
-        }
-    }
-};
-
-Service saslConsumerIncorrectCredentialsService =
-service object {
-    remote function onConsumerRecord(Caller caller,
-                                BytesConsumerRecord[] records) returns error? {
-        foreach var consumerRecord in records {
-            string messageContent = check 'string:fromBytes(consumerRecord.value);
-            log:printInfo(messageContent);
-            saslIncorrectCredentialsMsg = messageContent;
-        }
-    }
-};
-
-Service sslConsumerService =
-service object {
-    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] & readonly records) returns error? {
-        foreach var consumerRecord in records {
-            string messageContent = check 'string:fromBytes(consumerRecord.value);
-            log:printInfo(messageContent);
-            sslMsg = messageContent;
-        }
-    }
-};
-
-Service listenerDetachService1 =
-service object {
-    remote function onConsumerRecord(Caller caller,
-                                BytesConsumerRecord[] records) returns error? {
-        foreach var consumerRecord in records {
-            string messageContent = check 'string:fromBytes(consumerRecord.value);
-            log:printInfo(messageContent);
-            detachMsg1 = messageContent;
-        }
-    }
-};
-
-Service listenerDetachService2 =
-service object {
-    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
-        foreach var consumerRecord in records {
-            string messageContent = check 'string:fromBytes(consumerRecord.value);
-            log:printInfo(messageContent);
-            detachMsg2 = messageContent;
-        }
-    }
-};
-
-Service incorrectEndpointsService =
-service object {
-    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
-        foreach var consumerRecord in records {
-            string messageContent = check 'string:fromBytes(consumerRecord.value);
-            log:printInfo(messageContent);
-            incorrectEndpointMsg = messageContent;
-        }
-    }
-};
-
-@test:Config {enable: true}
-function listenerWithPollTimeoutConfigTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testListenerWithPollTimeoutConfig() returns error? {
     string topic = "listener-poll-timeout-config-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE, topic);
@@ -989,8 +867,10 @@ function listenerWithPollTimeoutConfigTest() returns error? {
     test:assertEquals(receivedTimeoutConfigValue, TEST_MESSAGE);
 }
 
-@test:Config {enable: true}
-function listenerWithConsumerHeadersTest() returns error? {
+@test:Config {
+    groups: ["listener", "service"]
+}
+function testListenerWithConsumerHeaders() returns error? {
     string topic = "listener-consumer-headers-test-topic";
     kafkaTopics.push(topic);
     map<byte[]|byte[][]>? headers = {"key1": ["header1".toBytes(), "header2".toBytes()], "key2": "header3".toBytes()};
@@ -1018,3 +898,150 @@ function listenerWithConsumerHeadersTest() returns error? {
     check headersListener.gracefulStop();
     test:assertEquals(receivedHeaders, headers);
 }
+
+Service messageOrderService = service object {
+    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] records) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            messagesReceivedInOrder = messagesReceivedInOrder + message;
+        }
+    }
+};
+
+Service consumerService = service object {
+    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+            receivedMessage = message;
+        }
+    }
+};
+
+Service consumerGracefulStopService = service object {
+    remote function onConsumerRecord(readonly & BytesConsumerRecord[] records) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+            receivedGracefulStopMessage = message;
+        }
+    }
+};
+
+Service consumerImmediateStopService = service object {
+    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] records) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+            receivedImmediateStopMessage = message;
+        }
+    }
+};
+
+Service consumerServiceWithCommit = service object {
+    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+        }
+        check caller->'commit();
+    }
+};
+
+Service consumerServiceWithCommitOffset = service object {
+    remote function onConsumerRecord(readonly & BytesConsumerRecord[] records, Caller caller) returns error? {
+        string topic = "listener-commit-offset-test-topic";
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+            receivedMsgCount = receivedMsgCount + 1;
+        }
+        TopicPartition topicPartition = {
+            topic: topic,
+            partition: 0
+        };
+        PartitionOffset partitionOffset = {
+            partition: topicPartition,
+            offset: receivedMsgCount
+        };
+        check caller->commitOffset([partitionOffset]);
+    }
+};
+
+Service consumerConfigService = service object {
+    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
+        foreach var kafkaRecord in records {
+            byte[] value = kafkaRecord.value;
+            string message = check 'string:fromBytes(value);
+            log:printInfo("Message received: " + message);
+            receivedConfigMessage = message;
+        }
+    }
+};
+
+Service saslConsumerService = service object {
+    remote function onConsumerRecord(BytesConsumerRecord[] records, Caller caller) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            saslMsg = messageContent;
+        }
+    }
+};
+
+Service saslConsumerIncorrectCredentialsService = service object {
+    remote function onConsumerRecord(Caller caller, BytesConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            saslIncorrectCredentialsMsg = messageContent;
+        }
+    }
+};
+
+Service sslConsumerService = service object {
+    remote function onConsumerRecord(Caller caller, readonly & BytesConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            sslMsg = messageContent;
+        }
+    }
+};
+
+Service listenerDetachService1 = service object {
+    remote function onConsumerRecord(Caller caller,
+            BytesConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            detachMsg1 = messageContent;
+        }
+    }
+};
+
+Service listenerDetachService2 = service object {
+    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            detachMsg2 = messageContent;
+        }
+    }
+};
+
+Service incorrectEndpointsService = service object {
+    remote function onConsumerRecord(BytesConsumerRecord[] records) returns error? {
+        foreach var consumerRecord in records {
+            string messageContent = check 'string:fromBytes(consumerRecord.value);
+            log:printInfo(messageContent);
+            incorrectEndpointMsg = messageContent;
+        }
+    }
+};

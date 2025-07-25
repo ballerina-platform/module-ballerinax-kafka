@@ -1,0 +1,11 @@
+[package]
+org = "wso2"
+name = "trade_api"
+version = "0.1.0"
+distribution = "2201.12.7"
+
+[[dependency]]
+org = "ballerinax"
+name = "kafka"
+version = "4.6.0"
+repository = "local"

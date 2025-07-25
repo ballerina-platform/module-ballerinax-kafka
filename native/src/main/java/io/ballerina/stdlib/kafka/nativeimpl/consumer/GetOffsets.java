@@ -19,6 +19,13 @@
 package io.ballerina.stdlib.kafka.nativeimpl.consumer;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.creators.TypeCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.flags.TypeFlags;
+import io.ballerina.runtime.api.types.ArrayType;
+import io.ballerina.runtime.api.types.PredefinedTypes;
+import io.ballerina.runtime.api.types.TupleType;
+import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
@@ -29,6 +36,7 @@ import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
@@ -36,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,20 +57,34 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ALIAS_TOPIC;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.DURATION_UNDEFINED_VALUE;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER_CONFIG;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.OFFSET_AND_TIMESTAMP_TYPE_NAME;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.TOPIC_PARTITION_TYPE_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getDefaultApiTimeout;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getIntFromBDecimal;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getIntFromLong;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getPartitionOffsetArrayFromOffsetMap;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getTopicPartition;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getTopicPartitionList;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateOffsetAndTimestampRecord;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populatePartitionOffsetRecord;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.populateTopicPartitionRecord;
+import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getModule;
 
 /**
  * Native methods to get different offset values for the ballerina kafka consumer.
  */
 public class GetOffsets {
-
     private static final Logger logger = LoggerFactory.getLogger(GetOffsets.class);
+
+    private static final Type topicParitionType = TypeCreator.createRecordType(TOPIC_PARTITION_TYPE_NAME, getModule(),
+            0, false, TypeFlags.ANYDATA);
+    private static Type offsetAndTimestampType = TypeCreator.createRecordType(OFFSET_AND_TIMESTAMP_TYPE_NAME,
+            getModule(), 0, false, TypeFlags.ANYDATA);
+    private static final Type offsetAndTimestampNilableType = TypeCreator.createUnionType(offsetAndTimestampType,
+            PredefinedTypes.TYPE_NULL);
+    private static TupleType topicPartitionOffsetTupleType = TypeCreator.createTupleType(List.of(topicParitionType,
+            offsetAndTimestampNilableType));
 
     /**
      * Returns the beginning offsets of given topic partitions for the ballerina kafka consumer.
@@ -93,7 +116,7 @@ public class GetOffsets {
             return getPartitionOffsetArrayFromOffsetMap(offsetMap);
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_GET_BEG_OFFSETS);
+                    KafkaObservabilityConstants.ERROR_TYPE_GET_BEG_OFFSETS);
             return createKafkaError("Failed to retrieve offsets for the topic partitions: " + e.getMessage());
         }
     }
@@ -136,7 +159,7 @@ public class GetOffsets {
             return offset;
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_GET_COMMIT_OFFSET);
+                    KafkaObservabilityConstants.ERROR_TYPE_GET_COMMIT_OFFSET);
             return createKafkaError("Failed to retrieve committed offsets: " + e.getMessage());
         }
     }
@@ -171,7 +194,7 @@ public class GetOffsets {
             }
         } catch (KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_GET_END_OFFSETS);
+                    KafkaObservabilityConstants.ERROR_TYPE_GET_END_OFFSETS);
             return createKafkaError("Failed to retrieve end offsets for the consumer: " + e.getMessage());
         }
 
@@ -211,9 +234,67 @@ public class GetOffsets {
             return position;
         } catch (IllegalStateException | KafkaException e) {
             KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                                 KafkaObservabilityConstants.ERROR_TYPE_GET_POSITION_OFFSET);
+                    KafkaObservabilityConstants.ERROR_TYPE_GET_POSITION_OFFSET);
             return createKafkaError("Failed to retrieve position offset: " + e.getMessage());
         }
+    }
+
+    public static Object offsetsForTimes(Environment environment, BObject consumer,
+                                         BArray topicPartitionTimestamps, Object duration) {
+        KafkaTracingUtil.traceResourceInvocation(environment, consumer);
+        KafkaConsumer kafkaConsumer = (KafkaConsumer) consumer.getNativeData(NATIVE_CONSUMER);
+        Map<TopicPartition, Long> topicPartitionTimestampsMap =
+                getTopicPartitionTimestampsMap(topicPartitionTimestamps);
+        Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes;
+        try {
+            if (duration instanceof BDecimal durationValue) {
+                int apiTimeout = getIntFromBDecimal(durationValue, logger, ALIAS_DURATION);
+                if (apiTimeout < 0) {
+                    return createKafkaError("Invalid duration value: " + duration);
+                }
+                Duration timeoutDuration = Duration.ofMillis(apiTimeout);
+                offsetsForTimes = kafkaConsumer.offsetsForTimes(topicPartitionTimestampsMap, timeoutDuration);
+            } else {
+                offsetsForTimes = kafkaConsumer.offsetsForTimes(topicPartitionTimestampsMap);
+            }
+            ArrayType offsetAndTimestampArrayType = TypeCreator.createArrayType(topicPartitionOffsetTupleType);
+            BArray offsetAndTimestampArray = ValueCreator.createArrayValue(offsetAndTimestampArrayType);
+            for (Map.Entry<TopicPartition, OffsetAndTimestamp> entry : offsetsForTimes.entrySet()) {
+                TopicPartition topicPartition = entry.getKey();
+                OffsetAndTimestamp offsetAndTimestamp = entry.getValue();
+                BArray offsetForTimes = getOffsetForTimes(topicPartition, offsetAndTimestamp);
+                offsetAndTimestampArray.append(offsetForTimes);
+            }
+            return offsetAndTimestampArray;
+        } catch (Exception e) {
+            KafkaMetricsUtil.reportConsumerError(consumer, KafkaObservabilityConstants.ERROR_TYPE_OFFSETS_FOR_TIMES);
+            logger.error("Failed to retrieve offsets for times: {}", e.getMessage(), e);
+            return createKafkaError("Failed to retrieve offsets for times: ", e);
+        }
+    }
+
+    private static Map<TopicPartition, Long> getTopicPartitionTimestampsMap(BArray topicPartitionTimestamps) {
+        Map<TopicPartition, Long> result = new HashMap<>();
+        for (int i = 0; i < topicPartitionTimestamps.size(); i++) {
+            BArray topicPartitionTimestamp = (BArray) topicPartitionTimestamps.get(i);
+            TopicPartition topicPartition = getTopicPartition((BMap<BString, Object>) topicPartitionTimestamp.get(0),
+                    logger);
+            Long timestamp = topicPartitionTimestamp.getInt(1);
+            result.put(topicPartition, timestamp);
+        }
+        return result;
+    }
+
+    private static BArray getOffsetForTimes(TopicPartition topicPartition, OffsetAndTimestamp offsetAndTimestamp) {
+        BArray offsetForTimes = ValueCreator.createTupleValue(topicPartitionOffsetTupleType);
+        BMap<BString, Object> topicPartitionRecord = populateTopicPartitionRecord(topicPartition.topic(),
+                topicPartition.partition());
+        offsetForTimes.add(0, topicPartitionRecord);
+        if (offsetAndTimestamp != null) {
+            BMap<BString, Object> offsetAndTimestampRecord = populateOffsetAndTimestampRecord(offsetAndTimestamp);
+            offsetForTimes.add(1, offsetAndTimestampRecord);
+        }
+        return offsetForTimes;
     }
 
     private static Map<TopicPartition, Long> getBeginningOffsetsWithDuration(KafkaConsumer consumer,

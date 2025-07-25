@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/confluent.cregistry;
 import ballerinax/confluent.cavroserdes;
+import ballerinax/confluent.cregistry;
 
 // Consumer-related types
 # Represents the different types of offset-reset methods of the Kafka consumer.
@@ -59,11 +59,11 @@ public enum DeserializerType {
 public type Serializer isolated object {
 
     # Serializes a given value using the provided schema
-    # 
-    # + value - Data to be serialized  
-    # + schema - The schema used for serialization  
-    # + subject - The subject under which the schema is registered (default: "subject")  
-    # + return - The serialized `byte[]` on success, otherwise an error 
+    #
+    # + value - Data to be serialized
+    # + schema - The schema used for serialization
+    # + subject - The subject under which the schema is registered (default: "subject")
+    # + return - The serialized `byte[]` on success, otherwise an error
     public isolated function serialize(anydata value, string schema, string subject) returns byte[]|error;
 };
 
@@ -77,7 +77,7 @@ public isolated class AvroSerializer {
         self.registry = check initiateSchemaRegistry(schemaRegistryConfig);
         self.schema = schema;
     }
-    
+
     public isolated function serialize(anydata value, string schema, string subject) returns byte[]|error {
         return cavroserdes:serialize(self.registry, schema, value, subject);
     }
@@ -87,12 +87,11 @@ public isolated class AvroSerializer {
 public type Deserializer object {
 
     # Deserializes the provided value
-    # 
-    # + value - Data to be deserialized  
-    # + return - Deserialized value as `anydata` on success, otherwise an error  
+    #
+    # + value - Data to be deserialized
+    # + return - Deserialized value as `anydata` on success, otherwise an error
     public function deserialize(byte[] value) returns anydata|error;
 };
-
 
 # Implementation of the `Deserializer` interface for Avro deserialization
 public isolated class AvroDeserializer {
@@ -117,7 +116,7 @@ isolated function getSchemaRegistryConfig(anydata & readonly schemaRegistryConfi
     do {
         return check schemaRegistryConfig.cloneWithType(cregistry:ConnectionConfig);
     } on fail error registryError {
-        string errorMessage = string `The provided values for 'schemaRegistryConfig' 
+        string errorMessage = string `The provided values for 'schemaRegistryConfig'
             do not match the expected schema registry properties: ${registryError.message()}`;
         return error(errorMessage);
     }
@@ -130,3 +129,35 @@ isolated function initiateSchemaRegistry(anydata & readonly schemaRegistryConfig
         return error(string `Error occurred while initializing the confluent registry: ${err.message()}`);
     }
 }
+
+# Represents a topic partition and a timestamp.
+public type TopicPartitionTimestamp [TopicPartition, int];
+
+# Represents an offset and a timestamp for a topic partition.
+public type OffsetAndTimestamp record {|
+    # The offset of the record in the topic partition
+    int offset;
+    # The timestamp of the record in the topic partition
+    int timestamp;
+    # The leader epoch of the record in the topic partition
+    int? leaderEpoch = ();
+|};
+
+# Represents a topic partition and an offset with a timestamp.
+public type TopicPartitionOffset [TopicPartition, OffsetAndTimestamp?];
+
+# Represents metadata of a Kafka record.
+public type RecordMetadata record {|
+    # The offset of the record in the topic partition
+    int? offset = ();
+    # The timestamp of the record in the topic partition
+    int? timestamp = ();
+    # The size of the serialized, uncompressed key in bytes. If key is null, the returned size is -1.
+    int serializedKeySize;
+    # The size of the serialized, uncompressed value in bytes. If value is null, the returned size is -1.
+    int serializedValueSize;
+    # The topic the record is appended to
+    string topic;
+    # The partition the record is sent to
+    int partition;
+|};

@@ -14,11 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
 import ballerina/log;
+import ballerina/test;
 
-@test:Config {enable: true}
-function stringBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testStringBindingConsumer() returns error? {
     string topic = "string-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -40,8 +42,10 @@ function stringBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function intBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testIntBindingConsumer() returns error? {
     string topic = "int-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     int sendingValue = 100;
@@ -64,8 +68,10 @@ function intBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function floatBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testFloatBindingConsumer() returns error? {
     string topic = "float-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     float sendingValue = 100.9;
@@ -88,8 +94,10 @@ function floatBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function decimalBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testDecimalBindingConsumer() returns error? {
     string topic = "decimal-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     decimal sendingValue = 10.4d;
@@ -112,8 +120,10 @@ function decimalBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function booleanBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testBooleanBindingConsumer() returns error? {
     string topic = "boolean-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     boolean sendingValue = true;
@@ -136,8 +146,10 @@ function booleanBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function xmlBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testXmlBindingConsumer() returns error? {
     string topic = "xml-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     xml sendingValue = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
@@ -160,7 +172,9 @@ function xmlBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
 function jsonBindingConsumerTest() returns error? {
     string topic = "json-binding-consumer-test-topic";
     kafkaTopics.push(topic);
@@ -183,8 +197,10 @@ function jsonBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function mapBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testMapBindingConsumer() returns error? {
     string topic = "map-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(personMap.toString().toBytes(), topic);
@@ -206,8 +222,10 @@ function mapBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function tableBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testTableBindingConsumer() returns error? {
     string topic = "table-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     table<Person> personMapTable = table [];
@@ -232,8 +250,10 @@ function tableBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function recordBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testRecordBindingConsumer() returns error? {
     string topic = "record-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -255,8 +275,10 @@ function recordBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function nilBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testNilBindingConsumer() returns error? {
     string topic = "nil-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage((), topic);
@@ -275,8 +297,10 @@ function nilBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function dataBindingErrorConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testDataBindingErrorConsumer() returns error? {
     string topic = "data-binding-error-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -300,8 +324,10 @@ function dataBindingErrorConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function stringConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testStringConsumerRecord() returns error? {
     string topic = "string-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -324,8 +350,10 @@ function stringConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function intConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testIntConsumerRecord() returns error? {
     string topic = "int-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(1.toString().toBytes(), topic);
@@ -348,8 +376,10 @@ function intConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function xmlConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testXmlConsumerRecord() returns error? {
     string topic = "xml-consumer-record-test-topic";
     kafkaTopics.push(topic);
     xml sendingValue = xml `<start><Person><name>wso2</name><location>col-03</location></Person><Person><name>wso2</name><location>col-03</location></Person></start>`;
@@ -373,8 +403,10 @@ function xmlConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function recordConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testRecordConsumerRecord() returns error? {
     string topic = "record-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -397,8 +429,10 @@ function recordConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function jsonConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testJsonConsumerRecord() returns error? {
     string topic = "json-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(jsonData.toString().toBytes(), topic);
@@ -421,8 +455,10 @@ function jsonConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function readonlyConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testReadonlyConsumerRecord() returns error? {
     string topic = "readonly-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -445,8 +481,10 @@ function readonlyConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function unionBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testUnionBindingConsumer() returns error? {
     string topic = "union-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(TEST_MESSAGE.toBytes(), topic);
@@ -468,8 +506,10 @@ function unionBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function readonlyRecordBindingConsumerTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testReadonlyRecordBindingConsumer() returns error? {
     string topic = "readonly-record-binding-consumer-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(personRecord1.toString().toBytes(), topic);
@@ -492,8 +532,10 @@ function readonlyRecordBindingConsumerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function pollErrorWithSeekConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testPollErrorWithSeekConsumerRecord() returns error? {
     string topic = "poll-error-with-seek-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(personRecord1, topic);
@@ -534,17 +576,19 @@ function pollErrorWithSeekConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function recordCastingErrorPollTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testRecordCastingErrorPoll() returns error? {
     string topic = "record-casting-error-poll-test-topic";
     kafkaTopics.push(topic);
     check sendMessage({
-        name: "ABC",
-        age: 12,
-        address: "test-address",
-        married: false,
-        id: 1231
-    }.toString().toBytes(), topic);
+                name: "ABC",
+                age: 12,
+                address: "test-address",
+                married: false,
+                id: 1231
+            }.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -563,17 +607,19 @@ function recordCastingErrorPollTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function recordCastingErrorPollPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testRecordCastingErrorPollPayload() returns error? {
     string topic = "record-casting-error-poll-payload-test-topic";
     kafkaTopics.push(topic);
     check sendMessage({
-        name: "ABC",
-        age: 12,
-        address: "test-address",
-        married: false,
-        id: 1231
-    }.toString().toBytes(), topic);
+                name: "ABC",
+                age: 12,
+                address: "test-address",
+                married: false,
+                id: 1231
+            }.toString().toBytes(), topic);
 
     ConsumerConfiguration consumerConfigs = {
         topics: [topic],
@@ -592,8 +638,10 @@ function recordCastingErrorPollPayloadTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function intCastingErrorPollPayloadWithAutoSeekTest() returns error? {
+@test:Config {
+    groups: ["consumer", "data-binding"]
+}
+function testIntCastingErrorPollPayloadWithAutoSeek() returns error? {
     string topic = "int-casting-error-poll-payload-with-auto-seek-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(12.toString().toBytes(), topic);

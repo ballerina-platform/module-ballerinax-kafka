@@ -36,7 +36,7 @@ public client isolated class Caller {
     # kafka:Error? result = caller->commitOffset([partitionOffset1, partitionOffset2]);
     # ```
     #
-    # + offsets - Offsets to be commited
+    # + offsets - Offsets to be committed
     # + duration - Timeout duration (in seconds) for the commit operation execution
     # + return - A `kafka:Error` if an error is encountered or else `()`
     isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error? =

@@ -14,15 +14,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
 import ballerina/lang.'string;
 import ballerina/test;
-import ballerina/io;
-import ballerina/crypto;
+import ballerina/time;
 
 string MESSAGE_KEY = "TEST-KEY";
 
-@test:Config{enable: true}
-function producerInitTest() returns error? {
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerInit() returns error? {
     ProducerConfiguration producerConfiguration1 = {
         clientId: "test-producer-02",
         acks: ACKS_ALL,
@@ -56,7 +58,7 @@ function producerInitTest() returns error? {
     if result3 is Error {
         string expectedErr = "configuration enableIdempotence must be set to true to enable " +
             "transactional producer";
-         test:assertEquals(result3.message(), expectedErr);
+        test:assertEquals(result3.message(), expectedErr);
     } else {
         test:assertFail(msg = "Expected an error");
     }
@@ -71,15 +73,17 @@ function producerInitTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
-function producerSendStringTest() returns error? {
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerSendString() returns error? {
     string topic = "send-string-test-topic";
     kafkaTopics.push(topic);
     Producer stringProducer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Hello, Ballerina";
-    Error? result = stringProducer->send({ topic: topic, value: message.toBytes() });
+    Error? result = stringProducer->send({topic: topic, value: message.toBytes()});
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
-    result = stringProducer->send({ topic: topic, value: message.toBytes(), key: MESSAGE_KEY.toBytes() });
+    result = stringProducer->send({topic: topic, value: message.toBytes(), key: MESSAGE_KEY.toBytes()});
     check stringProducer->close();
 
     ConsumerConfiguration consumerConfiguration = {
@@ -97,35 +101,20 @@ function producerSendStringTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function producerKeyTypeMismatchErrorTest() returns error? {
-    string topic = "key-type-mismatch-error-test-topic";
-    Producer producer = check new (DEFAULT_URL, producerConfiguration);
-    string message = "Hello, Ballerina";
-    error? result = trap sendByteArrayValues(producer, message.toBytes(), topic, [], MESSAGE_KEY, 0, (), SER_BYTE_ARRAY);
-    if result is error {
-        string expectedErr = "Invalid type found for Kafka key. Expected key type: 'byte[]'.";
-        test:assertEquals(result.message(), expectedErr);
-    } else {
-        test:assertFail(msg = "Expected an error");
-    }
-    check producer->close();
-}
-
 @test:Config {
-    enable: true,
-    dependsOn: [producerSendStringTest]
+    groups: ["producer"],
+    dependsOn: [testProducerSendString]
 }
-function producerCloseTest() returns error? {
+function testProducerClose() returns error? {
     string topic = "producer-close-test-topic";
     kafkaTopics.push(topic);
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
     string message = "Test Message";
-    Error? result = producer->send({ topic: topic, value: message.toBytes() });
+    Error? result = producer->send({topic: topic, value: message.toBytes()});
     test:assertFalse(result is Error, result is Error ? result.toString() : result.toString());
     result = producer->close();
     test:assertFalse(result is Error, result is Error ? result.toString() : result.toString());
-    result = producer->send({ topic: topic, value: message.toBytes() });
+    result = producer->send({topic: topic, value: message.toBytes()});
     test:assertTrue(result is Error);
     if result is Error {
         string expectedErr = "Failed to send data to Kafka server: Cannot perform operation after producer has been closed";
@@ -134,12 +123,14 @@ function producerCloseTest() returns error? {
     check producer->close();
 }
 
-@test:Config {enable: true}
-function producerFlushTest() returns error? {
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerFlush() returns error? {
     string topic = "producer-flush-test-topic";
     kafkaTopics.push(topic);
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
-    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     check producer->'flush();
     check producer->close();
 
@@ -155,8 +146,10 @@ function producerFlushTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function producerGetTopicPartitionsTest() returns error? {
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerGetTopicPartitions() returns error? {
     string topic = "get-topic-partitions-test-topic";
     kafkaTopics.push(topic);
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
@@ -165,8 +158,10 @@ function producerGetTopicPartitionsTest() returns error? {
     check producer->close();
 }
 
-@test:Config {enable: true}
-function producerGetTopicPartitionsErrorTest() returns error? {
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerGetTopicPartitionsError() returns error? {
     string topic = "get-topic-partitions-error-test-topic";
     Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
     TopicPartition[]|Error result = producer->getTopicPartitions(topic);
@@ -180,8 +175,10 @@ function producerGetTopicPartitionsErrorTest() returns error? {
     check producer->close();
 }
 
-@test:Config {enable: false}
-function transactionalProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "transactional"]
+}
+function testTransactionalProducer() returns error? {
     string topic = "transactional-producer-test-topic";
     kafkaTopics.push(topic);
     ProducerConfiguration producerConfigs = {
@@ -193,15 +190,11 @@ function transactionalProducerTest() returns error? {
     };
     Producer producer = check new (DEFAULT_URL, producerConfigs);
     transaction {
-        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
-        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
-        check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+        check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+        check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+        check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
         var commitResult = commit;
-        if commitResult is () {
-            io:println("Commit successful");
-        } else {
-            test:assertFail(msg = "Commit Failed");
-        }
+        test:assertTrue(commitResult is ());
     }
     check producer->close();
 
@@ -217,8 +210,10 @@ function transactionalProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: false}
-function transactionalProducerWithAbortTest() returns error? {
+@test:Config {
+    groups: ["producer", "transactional"]
+}
+function testTransactionalProducerWithAbort() returns error? {
     string topic = "rollback-producer-test-topic";
     kafkaTopics.push(topic);
     ProducerConfiguration producerConfigs = {
@@ -231,14 +226,14 @@ function transactionalProducerWithAbortTest() returns error? {
     Producer producer = check new (DEFAULT_URL, producerConfigs);
     do {
         transaction {
-            check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
-            check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
-            check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+            check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+            check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
+            check producer->send({topic: topic, value: TEST_MESSAGE.toBytes(), partition: 0});
             check failTransaction();
             check commit;
         }
     } on fail var e {
-        io:println(e.toString());
+        test:assertEquals(e.message(), "Fail!");
     }
     check producer->close();
 
@@ -271,8 +266,10 @@ isolated function failTransaction() returns error {
     return error("Fail!");
 }
 
-@test:Config{enable: true}
-function saslProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "sasl"]
+}
+function testSaslProducer() returns error? {
     string topic = "sasl-producer-test-topic";
     kafkaTopics.push(topic);
 
@@ -288,7 +285,7 @@ function saslProducerTest() returns error? {
 
     Producer kafkaProducer = check new (SASL_URL, producerConfigs);
 
-    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     check kafkaProducer->close();
 
@@ -304,8 +301,10 @@ function saslProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{enable: true}
-function saslScram256ProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "sasl"]
+}
+function testSaslScram256Producer() returns error? {
     string topic = "sasl-scram-256-producer-test-topic";
     kafkaTopics.push(topic);
 
@@ -316,7 +315,7 @@ function saslScram256ProducerTest() returns error? {
     };
 
     Producer kafkaProducer = check new (SASL_URL, producerConfigs);
-    check kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    check kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     check kafkaProducer->close();
 
     ConsumerConfiguration consumerConfiguration = {
@@ -331,8 +330,10 @@ function saslScram256ProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{enable: true}
-function saslScram512ProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "sasl"]
+}
+function testSaslScram512Producer() returns error? {
     string topic = "sasl-scram-512-producer-test-topic";
     kafkaTopics.push(topic);
 
@@ -343,7 +344,7 @@ function saslScram512ProducerTest() returns error? {
     };
 
     Producer kafkaProducer = check new (SASL_URL, producerConfigs);
-    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     check kafkaProducer->close();
 
@@ -359,8 +360,10 @@ function saslScram512ProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config{enable: true}
-function saslProducerIncorrectCredentialsTest() returns error? {
+@test:Config {
+    groups: ["producer", "sasl"]
+}
+function testSaslProducerWithIncorrectCredentials() returns error? {
     string topic = "sasl-producer-incorrect-credentials-test-topic";
     kafkaTopics.push(topic);
     AuthenticationConfiguration invalidAuthConfig = {
@@ -381,7 +384,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
 
     Producer kafkaProducer = check new (SASL_URL, producerConfigs);
 
-    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     if result is Error {
         string errorMsg = "Failed to send data to Kafka server: Authentication failed: Invalid username or password";
         test:assertEquals(result.message(), errorMsg);
@@ -390,7 +393,7 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     }
 
     kafkaProducer = check new (SSL_URL, producerConfigs);
-    result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     if result is Error {
         string errorMsg = "Failed to send data to Kafka server: Topic sasl-producer-incorrect-credentials-test-topic not present in metadata after 6000 ms.";
         test:assertEquals(result.message(), errorMsg);
@@ -399,8 +402,10 @@ function saslProducerIncorrectCredentialsTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
-function producerAdditionalPropertiesTest() returns error? {
+@test:Config {
+    groups: ["producer", "sasl"]
+}
+function testProducerAdditionalProperties() returns error? {
     string topic = "producer-additional-properties-test-topic";
     kafkaTopics.push(topic);
     map<string> propertyMap = {
@@ -418,7 +423,7 @@ function producerAdditionalPropertiesTest() returns error? {
     };
 
     Producer kafkaProducer = check new (SASL_URL, producerConfigs);
-    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertFalse(result is error, result is error ? result.toString() : result.toString());
     check kafkaProducer->close();
 
@@ -434,8 +439,10 @@ function producerAdditionalPropertiesTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function sslProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "ssl"]
+}
+function testSslProducer() returns error? {
     string topic = "ssl-producer-test-topic";
     kafkaTopics.push(topic);
 
@@ -449,7 +456,7 @@ function sslProducerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
-    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     check producer->close();
 
     ConsumerConfiguration consumerConfiguration = {
@@ -464,8 +471,10 @@ function sslProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function sslCertKeyProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "ssl"]
+}
+function testSslCertKeyProducer() returns error? {
     string topic = "ssl-cert-key-producer-test-topic";
     kafkaTopics.push(topic);
 
@@ -492,7 +501,7 @@ function sslCertKeyProducerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
-    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     check producer->close();
 
     ConsumerConfiguration consumerConfiguration = {
@@ -507,8 +516,10 @@ function sslCertKeyProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function sslCertOnlyProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "ssl"]
+}
+function testSslCertOnlyProducer() returns error? {
     string topic = "ssl-cert-only-producer-test-topic";
     kafkaTopics.push(topic);
 
@@ -529,7 +540,7 @@ function sslCertOnlyProducerTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
-    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     check producer->close();
 
     ConsumerConfiguration consumerConfiguration = {
@@ -544,8 +555,10 @@ function sslCertOnlyProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function SSLWithSASLAuthProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "ssl", "sasl"]
+}
+function testSslWithSaslAuthProducer() returns error? {
     string topic = "ssl-with-sasl-auth-producer-test-topic";
     kafkaTopics.push(topic);
 
@@ -581,7 +594,7 @@ function SSLWithSASLAuthProducerTest() returns error? {
     };
 
     Producer producer = check new (SASL_SSL_URL, producerConfigs);
-    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertTrue(result is Error);
     if result is Error {
         test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic ssl-with-sasl-auth-producer-test-topic not present in metadata after 6000 ms.");
@@ -600,7 +613,7 @@ function SSLWithSASLAuthProducerTest() returns error? {
     };
 
     producer = check new (SASL_SSL_URL, producerConfigs);
-    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     check producer->close();
 
     ConsumerConfiguration consumerConfiguration = {
@@ -615,8 +628,10 @@ function SSLWithSASLAuthProducerTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function SASLOnSSLEndpointProducerTest() returns error? {
+@test:Config {
+    groups: ["producer", "sasl", "ssl"]
+}
+function testSaslOnSslEndpointProducer() returns error? {
     string topic = "sasl-on-ssl-endpoint-producer-test-topic";
 
     ProducerConfiguration producerConfigs = {
@@ -630,7 +645,7 @@ function SASLOnSSLEndpointProducerTest() returns error? {
     };
 
     Producer producer = check new (SSL_URL, producerConfigs);
-    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertTrue(result is Error);
     if result is Error {
         test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic sasl-on-ssl-endpoint-producer-test-topic not present in metadata after 6000 ms.");
@@ -638,15 +653,17 @@ function SASLOnSSLEndpointProducerTest() returns error? {
     check producer->close();
 }
 
-@test:Config {enable: true}
-function operationsOnClosedProducerTest() returns error? {
+@test:Config {
+    groups: ["producer"]
+}
+function testOperationsOnClosedProducer() returns error? {
     string topic = "operations-on-closed-producer";
     kafkaTopics.push(topic);
     ProducerConfiguration producerConfiguration = {
         clientId: "test-producer-16"
     };
     Producer producer = check new (DEFAULT_URL, producerConfiguration);
-    check producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    check producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     check producer->close();
 
     TopicPartition[]|Error? result = producer->getTopicPartitions("ssl-cert-only-producer-test-topic");
@@ -656,8 +673,10 @@ function operationsOnClosedProducerTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
-function producerAuthWithoutSecurityConfigsTest() returns error? {
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerAuthWithoutSecurityConfigs() returns error? {
     string topic = "producer-auth-without-security-configs-test-topic";
 
     ProducerConfiguration producerConfiguration = {
@@ -669,22 +688,24 @@ function producerAuthWithoutSecurityConfigsTest() returns error? {
         securityProtocol: PROTOCOL_PLAINTEXT
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
-    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertTrue(result is Error);
     if result is Error {
         test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-auth-without-security-configs-test-topic not present in metadata after 6000 ms.");
     }
 
     producer = check new (SASL_URL, producerConfiguration);
-    result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    result = producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertTrue(result is Error);
     if result is Error {
         test:assertEquals(result.message(), "Failed to send data to Kafka server: Topic producer-auth-without-security-configs-test-topic not present in metadata after 6000 ms.");
     }
 }
 
-@test:Config {enable: true}
-function sslIncorrectStoresTest() returns error? {
+@test:Config {
+    groups: ["producer", "ssl"]
+}
+function testSslIncorrectStores() returns error? {
     string topic = "ssl-incorrect-stores-test-topic";
     crypto:TrustStore invalidTrustStore = {
         path: SSL_INCORRECT_TRUSTSTORE_PATH,
@@ -717,15 +738,17 @@ function sslIncorrectStoresTest() returns error? {
         securityProtocol: PROTOCOL_SSL
     };
     Producer producer = check new (SSL_URL, producerConfiguration);
-    Error? result = producer->send({ topic: topic, value: TEST_MESSAGE.toBytes() });
+    Error? result = producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
     test:assertTrue(result is Error);
     if result is Error {
         test:assertEquals(result.message(), "Failed to send data to Kafka server: SSL handshake failed");
     }
 }
 
-@test:Config {enable: true}
-function sslIncorrectMasterPasswordTest() returns error? {
+@test:Config {
+    groups: ["producer", "ssl"]
+}
+function testSslIncorrectMasterPassword() returns error? {
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_PATH,
         password: INCORRECT_SSL_MASTER_PASSWORD
@@ -763,8 +786,10 @@ function sslIncorrectMasterPasswordTest() returns error? {
     }
 }
 
-@test:Config {enable: true}
-function sslIncorrectCertPathTest() returns error? {
+@test:Config {
+    groups: ["producer", "ssl"]
+}
+function testSslIncorrectCertPath() returns error? {
     crypto:TrustStore invalidTrustStore = {
         path: SSL_TRUSTSTORE_INCORRECT_PATH,
         password: SSL_MASTER_PASSWORD
@@ -800,4 +825,20 @@ function sslIncorrectCertPathTest() returns error? {
     if result is Error {
         test:assertEquals(result.message(), "Failed to initialize the producer: Failed to create new NetworkClient");
     }
+}
+
+@test:Config {
+    groups: ["producer"]
+}
+function testProducerSendWithMetadata() returns error? {
+    string topic = "producer-send-with-metadata-test-topic";
+    kafkaTopics.push(topic);
+    Producer producer = check new (DEFAULT_URL, producerConfiguration);
+    int timestamp = time:utcNow()[0];
+    RecordMetadata metadata = check producer->sendWithMetadata({topic: topic, value: TEST_MESSAGE.toBytes(), timestamp: timestamp});
+    test:assertEquals(metadata.topic, topic);
+    test:assertEquals(metadata.partition, 0);
+    test:assertEquals(metadata.offset, 0);
+    test:assertEquals(metadata.timestamp, timestamp);
+    check producer->close();
 }

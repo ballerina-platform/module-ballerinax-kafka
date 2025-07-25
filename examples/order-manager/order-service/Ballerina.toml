@@ -1,5 +1,5 @@
 [package]
-org = "dilan"
+org = "wso2"
 name = "order_service"
 version = "0.1.0"
 

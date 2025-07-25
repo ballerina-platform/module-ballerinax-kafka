@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+- [Add support for seeking to a specific timestamp in a topic partition](https://github.com/ballerina-platform/ballerina-library/issues/8113)
+- [Add support for retrieving metadata when sending a message](https://github.com/ballerina-platform/ballerina-library/issues/8114)
+
 ## [4.2.0] - 2024-08-20
 
 ### Fixed

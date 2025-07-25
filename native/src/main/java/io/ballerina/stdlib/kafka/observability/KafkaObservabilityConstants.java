@@ -70,6 +70,7 @@ public class KafkaObservabilityConstants {
     public static final String ERROR_TYPE_SUBSCRIBE = "subscribe";
     public static final String ERROR_TYPE_SUBSCRIBE_PATTERN = "subscribe_to_pattern";
     public static final String ERROR_TYPE_UNSUBSCRIBE = "unsubscribe";
+    public static final String ERROR_TYPE_OFFSETS_FOR_TIMES = "offsetsForTimes";
 
     public static final String CONTEXT_PRODUCER = "producer";
     public static final String CONTEXT_CONSUMER = "consumer";

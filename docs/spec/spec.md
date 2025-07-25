@@ -1,9 +1,9 @@
 # Specification: Ballerina Kafka Library
 
-_Owners_: @shafreenAnfar @dilanSachi @aashikam    
-_Reviewers_: @shafreenAnfar @aashikam  
-_Created_: 2020/10/28   
-_Updated_: 2022/05/11   
+_Authors_: @shafreenAnfar @dilanSachi @aashikam @ThisaruGuruge \
+_Reviewers_: @shafreenAnfar @aashikam \
+_Created_: 2020/10/28 \
+_Updated_: 2025/07/22 \
 _Edition_: Swan Lake  
 
 ## Introduction
@@ -27,6 +27,11 @@ The conforming implementation of the specification is released to Ballerina cent
       *    3.2.1. [Insecure Client](#321-insecure-client)
       *    3.2.2. [Secure Client](#322-secure-client)
    *  3.3. [Functions](#33-functions)
+      *    3.3.1. [The `send()` API](#331-the-send-api)
+      *    3.3.2. [The `sendWithMetadata()` API](#332-the-sendwithmetadata-api)
+      *    3.3.3. [The `close()` API](#333-the-close-api)
+      *    3.3.4. [The `flush()` API](#334-the-flush-api)
+      *    3.3.5. [The `getTopicPartitions()` API](#335-the-gettopicpartitions-api)
 4. [Consumer](#4-consumer)
    *  4.1. [Configurations](#41-configurations)
    *  4.2. [Consumer Client](#42-consumer-client)
@@ -265,7 +270,11 @@ kafka:ProducerConfiguration producerConfigs = {
 };
 ```
 ### 3.3. Functions
-* Kafka Producer API can be used to send messages to the Kafka server. For this, the `send()` method can be used.
+
+#### 3.3.1 The `send()` API
+
+Kafka Producer API can be used to send messages to the Kafka server. For this, the `send()` method can be used.
+
 ```ballerina
 # Produces records to the Kafka server.
 # ```ballerina
@@ -276,9 +285,29 @@ kafka:ProducerConfiguration producerConfigs = {
 # + return -  A `kafka:Error` if send action fails to send data or else '()'
 isolated remote function send(AnydataProducerRecord producerRecord) returns Error?;
 ```
-* If the user wants to ensure the message order or ensure that the message goes to a specific partition, `key` and
-  `partition` configurations can be provided in the `ProducerRecord`;
-* To close the producer after the usage, `close()` can be used.
+
+> **Note:** If the user wants to ensure the message order or ensure that the message goes to a specific partition, `key` and `partition` configurations can be provided in the `ProducerRecord`;
+
+### 3.3.2 The `sendWithMetadata()` API
+
+When sending a message to the Kafka server, it is useful to retrieve metadata about the sent message, such as the offset and partition. This information can be retrieved using the `sendWithMetadata()` API.
+
+```ballerina
+# Produces the records to the Kafka server and returns the relevant metadata.
+# ```ballerina
+# kafka:RecordMetadata metadata = check producer->sendWithMetadata({topic: "kafka-topic", value: "Hello World".toBytes()});
+# ```
+#
+# + producerRecord - Record to be produced
+# + return - A `kafka:RecordMetadata` containing the metadata of the produced record if send action succeeds or
+# else a `kafka:Error`
+isolated remote function sendWithMetadata(AnydataProducerRecord producerRecord) returns RecordMetadata|Error;
+```
+
+#### 3.3.3 The `close()` API
+
+To close the producer after the usage, `close()` can be used.
+
 ```ballerina
 # Closes the producer connection to the external Kafka broker.
 # ```ballerina
@@ -288,7 +317,13 @@ isolated remote function send(AnydataProducerRecord producerRecord) returns Erro
 # + return - A `kafka:Error` if closing the producer failed or else '()'
 isolated remote function close() returns Error?;
 ```
-* To make all the buffered records available to send, `flush()` API can be used after sending a message.
+
+#### 3.3.4 The `flush()` API
+
+When sending messages to the Kafka server, they are buffered before being sent. This is done to optimize the performance.
+
+To make all the buffered records available to send, `flush()` API can be used after sending a message.
+
 ```ballerina
 # Flushes the batch of records already sent to the broker by the producer.
 # ```ballerina
@@ -298,7 +333,11 @@ isolated remote function close() returns Error?;
 # + return - A `kafka:Error` if records couldn't be flushed or else '()'
 isolated remote function 'flush() returns Error?;
 ```
-* `getTopicPartitions()` can be used to fetch the partitions of a specific topic.
+
+#### 3.3.5 The `getTopicPartitions()` API
+
+This API can be used to fetch the topic partitions of a specific topic.
+
 ```ballerina
 # Retrieves the topic partition information for the provided topic.
 # ```ballerina
@@ -309,11 +348,16 @@ isolated remote function 'flush() returns Error?;
 # + return - A `kafka:TopicPartition` array for the given topic or else a `kafka:Error` if the operation fails
 isolated remote function getTopicPartitions(string topic) returns TopicPartition[]|Error;
 ```
+
 ## 4. Consumer
+
 The Consumer allows applications to read streams of data from topics in the Kafka cluster. Ballerina Kafka supports
 two types of consumers, Consumer Client and Listener.
+
 ### 4.1. Configurations
-* When initializing the consumer or the listener, following configurations can be provided.
+
+When initializing the consumer or the listener, the following configurations can be provided.
+
 ```ballerina
 public type ConsumerConfiguration record {|
     # Unique string that identifies the consumer
@@ -409,7 +453,9 @@ public type ConsumerConfiguration record {|
     SecurityProtocol securityProtocol = PROTOCOL_PLAINTEXT;
 |};
 ```
+
 * A `kafka:AnydataConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
+
 ```ballerina
 public type AnydataConsumerRecord record {|
     # Key that is included in the record
@@ -424,7 +470,9 @@ public type AnydataConsumerRecord record {|
     map<byte[]|byte[][]> headers;
 |};
 ```
-* `kafka:BytesConsumerRecord` defines the subtype of `kafka:AnydataConsumerRecord` where the value is a `byte[]`.
+
+`kafka:BytesConsumerRecord` defines the subtype of `kafka:AnydataConsumerRecord` where the value is a `byte[]`.
+
 ```ballerina
 public type BytesConsumerRecord record {|
     *AnydataConsumerRecord;
@@ -432,14 +480,21 @@ public type BytesConsumerRecord record {|
     byte[] value;
 |};
 ```
+
 ### 4.2. Consumer Client
+
 The Consumer Client provides the ability to pull messages from the Kafka server anytime the user needs and has 
 APIs to manage subscriptions, topic partitions, offsets etc.
+
 #### 4.2.1. Initialization
+
 Connection with the Kafka server can be established insecurely or securely as same as the producer.
+
 ##### 4.2.1.1. Insecure Client
+
 A simple insecure connection with the Kafka server can be easily established by providing the Kafka server URL and
 basic configuration.
+
 ```ballerina
 # Creates a new Kafka `Consumer`.
 #
@@ -448,9 +503,12 @@ basic configuration.
 # + return - A `kafka:Error` if an error is encountered or else '()'
 public isolated function init (string|string[] bootstrapServers, *ConsumerConfiguration config) returns Error?;
 ```
+
 ##### 4.2.1.2. Secure Client
+
 A secure client can be established via SSL as same as the Kafka Producer using either a `crypto:Truststore` or a
 certificate file. Additionally, a `crypto:Keystore` or a key file can also be provided.
+
 ```ballerina
 kafka:ConsumerConfiguration consumerConfiguration = {
     topics: ["kafka-topic"],
@@ -460,7 +518,9 @@ kafka:ConsumerConfiguration consumerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SSL
 };
 ```
+
 Consumer client can be authenticated with the Kafka server using SASL by providing `kafka:AuthenticationConfiguration`.
+
 ```ballerina
 kafka:ConsumerConfiguration consumerConfiguration = {
     clientId: "secure-consumer",
@@ -470,8 +530,11 @@ kafka:ConsumerConfiguration consumerConfiguration = {
     securityProtocol: kafka:PROTOCOL_SASL_SSL
 };
 ```
+
 #### 4.2.2. Consume Messages
+
 * Kafka consumer can consume messages by using the `poll()` method.
+
 ```ballerina
 # Polls the external broker to retrieve messages.
 # ```ballerina
@@ -483,8 +546,10 @@ kafka:ConsumerConfiguration consumerConfiguration = {
 # + return - Array of consumer records if executed successfully or else a `kafka:Error`
 isolated remote function poll(decimal timeout, typedesc<AnydataConsumerRecord[]> T = <>) returns T|Error;
 ```
+
 * When polling, a timeout value can be specified, and it will be the maximum time that the `poll()` method will block for.
 * Subtypes of `kafka:AnydataConsumerRecord` can be created to bind the data to a specific type.
+
 ```ballerina
 public type StringConsumerRecord record {|
     *kafka:AnydataConsumerRecord;
@@ -492,7 +557,9 @@ public type StringConsumerRecord record {|
 |};
 StringConsumerRecord[] stringRecords = check consumer->poll(10);
 ```
+
 * If none of the metadata of the consumer records are not needed, `pollPayload` api can be used to directly get the payload in the intended type.
+
 ```ballerina
 # Polls the external broker to retrieve messages in the required data type without the `kafka:AnydataConsumerRecord`
 # information.
@@ -505,8 +572,10 @@ StringConsumerRecord[] stringRecords = check consumer->poll(10);
 # + return - Array of data in the required format if executed successfully or else a `kafka:Error`
 isolated remote function pollPayload(decimal timeout, typedesc<anydata[]> T = <>) returns T|Error;
 ```
+
 * After consuming messages, the consumed offsets can be committed to the Kafka server. This can be done automatically by 
 specifying `autoCommit: true` in `kafka:ConsumerConfiguration` or by manually using `commit()`.
+
 ```ballerina
 # Commits the currently consumed offsets of the consumer.
 # ```ballerina
@@ -516,7 +585,9 @@ specifying `autoCommit: true` in `kafka:ConsumerConfiguration` or by manually us
 # + return - A `kafka:Error` if an error is encountered or else '()'
 isolated remote function 'commit() returns Error?;
 ```
+
 * Consumer can be closed after its usage using `close()` method.
+
 ```ballerina
 # Closes the consumer connection with the external Kafka broker.
 # ```ballerina
@@ -527,8 +598,11 @@ isolated remote function 'commit() returns Error?;
 # + return - A `kafka:Error` if an error is encountered or else '()'
 isolated remote function close(decimal duration = -1) returns Error?;
 ```
+
 #### 4.2.3. Handle Offsets
+
 * If it is needed to commit up to a specific offset, `commitOffset()` can be used.
+
 ```ballerina
 # Commits the given offsets of the specific topic partitions for the consumer.
 # ```ballerina
@@ -540,7 +614,9 @@ isolated remote function close(decimal duration = -1) returns Error?;
 # + return - `kafka:Error` if an error is encountered or else `()`
 isolated remote function commitOffset(PartitionOffset[] offsets, decimal duration = -1) returns Error?;
 ```
+
 * `getBeginningOffsets()` retrieves the start offsets for a given set of partitions.
+
 ```ballerina
 # Retrieves the start offsets for a given set of partitions.
 # ```ballerina
@@ -552,7 +628,9 @@ isolated remote function commitOffset(PartitionOffset[] offsets, decimal duratio
 # + return - Starting offsets for the given partitions if executes successfully or else a `kafka:Error`
 isolated remote function getBeginningOffsets(TopicPartition[] partitions, decimal duration = -1) returns PartitionOffset[]|Error;
 ```
+
 * Last committed offsets can be retrieved using `getCommittedOffset()`.
+
 ```ballerina
 # Retrieves the lastly committed offset for the given topic partition.
 # ```ballerina
@@ -565,7 +643,9 @@ isolated remote function getBeginningOffsets(TopicPartition[] partitions, decima
 #            present, `()` if there are no committed offsets, or else a `kafka:Error`
 isolated remote function getCommittedOffset(TopicPartition partition, decimal duration = -1) returns PartitionOffset|Error?;
 ```
+
 * The last offset can be retrieved using `getEndOffsets()`.
+
 ```ballerina
 # Retrieves the last offsets for a given set of partitions.
 # ```ballerina
@@ -577,8 +657,10 @@ isolated remote function getCommittedOffset(TopicPartition partition, decimal du
 # + return - End offsets for the given partitions if executes successfully or else a `kafka:Error`
 isolated remote function getEndOffsets(TopicPartition[] partitions, decimal duration = -1) returns PartitionOffset[]|Error;
 ```
+
 * To retrieve the offset of the next record that will be fetched if a record exists in that position, `getPositionOffset()` 
 can be used.
+
 ```ballerina
 # Retrieves the offset of the next record that will be fetched if a record exists in that position.
 # ```ballerina
@@ -591,8 +673,25 @@ can be used.
 #            the operation fails
 isolated remote function getPositionOffset(TopicPartition partition, decimal duration = -1) returns int|Error;
 ```
+
+* To retrieve the offsets for a given timestamp, `offsetsForTimes()` can be used.
+
+```ballerina
+# Retrieves the offsets for the given topic partitions and timestamps.
+# ```ballerina
+# kafka:TopicPartitionOffset[] result = check consumer->offsetsForTimes([[topicPartition1, timestamp1], [topicPartition2, timestamp2]]);
+# ```
+#
+# + topicPartitionTimestamps - Array of topic partitions with required timestamps
+# + duration - Timeout duration (in seconds) for the `offsetsForTimes` operation to execute
+# + return - Array of topic partition offsets if executed successfully or else a `kafka:Error`
+isolated remote function offsetsForTimes(TopicPartitionTimestamp[] topicPartitionTimestamps, decimal? duration = ()) returns TopicPartitionOffset[]|Error;
+```
+
 #### 4.2.4. Handle Partitions
+
 * To assign a consumer to a set of topic partitions, `assign()` can be used.
+
 ```ballerina
 # Assigns consumer to a set of topic partitions.
 #
@@ -600,7 +699,9 @@ isolated remote function getPositionOffset(TopicPartition partition, decimal dur
 # + return - `kafka:Error` if an error is encountered or else nil
 isolated remote function assign(TopicPartition[] partitions) returns Error?;
 ```
+
 * To check the assigned topic partitions for a specific consumer, `getAssignment()` can be used.
+
 ```ballerina
 # Retrieves the currently-assigned partitions of the consumer.
 # ```ballerina
@@ -610,7 +711,9 @@ isolated remote function assign(TopicPartition[] partitions) returns Error?;
 # + return - Array of assigned partitions for the consumer if executes successfully or else a `kafka:Error`
 isolated remote function getAssignment() returns TopicPartition[]|Error;
 ```
+
 * To pause the message retrieval from a specific set of partitions, `pause()` can be used.
+
 ```ballerina
 # Pauses retrieving messages from a set of partitions.
 # ```ballerina
@@ -621,7 +724,9 @@ isolated remote function getAssignment() returns TopicPartition[]|Error;
 # + return - A `kafka:Error` if an error is encountered or else `()`
 isolated remote function pause(TopicPartition[] partitions) returns Error?;
 ```
+
 * To resume the message retrieval from paused partitions, `resume()` can be used.
+
 ```ballerina
 # Resumes retrieving messages from a set of partitions, which were paused earlier.
 # ```ballerina
@@ -632,7 +737,9 @@ isolated remote function pause(TopicPartition[] partitions) returns Error?;
 # + return - A `kafka:Error` if an error is encountered or else `()`
 isolated remote function resume(TopicPartition[] partitions) returns Error?;
 ```
+
 * To get a list of the partitions that are currently paused from message retrieval, `getPausedPartitions()` can be used.
+
 ```ballerina
 # Retrieves the partitions, which are currently paused.
 # ```ballerina
@@ -642,7 +749,9 @@ isolated remote function resume(TopicPartition[] partitions) returns Error?;
 # + return - The set of partitions paused from message retrieval if executes successfully or else a `kafka:Error`
 isolated remote function getPausedPartitions() returns TopicPartition[]|Error;
 ```
+
 * To get the partitions to which a topic belong, `getTopicPartitions()` can be used.
+
 ```ballerina
 # Retrieves the set of partitions to which the topic belongs.
 # ```ballerina
@@ -654,8 +763,11 @@ isolated remote function getPausedPartitions() returns TopicPartition[]|Error;
 # + return - Array of partitions for the given topic if executes successfully or else a `kafka:Error`
 isolated remote function getTopicPartitions(string topic, decimal duration = -1) returns TopicPartition[]|Error;
 ```
+
 #### 4.2.5. Seeking
+
 * To seek to a given offset in a topic partition, `seek()` can be used.
+
 ```ballerina
 # Seeks for a given offset in a topic partition.
 # ```ballerina

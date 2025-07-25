@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/kafka;
-import ballerina/log;
 import ballerina/crypto;
+import ballerina/log;
+import ballerinax/kafka;
 
 configurable string INPUT_TOPIC = ?;
 configurable string OUTPUT_TOPIC = ?;
@@ -113,23 +113,25 @@ function processRecord(map<int> wordCountMap, kafka:BytesConsumerRecord 'record)
     map<int> tempWordCountMap = {};
     string sentence = check string:fromBytes('record.value);
 
-    _ = check from string word in re`\s`.split(sentence) let int? result = wordCountMap[word] do {
-        if result is () {
-            // Add a new value if the word does not exist in the map
-            wordCountMap[word] = 1;
-            tempWordCountMap[word] = 1;
-        } else {
-            // Increment the count if the word already exists
-            wordCountMap[word] = result + 1;
-            tempWordCountMap[word] = result + 1;
-        }
-    };
+    _ = from string word in re `\s`.split(sentence)
+        let int? result = wordCountMap[word]
+        do {
+            if result is () {
+                // Add a new value if the word does not exist in the map
+                wordCountMap[word] = 1;
+                tempWordCountMap[word] = 1;
+            } else {
+                // Increment the count if the word already exists
+                wordCountMap[word] = result + 1;
+                tempWordCountMap[word] = result + 1;
+            }
+        };
     return tempWordCountMap;
 }
 
 function publishWordCount(kafka:Producer kafkaProducer, string word, int count) {
     // Publish the message to the topic with the count as the message value and the word as the message key
-    error? result = kafkaProducer->send({ topic: OUTPUT_TOPIC, 'key: word.toBytes(), value: count.toString().toBytes() });
+    error? result = kafkaProducer->send({topic: OUTPUT_TOPIC, 'key: word.toBytes(), value: count.toString().toBytes()});
     if result is error {
         log:printError("Could not send word " + word + " with count " + count.toString() + " to kafka", result);
     }

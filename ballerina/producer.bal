@@ -98,6 +98,27 @@ public client isolated class Producer {
     # + producerRecord - Record to be produced
     # + return - A `kafka:Error` if send action fails to send data or else '()'
     isolated remote function send(AnydataProducerRecord producerRecord) returns Error? {
+        [byte[]?, byte[]] [key, value] = check self.getKeyValuePair(producerRecord);
+        return sendExternal(self, value, producerRecord.topic, getHeaderValueAsByteArrayList(producerRecord?.headers), key,
+                producerRecord?.partition, producerRecord?.timestamp);
+    }
+
+    # Produces the records to the Kafka server and returns the relevant metadata.
+    # ```ballerina
+    # kafka:RecordMetadata metadata = check producer->sendWithMetadata({topic: "kafka-topic", value: "Hello World".toBytes()});
+    # ```
+    #
+    # + producerRecord - Record to be produced
+    # + return - A `kafka:RecordMetadata` containing the metadata of the produced record if send action succeeds or
+    # else a `kafka:Error`
+    isolated remote function sendWithMetadata(AnydataProducerRecord producerRecord) returns RecordMetadata|Error {
+        [byte[]?, byte[]] [key, value] = check self.getKeyValuePair(producerRecord);
+        return sendWithMetadataExternal(self, value, producerRecord.topic,
+                getHeaderValueAsByteArrayList(producerRecord?.headers), key, producerRecord?.partition,
+                producerRecord?.timestamp);
+    }
+
+    private isolated function getKeyValuePair(AnydataProducerRecord producerRecord) returns [byte[]?, byte[]]|Error {
         // Only producing byte[] values is handled at the moment
         anydata anydataValue = producerRecord.value;
         byte[] value = anydataValue.toString().toBytes();
@@ -131,49 +152,9 @@ public client isolated class Producer {
             }
         }
         if !isKeyAvro && !isValueAvro {
-            if anydataValue is byte[] {
-                value = anydataValue;
-            } else if anydataValue is xml {
-                value = anydataValue.toString().toBytes();
-            } else if anydataValue is string {
-                value = anydataValue.toBytes();
-            } else {
-                value = anydataValue.toJsonString().toBytes();
-            }
-            if anydataKey is byte[] {
-                key = anydataKey;
-            } else if anydataKey is xml {
-                key = anydataKey.toString().toBytes();
-            } else if anydataKey is string {
-                key = anydataKey.toBytes();
-            } else if anydataKey !is () {
-                key = anydataKey.toJsonString().toBytes();
-            }
+            value = getByteValue(anydataValue);
+            key = anydataKey is () ? () : getByteValue(anydataKey);
         }
-        return sendByteArrayValues(self, value, producerRecord.topic, self.getHeaderValueAsByteArrayList(producerRecord?.headers), key,
-                producerRecord?.partition, producerRecord?.timestamp, self.keySerializerType);
-    }
-
-    private isolated function getHeaderValueAsByteArrayList(map<byte[]|byte[][]|string|string[]>? headers) returns [string, byte[]][] {
-        [string, byte[]][] bytesHeaderList = [];
-        if headers is map<byte[]|byte[][]|string|string[]> {
-            foreach string key in headers.keys() {
-                byte[]|byte[][]|string|string[] values = headers.get(key);
-                if values is byte[] {
-                    bytesHeaderList.push([key, values]);
-                } else if values is byte[][] {
-                    foreach byte[] headerValue in values {
-                        bytesHeaderList.push([key, headerValue]);
-                    }
-                } else if values is string {
-                    bytesHeaderList.push([key, values.toBytes()]);
-                } else if values is string[] {
-                    foreach string headerValue in values {
-                        bytesHeaderList.push([key, headerValue.toBytes()]);
-                    }
-                }
-            }
-        }
-        return bytesHeaderList;
+        return [key, value];
     }
 }

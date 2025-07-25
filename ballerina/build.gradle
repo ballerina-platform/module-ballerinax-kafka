@@ -17,19 +17,8 @@
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
-buildscript {
-    repositories {
-        maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/plugin-gradle'
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
-    }
-    dependencies {
-        classpath "io.ballerina:plugin-gradle:${project.ballerinaGradlePluginVersion}"
-    }
+plugins {
+    id 'io.ballerina.plugin'
 }
 
 description = 'Ballerina - Kafka Ballerina'
@@ -55,8 +44,6 @@ def stripBallerinaExtensionVersion(String extVersion) {
         return extVersion.replace("${project.ext.snapshotVersion}", "")
     }
 }
-
-apply plugin: 'io.ballerina.plugin'
 
 ballerina {
     module = packageName
@@ -124,16 +111,14 @@ task startKafkaServer() {
                 standardOutput = stdOut
             }
             if (!stdOut.toString().contains("kafka-test")) {
-                println "Starting Kafka server."
+                println "Starting Kafka server and waiting for it to be healthy..."
                 exec {
-                    commandLine 'sh', '-c', "docker compose -f tests/compose.yaml up -d"
+                    commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml up --wait"
                     standardOutput = stdOut
                 }
-                println stdOut.toString()
-                sleep(50 * 1000)
-            } else {
-                println "Kafka server is already running."
             }
+            sleep(50 * 1000)
+            println "Kafka server is ready."
         }
     }
 }
@@ -149,11 +134,10 @@ task stopKafkaServer() {
             if (stdOut.toString().contains("kafka-test")) {
                 println "Stopping Kafka server."
                 exec {
-                    commandLine 'sh', '-c', "docker compose -f tests/compose.yaml rm -svf"
+                    commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml down"
                     standardOutput = stdOut
                 }
                 println stdOut.toString()
-                sleep(5 * 1000)
             } else {
                 println "Kafka server is not started."
             }
@@ -189,6 +173,7 @@ build.dependsOn ":${packageName}-native:build"
 build.dependsOn ":${packageName}-compiler-plugin:build"
 test.dependsOn ":${packageName}-native:build"
 test.dependsOn ":${packageName}-compiler-plugin:build"
+test.finalizedBy stopKafkaServer
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build

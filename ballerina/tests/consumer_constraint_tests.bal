@@ -14,10 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
 import ballerina/constraint;
-import ballerina/log;
 import ballerina/lang.runtime;
+import ballerina/log;
+import ballerina/test;
 
 public type StringConstraintConsumerRecord record {|
     *AnydataConsumerRecord;
@@ -80,8 +80,10 @@ string receivedNumberMinValueConstraintError = "";
 int receivedValidRecordCount = 0;
 int receivedSeekedValidRecordCount = 0;
 
-@test:Config {enable: true}
-function stringMinLengthConstraintConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testStringMinLengthConstraintConsumerRecord() returns error? {
     string topic = "string-min-length-constraint-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage("Short msg", topic);
@@ -104,8 +106,10 @@ function stringMinLengthConstraintConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function stringMaxLengthConstraintConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testStringMaxLengthConstraintConsumerRecord() returns error? {
     string topic = "string-max-length-constraint-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage("This is a long message with a long key", topic, "key-00000000000002");
@@ -128,8 +132,10 @@ function stringMaxLengthConstraintConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function floatMaxValueConstraintPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testFloatMaxValueConstraintPayload() returns error? {
     string topic = "float-max-value-constraint-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(1010.45, topic);
@@ -152,8 +158,10 @@ function floatMaxValueConstraintPayloadTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function arrayMaxLengthConstraintPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testArrayMaxLengthConstraintPayload() returns error? {
     string topic = "array-max-length-constraint-payload-test-topic";
     kafkaTopics.push(topic);
     check sendMessage([1, 2, 3, 4, 5, 6], topic);
@@ -167,17 +175,18 @@ function arrayMaxLengthConstraintPayloadTest() returns error? {
     };
     Consumer consumer = check new (DEFAULT_URL, consumerConfigs);
 
-    NameList[]|error result = consumer->pollPayload(2);
+    NameList[]|error result = consumer->pollPayload(5);
+    test:assertTrue(result is PayloadValidationError);
     if result is PayloadValidationError {
         test:assertEquals(result.message(), validationErrorMessage);
-    } else {
-        test:assertFail("Expected a constraint validation error");
     }
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function arrayMinLengthConstraintPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testArrayMinLengthConstraintPayload() returns error? {
     string topic = "array-min-length-constraint-payload-test-topic";
     kafkaTopics.push(topic);
     check sendMessage([1], topic);
@@ -200,8 +209,10 @@ function arrayMinLengthConstraintPayloadTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function floatMinValueConstraintPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testFloatMinValueConstraintPayload() returns error? {
     string topic = "float-min-value-constraint-consumer-record-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(1.45, topic);
@@ -224,8 +235,10 @@ function floatMinValueConstraintPayloadTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testIntMaxValueConstraintListenerConsumerRecord() returns error? {
     string topic = "int-max-value-constraint-listener-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(1000, topic);
@@ -260,8 +273,10 @@ function intMaxValueConstraintListenerConsumerRecordTest() returns error? {
     test:assertEquals(receivedIntMaxValueConstraintError, validationErrorMessage);
 }
 
-@test:Config {enable: true}
-function intMinValueConstraintListenerConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testIntMinValueConstraintListenerConsumerRecord() returns error? {
     string topic = "int-min-value-constraint-listener-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(8, topic);
@@ -296,8 +311,10 @@ function intMinValueConstraintListenerConsumerRecordTest() returns error? {
     test:assertEquals(receivedIntMinValueConstraintError, validationErrorMessage);
 }
 
-@test:Config {enable: true}
-function numberMaxValueConstraintListenerPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testNumberMaxValueConstraintListenerPayload() returns error? {
     string topic = "number-max-value-constraint-listener-payload-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(1000.456, topic);
@@ -332,8 +349,10 @@ function numberMaxValueConstraintListenerPayloadTest() returns error? {
     test:assertEquals(receivedNumberMaxValueConstraintError, validationErrorMessage);
 }
 
-@test:Config {enable: true}
-function numberMinValueConstraintListenerPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testNumberMinValueConstraintListenerPayload() returns error? {
     string topic = "number-min-value-constraint-listener-payload-test-topic";
     kafkaTopics.push(topic);
     check sendMessage(3.456, topic);
@@ -368,8 +387,10 @@ function numberMinValueConstraintListenerPayloadTest() returns error? {
     test:assertEquals(receivedNumberMinValueConstraintError, validationErrorMessage);
 }
 
-@test:Config {enable: true}
-function validRecordConstraintPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testValidRecordConstraintPayload() returns error? {
     string topic = "valid-record-constraint-listener-payload-test-topic";
     kafkaTopics.push(topic);
     check sendMessage({name: "Phil Dunphy", age: 56}, topic);
@@ -406,8 +427,10 @@ function validRecordConstraintPayloadTest() returns error? {
     test:assertEquals(receivedValidRecordCount, 4);
 }
 
-@test:Config {enable: true}
-function disabledConstraintValidationTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testDisabledConstraintValidation() returns error? {
     string topic = "disabled-constraint-validation-test-topic";
     kafkaTopics.push(topic);
     check sendMessage("This is a long message", topic);
@@ -434,8 +457,10 @@ function disabledConstraintValidationTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function constraintErrorWithSeekConsumerRecordTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testConstraintErrorWithSeekConsumerRecord() returns error? {
     string topic = "constraint-error-with-seek-test-topic";
     kafkaTopics.push(topic);
     check sendMessage("This is a valid message", topic);
@@ -478,8 +503,10 @@ function constraintErrorWithSeekConsumerRecordTest() returns error? {
     check consumer->close();
 }
 
-@test:Config {enable: true}
-function invalidRecordConstraintWithSeekPayloadTest() returns error? {
+@test:Config {
+    groups: ["consumer", "constraint"]
+}
+function testInvalidRecordConstraintWithSeekPayload() returns error? {
     string topic = "invalid-record-constraint-with-seek-listener-test-topic";
     kafkaTopics.push(topic);
     check sendMessage({name: "Phil Dunphy", age: 56}, topic);

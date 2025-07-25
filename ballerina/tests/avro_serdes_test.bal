@@ -24,9 +24,9 @@ final string value = "value-message";
 
 @test:Config {
     enable: true,
-    groups: ["serdes"]
+    groups: ["serdes", "avro"]
 }
-function keyValueSerializationTest() returns error? {
+function testKeyValueSerialization() returns error? {
     string topic = "schema-registry-key-value-test-topic";
     kafkaTopics.push(topic);
     ProducerConfiguration producerConfiguration = {
@@ -66,9 +66,9 @@ function keyValueSerializationTest() returns error? {
 
 @test:Config {
     enable: true,
-    groups: ["serdes"]
+    groups: ["serdes", "avro"]
 }
-function keySerializationTest() returns error? {
+function testKeySerialization() returns error? {
     string topic = "schema-registry-key-test-topic";
     kafkaTopics.push(topic);
     ProducerConfiguration producerConfiguration = {
@@ -104,9 +104,9 @@ function keySerializationTest() returns error? {
 
 @test:Config {
     enable: true,
-    groups: ["serdes"]
+    groups: ["serdes", "avro"]
 }
-function valueSerializationTest() returns error? {
+function testValueSerialization() returns error? {
     string topic = "schema-registry-value-test-topic";
     kafkaTopics.push(topic);
     ProducerConfiguration producerConfiguration = {
@@ -142,9 +142,9 @@ function valueSerializationTest() returns error? {
 
 @test:Config {
     enable: true,
-    groups: ["serdes", "error"]
+    groups: ["serdes", "error", "avro"]
 }
-function valueSerializationErrorTest() returns error? {
+function testValueSerializationError() returns error? {
     string topic = "value-error-test-topic";
     string value = "message";
     kafkaTopics.push(topic);
@@ -168,14 +168,14 @@ function valueSerializationErrorTest() returns error? {
 
 @test:Config {
     enable: true,
-    groups: ["serdes", "error"]
+    groups: ["serdes", "error", "avro"]
 }
-function keySerializationErrorTest() returns error? {
+function testKeySerializationError() returns error? {
     string topic = "value-error-test-topic";
     string value = "message";
     ProducerConfiguration producerConfiguration = {
         keySerializerType: SER_AVRO,
-        keySchema: string `{"namespace": "example.avro.test", "type": "record", "name": "testStudent", 
+        keySchema: string `{"namespace": "example.avro.test", "type": "record", "name": "testStudent",
             "fields": [{"name": "name", "type": "string"}, {"name": "favorite_color", "type": "string"}]}`,
         schemaRegistryConfig: {
             "baseUrl": "http://0.0.0.0:8081"
