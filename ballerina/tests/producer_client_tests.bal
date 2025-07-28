@@ -286,7 +286,7 @@ function testSaslProducer() returns error? {
     Producer kafkaProducer = check new (SASL_URL, producerConfigs);
 
     Error? result = kafkaProducer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
-    test:assertFalse(result is error, result is error ? result.toString() : result.toString());
+    test:assertFalse(result is error);
     check kafkaProducer->close();
 
     ConsumerConfiguration consumerConfiguration = {
