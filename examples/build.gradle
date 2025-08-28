@@ -140,6 +140,7 @@ task stopKafkaServer() {
 
 buildExamples.dependsOn ":${packageName}-ballerina:build"
 testExamples.dependsOn ":${packageName}-ballerina:build"
+startKafkaServer.dependsOn ":${packageName}-ballerina:stopKafkaServer"
 testExamples.dependsOn startKafkaServer
 testExamples.finalizedBy stopKafkaServer
 
