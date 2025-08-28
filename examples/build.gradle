@@ -140,6 +140,8 @@ task stopKafkaServer() {
 
 buildExamples.dependsOn ":${packageName}-ballerina:build"
 testExamples.dependsOn ":${packageName}-ballerina:build"
+// Ensure kafka-examples startKafkaServer runs after kafka-ballerina stopKafkaServer
+startKafkaServer.dependsOn ":${packageName}-ballerina:stopKafkaServer"
 testExamples.dependsOn startKafkaServer
 testExamples.finalizedBy stopKafkaServer
 

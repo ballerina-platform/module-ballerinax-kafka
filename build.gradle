@@ -122,4 +122,13 @@ task build {
     dependsOn(':kafka-compiler-plugin:build')
     dependsOn(':kafka-native:build')
     dependsOn(':kafka-ballerina:build')
+    dependsOn(':kafka-examples:build')
 }
+
+task test {
+    dependsOn(':kafka-ballerina:test')
+    dependsOn(':kafka-examples:test')
+}
+
+// Ensure examples test runs after ballerina test
+project(':kafka-examples').test.mustRunAfter(project(':kafka-ballerina').test)
