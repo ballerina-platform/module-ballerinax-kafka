@@ -309,24 +309,12 @@ public class KafkaUtils {
                 try {
                     certValue = readPasswordValueFromFile(certFile.getValue());
                 } catch (IOException e) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(e.getMessage());
-                    Throwable cause = e.getCause();
-                    if (Objects.nonNull(cause)) {
-                        sb.append(" : ").append(cause.getMessage());
-                    }
-                    throw createKafkaError("Error reading certificate file : " + sb);
+                    throw createKafkaError("Error reading certificate file : " + e.getMessage());
                 }
                 try {
                     keyValue = readPasswordValueFromFile(keyFile.getValue());
                 } catch (IOException e) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(e.getMessage());
-                    Throwable cause = e.getCause();
-                    if (Objects.nonNull(cause)) {
-                        sb.append(" : ").append(cause.getMessage());
-                    }
-                    throw createKafkaError("Error reading private key file : " + sb);
+                    throw createKafkaError("Error reading private key file : " + e.getMessage());
                 }
                 configParams.setProperty(SslConfigs.SSL_KEYSTORE_KEY_CONFIG, keyValue);
                 configParams.setProperty(SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG, certValue);
