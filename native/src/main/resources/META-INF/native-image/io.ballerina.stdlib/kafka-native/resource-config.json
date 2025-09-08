@@ -2,10 +2,7 @@
   "resources": {
     "includes": [
       {
-        "pattern": "\\Qkafka/kafka-version.properties\\E",
-        "condition": {
-          "typeReachable": "org.apache.kafka.common.utils.AppInfoParser"
-        }
+        "pattern": "\\Qkafka/kafka-version.properties\\E"
       }
     ]
   },
@@ -15,9 +12,6 @@
       "classNames": [
         "sun.security.util.Resources"
       ]
-    },
-    {
-      "name": "sun.security.util.resources.security"
     }
   ]
 }
