@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Fixed
+- [Ballerina Kafka connector crashes with a NPE when consuming messages with `null` header values](https://github.com/ballerina-platform/ballerina-library/issues/8215)
+
+## [4.6.0] - 2025-06-26
+
 ### Added
 
 - [Add support for seeking to a specific timestamp in a topic partition](https://github.com/ballerina-platform/ballerina-library/issues/8113)
