@@ -2,11 +2,93 @@
   "resources": {
     "includes": [
       {
+        "pattern": "\\QMETA-INF/axiom.xml\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/io.ballerina.runtime.observability.metrics.spi.MetricProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/io.opentelemetry.context.ContextStorageProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.util.spi.ResourceBundleControlProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.security.auth.spi.LoginModule\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.xml.parsers.DocumentBuilderFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.xml.stream.XMLInputFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.xml.stream.XMLOutputFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.apache.avro.Conversion\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.apache.avro.LogicalTypes$LogicalTypeFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.apache.commons.logging.LogFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+      },
+      {
+        "pattern": "\\Qcommons-logging.properties\\E"
+      },
+      {
         "pattern": "\\Qkafka/kafka-version.properties\\E"
+      },
+      {
+        "pattern": "\\Qlogging.properties\\E"
+      },
+      {
+        "pattern": "\\Qorg/quartz/core/quartz-build.properties\\E"
+      },
+      {
+        "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
+      },
+      {
+        "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfkc.nrm\\E"
+      },
+      {
+        "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/uprops.icu\\E"
+      },
+      {
+        "pattern": "java.base:\\Qsun/net/idn/uidna.spp\\E"
+      },
+      {
+        "pattern": "jdk.jfr:\\Qjdk/jfr/internal/query/view.ini\\E"
       }
     ]
   },
   "bundles": [
+    {
+      "name": "MessagesBundle",
+      "locales": [
+        "",
+        "en-US"
+      ]
+    },
     {
       "name": "sun.security.util.Resources",
       "classNames": [
