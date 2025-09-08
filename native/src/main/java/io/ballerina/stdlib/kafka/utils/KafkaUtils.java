@@ -624,8 +624,12 @@ public class KafkaUtils {
         if (appropriateType instanceof ArrayType arrayType) {
             handleHeaderValuesWithArrayType(key, list, arrayType, bHeaderMap);
         } else if (appropriateType.getTag() == STRING_TAG) {
-            bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(new String(list.get(0),
-                    StandardCharsets.UTF_8)));
+            byte[] value = list.getFirst();
+            if (value == null) {
+                return;
+            }
+            bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(
+                    new String(value, StandardCharsets.UTF_8)));
         }
     }
 
@@ -634,18 +638,35 @@ public class KafkaUtils {
         Type elementType = arrayType.getElementType();
         if (elementType.getTag() == ARRAY_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
+            if (list == null) {
+                return;
+            }
             for (int i = 0; i < list.size(); i++) {
-                valueArray.add(i, ValueCreator.createArrayValue(list.get(i)));
+                byte[] value = list.get(i);
+                if (value == null) {
+                    continue;
+                }
+                valueArray.add(i, ValueCreator.createArrayValue(value));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
         } else if (elementType.getTag() == STRING_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
+            if (list == null) {
+                return;
+            }
             for (int i = 0; i < list.size(); i++) {
-                valueArray.add(i, StringUtils.fromString(new String(list.get(i), StandardCharsets.UTF_8)));
+                byte[] value = list.get(i);
+                if (value == null) {
+                    continue;
+                }
+                valueArray.add(i, StringUtils.fromString(new String(value, StandardCharsets.UTF_8)));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
         } else if (elementType.getTag() == BYTE_TAG) {
-            bHeaderMap.put(StringUtils.fromString(key), ValueCreator.createArrayValue(list.get(0)));
+            byte[] value = list.getFirst();
+            if (value != null) {
+                bHeaderMap.put(StringUtils.fromString(key), ValueCreator.createArrayValue(value));
+            }
         }
     }
 
