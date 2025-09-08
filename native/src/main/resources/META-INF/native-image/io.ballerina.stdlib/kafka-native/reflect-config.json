@@ -1,237 +1,9 @@
 [
   {
-    "name": "apple.security.AppleProvider",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.Metadata",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.Rule",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.RuleKind",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.RuleMode",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.RuleSet",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.SchemaEntity",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.SchemaEntity$EntityType",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.SchemaString",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setSchemaString",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.SchemaTags",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.SchemaTypeConverter",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.requests.RegisterSchemaRequest",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true,
-    "methods": [
-      {
-        "name": "getId",
-        "parameterTypes": []
-      },
-      {
-        "name": "getMetadata",
-        "parameterTypes": []
-      },
-      {
-        "name": "getReferences",
-        "parameterTypes": []
-      },
-      {
-        "name": "getRuleSet",
-        "parameterTypes": []
-      },
-      {
-        "name": "getSchema",
-        "parameterTypes": []
-      },
-      {
-        "name": "getSchemaTagsToAdd",
-        "parameterTypes": []
-      },
-      {
-        "name": "getSchemaTagsToRemove",
-        "parameterTypes": []
-      },
-      {
-        "name": "getSchemaType",
-        "parameterTypes": []
-      },
-      {
-        "name": "getVersion",
-        "parameterTypes": []
-      },
-      {
-        "name": "isPropagateSchemaTags",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.confluent.kafka.schemaregistry.client.rest.entities.requests.RegisterSchemaResponse",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setId",
-        "parameterTypes": [
-          "int"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.security.AccessControlContext"
-  },
-  {
-    "name": "java.security.AccessController",
-    "methods": [
-      {
-        "name": "doPrivileged",
-        "parameterTypes": [
-          "java.security.PrivilegedAction"
-        ]
-      },
-      {
-        "name": "getContext",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.security.AlgorithmParametersSpi"
-  },
-  {
-    "name": "java.security.KeyStoreSpi"
-  },
-  {
-    "name": "java.security.SecureRandomParameters"
-  },
-  {
-    "name": "java.security.interfaces.RSAPrivateKey"
-  },
-  {
-    "name": "java.security.interfaces.RSAPublicKey"
-  },
-  {
-    "name": "javax.security.auth.Subject",
-    "methods": [
-      {
-        "name": "callAs",
-        "parameterTypes": [
-          "javax.security.auth.Subject",
-          "java.util.concurrent.Callable"
-        ]
-      },
-      {
-        "name": "current",
-        "parameterTypes": []
-      },
-      {
-        "name": "doAs",
-        "parameterTypes": [
-          "javax.security.auth.Subject",
-          "java.security.PrivilegedExceptionAction"
-        ]
-      },
-      {
-        "name": "getSubject",
-        "parameterTypes": [
-          "java.security.AccessControlContext"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "javax.security.auth.x500.X500Principal",
-    "fields": [
-      {
-        "name": "thisX500Name"
-      }
-    ],
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "sun.security.x509.X500Name"
-        ]
-      }
-    ]
-  },
-  {
     "name": "org.apache.kafka.clients.consumer.CooperativeStickyAssignor",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.ConsumerPartitionAssignor"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -241,6 +13,57 @@
   },
   {
     "name": "org.apache.kafka.clients.consumer.RangeAssignor",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.ConsumerPartitionAssignor"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.clients.consumer.RoundRobinAssignor",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.ConsumerPartitionAssignor"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.clients.consumer.StickyAssignor",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.ConsumerPartitionAssignor"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.clients.producer.RoundRobinPartitioner",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.metrics.JmxReporter",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.utils.Utils"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -250,6 +73,9 @@
   },
   {
     "name": "org.apache.kafka.common.security.authenticator.AbstractLogin$DefaultLoginCallbackHandler",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.security.authenticator.LoginManager"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -259,6 +85,9 @@
   },
   {
     "name": "org.apache.kafka.common.security.authenticator.DefaultLogin",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.security.authenticator.LoginManager"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -268,6 +97,9 @@
   },
   {
     "name": "org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.network.SaslChannelBuilder"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -277,15 +109,9 @@
   },
   {
     "name": "org.apache.kafka.common.security.plain.PlainLoginModule",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "org.apache.kafka.common.security.scram.ScramLoginModule",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.security.authenticator.AbstractLogin"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -295,6 +121,37 @@
   },
   {
     "name": "org.apache.kafka.common.security.scram.internals.ScramSaslClient$ScramSaslClientFactory",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.security.scram.internals.ScramSaslClientProvider"
+    },
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.apache.kafka.common.security.scram.ScramLoginModule",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.security.authenticator.AbstractLogin"
+    },
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.BooleanDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.BooleanSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -304,6 +161,9 @@
   },
   {
     "name": "org.apache.kafka.common.serialization.ByteArrayDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -313,6 +173,429 @@
   },
   {
     "name": "org.apache.kafka.common.serialization.ByteArraySerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ByteBufferDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ByteBufferSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.BytesDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.BytesSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.DoubleDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.DoubleSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.FloatDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.FloatSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.IntegerDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.IntegerSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ListDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ListSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.LongDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.LongSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$BooleanSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListDeserializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$BooleanSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$ByteArraySerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$ByteBufferSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$BytesSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$DoubleSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$FloatSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$IntegerSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$LongSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$ShortSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$StringSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$UUIDSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.Serdes$VoidSerde",
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.serialization.ListSerializer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ShortDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.ShortSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.StringDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.StringSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.UUIDDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.UUIDSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.VoidDeserializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.consumer.KafkaConsumer"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.serialization.VoidSerializer",
+    "condition": {
+      "typeReachable": "org.apache.kafka.clients.producer.KafkaProducer"
+    },
     "methods": [
       {
         "name": "<init>",
@@ -322,391 +605,16 @@
   },
   {
     "name": "org.apache.kafka.common.utils.AppInfoParser$AppInfo",
-    "queryAllPublicConstructors": true
+    "queryAllPublicConstructors": true,
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.utils.AppInfoParser"
+    }
   },
   {
     "name": "org.apache.kafka.common.utils.AppInfoParser$AppInfoMBean",
-    "queryAllPublicMethods": true
-  },
-  {
-    "name": "org.apache.kafka.shaded.com.google.protobuf.ExtensionRegistry",
-    "methods": [
-      {
-        "name": "getEmptyRegistry",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.pkcs12.PKCS12KeyStore",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.ConfigFile",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.DSA$SHA224withDSA",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.DSA$SHA256withDSA",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.DSAKeyFactory",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.JavaKeyStore$DualFormatJKS",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.JavaKeyStore$JKS",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.NativePRNG",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.security.SecureRandomParameters"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.SHA",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.SHA2$SHA224",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.SHA2$SHA256",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.SHA5$SHA384",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.SHA5$SHA512",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.X509Factory",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.certpath.PKIXCertPathValidator",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.rsa.PSSParameters",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.rsa.RSAKeyFactory$Legacy",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.rsa.RSAPSSSignature",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.rsa.RSASignature$SHA224withRSA",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.rsa.RSASignature$SHA256withRSA",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.ssl.KeyManagerFactoryImpl$SunX509",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.ssl.SSLContextImpl$TLSContext",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.util.ObjectIdentifier"
-  },
-  {
-    "name": "sun.security.x509.AuthorityInfoAccessExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.AuthorityKeyIdentifierExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.BasicConstraintsExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.CRLDistributionPointsExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.CertificateExtensions"
-  },
-  {
-    "name": "sun.security.x509.CertificatePoliciesExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.ExtendedKeyUsageExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.IssuerAlternativeNameExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.KeyUsageExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.NetscapeCertTypeExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.PrivateKeyUsageExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.SubjectAlternativeNameExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.x509.SubjectKeyIdentifierExtension",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.Boolean",
-          "java.lang.Object"
-        ]
-      }
-    ]
+    "queryAllPublicMethods": true,
+    "condition": {
+      "typeReachable": "org.apache.kafka.common.utils.AppInfoParser"
+    }
   }
 ]
