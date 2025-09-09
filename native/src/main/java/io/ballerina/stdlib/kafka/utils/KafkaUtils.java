@@ -625,7 +625,8 @@ public class KafkaUtils {
             handleHeaderValuesWithArrayType(key, list, arrayType, bHeaderMap);
         } else if (appropriateType.getTag() == STRING_TAG) {
             byte[] value = list.getFirst();
-            if (value == null) {
+            if (Objects.isNull(value)) {
+                bHeaderMap.put(StringUtils.fromString(key), null);
                 return;
             }
             bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(
@@ -638,12 +639,15 @@ public class KafkaUtils {
         Type elementType = arrayType.getElementType();
         if (elementType.getTag() == ARRAY_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
-            if (list == null) {
+            if (Objects.isNull(list)) {
+                bHeaderMap.put(StringUtils.fromString(key), null);
                 return;
             }
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
-                if (value == null) {
+                if (Objects.isNull(value)) {
+                    // todo: identify how to do this
+                    valueArray.append(null);
                     continue;
                 }
                 valueArray.add(i, ValueCreator.createArrayValue(value));
@@ -651,12 +655,15 @@ public class KafkaUtils {
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
         } else if (elementType.getTag() == STRING_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
-            if (list == null) {
+            if (Objects.isNull(list)) {
+                bHeaderMap.put(StringUtils.fromString(key), null);
                 return;
             }
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
-                if (value == null) {
+                if (Objects.isNull(value)) {
+                    // todo: identify how to do this
+                    valueArray.append(null);
                     continue;
                 }
                 valueArray.add(i, StringUtils.fromString(new String(value, StandardCharsets.UTF_8)));
@@ -664,9 +671,11 @@ public class KafkaUtils {
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
         } else if (elementType.getTag() == BYTE_TAG) {
             byte[] value = list.getFirst();
-            if (value != null) {
-                bHeaderMap.put(StringUtils.fromString(key), ValueCreator.createArrayValue(value));
+            if (Objects.isNull(value)) {
+                bHeaderMap.put(StringUtils.fromString(key), null);
+                return;
             }
+            bHeaderMap.put(StringUtils.fromString(key), ValueCreator.createArrayValue(value));
         }
     }
 
