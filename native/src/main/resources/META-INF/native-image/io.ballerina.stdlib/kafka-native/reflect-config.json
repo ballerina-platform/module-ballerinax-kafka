@@ -98,39 +98,6 @@
     ]
   },
   {
-    "name": "java.security.AccessControlContext"
-  },
-  {
-    "name": "java.security.AccessController",
-    "methods": [
-      {
-        "name": "doPrivileged",
-        "parameterTypes": [
-          "java.security.PrivilegedAction"
-        ]
-      },
-      {
-        "name": "getContext",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.security.AlgorithmParametersSpi"
-  },
-  {
-    "name": "java.security.KeyStoreSpi"
-  },
-  {
-    "name": "java.security.SecureRandomParameters"
-  },
-  {
-    "name": "java.security.interfaces.RSAPrivateKey"
-  },
-  {
-    "name": "java.security.interfaces.RSAPublicKey"
-  },
-  {
     "name": "javax.security.auth.Subject",
     "methods": [
       {
