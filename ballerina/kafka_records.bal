@@ -198,6 +198,9 @@ public type TopicPartition record {|
     int partition;
 |};
 
+type ByteHeaderValue byte[]|byte[][];
+type AnydataHeaderValue ByteHeaderValue|string|string[];
+
 # Type related to anydata consumer record.
 #
 # + key - Key that is included in the record
@@ -210,7 +213,7 @@ public type AnydataConsumerRecord record {|
     anydata value;
     int timestamp;
     PartitionOffset offset;
-    map<byte[]|byte[][]|string|string[]> headers;
+    map<AnydataHeaderValue?> headers;
 |};
 
 # Subtype related to `kafka:AnydataConsumerRecord` record.
@@ -220,7 +223,7 @@ public type AnydataConsumerRecord record {|
 public type BytesConsumerRecord record {|
     *AnydataConsumerRecord;
     byte[] value;
-    map<byte[]|byte[][]> headers;
+    map<ByteHeaderValue?> headers;
 |};
 
 # Details related to the anydata producer record.
