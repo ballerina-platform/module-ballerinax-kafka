@@ -457,6 +457,9 @@ public type ConsumerConfiguration record {|
 * A `kafka:AnydataConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
 
 ```ballerina
+type ByteHeaderValue byte[]|byte[][];
+type AnydataHeaderValue ByteHeaderValue|string|string[];
+
 public type AnydataConsumerRecord record {|
     # Key that is included in the record
     anydata key?;
@@ -467,7 +470,7 @@ public type AnydataConsumerRecord record {|
     # Topic partition position in which the consumed record is stored
     PartitionOffset offset;
     # Map of headers included with the record
-    map<byte[]|byte[][]> headers;
+    map<AnydataHeaderValue?> headers;
 |};
 ```
 
@@ -478,6 +481,8 @@ public type BytesConsumerRecord record {|
     *AnydataConsumerRecord;
     // Record content in bytes
     byte[] value;
+    // Headers as a byte[] or byte[][] or nil
+    map<ByteHeaderValue?> headers;
 |};
 ```
 
