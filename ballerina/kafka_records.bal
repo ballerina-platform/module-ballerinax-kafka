@@ -219,7 +219,7 @@ public type AnydataConsumerRecord record {|
 # Subtype related to `kafka:AnydataConsumerRecord` record.
 #
 # + value - Record content in bytes
-# + headers - Headers as a byte[] or byte[][]
+# + headers - Headers as a byte[] or byte[][] or nil
 public type BytesConsumerRecord record {|
     *AnydataConsumerRecord;
     byte[] value;
