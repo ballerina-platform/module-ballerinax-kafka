@@ -30,7 +30,7 @@ string detachMsg1 = "";
 string detachMsg2 = "";
 string incorrectEndpointMsg = "";
 string receivedTimeoutConfigValue = "";
-map<ByteHeaderValue?> receivedHeaders = {};
+map<byte[]|byte[][]|()?> receivedHeaders = {};
 
 int receivedMsgCount = 0;
 
