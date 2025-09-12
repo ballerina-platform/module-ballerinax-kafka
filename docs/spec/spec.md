@@ -1,9 +1,9 @@
 # Specification: Ballerina Kafka Library
 
-_Authors_: @shafreenAnfar @dilanSachi @aashikam @ThisaruGuruge \
+_Authors_: @shafreenAnfar @dilanSachi @aashikam @ThisaruGuruge @ayeshLK \
 _Reviewers_: @shafreenAnfar @aashikam \
 _Created_: 2020/10/28 \
-_Updated_: 2025/07/22 \
+_Updated_: 2025/09/12 \
 _Edition_: Swan Lake  
 
 ## Introduction
@@ -457,9 +457,6 @@ public type ConsumerConfiguration record {|
 * A `kafka:AnydataConsumerRecord` corresponds to a message and other metadata that is received from the Kafka server.
 
 ```ballerina
-type ByteHeaderValue byte[]|byte[][];
-type AnydataHeaderValue ByteHeaderValue|string|string[];
-
 public type AnydataConsumerRecord record {|
     # Key that is included in the record
     anydata key?;
@@ -470,7 +467,7 @@ public type AnydataConsumerRecord record {|
     # Topic partition position in which the consumed record is stored
     PartitionOffset offset;
     # Map of headers included with the record
-    map<AnydataHeaderValue?> headers;
+    map<byte[]|byte[][]|string|string[]|()> headers;
 |};
 ```
 
@@ -482,7 +479,7 @@ public type BytesConsumerRecord record {|
     // Record content in bytes
     byte[] value;
     // Headers as a byte[] or byte[][] or nil
-    map<ByteHeaderValue?> headers;
+    map<byte[]|byte[][]|()> headers;
 |};
 ```
 
