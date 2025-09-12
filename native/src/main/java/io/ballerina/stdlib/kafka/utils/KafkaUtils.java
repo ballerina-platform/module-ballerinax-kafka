@@ -580,8 +580,13 @@ public class KafkaUtils {
         BMap<BString, Object> topicPartition = ValueCreator.createRecordValue(getTopicPartitionRecord(), record.topic(),
                 (long) record.partition());
         MapType headerType = (MapType) getReferredType(fieldMap.get(KAFKA_RECORD_HEADERS.getValue()).getFieldType());
-        BMap bHeaders = getBHeadersFromConsumerRecord(record.headers(), headerType.getConstrainedType());
-        BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);
+        BMap bHeaders;
+        try {
+            bHeaders = getBHeadersFromConsumerRecord(record.headers(), headerType.getConstrainedType());
+        } catch (BError e) {
+            throw createPayloadBindingError(e, record, autoSeek);
+        }
+        BMap<BString, Object> consumerRecord = ValueCreator.createRecordValue(recordType);;
         consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_KEY), key);
         consumerRecord.put(StringUtils.fromString(KAFKA_RECORD_VALUE), value);
         consumerRecord.put(KAFKA_RECORD_TIMESTAMP, record.timestamp());
@@ -614,7 +619,7 @@ public class KafkaUtils {
                 boolean nilable = headerType.isNilable();
                 handleSupportedTypesForHeaders(key, valueList, appropriateType, bHeaderMap, nilable);
             } else {
-                // Setting nilable as false as nilable type would come in as a union type
+                // Setting nilable as `false` as nilable type would come in as a union type
                 handleSupportedTypesForHeaders(key, valueList, headerType, bHeaderMap, false);
             }
         });
@@ -683,7 +688,7 @@ public class KafkaUtils {
             if (isNilable) {
                 return true;
             }
-            throw new RuntimeException("Passing a null value for a non-nilable field");
+            throw createKafkaError("Header value is nil, but the expected header value type does not allow nil values");
         }
         return false;
     }
