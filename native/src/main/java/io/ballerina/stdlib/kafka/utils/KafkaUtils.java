@@ -611,21 +611,23 @@ public class KafkaUtils {
             if (headerType instanceof UnionType unionType) {
                 Type appropriateType = getMostAppropriateTypeFromUnionType(unionType.getMemberTypes(),
                         valueList.size());
-                handleSupportedTypesForHeaders(key, valueList, appropriateType, bHeaderMap);
+                boolean nilable = headerType.isNilable();
+                handleSupportedTypesForHeaders(key, valueList, appropriateType, bHeaderMap, nilable);
             } else {
-                handleSupportedTypesForHeaders(key, valueList, headerType, bHeaderMap);
+                // Setting nilable as false as nilable type would come in as a union type
+                handleSupportedTypesForHeaders(key, valueList, headerType, bHeaderMap, false);
             }
         });
         return bHeaderMap;
     }
 
     private static void handleSupportedTypesForHeaders(String key, ArrayList<byte[]> list, Type appropriateType,
-                                                       BMap bHeaderMap) {
+                                                       BMap bHeaderMap, boolean nilable) {
         if (appropriateType instanceof ArrayType arrayType) {
-            handleHeaderValuesWithArrayType(key, list, arrayType, bHeaderMap);
+            handleHeaderValuesWithArrayType(key, list, arrayType, bHeaderMap, nilable);
         } else if (appropriateType.getTag() == STRING_TAG) {
             byte[] value = list.getFirst();
-            if (Objects.isNull(value)) {
+            if (isNilValue(value, nilable)) {
                 bHeaderMap.put(StringUtils.fromString(key), null);
                 return;
             }
@@ -635,18 +637,16 @@ public class KafkaUtils {
     }
 
     private static void handleHeaderValuesWithArrayType(String key, ArrayList<byte[]> list, ArrayType arrayType,
-                                                        BMap bHeaderMap) {
+                                                        BMap bHeaderMap, boolean nilable) {
         Type elementType = arrayType.getElementType();
         if (elementType.getTag() == ARRAY_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
-            if (Objects.isNull(list)) {
+            if (isNilValue(list, nilable)) {
                 bHeaderMap.put(StringUtils.fromString(key), null);
-                return;
             }
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
-                if (Objects.isNull(value)) {
-                    // todo: identify how to do this
+                if (isNilValue(value, nilable)) {
                     valueArray.append(null);
                     continue;
                 }
@@ -655,14 +655,13 @@ public class KafkaUtils {
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
         } else if (elementType.getTag() == STRING_TAG) {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
-            if (Objects.isNull(list)) {
+            if (isNilValue(list, nilable)) {
                 bHeaderMap.put(StringUtils.fromString(key), null);
                 return;
             }
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
-                if (Objects.isNull(value)) {
-                    // todo: identify how to do this
+                if (isNilValue(value, nilable)) {
                     valueArray.append(null);
                     continue;
                 }
@@ -671,12 +670,22 @@ public class KafkaUtils {
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
         } else if (elementType.getTag() == BYTE_TAG) {
             byte[] value = list.getFirst();
-            if (Objects.isNull(value)) {
+            if (isNilValue(value, nilable)) {
                 bHeaderMap.put(StringUtils.fromString(key), null);
                 return;
             }
             bHeaderMap.put(StringUtils.fromString(key), ValueCreator.createArrayValue(value));
         }
+    }
+
+    private static boolean isNilValue(Object value, boolean isNilable) {
+        if (Objects.isNull(value)) {
+            if (isNilable) {
+                return true;
+            }
+            throw new RuntimeException("Passing a null value for a non-nilable field");
+        }
+        return false;
     }
 
     private static Type getMostAppropriateTypeFromUnionType(List<Type> memberTypes, int size) {
