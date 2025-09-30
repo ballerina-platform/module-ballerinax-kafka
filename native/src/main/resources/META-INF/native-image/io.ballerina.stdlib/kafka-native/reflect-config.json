@@ -98,6 +98,35 @@
     ]
   },
   {
+    "name": "javax.security.auth.Subject",
+    "methods": [
+      {
+        "name": "callAs",
+        "parameterTypes": [
+          "javax.security.auth.Subject",
+          "java.util.concurrent.Callable"
+        ]
+      },
+      {
+        "name": "current",
+        "parameterTypes": []
+      },
+      {
+        "name": "doAs",
+        "parameterTypes": [
+          "javax.security.auth.Subject",
+          "java.security.PrivilegedExceptionAction"
+        ]
+      },
+      {
+        "name": "getSubject",
+        "parameterTypes": [
+          "java.security.AccessControlContext"
+        ]
+      }
+    ]
+  },
+  {
     "name": "sun.security.provider.ConfigFile",
     "methods": [
       {
