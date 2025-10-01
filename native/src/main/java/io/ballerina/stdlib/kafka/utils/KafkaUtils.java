@@ -624,18 +624,17 @@ public class KafkaUtils {
         if (appropriateType instanceof ArrayType arrayType) {
             handleHeaderValuesWithArrayType(key, list, arrayType, bHeaderMap);
         } else if (appropriateType.getTag() == STRING_TAG) {
-            byte[] value = list.get(0);
-            if (Objects.isNull(value)) {
+            if (Objects.isNull(list) || list.isEmpty() || Objects.isNull(list.getFirst())) {
                 return;
             }
-            bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(new String(value,
+            bHeaderMap.put(StringUtils.fromString(key), StringUtils.fromString(new String(list.getFirst(),
                     StandardCharsets.UTF_8)));
         }
     }
 
     private static void handleHeaderValuesWithArrayType(String key, ArrayList<byte[]> list, ArrayType arrayType,
                                                         BMap bHeaderMap) {
-        if (Objects.isNull(list)) {
+        if (Objects.isNull(list) || list.isEmpty()) {
             return;
         }
         Type elementType = arrayType.getElementType();
@@ -643,9 +642,6 @@ public class KafkaUtils {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
-                if (Objects.isNull(value)) {
-                    continue;
-                }
                 valueArray.add(i, ValueCreator.createArrayValue(value));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
@@ -653,9 +649,6 @@ public class KafkaUtils {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
-                if (Objects.isNull(value)) {
-                    continue;
-                }
                 valueArray.add(i, StringUtils.fromString(new String(value, StandardCharsets.UTF_8)));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
