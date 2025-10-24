@@ -597,13 +597,24 @@ public class KafkaUtils {
     private static BMap getBHeadersFromConsumerRecord(Headers headers, Type headerType) {
         HashMap<String, ArrayList<byte[]>> headerMap = new HashMap<>();
         for (Header header : headers) {
-            if (headerMap.containsKey(header.key())) {
-                ArrayList<byte[]> headerList = headerMap.get(header.key());
+            String key;
+            try {
+                key = header.key();
+            } catch (NullPointerException e) {
+                // Skip headers with null key buffer - this can happen with malformed headers
+                continue;
+            }
+            if (key == null) {
+                // Skip headers with null keys
+                continue;
+            }
+            if (headerMap.containsKey(key)) {
+                ArrayList<byte[]> headerList = headerMap.get(key);
                 headerList.add(header.value());
             } else {
-                ArrayList headerList = new ArrayList<byte[]>();
+                ArrayList<byte[]> headerList = new ArrayList<>();
                 headerList.add(header.value());
-                headerMap.put(header.key(), headerList);
+                headerMap.put(key, headerList);
             }
         }
         BMap bHeaderMap = ValueCreator.createMapValue();
