@@ -131,6 +131,10 @@ public class KafkaListenerImpl implements KafkaListener {
             } catch (BError bError) {
                 consumer.notifyFailure(bError);
                 onError(bError);
+            } catch (Throwable t) {
+                BError error = createKafkaError(t.getMessage(), t);
+                consumer.notifyFailure(error);
+                onError(t);
             }
         });
     }
