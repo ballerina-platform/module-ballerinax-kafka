@@ -53,7 +53,7 @@ function testConsumerConnectionTimeout() returns error? {
     Consumer consumer = consumerResult;
 
     // Error should occur during first poll
-    ConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
+    AnydataConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
 
     if pollResult is Error {
         string errorMsg = pollResult.message();
@@ -87,7 +87,7 @@ function testConsumerInvalidHostname() returns error? {
     Consumer consumer = consumerResult;
 
     // Error should occur during first poll
-    ConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
+    AnydataConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
 
     if pollResult is Error {
         string errorMsg = pollResult.message();
@@ -128,7 +128,7 @@ function testConsumerSaslAuthenticationFailure() returns error? {
     Consumer consumer = consumerResult;
 
     // Error should occur during first poll
-    ConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
+    AnydataConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
 
     if pollResult is Error {
         string errorMsg = pollResult.message();
@@ -172,7 +172,7 @@ function testConsumerSslCertificateError() returns error? {
     Consumer consumer = consumerResult;
 
     // Error should occur during first poll
-    ConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
+    AnydataConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
 
     if pollResult is Error {
         string errorMsg = pollResult.message();
@@ -351,7 +351,7 @@ function testListenerSaslAuthenticationError() returns error? {
 
 // Test service for listener tests
 Service testService = service object {
-    remote function onConsumerRecord(Caller caller, ConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(Caller caller, AnydataConsumerRecord[] records) returns error? {
         // No-op service for testing
     }
 };
