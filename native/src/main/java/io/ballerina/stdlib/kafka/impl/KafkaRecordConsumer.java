@@ -21,6 +21,7 @@ package io.ballerina.stdlib.kafka.impl;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.stdlib.kafka.api.KafkaListener;
 import io.ballerina.stdlib.kafka.utils.KafkaConstants;
+import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -73,6 +74,8 @@ public class KafkaRecordConsumer {
         }
         List<String> topics = (List<String>) configParams.get(KafkaConstants.ALIAS_TOPICS.getValue());
         // Subscribe Kafka Consumer to given topics.
+        // Note: This is where the connection to brokers is actually established
+        // SSL/TLS handshake and SASL authentication will occur here
         this.kafkaConsumer.subscribe(topics);
         this.kafkaListener = kafkaListener;
         if (configParams.get(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue()) != null) {
@@ -105,7 +108,11 @@ public class KafkaRecordConsumer {
             }
             processRetrievedRecords(recordsRetrieved);
         } catch (KafkaException | IllegalStateException | IllegalArgumentException e) {
-            this.kafkaListener.onError(e);
+            // Log detailed error information for diagnostics
+            String detailedError = KafkaUtils.getDetailedErrorMessage(e);
+            logger.error("Kafka service {} consumer {} encountered error while polling: {}",
+                        this.serviceId, this.consumerId, detailedError, e);
+            this.kafkaListener.onError(new KafkaException("Failed to poll from Kafka: " + detailedError, e));
             // When un-recoverable exception is thrown we stop scheduling task to the executor.
             // Later at stopConsume() on KafkaRecordConsumer we close the consumer.
             this.pollTaskFuture.cancel(false);

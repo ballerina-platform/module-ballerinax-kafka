@@ -1016,6 +1016,169 @@ public class KafkaUtils {
         return clientId;
     }
 
+    /**
+     * Extracts detailed error message from exceptions during Kafka operations.
+     * Provides specific guidance for SSL, authentication, and connection errors.
+     * Uses exception type checking for robust error detection.
+     *
+     * @param e The caught exception.
+     * @return Detailed error message with cause information and troubleshooting guidance.
+     */
+    public static String getDetailedErrorMessage(Exception e) {
+        Throwable cause = e.getCause() != null ? e.getCause() : e;
+        String message = cause.getMessage() != null ? cause.getMessage() : e.getMessage();
+        String causeClassName = cause.getClass().getName();
+
+        // Check exception types from most specific to most general
+
+        // SSL/TLS Exceptions
+        if (isSSLException(cause)) {
+            return message + ". SSL/TLS error occurred. Please verify: " +
+                   "1) Certificate paths are correct, " +
+                   "2) Truststore/keystore are accessible and valid, " +
+                   "3) Certificates are not expired, " +
+                   "4) SSL protocol versions match broker configuration.";
+        }
+
+        // SASL Authentication Exceptions
+        if (isSaslAuthenticationException(cause)) {
+            return message + ". SASL authentication error occurred. Please verify: " +
+                   "1) Username and password are correct, " +
+                   "2) Authentication mechanism (PLAIN, SCRAM-SHA-256, SCRAM-SHA-512) matches broker configuration, " +
+                   "3) User has necessary permissions on the broker.";
+        }
+
+        // Kafka Authorization Exceptions
+        if (isAuthorizationException(cause, causeClassName)) {
+            return message + ". Authorization error occurred. Please verify: " +
+                   "1) User has appropriate permissions on the topic, " +
+                   "2) ACLs are correctly configured on the broker, " +
+                   "3) User is authorized for the requested operation.";
+        }
+
+        // Timeout Exceptions
+        if (isTimeoutException(cause)) {
+            return message + ". Connection timeout occurred. Please verify: " +
+                   "1) Bootstrap servers configuration is correct, " +
+                   "2) Kafka brokers are running and accessible, " +
+                   "3) Network connectivity and firewall rules allow connection, " +
+                   "4) Consider increasing timeout values if network latency is high.";
+        }
+
+        // DNS/Hostname Resolution Exceptions
+        if (isUnknownHostException(cause)) {
+            return message + ". Cannot resolve broker hostname. Please verify: " +
+                   "1) Bootstrap servers hostnames are spelled correctly, " +
+                   "2) DNS resolution is working properly, " +
+                   "3) Hostnames are reachable from this network.";
+        }
+
+        // Connection Exceptions
+        if (isConnectionException(cause, causeClassName)) {
+            return message + ". Connection to broker failed. Please verify: " +
+                   "1) Kafka brokers are running, " +
+                   "2) Port numbers are correct in bootstrap servers, " +
+                   "3) Network route to brokers is available, " +
+                   "4) Firewall is not blocking the connection.";
+        }
+
+        // Kafka-specific exceptions
+        if (isLeaderNotAvailableException(causeClassName)) {
+            return message + ". Kafka broker leadership issue. This may be temporary during broker restart or " +
+                   "leader election. Retry the operation or verify cluster health.";
+        }
+
+        if (isRecordTooLargeException(causeClassName)) {
+            return message + ". Message size exceeds broker limits. Please verify: " +
+                   "1) Message size is within broker's max.request.size limit, " +
+                   "2) Topic's max.message.bytes configuration, " +
+                   "3) Consider compressing messages or splitting large payloads.";
+        }
+
+        // Default case: return original message
+        return message;
+    }
+
+    /**
+     * Checks if the exception is related to SSL/TLS.
+     */
+    private static boolean isSSLException(Throwable cause) {
+        String className = cause.getClass().getName();
+        return cause instanceof javax.net.ssl.SSLException ||
+               className.contains("SSLException") ||
+               className.contains("SSLHandshakeException") ||
+               className.contains("SSLProtocolException") ||
+               className.contains("SSLKeyException") ||
+               className.contains("CertificateException");
+    }
+
+    /**
+     * Checks if the exception is related to SASL authentication.
+     */
+    private static boolean isSaslAuthenticationException(Throwable cause) {
+        String className = cause.getClass().getName();
+        return className.contains("SaslAuthenticationException") ||
+               className.contains("AuthenticationException") ||
+               (className.contains("LoginException") &&
+                cause.getMessage() != null && cause.getMessage().contains("SASL"));
+    }
+
+    /**
+     * Checks if the exception is related to authorization.
+     */
+    private static boolean isAuthorizationException(Throwable cause, String className) {
+        return className.contains("AuthorizationException") ||
+               className.contains("TopicAuthorizationException") ||
+               className.contains("GroupAuthorizationException") ||
+               className.contains("ClusterAuthorizationException") ||
+               className.contains("TransactionalIdAuthorizationException");
+    }
+
+    /**
+     * Checks if the exception is a timeout exception.
+     */
+    private static boolean isTimeoutException(Throwable cause) {
+        return cause instanceof java.util.concurrent.TimeoutException ||
+               cause instanceof java.net.SocketTimeoutException ||
+               cause.getClass().getName().contains("TimeoutException");
+    }
+
+    /**
+     * Checks if the exception is related to hostname resolution.
+     */
+    private static boolean isUnknownHostException(Throwable cause) {
+        return cause instanceof java.net.UnknownHostException;
+    }
+
+    /**
+     * Checks if the exception is related to connection failures.
+     */
+    private static boolean isConnectionException(Throwable cause, String className) {
+        return cause instanceof java.net.ConnectException ||
+               cause instanceof java.net.SocketException ||
+               cause instanceof java.io.IOException &&
+               (className.contains("ConnectionException") ||
+                cause.getMessage() != null &&
+                (cause.getMessage().contains("Connection refused") ||
+                 cause.getMessage().contains("Connection reset")));
+    }
+
+    /**
+     * Checks if the exception is related to Kafka leader election.
+     */
+    private static boolean isLeaderNotAvailableException(String className) {
+        return className.contains("NotLeaderForPartitionException") ||
+               className.contains("LeaderNotAvailableException") ||
+               className.contains("NotLeaderOrFollowerException");
+    }
+
+    /**
+     * Checks if the exception is related to record size limits.
+     */
+    private static boolean isRecordTooLargeException(String className) {
+        return className.contains("RecordTooLargeException");
+    }
+
     public static String getServerUrls(Object bootstrapServer) {
         if (TypeUtils.getType(bootstrapServer).getTag() == TypeTags.ARRAY_TAG) {
             // if string[]

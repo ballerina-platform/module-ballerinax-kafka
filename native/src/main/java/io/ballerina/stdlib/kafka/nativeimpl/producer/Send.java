@@ -36,6 +36,8 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,7 @@ import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERIALIZED_KEY_SIZE
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.SERIALIZED_VALUE_SIZE_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.TIMESTAMP_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaUtils.createKafkaError;
+import static io.ballerina.stdlib.kafka.utils.KafkaUtils.getDetailedErrorMessage;
 import static io.ballerina.stdlib.kafka.utils.ModuleUtils.getModule;
 import static io.ballerina.stdlib.kafka.utils.TransactionUtils.handleTransactions;
 
@@ -59,6 +62,9 @@ import static io.ballerina.stdlib.kafka.utils.TransactionUtils.handleTransaction
  * Native method to send different types of keys and values to kafka broker from ballerina kafka producer.
  */
 public class Send {
+
+    private static final Logger logger = LoggerFactory.getLogger(Send.class);
+
     public static Object sendExternal(Environment env, BObject producer, BArray value, BString topic,
                                       BArray headerList, Object key, Object partition, Object timestamp) {
         ProducerRecord<?, byte[]> record = getProducerRecord(value, topic, headerList, key, partition, timestamp);
@@ -74,7 +80,10 @@ public class Send {
                     if (Objects.nonNull(e)) {
                         KafkaMetricsUtil.reportProducerError(producer,
                                 KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                        balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+                        String detailedError = getDetailedErrorMessage(e);
+                        logger.error("Failed to send data to Kafka server for topic '{}': {}",
+                                    record.topic(), detailedError, e);
+                        balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + detailedError));
                     } else {
                         KafkaMetricsUtil.reportPublish(producer, record.topic(), record.value());
                         balFuture.complete(null);
@@ -82,7 +91,10 @@ public class Send {
                 });
             } catch (IllegalStateException | KafkaException e) {
                 KafkaMetricsUtil.reportProducerError(producer, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+                String detailedError = getDetailedErrorMessage(e);
+                logger.error("Failed to send data to Kafka server for topic '{}': {}",
+                            record.topic(), detailedError, e);
+                balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + detailedError));
             }
         });
         return ModuleUtils.getResult(balFuture);
@@ -104,7 +116,10 @@ public class Send {
                 balFuture.complete(populateRecordMetadata(metadata));
             } catch (Exception e) {
                 KafkaMetricsUtil.reportProducerError(producer, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+                String detailedError = getDetailedErrorMessage(e);
+                logger.error("Failed to send data to Kafka server for topic '{}': {}",
+                            record.topic(), detailedError, e);
+                balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + detailedError));
             }
         });
         return ModuleUtils.getResult(balFuture);
