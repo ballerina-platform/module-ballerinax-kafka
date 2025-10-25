@@ -16,6 +16,7 @@
 
 import ballerina/jballerina.java;
 import ballerina/uuid;
+import ballerinax/confluent.cregistry;
 
 # Represents a Kafka producer endpoint.
 #
@@ -27,7 +28,7 @@ public client isolated class Producer {
     private final SerializerType keySerializerType;
     private final SerializerType valueSerializerType;
     private final string|string[] & readonly bootstrapServers;
-    private final anydata & readonly schemaRegistryConfig;
+    private final cregistry:ConnectionConfig? schemaRegistryConfig;
     private final string? keySchema;
     private final string? valueSchema;
 
@@ -124,16 +125,22 @@ public client isolated class Producer {
         byte[] value = anydataValue.toString().toBytes();
         byte[]? key = ();
         anydata anydataKey = producerRecord?.key;
-
+        cregistry:ConnectionConfig? schemaRegistryConfig;
+        lock {
+            schemaRegistryConfig = self.schemaRegistryConfig.cloneReadOnly();
+        }
         boolean isKeyAvro = self.keySerializerType == SER_AVRO;
         boolean isValueAvro = self.valueSerializerType == SER_AVRO;
         if isKeyAvro && anydataKey != () {
             do {
+                if schemaRegistryConfig is () {
+                    return error Error("The field `schemaRegistryConfig` cannot be empty for Avro serialization");
+                }
                 string? keySchema = self.keySchema.cloneReadOnly();
                 if keySchema is () {
                     return error Error("The field `keySchema` can't be empty for serializing keys in Avro format");
                 }
-                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, keySchema);
+                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, keySchema);
                 key = check serializer.serialize(anydataKey, keySchema, "key-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
@@ -141,11 +148,14 @@ public client isolated class Producer {
         }
         if isValueAvro {
             do {
+                if schemaRegistryConfig is () {
+                    return error Error("The field `schemaRegistryConfig` cannot be empty for Avro serialization");
+                }
                 string? valueSchema = self.valueSchema.cloneReadOnly();
                 if valueSchema is () {
                     return error Error("The field `valueSchema` can't be empty for serializing values in Avro format");
                 }
-                Serializer serializer = check new AvroSerializer(self.schemaRegistryConfig, valueSchema);
+                Serializer serializer = check new AvroSerializer(schemaRegistryConfig, valueSchema);
                 value = check serializer.serialize(anydataValue, valueSchema, "value-" + producerRecord.topic);
             } on fail error err {
                 return error Error(err.message());
