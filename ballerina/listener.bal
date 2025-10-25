@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/jballerina.java;
+import ballerinax/confluent.cregistry;
 
 # Represents a Kafka consumer endpoint.
 #
@@ -38,11 +39,17 @@ public isolated class Listener {
         self.consumerConfig = config.cloneReadOnly();
         self.keyDeserializerType = config.keyDeserializerType;
         self.valueDeserializerType = config.valueDeserializerType;
+        cregistry:ConnectionConfig? schemaRegistryConfig = config.schemaRegistryConfig;
+        if self.keyDeserializerType == DES_AVRO || self.valueDeserializerType == DES_AVRO {
+            if schemaRegistryConfig is () {
+                return error Error("The field `schemaRegistryConfig` cannot be empty for Avro deserialization");
+            }
+        }
         do {
             self.keyDeserializer = self.keyDeserializerType == DES_AVRO 
-                ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
+                ? check new AvroDeserializer(check schemaRegistryConfig.cloneWithType()) : ();
             self.valueDeserializer = self.valueDeserializerType == DES_AVRO
-                ? check new AvroDeserializer(config.schemaRegistryConfig) : ();
+                ? check new AvroDeserializer(check config.schemaRegistryConfig.cloneWithType()) : ();
         } on fail error err {
             return error Error("Failed to initialize the deserializers", err);
         }

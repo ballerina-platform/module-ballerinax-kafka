@@ -73,7 +73,7 @@ public isolated class AvroSerializer {
     private final cregistry:Client registry;
     private final string schema;
 
-    public isolated function init(anydata & readonly schemaRegistryConfig, string schema) returns error? {
+    public isolated function init(cregistry:ConnectionConfig schemaRegistryConfig, string schema) returns error? {
         self.registry = check initiateSchemaRegistry(schemaRegistryConfig);
         self.schema = schema;
     }
@@ -98,7 +98,7 @@ public isolated class AvroDeserializer {
     *Deserializer;
     private final cregistry:Client registry;
 
-    public isolated function init(anydata & readonly schemaRegistryConfig) returns error? {
+    public isolated function init(cregistry:ConnectionConfig schemaRegistryConfig) returns error? {
         self.registry = check initiateSchemaRegistry(schemaRegistryConfig);
     }
 
@@ -111,20 +111,9 @@ public isolated class AvroDeserializer {
     }
 }
 
-isolated function getSchemaRegistryConfig(anydata & readonly schemaRegistryConfig)
-    returns cregistry:ConnectionConfig|error {
+isolated function initiateSchemaRegistry(cregistry:ConnectionConfig schemaRegistryConfig) returns cregistry:Client|error {
     do {
-        return check schemaRegistryConfig.cloneWithType(cregistry:ConnectionConfig);
-    } on fail error registryError {
-        string errorMessage = string `The provided values for 'schemaRegistryConfig'
-            do not match the expected schema registry properties: ${registryError.message()}`;
-        return error(errorMessage);
-    }
-}
-
-isolated function initiateSchemaRegistry(anydata & readonly schemaRegistryConfig) returns cregistry:Client|error {
-    do {
-        return check new (check getSchemaRegistryConfig(schemaRegistryConfig));
+        return check new (schemaRegistryConfig);
     } on fail error err {
         return error(string `Error occurred while initializing the confluent registry: ${err.message()}`);
     }
