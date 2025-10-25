@@ -597,6 +597,10 @@ public class KafkaUtils {
     private static BMap getBHeadersFromConsumerRecord(Headers headers, Type headerType) {
         HashMap<String, ArrayList<byte[]>> headerMap = new HashMap<>();
         for (Header header : headers) {
+            if (Objects.isNull(header)) {
+                throw ErrorCreator.createError(StringUtils.fromString(
+                        "Failed to process Kafka message headers: Encountered a `null` header"));
+            }
             String key;
             try {
                 key = header.key();
