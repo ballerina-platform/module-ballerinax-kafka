@@ -597,13 +597,30 @@ public class KafkaUtils {
     private static BMap getBHeadersFromConsumerRecord(Headers headers, Type headerType) {
         HashMap<String, ArrayList<byte[]>> headerMap = new HashMap<>();
         for (Header header : headers) {
-            if (headerMap.containsKey(header.key())) {
-                ArrayList<byte[]> headerList = headerMap.get(header.key());
+            if (Objects.isNull(header)) {
+                throw ErrorCreator.createError(StringUtils.fromString(
+                        "Failed to process Kafka message headers: Encountered a `null` header"));
+            }
+            String key;
+            try {
+                key = header.key();
+            } catch (NullPointerException e) {
+                // Malformed header detected
+                throw ErrorCreator.createError(StringUtils.fromString(
+                    "Failed to process Kafka message headers: Encountered a malformed header with `null` key"), e);
+            }
+            if (key == null) {
+                // Null key after successful retrieval - also malformed
+                throw ErrorCreator.createError(StringUtils.fromString(
+                        "Failed to process Kafka message headers: Encountered a malformed header with `null` key"));
+            }
+            if (headerMap.containsKey(key)) {
+                ArrayList<byte[]> headerList = headerMap.get(key);
                 headerList.add(header.value());
             } else {
-                ArrayList headerList = new ArrayList<byte[]>();
+                ArrayList<byte[]> headerList = new ArrayList<>();
                 headerList.add(header.value());
-                headerMap.put(header.key(), headerList);
+                headerMap.put(key, headerList);
             }
         }
         BMap bHeaderMap = ValueCreator.createMapValue();
@@ -642,6 +659,9 @@ public class KafkaUtils {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
+                if (Objects.isNull(value)) {
+                    continue;
+                }
                 valueArray.add(i, ValueCreator.createArrayValue(value));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
@@ -649,6 +669,9 @@ public class KafkaUtils {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
+                if (Objects.isNull(value)) {
+                    continue;
+                }
                 valueArray.add(i, StringUtils.fromString(new String(value, StandardCharsets.UTF_8)));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);

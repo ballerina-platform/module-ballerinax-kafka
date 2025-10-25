@@ -131,6 +131,12 @@ public class KafkaListenerImpl implements KafkaListener {
             } catch (BError bError) {
                 consumer.notifyFailure(bError);
                 onError(bError);
+            } catch (Throwable t) {
+                // This occurs when there is an unidentified runtime exception, hence we should consider this as a
+                // serious error and halt message processing
+                String errorMessage = "Error occurred while dispatching received messages: " + t.getMessage();
+                BError bError = createKafkaError(errorMessage, t);
+                (new KafkaOnErrorCallback()).notifyFailure(bError);
             }
         });
     }

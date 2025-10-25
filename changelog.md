@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Fixed
+- [When receiving a malformed messages Kafka listener execution stops](https://github.com/ballerina-platform/ballerina-library/issues/8403)
+
+## [4.6.1] - 2025-10-02
+
+### Fixed
 - [Ballerina Kafka connector crashes with a NPE when consuming messages with `null` header values](https://github.com/ballerina-platform/ballerina-library/issues/8215)
 
 ## [4.6.0] - 2025-06-26
