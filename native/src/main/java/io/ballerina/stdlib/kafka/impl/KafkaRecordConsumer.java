@@ -73,6 +73,8 @@ public class KafkaRecordConsumer {
         }
         List<String> topics = (List<String>) configParams.get(KafkaConstants.ALIAS_TOPICS.getValue());
         // Subscribe Kafka Consumer to given topics.
+        // Note: This is where the connection to brokers is actually established
+        // SSL/TLS handshake and SASL authentication will occur here
         this.kafkaConsumer.subscribe(topics);
         this.kafkaListener = kafkaListener;
         if (configParams.get(KafkaConstants.ALIAS_POLLING_TIMEOUT.getValue()) != null) {
@@ -105,7 +107,11 @@ public class KafkaRecordConsumer {
             }
             processRetrievedRecords(recordsRetrieved);
         } catch (KafkaException | IllegalStateException | IllegalArgumentException e) {
-            this.kafkaListener.onError(e);
+            // Log detailed error information for diagnostics
+            String detailedError = getDetailedErrorMessage(e);
+            logger.error("Kafka service {} consumer {} encountered error while polling: {}",
+                        this.serviceId, this.consumerId, detailedError, e);
+            this.kafkaListener.onError(new KafkaException("Failed to poll from Kafka: " + detailedError, e));
             // When un-recoverable exception is thrown we stop scheduling task to the executor.
             // Later at stopConsume() on KafkaRecordConsumer we close the consumer.
             this.pollTaskFuture.cancel(false);
@@ -196,5 +202,58 @@ public class KafkaRecordConsumer {
             Thread.currentThread().interrupt();
         }
         this.kafkaConsumer.unsubscribe();
+    }
+
+    /**
+     * Extracts detailed error message from exceptions during poll operations.
+     * Provides specific guidance for SSL, authentication, and connection errors.
+     *
+     * @param e The caught exception.
+     * @return Detailed error message with cause information and troubleshooting guidance.
+     */
+    private static String getDetailedErrorMessage(Exception e) {
+        Throwable cause = e.getCause() != null ? e.getCause() : e;
+        String message = cause.getMessage() != null ? cause.getMessage() : e.getMessage();
+        String causeClass = cause.getClass().getSimpleName();
+
+        // Provide specific guidance for common error types
+        if (message.contains("SSL") || message.contains("ssl") || causeClass.contains("SSL")) {
+            return message + ". SSL/TLS error occurred. Please verify: " +
+                   "1) Certificate paths are correct, " +
+                   "2) Truststore/keystore are accessible and valid, " +
+                   "3) Certificates are not expired, " +
+                   "4) SSL protocol versions match broker configuration.";
+        } else if (message.contains("SaslAuthentication") || message.contains("Authentication failed") ||
+                   message.contains("SASL") || message.contains("authentication") || causeClass.contains("Sasl")) {
+            return message + ". SASL authentication error occurred. Please verify: " +
+                   "1) Username and password are correct, " +
+                   "2) Authentication mechanism (PLAIN, SCRAM-SHA-256, SCRAM-SHA-512) matches broker configuration, " +
+                   "3) User has necessary permissions on the broker.";
+        } else if (message.contains("TimeoutException") || message.contains("timeout") ||
+                   causeClass.contains("Timeout")) {
+            return message + ". Connection timeout occurred. Please verify: " +
+                   "1) Bootstrap servers configuration is correct, " +
+                   "2) Kafka brokers are running and accessible, " +
+                   "3) Network connectivity and firewall rules allow connection, " +
+                   "4) Consider increasing timeout values if network latency is high.";
+        } else if (message.contains("UnknownHostException") || message.contains("nodename nor servname provided") ||
+                   causeClass.contains("UnknownHost")) {
+            return message + ". Cannot resolve broker hostname. Please verify: " +
+                   "1) Bootstrap servers hostnames are spelled correctly, " +
+                   "2) DNS resolution is working properly, " +
+                   "3) Hostnames are reachable from this network.";
+        } else if (message.contains("Connection refused") || message.contains("Connection reset") ||
+                   message.contains("ConnectionException") || causeClass.contains("Connection")) {
+            return message + ". Connection to broker failed. Please verify: " +
+                   "1) Kafka brokers are running, " +
+                   "2) Port numbers are correct in bootstrap servers, " +
+                   "3) Network route to brokers is available, " +
+                   "4) Firewall is not blocking the connection.";
+        } else if (message.contains("NotLeaderForPartitionException") || message.contains("LeaderNotAvailable")) {
+            return message + ". Kafka broker leadership issue. This may be temporary during broker restart or " +
+                   "leader election. Retry the operation or verify cluster health.";
+        } else {
+            return message;
+        }
     }
 }
