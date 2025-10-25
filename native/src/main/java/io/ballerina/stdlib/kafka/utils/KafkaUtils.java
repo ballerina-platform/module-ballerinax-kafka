@@ -601,7 +601,7 @@ public class KafkaUtils {
             try {
                 key = header.key();
             } catch (NullPointerException e) {
-                // Malformed header detected - throw a proper error instead of silently skipping
+                // Malformed header detected
                 throw ErrorCreator.createError(StringUtils.fromString(
                     "Failed to process Kafka message headers: Encountered a malformed header with `null` key"), e);
             }
@@ -655,6 +655,9 @@ public class KafkaUtils {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
+                if (Objects.isNull(value)) {
+                    continue;
+                }
                 valueArray.add(i, ValueCreator.createArrayValue(value));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
@@ -662,6 +665,9 @@ public class KafkaUtils {
             BArray valueArray = ValueCreator.createArrayValue(arrayType);
             for (int i = 0; i < list.size(); i++) {
                 byte[] value = list.get(i);
+                if (Objects.isNull(value)) {
+                    continue;
+                }
                 valueArray.add(i, StringUtils.fromString(new String(value, StandardCharsets.UTF_8)));
             }
             bHeaderMap.put(StringUtils.fromString(key), valueArray);
