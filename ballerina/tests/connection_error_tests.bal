@@ -147,7 +147,7 @@ function testConsumerSaslAuthenticationFailure() returns error? {
     check consumer->close();
 }
 
-// Test: Consumer SSL certificate error
+// Test: Consumer SSL certificate error (invalid truststore path)
 @test:Config {}
 function testConsumerSslCertificateError() returns error? {
     crypto:TrustStore invalidTrustStore = {
@@ -186,6 +186,80 @@ function testConsumerSslCertificateError() returns error? {
         );
     } else {
         test:assertFail("Expected SSL certificate error during poll, but succeeded");
+    }
+
+    check consumer->close();
+}
+
+// Test: Consumer connecting to SSL broker without SSL configuration
+@test:Config {}
+function testConsumerSslBrokerWithoutSslConfig() returns error? {
+    // Try to connect to SSL broker without providing SSL configuration
+    Consumer|Error consumerResult = new (SSL_TEST_URL, {
+        groupId: TEST_GROUP + "-no-ssl",
+        topics: [TEST_TOPIC]
+        // Note: No secureSocket configuration provided
+    });
+
+    if consumerResult is Error {
+        test:assertFail("Consumer initialization should succeed (lazy connection)");
+    }
+
+    Consumer consumer = consumerResult;
+
+    // Error should occur during first poll - SSL handshake will fail
+    AnydataConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
+
+    if pollResult is Error {
+        string errorMsg = pollResult.message();
+        test:assertTrue(
+            errorMsg.includes("SSL") || errorMsg.includes("ssl") ||
+            errorMsg.includes("Connection") || errorMsg.includes("handshake"),
+            "Error message should mention SSL or connection issue. Got: " + errorMsg
+        );
+    } else {
+        test:assertFail("Expected SSL handshake error during poll, but succeeded");
+    }
+
+    check consumer->close();
+}
+
+// Test: Consumer SSL with wrong password
+@test:Config {}
+function testConsumerSslWrongPassword() returns error? {
+    crypto:TrustStore trustStoreWithWrongPassword = {
+        path: VALID_SSL_TRUSTSTORE,
+        password: INVALID_SSL_PASSWORD
+    };
+
+    SecureSocket socketWithWrongPassword = {
+        cert: trustStoreWithWrongPassword
+    };
+
+    Consumer|Error consumerResult = new (SSL_TEST_URL, {
+        groupId: TEST_GROUP + "-wrong-ssl-pass",
+        topics: [TEST_TOPIC],
+        secureSocket: socketWithWrongPassword
+    });
+
+    if consumerResult is Error {
+        test:assertFail("Consumer initialization should succeed (lazy connection)");
+    }
+
+    Consumer consumer = consumerResult;
+
+    // Error should occur during first poll
+    AnydataConsumerRecord[]|Error pollResult = consumer->poll(SHORT_TIMEOUT);
+
+    if pollResult is Error {
+        string errorMsg = pollResult.message();
+        test:assertTrue(
+            errorMsg.includes("SSL") || errorMsg.includes("password") ||
+            errorMsg.includes("keystore") || errorMsg.includes("truststore"),
+            "Error message should mention SSL/password issue. Got: " + errorMsg
+        );
+    } else {
+        test:assertFail("Expected SSL password error during poll, but succeeded");
     }
 
     check consumer->close();
@@ -267,6 +341,127 @@ function testProducerSaslAuthenticationFailure() returns error? {
     check producer->close();
 }
 
+// Test: Producer connecting to SSL broker without SSL configuration
+@test:Config {}
+function testProducerSslBrokerWithoutSslConfig() returns error? {
+    // Try to connect to SSL broker without providing SSL configuration
+    Producer|Error producerResult = new (SSL_TEST_URL);
+
+    if producerResult is Error {
+        test:assertFail("Producer initialization should succeed (lazy connection)");
+    }
+
+    Producer producer = producerResult;
+
+    // Error should occur during first send - SSL handshake will fail
+    Error? sendResult = producer->send({
+        topic: TEST_TOPIC,
+        value: "test message".toBytes()
+    });
+
+    if sendResult is Error {
+        string errorMsg = sendResult.message();
+        test:assertTrue(
+            errorMsg.includes("SSL") || errorMsg.includes("ssl") ||
+            errorMsg.includes("Connection") || errorMsg.includes("handshake"),
+            "Error message should mention SSL or connection issue. Got: " + errorMsg
+        );
+    } else {
+        test:assertFail("Expected SSL handshake error during send, but succeeded");
+    }
+
+    check producer->close();
+}
+
+// Test: Producer SSL with invalid truststore
+@test:Config {}
+function testProducerSslInvalidTruststore() returns error? {
+    crypto:TrustStore invalidTrustStore = {
+        path: INVALID_SSL_TRUSTSTORE,
+        password: SSL_PASSWORD
+    };
+
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore
+    };
+
+    Producer|Error producerResult = new (SSL_TEST_URL, {
+        secureSocket: invalidSocket
+    });
+
+    if producerResult is Error {
+        test:assertFail("Producer initialization should succeed (lazy connection)");
+    }
+
+    Producer producer = producerResult;
+
+    // Error should occur during first send
+    Error? sendResult = producer->send({
+        topic: TEST_TOPIC,
+        value: "test message".toBytes()
+    });
+
+    if sendResult is Error {
+        string errorMsg = sendResult.message();
+        test:assertTrue(
+            errorMsg.includes("SSL") || errorMsg.includes("certificate") ||
+            errorMsg.includes("truststore") || errorMsg.includes("path"),
+            "Error message should mention SSL/certificate/truststore issue. Got: " + errorMsg
+        );
+        test:assertTrue(
+            errorMsg.includes("Certificate paths") || errorMsg.includes("Truststore") ||
+            errorMsg.includes("accessible"),
+            "Error message should provide troubleshooting guidance. Got: " + errorMsg
+        );
+    } else {
+        test:assertFail("Expected SSL certificate error during send, but succeeded");
+    }
+
+    check producer->close();
+}
+
+// Test: Producer SSL with wrong password
+@test:Config {}
+function testProducerSslWrongPassword() returns error? {
+    crypto:TrustStore trustStoreWithWrongPassword = {
+        path: VALID_SSL_TRUSTSTORE,
+        password: INVALID_SSL_PASSWORD
+    };
+
+    SecureSocket socketWithWrongPassword = {
+        cert: trustStoreWithWrongPassword
+    };
+
+    Producer|Error producerResult = new (SSL_TEST_URL, {
+        secureSocket: socketWithWrongPassword
+    });
+
+    if producerResult is Error {
+        test:assertFail("Producer initialization should succeed (lazy connection)");
+    }
+
+    Producer producer = producerResult;
+
+    // Error should occur during first send
+    Error? sendResult = producer->send({
+        topic: TEST_TOPIC,
+        value: "test message".toBytes()
+    });
+
+    if sendResult is Error {
+        string errorMsg = sendResult.message();
+        test:assertTrue(
+            errorMsg.includes("SSL") || errorMsg.includes("password") ||
+            errorMsg.includes("keystore") || errorMsg.includes("truststore"),
+            "Error message should mention SSL/password issue. Got: " + errorMsg
+        );
+    } else {
+        test:assertFail("Expected SSL password error during send, but succeeded");
+    }
+
+    check producer->close();
+}
+
 // Test: Listener with connection error during start
 @test:Config {}
 function testListenerConnectionErrorOnStart() returns error? {
@@ -342,6 +537,92 @@ function testListenerSaslAuthenticationError() returns error? {
         test:assertTrue(
             errorMsg.includes("SASL") || errorMsg.includes("Authentication") || errorMsg.includes("authentication"),
             "Error message should indicate SASL authentication issue. Got: " + errorMsg
+        );
+    }
+
+    // Clean up
+    check kafkaListener.gracefulStop();
+}
+
+// Test: Listener connecting to SSL broker without SSL configuration
+@test:Config {}
+function testListenerSslBrokerWithoutSslConfig() returns error? {
+    // Try to connect to SSL broker without providing SSL configuration
+    Listener|Error listenerResult = new (SSL_TEST_URL, {
+        groupId: TEST_GROUP + "-listener-no-ssl",
+        topics: [TEST_TOPIC]
+        // Note: No secureSocket configuration provided
+    });
+
+    if listenerResult is Error {
+        test:assertFail("Listener initialization should succeed (lazy connection)");
+    }
+
+    Listener kafkaListener = listenerResult;
+
+    // Attach a service
+    error? attachResult = kafkaListener.attach(testService);
+    if attachResult is error {
+        test:assertFail("Service attach should succeed. Got error: " + attachResult.message());
+    }
+
+    // Error should occur during start when polling begins - SSL handshake will fail
+    error? startResult = kafkaListener.'start();
+
+    // Note: Errors will be logged in background polling thread
+    if startResult is error {
+        string errorMsg = startResult.message();
+        test:assertTrue(
+            errorMsg.includes("SSL") || errorMsg.includes("ssl") ||
+            errorMsg.includes("Connection") || errorMsg.includes("handshake"),
+            "Error message should indicate SSL or connection issue. Got: " + errorMsg
+        );
+    }
+
+    // Clean up
+    check kafkaListener.gracefulStop();
+}
+
+// Test: Listener SSL with invalid certificate
+@test:Config {}
+function testListenerSslInvalidCertificate() returns error? {
+    crypto:TrustStore invalidTrustStore = {
+        path: INVALID_SSL_TRUSTSTORE,
+        password: SSL_PASSWORD
+    };
+
+    SecureSocket invalidSocket = {
+        cert: invalidTrustStore
+    };
+
+    Listener|Error listenerResult = new (SSL_TEST_URL, {
+        groupId: TEST_GROUP + "-listener-invalid-cert",
+        topics: [TEST_TOPIC],
+        secureSocket: invalidSocket
+    });
+
+    if listenerResult is Error {
+        test:assertFail("Listener initialization should succeed (lazy connection)");
+    }
+
+    Listener kafkaListener = listenerResult;
+
+    // Attach a service
+    error? attachResult = kafkaListener.attach(testService);
+    if attachResult is error {
+        test:assertFail("Service attach should succeed. Got error: " + attachResult.message());
+    }
+
+    // Error should occur during start when polling begins
+    error? startResult = kafkaListener.'start();
+
+    // Note: Errors will be logged in background polling thread
+    if startResult is error {
+        string errorMsg = startResult.message();
+        test:assertTrue(
+            errorMsg.includes("SSL") || errorMsg.includes("certificate") ||
+            errorMsg.includes("truststore"),
+            "Error message should indicate SSL/certificate issue. Got: " + errorMsg
         );
     }
 
