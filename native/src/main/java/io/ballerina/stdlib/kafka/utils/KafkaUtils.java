@@ -601,12 +601,14 @@ public class KafkaUtils {
             try {
                 key = header.key();
             } catch (NullPointerException e) {
-                // Skip headers with null key buffer - this can happen with malformed headers
-                continue;
+                // Malformed header detected - throw a proper error instead of silently skipping
+                throw ErrorCreator.createError(StringUtils.fromString(
+                    "Failed to process Kafka message headers: Encountered a malformed header with `null` key"), e);
             }
             if (key == null) {
-                // Skip headers with null keys
-                continue;
+                // Null key after successful retrieval - also malformed
+                throw ErrorCreator.createError(StringUtils.fromString(
+                        "Failed to process Kafka message headers: Encountered a malformed header with `null` key"));
             }
             if (headerMap.containsKey(key)) {
                 ArrayList<byte[]> headerList = headerMap.get(key);
