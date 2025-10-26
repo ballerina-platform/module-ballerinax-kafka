@@ -17,7 +17,7 @@ This consists of 2 services:
 
 ## Implementation
 
-![Banking Transaction System](topology.png)
+![Banking Transaction System](../topology.png)
 
 ### Transaction Types Supported
 1. **DEPOSIT** - Credit transactions to customer accounts
@@ -56,17 +56,15 @@ Create a `Config.toml` file in the `producer` directory with your credentials:
 ```toml
 # Kafka Configuration
 bootstrapServers = "pkc-xxxxx.us-west-2.aws.confluent.cloud:9092"
-kafkaUsername = "YOUR_KAFKA_API_KEY"
-kafkaPassword = "YOUR_KAFKA_API_SECRET"
+kafkaAPIKey = "<YOUR_KAFKA_API_KEY>"
+kafkaAPISecret = "<YOUR_KAFKA_API_SECRET>"
 topicName = "banking-transactions"
 
 # Schema Registry Configuration
 baseUrl = "https://psrc-xxxxx.us-west-2.aws.confluent.cloud"
+registryAPIKey = "<YOUR_SCHEMA_REGISTRY_API_KEY>"
+registryAPISecret = "<YOUR_SCHEMA_REGISTRY_API_SECRET>"
 identityMapCapacity = 100
-
-[originals]
-"basic.auth.credentials.source" = "USER_INFO"
-"basic.auth.user.info" = "YOUR_SCHEMA_REGISTRY_API_KEY:YOUR_SCHEMA_REGISTRY_API_SECRET"
 ```
 
 ### Processor Configuration
@@ -76,17 +74,15 @@ Create a `Config.toml` file in the `processor` directory with your credentials:
 ```toml
 # Kafka Configuration
 bootstrapServers = "pkc-xxxxx.us-west-2.aws.confluent.cloud:9092"
-kafkaUsername = "YOUR_KAFKA_API_KEY"
-kafkaPassword = "YOUR_KAFKA_API_SECRET"
+kafkaAPIKey = "<YOUR_KAFKA_API_KEY>"
+kafkaAPISecret = "<YOUR_KAFKA_API_SECRET>"
 topicName = "banking-transactions"
 groupId = "transaction-processor-group"
 
 # Schema Registry Configuration
 baseUrl = "https://psrc-xxxxx.us-west-2.aws.confluent.cloud"
-
-[originals]
-"basic.auth.credentials.source" = "USER_INFO"
-"basic.auth.user.info" = "YOUR_SCHEMA_REGISTRY_API_KEY:YOUR_SCHEMA_REGISTRY_API_SECRET"
+registryAPIKey = "<YOUR_SCHEMA_REGISTRY_API_KEY>"
+registryAPISecret = "<YOUR_SCHEMA_REGISTRY_API_SECRET>"
 ```
 
 ## Run the Example

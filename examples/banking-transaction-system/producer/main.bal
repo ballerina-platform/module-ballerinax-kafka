@@ -19,13 +19,14 @@ import ballerinax/kafka;
 
 // Schema Registry Configuration
 configurable string baseUrl = ?;
+configurable string registryAPIKey = ?;
+configurable string registryAPISecret = ?;
 configurable int identityMapCapacity = ?;
-configurable map<anydata> & readonly originals = ?;
 
 // Kafka Configuration
 configurable string bootstrapServers = ?;
-configurable string kafkaUsername = ?;
-configurable string kafkaPassword = ?;
+configurable string kafkaAPIKey = ?;
+configurable string kafkaAPISecret = ?;
 configurable string topicName = ?;
 
 // Transaction Status Enum
@@ -90,17 +91,19 @@ function produceTransactions() returns error? {
 
     // Configure Kafka producer with Avro serialization
     kafka:ProducerConfiguration config = {
-        compressionType: kafka:COMPRESSION_SNAPPY,
         auth: {
-            username: kafkaUsername,
-            password: kafkaPassword
+            username: kafkaAPIKey,
+            password: kafkaAPISecret
         },
         securityProtocol: kafka:PROTOCOL_SASL_SSL,
         valueSerializerType: kafka:SER_AVRO,
         valueSchema: valueSchema,
         schemaRegistryConfig: {
             "baseUrl": baseUrl,
-            "originals": originals
+            "originals": {
+                "basic.auth.credentials.source": "USER_INFO",
+                "basic.auth.user.info": string `${registryAPIKey}:${registryAPISecret}`
+            }
         }
     };
 

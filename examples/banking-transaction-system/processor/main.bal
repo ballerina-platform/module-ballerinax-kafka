@@ -19,12 +19,13 @@ import ballerinax/kafka;
 
 // Schema Registry Configuration
 configurable string baseUrl = ?;
-configurable map<anydata> & readonly originals = ?;
+configurable string registryAPIKey = ?;
+configurable string registryAPISecret = ?;
 
 // Kafka Configuration
 configurable string bootstrapServers = ?;
-configurable string kafkaUsername = ?;
-configurable string kafkaPassword = ?;
+configurable string kafkaAPIKey = ?;
+configurable string kafkaAPISecret = ?;
 configurable string topicName = ?;
 configurable string groupId = ?;
 
@@ -63,13 +64,16 @@ listener kafka:Listener transactionListener = new (bootstrapServers, {
     securityProtocol: kafka:PROTOCOL_SASL_SSL,
     auth: {
         mechanism: kafka:AUTH_SASL_PLAIN,
-        username: kafkaUsername,
-        password: kafkaPassword
+        username: kafkaAPIKey,
+        password: kafkaAPISecret
     },
     schemaRegistryUrl: baseUrl,
     schemaRegistryConfig: {
         "baseUrl": baseUrl,
-        "originals": originals
+        "originals": {
+            "basic.auth.credentials.source": "USER_INFO",
+            "basic.auth.user.info": string `${registryAPIKey}:${registryAPISecret}`
+        }
     },
     valueDeserializerType: kafka:DES_AVRO,
     offsetReset: kafka:OFFSET_RESET_EARLIEST
@@ -78,10 +82,7 @@ listener kafka:Listener transactionListener = new (bootstrapServers, {
 // Transaction Processing Service
 service on transactionListener {
 
-    remote function onConsumerRecord(anydata[] data) returns error? {
-        // Convert received data to Transaction records
-        Transaction[] transactions = data.'map(value => check value.cloneWithType(Transaction));
-
+    remote function onConsumerRecord(Transaction[] transactions) returns error? {
         foreach Transaction txn in transactions {
             processTransaction(txn);
         }
