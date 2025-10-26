@@ -9,6 +9,7 @@ The examples in this directory cover various use cases of the Ballerina Kafka co
 - [**Order manager**](): A simple order management system that uses Kafka to process orders.
 - [**Word count calculator**](): A word count calculator that reads messages from a Kafka topic and counts the occurrences of each word.
 - [**Twitter filter**](): A Twitter filter that reads tweets from a Kafka topic and filters them based on certain criteria.
+- [**Banking transaction processor**](): A banking transaction processor that processes banking transactions using Kafka.
 
 ## Running the Examples
 
