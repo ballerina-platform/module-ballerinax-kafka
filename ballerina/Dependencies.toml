@@ -411,7 +411,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "confluent.cavroserdes"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
 	{org = "ballerina", name = "avro"},
 	{org = "ballerina", name = "jballerina.java"},

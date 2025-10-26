@@ -81,4 +81,8 @@
         <Class name="io.ballerina.stdlib.kafka.utils.ModuleUtils"/>
         <Bug pattern="MS_EXPOSE_REP"/>
     </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.kafka.utils.KafkaUtils"/>
+        <Bug pattern="DCN_NULLPOINTER_EXCEPTION"/>
+    </Match>
 </FindBugsFilter>
