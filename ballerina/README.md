@@ -129,6 +129,17 @@ kafka:TopicPartition topicPartition = {
 check kafkaConsumer->assign([topicPartition]);
 ```
 
+## Examples
+
+The following example shows how to use the Ballerina `kafka` connector to produce and consume messages using an Apache Kafka message broker.
+
+- [**Order manager**](https://github.com/ballerina-platform/module-ballerinax-kafka/tree/master/examples/order-manager): A simple order management system that uses Kafka to process orders.
+- [**Word count calculator**](https://github.com/ballerina-platform/module-ballerinax-kafka/tree/master/examples/secured-word-count-calculator): A word count calculator that reads messages from a Kafka topic and counts the occurrences of each word.
+- [**Twitter filter**](https://github.com/ballerina-platform/module-ballerinax-kafka/tree/master/examples/twitter-filter): A Twitter filter that reads tweets from a Kafka topic and filters them based on certain criteria.
+- [**Stock trading analyzer**](https://github.com/ballerina-platform/module-ballerinax-kafka/tree/master/examples/stock-trading-analyzer): This example demonstrates a simulated stock trading system built using Kafka and Ballerina.
+- [**Banking transaction processor**](https://github.com/ballerina-platform/module-ballerinax-kafka/tree/master/examples/banking-transaction-system): A banking transaction processor that processes banking transactions using Kafka. It illustrates how banking transactions can be published and consumed in real time, while also integrating with Confluent Schema Registry to manage message schemas between the producer and consumer.
+
+
 ### Report issues
 
 To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina standard library parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
