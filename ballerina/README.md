@@ -131,7 +131,7 @@ check kafkaConsumer->assign([topicPartition]);
 
 ## Examples
 
-The following example shows how to use the `kafka` connector to produce and consume messages using an Apache Kafka message broker.
+The following example shows how to use the Ballerina `kafka` connector to produce and consume messages using an Apache Kafka message broker.
 
 - [**Order manager**](https://github.com/ballerina-platform/module-ballerinax-kafka/tree/master/examples/order-manager): A simple order management system that uses Kafka to process orders.
 - [**Word count calculator**](https://github.com/ballerina-platform/module-ballerinax-kafka/tree/master/examples/secured-word-count-calculator): A word count calculator that reads messages from a Kafka topic and counts the occurrences of each word.
