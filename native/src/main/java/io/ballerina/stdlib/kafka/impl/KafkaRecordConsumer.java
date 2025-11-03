@@ -18,13 +18,12 @@
 
 package io.ballerina.stdlib.kafka.impl;
 
-import io.ballerina.runtime.api.values.BError;
 import io.ballerina.stdlib.kafka.api.KafkaListener;
 import io.ballerina.stdlib.kafka.utils.KafkaConstants;
+import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,18 +103,20 @@ public class KafkaRecordConsumer {
                                      + this.consumerId + " has received " + recordsRetrieved.count() + " records.");
             }
             processRetrievedRecords(recordsRetrieved);
-        } catch (KafkaException | IllegalStateException | IllegalArgumentException e) {
+        } catch (Exception e) {
             this.kafkaListener.onError(e);
             // When un-recoverable exception is thrown we stop scheduling task to the executor.
             // Later at stopConsume() on KafkaRecordConsumer we close the consumer.
             this.pollTaskFuture.cancel(false);
-        } catch (BError e) {
-            this.kafkaListener.onError(e);
         }
     }
 
     private void processRetrievedRecords(ConsumerRecords consumerRecords) {
-        if (Objects.nonNull(consumerRecords) && !consumerRecords.isEmpty()) {
+        if (Objects.isNull(consumerRecords)) {
+            return;
+        }
+
+        if (!consumerRecords.isEmpty()) {
             Semaphore sem = new Semaphore(0);
             KafkaPollCycleFutureListener pollCycleListener = new KafkaPollCycleFutureListener(sem, serviceId);
             this.kafkaListener.onRecordsReceived(consumerRecords, kafkaConsumer, groupId, pollCycleListener);
@@ -127,6 +128,13 @@ public class KafkaRecordConsumer {
             } catch (InterruptedException e) {
                 this.kafkaListener.onError(e);
                 this.pollTaskFuture.cancel(false);
+            }
+        } else {
+            // Check if there are active connections when we receive empty records
+            double connectionCount = KafkaUtils.getActiveConnectionCount(kafkaConsumer);
+            if (connectionCount == 0) {
+                Exception serverDownException = new Exception("Server might not be available");
+                this.kafkaListener.onError(serverDownException);
             }
         }
     }

@@ -57,6 +57,8 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.Metric;
+import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
@@ -1149,5 +1151,23 @@ public class KafkaUtils {
 
     public static boolean getAutoSeekOnErrorConfig(BObject bObject) {
         return (boolean) bObject.getMapValue(CONSUMER_CONFIG_FIELD_NAME).get(CONSUMER_ENABLE_AUTO_SEEK_CONFIG);
+    }
+
+    /**
+     * Retrieves the active connection count from Kafka consumer metrics.
+     *
+     * @param kafkaConsumer the Kafka consumer instance
+     * @return the number of active connections, or 0 if metric not available
+     */
+    public static double getActiveConnectionCount(KafkaConsumer kafkaConsumer) {
+        Map<MetricName, ? extends Metric> metrics = kafkaConsumer.metrics();
+        for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+            MetricName metricName = entry.getKey();
+            if ("connection-count".equals(metricName.name()) &&
+                "consumer-metrics".equals(metricName.group())) {
+                return (double) entry.getValue().metricValue();
+            }
+        }
+        return 0;
     }
 }
