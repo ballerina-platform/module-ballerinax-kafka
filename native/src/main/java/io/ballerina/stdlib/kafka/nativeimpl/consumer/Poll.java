@@ -35,7 +35,6 @@ import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
 import io.ballerina.stdlib.kafka.utils.ModuleUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -82,12 +81,12 @@ public class Poll {
                             kafkaConsumer, autoSeek);
                 }
                 balFuture.complete(consumerRecords);
-            } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
-                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             } catch (BError e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(e);
+            } catch (Exception e) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             }
         });
         return ModuleUtils.getResult(balFuture);
@@ -118,7 +117,7 @@ public class Poll {
             } catch (BError bError) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(bError);
-            } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
+            } catch (Exception e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             }
