@@ -54,6 +54,7 @@ public class KafkaRecordConsumer {
     private int pollingInterval = 1000;
     private long stopTimeout = 30000;
     private String groupId;
+    private String bootstrapServers;
     private final KafkaListener kafkaListener;
     private final String serviceId;
     private final int consumerId;
@@ -82,6 +83,7 @@ public class KafkaRecordConsumer {
             this.pollingInterval = (Integer) configParams.get(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue());
         }
         this.groupId = (String) configParams.get(ConsumerConfig.GROUP_ID_CONFIG);
+        this.bootstrapServers = (String) configParams.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
     }
 
     private void poll() {
@@ -133,7 +135,8 @@ public class KafkaRecordConsumer {
             // Check if there are active connections when we receive empty records
             double connectionCount = KafkaUtils.getActiveConnectionCount(kafkaConsumer);
             if (connectionCount == 0) {
-                Exception serverDownException = new Exception("Server might not be available");
+                Exception serverDownException = new Exception(
+                        "Server might not be available at " + this.bootstrapServers + ". No active connections found.");
                 this.kafkaListener.onError(serverDownException);
             }
         }

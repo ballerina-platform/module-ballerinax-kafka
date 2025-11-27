@@ -1170,4 +1170,22 @@ public class KafkaUtils {
         }
         return 0;
     }
+
+    /**
+     * Retrieves the active connection count from Kafka producer metrics.
+     *
+     * @param kafkaProducer the Kafka producer instance
+     * @return the number of active connections, or 0 if metric not available
+     */
+    public static double getActiveConnectionCount(KafkaProducer kafkaProducer) {
+        Map<MetricName, ? extends Metric> metrics = kafkaProducer.metrics();
+        for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+            MetricName metricName = entry.getKey();
+            if ("connection-count".equals(metricName.name()) &&
+                "producer-metrics".equals(metricName.group())) {
+                return (double) entry.getValue().metricValue();
+            }
+        }
+        return 0;
+    }
 }
