@@ -1294,8 +1294,12 @@ function testIncorrectKafkaUrl() returns error? {
         clientId: "test-consumer-49"
     };
     Consumer consumer = check new (INCORRECT_KAFKA_URL, consumerConfiguration);
-    BytesConsumerRecord[] consumerRecords = check consumer->poll(5);
-    test:assertEquals(consumerRecords.length(), 0, "Expected: 0. Received: " + consumerRecords.length().toString());
+    BytesConsumerRecord[]|error result = consumer->poll(5);
+    test:assertTrue(result is error, "Expected an error when connecting to incorrect Kafka URL");
+    if result is error {
+        string expectedError = "Server might not be available at " + INCORRECT_KAFKA_URL + ". No active connections found.";
+        test:assertEquals(result.message(), expectedError);
+    }
     check consumer->close();
 }
 

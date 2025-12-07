@@ -18,12 +18,14 @@
 
 package io.ballerina.stdlib.kafka.impl;
 
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.stdlib.kafka.api.KafkaListener;
 import io.ballerina.stdlib.kafka.utils.KafkaConstants;
 import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,11 +107,13 @@ public class KafkaRecordConsumer {
                                      + this.consumerId + " has received " + recordsRetrieved.count() + " records.");
             }
             processRetrievedRecords(recordsRetrieved);
-        } catch (Exception e) {
+        } catch (KafkaException | IllegalStateException | IllegalArgumentException e) {
             this.kafkaListener.onError(e);
             // When un-recoverable exception is thrown we stop scheduling task to the executor.
             // Later at stopConsume() on KafkaRecordConsumer we close the consumer.
             this.pollTaskFuture.cancel(false);
+        } catch (BError e) {
+            this.kafkaListener.onError(e);
         }
     }
 
@@ -132,9 +136,8 @@ public class KafkaRecordConsumer {
                 this.pollTaskFuture.cancel(false);
             }
         } else {
-            // Check if there are active connections when we receive empty records
-            double connectionCount = KafkaUtils.getActiveConnectionCount(kafkaConsumer);
-            if (connectionCount == 0) {
+            // Check if server is truly unavailable (not just a security/config issue)
+            if (KafkaUtils.isServerUnavailable(kafkaConsumer)) {
                 Exception serverDownException = new Exception(
                         "Server might not be available at " + this.bootstrapServers + ". No active connections found.");
                 this.kafkaListener.onError(serverDownException);

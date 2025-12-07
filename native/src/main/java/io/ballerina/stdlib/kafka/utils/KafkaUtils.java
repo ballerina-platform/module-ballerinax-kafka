@@ -1188,4 +1188,79 @@ public class KafkaUtils {
         }
         return 0;
     }
+
+    /**
+     * Checks if there are any signs that the server was reached during connection attempts.
+     * This includes failed/successful authentication attempts or connection creation attempts.
+     * If any of these metrics are non-zero, it indicates the server was reachable but
+     * there's a configuration/security issue, NOT that the server is unavailable.
+     *
+     * @param kafkaConsumer the Kafka consumer instance
+     * @return true if there are signs the server was reached, false otherwise
+     */
+    public static boolean hasServerInteractionAttempts(KafkaConsumer kafkaConsumer) {
+        Map<MetricName, ? extends Metric> metrics = kafkaConsumer.metrics();
+        for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+            MetricName metricName = entry.getKey();
+            String group = metricName.group();
+            String name = metricName.name();
+
+            // Only check consumer-metrics group
+            if (!"consumer-metrics".equals(group)) {
+                continue;
+            }
+
+            // Check for failed authentication - server was reached but auth failed
+            if ("failed-authentication-total".equals(name)) {
+                double value = (double) entry.getValue().metricValue();
+                if (value > 0) {
+                    return true;
+                }
+            }
+
+            // Check for successful authentications - server definitely reachable
+            if ("successful-authentication-total".equals(name)) {
+                double value = (double) entry.getValue().metricValue();
+                if (value > 0) {
+                    return true;
+                }
+            }
+
+            // Check for connection creation attempts - TCP connection was at least attempted
+            // This helps detect SSL/protocol mismatch scenarios where TCP connects but
+            // the handshake fails before Kafka authentication
+            if ("connection-creation-total".equals(name)) {
+                double value = (double) entry.getValue().metricValue();
+                if (value > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determines if the server is truly unavailable.
+     * Returns true only if there are no active connections AND no signs that the server
+     * was ever reached (no auth failures, no IO errors, no connection closes).
+     * This helps distinguish between "server is down" vs "server is up but config is wrong".
+     *
+     * @param kafkaConsumer the Kafka consumer instance
+     * @return true if the server appears to be truly unavailable, false otherwise
+     */
+    public static boolean isServerUnavailable(KafkaConsumer kafkaConsumer) {
+        // If we have active connections, server is available
+        if (getActiveConnectionCount(kafkaConsumer) > 0) {
+            return false;
+        }
+
+        // If there are signs the server was reached (auth failures, IO errors, etc.),
+        // it means server is available but there's a config issue
+        if (hasServerInteractionAttempts(kafkaConsumer)) {
+            return false;
+        }
+
+        // No connections and no signs of server interaction - server is likely down
+        return true;
+    }
 }

@@ -25,7 +25,7 @@ boolean onErrorCalled = false;
 }
 function testListenerWithServerDown() returns error? {
     string topic = "server-down-listener-test-topic";
-    kafkaTopics.push(topic);
+    // Note: Don't push to kafkaTopics since this topic won't be created (INCORRECT_KAFKA_URL)
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -42,8 +42,8 @@ function testListenerWithServerDown() returns error? {
     runtime:sleep(5);
 
     test:assertTrue(onErrorCalled);
-    test:assertTrue(serverDownErrorMessage.includes("Server might not be available") ||
-                    serverDownErrorMessage.includes("No active connections"));
+    string expectedError = "Server might not be available at " + INCORRECT_KAFKA_URL + ". No active connections found.";
+    test:assertEquals(serverDownErrorMessage, expectedError);
 
     check consumer.gracefulStop();
 
@@ -56,7 +56,7 @@ function testListenerWithServerDown() returns error? {
 }
 function testConsumerClientWithServerDown() returns error? {
     string topic = "server-down-consumer-test-topic";
-    kafkaTopics.push(topic);
+    // Note: Don't push to kafkaTopics since this topic won't be created (INCORRECT_KAFKA_URL)
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -69,8 +69,8 @@ function testConsumerClientWithServerDown() returns error? {
     BytesConsumerRecord[]|error result = consumer->poll(3);
     test:assertTrue(result is error);
     if result is error {
-        test:assertTrue(result.message().includes("Server might not be available") ||
-                        result.message().includes("No active connections"));
+        string expectedError = "Server might not be available at " + INCORRECT_KAFKA_URL + ". No active connections found.";
+        test:assertEquals(result.message(), expectedError);
     }
     check consumer->close();
 }
@@ -80,7 +80,7 @@ function testConsumerClientWithServerDown() returns error? {
 }
 function testConsumerPollPayloadWithServerDown() returns error? {
     string topic = "server-down-poll-payload-test-topic";
-    kafkaTopics.push(topic);
+    // Note: Don't push to kafkaTopics since this topic won't be created (INCORRECT_KAFKA_URL)
 
     ConsumerConfiguration consumerConfiguration = {
         topics: [topic],
@@ -93,8 +93,8 @@ function testConsumerPollPayloadWithServerDown() returns error? {
     string[]|error result = consumer->pollPayload(3);
     test:assertTrue(result is error);
     if result is error {
-        test:assertTrue(result.message().includes("Server might not be available") ||
-                        result.message().includes("No active connections"));
+        string expectedError = "Server might not be available at " + INCORRECT_KAFKA_URL + ". No active connections found.";
+        test:assertEquals(result.message(), expectedError);
     }
     check consumer->close();
 }
@@ -142,8 +142,6 @@ Service serverGoingDownListenerService = service object {
     }
 
     remote function onError(Error 'error) {
-        if 'error.message().includes("Server might not be available") ||
-           'error.message().includes("No active connections") {
-        }
+        // This service handles errors when server goes down
     }
 };

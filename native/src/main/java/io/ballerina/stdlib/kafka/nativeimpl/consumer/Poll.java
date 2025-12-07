@@ -36,6 +36,7 @@ import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import io.ballerina.stdlib.kafka.utils.ModuleUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -79,28 +80,25 @@ public class Poll {
                 String bootstrapServers = (String) consumerObject.getNativeData(BOOTSTRAP_SERVERS);
                 synchronized (kafkaConsumer) {
                     ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
-                    if (recordsRetrieved.isEmpty()) {
-                        double connectionCount = KafkaUtils.getActiveConnectionCount(kafkaConsumer);
-                        if (connectionCount == 0) {
-                            KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                    KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                            String errorMsg = "Server might not be available at " + bootstrapServers
-                                    + ". No active connections found.";
-                            balFuture.complete(createKafkaError(errorMsg));
-                            return;
-                        }
+                    if (recordsRetrieved.isEmpty() && KafkaUtils.isServerUnavailable(kafkaConsumer)) {
+                        KafkaMetricsUtil.reportConsumerError(consumerObject,
+                                KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                        String errorMsg = "Server might not be available at " + bootstrapServers
+                                + ". No active connections found.";
+                        balFuture.complete(createKafkaError(errorMsg));
+                        return;
                     }
                     consumerRecords = getConsumerRecords(consumerObject, recordsRetrieved, recordType,
                             bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit,
                             kafkaConsumer, autoSeek);
                 }
                 balFuture.complete(consumerRecords);
+            } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             } catch (BError e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(e);
-            } catch (Exception e) {
-                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             }
         });
         return ModuleUtils.getResult(balFuture);
@@ -123,28 +121,26 @@ public class Poll {
                 ConsumerRecords recordsRetrieved;
                 synchronized (kafkaConsumer) {
                     recordsRetrieved = kafkaConsumer.poll(duration);
-                    if (recordsRetrieved.isEmpty()) {
-                        double connectionCount = KafkaUtils.getActiveConnectionCount(kafkaConsumer);
-                        if (connectionCount == 0) {
-                            KafkaMetricsUtil.reportConsumerError(consumerObject,
-                                    KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                            String errorMsg = "Server might not be available at " + bootstrapServers
-                                    + ". No active connections found.";
-                            balFuture.complete(createKafkaError(errorMsg));
-                            return;
-                        }
-                    } else {
+                    if (recordsRetrieved.isEmpty() && KafkaUtils.isServerUnavailable(kafkaConsumer)) {
+                        KafkaMetricsUtil.reportConsumerError(consumerObject,
+                                KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                        String errorMsg = "Server might not be available at " + bootstrapServers
+                                + ". No active connections found.";
+                        balFuture.complete(createKafkaError(errorMsg));
+                        return;
+                    }
+                    if (!recordsRetrieved.isEmpty()) {
                         dataArray = getValuesWithIntendedType(consumerObject, arrayType, kafkaConsumer,
                                 recordsRetrieved, constraintValidation, autoCommit, autoSeek);
                     }
                 }
                 balFuture.complete(dataArray);
+            } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             } catch (BError bError) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(bError);
-            } catch (Exception e) {
-                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
             }
         });
         return ModuleUtils.getResult(balFuture);
