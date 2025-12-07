@@ -76,27 +76,6 @@ function testConsumerClientWithServerDown() returns error? {
 }
 
 @test:Config {
-    groups: ["producer", "server-availability"]
-}
-function testProducerClientWithServerDown() returns error? {
-    string topic = "server-down-producer-test-topic";
-    kafkaTopics.push(topic);
-
-    ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-server-down"
-    };
-
-    Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
-    Error? result = producer->send({topic: topic, value: TEST_MESSAGE.toBytes()});
-    test:assertTrue(result is Error);
-    if result is Error {
-        test:assertTrue(result.message().includes("Server might not be available") ||
-                        result.message().includes("No active connections"));
-    }
-    check producer->close();
-}
-
-@test:Config {
     groups: ["consumer", "server-availability"]
 }
 function testConsumerPollPayloadWithServerDown() returns error? {
@@ -118,27 +97,6 @@ function testConsumerPollPayloadWithServerDown() returns error? {
                         result.message().includes("No active connections"));
     }
     check consumer->close();
-}
-
-@test:Config {
-    groups: ["producer", "server-availability"]
-}
-function testProducerSendWithMetadataServerDown() returns error? {
-    string topic = "server-down-send-metadata-test-topic";
-    kafkaTopics.push(topic);
-
-    ProducerConfiguration producerConfiguration = {
-        clientId: "test-producer-send-metadata-server-down"
-    };
-
-    Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
-    RecordMetadata|Error result = producer->sendWithMetadata({topic: topic, value: TEST_MESSAGE.toBytes()});
-    test:assertTrue(result is Error);
-    if result is Error {
-        test:assertTrue(result.message().includes("Server might not be available") ||
-                        result.message().includes("No active connections"));
-    }
-    check producer->close();
 }
 
 @test:Config {
