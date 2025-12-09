@@ -21,6 +21,7 @@ package io.ballerina.stdlib.kafka.impl;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.stdlib.kafka.api.KafkaListener;
 import io.ballerina.stdlib.kafka.utils.KafkaConstants;
+import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -55,6 +56,7 @@ public class KafkaRecordConsumer {
     private int pollingInterval = 1000;
     private long stopTimeout = 30000;
     private String groupId;
+    private String bootstrapServers;
     private final KafkaListener kafkaListener;
     private final String serviceId;
     private final int consumerId;
@@ -83,6 +85,7 @@ public class KafkaRecordConsumer {
             this.pollingInterval = (Integer) configParams.get(KafkaConstants.ALIAS_POLLING_INTERVAL.getValue());
         }
         this.groupId = (String) configParams.get(ConsumerConfig.GROUP_ID_CONFIG);
+        this.bootstrapServers = (String) configParams.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
     }
 
     private void poll() {
@@ -115,7 +118,11 @@ public class KafkaRecordConsumer {
     }
 
     private void processRetrievedRecords(ConsumerRecords consumerRecords) {
-        if (Objects.nonNull(consumerRecords) && !consumerRecords.isEmpty()) {
+        if (Objects.isNull(consumerRecords)) {
+            return;
+        }
+
+        if (!consumerRecords.isEmpty()) {
             Semaphore sem = new Semaphore(0);
             KafkaPollCycleFutureListener pollCycleListener = new KafkaPollCycleFutureListener(sem, serviceId);
             this.kafkaListener.onRecordsReceived(consumerRecords, kafkaConsumer, groupId, pollCycleListener);
@@ -127,6 +134,13 @@ public class KafkaRecordConsumer {
             } catch (InterruptedException e) {
                 this.kafkaListener.onError(e);
                 this.pollTaskFuture.cancel(false);
+            }
+        } else {
+            // Check if server is truly unavailable (not just a security/config issue)
+            if (KafkaUtils.isServerUnavailable(kafkaConsumer)) {
+                Exception serverDownException = new Exception(
+                        "Server might not be available at " + this.bootstrapServers + ". No active connections found.");
+                this.kafkaListener.onError(serverDownException);
             }
         }
     }

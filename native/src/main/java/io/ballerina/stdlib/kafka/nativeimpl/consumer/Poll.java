@@ -32,6 +32,7 @@ import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
+import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import io.ballerina.stdlib.kafka.utils.ModuleUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -44,6 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import static io.ballerina.runtime.api.utils.TypeUtils.getReferredType;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.BOOTSTRAP_SERVERS;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.CONSUMER_CONFIG_FIELD_NAME;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_CONSUMER;
@@ -75,8 +77,17 @@ public class Poll {
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
                 boolean autoSeek = getAutoSeekOnErrorConfig(consumerObject);
                 BArray consumerRecords;
+                String bootstrapServers = (String) consumerObject.getNativeData(BOOTSTRAP_SERVERS);
                 synchronized (kafkaConsumer) {
                     ConsumerRecords recordsRetrieved = kafkaConsumer.poll(duration);
+                    if (recordsRetrieved.isEmpty() && KafkaUtils.isServerUnavailable(kafkaConsumer)) {
+                        KafkaMetricsUtil.reportConsumerError(consumerObject,
+                                KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                        String errorMsg = "Server might not be available at " + bootstrapServers
+                                + ". No active connections found.";
+                        balFuture.complete(createKafkaError(errorMsg));
+                        return;
+                    }
                     consumerRecords = getConsumerRecords(consumerObject, recordsRetrieved, recordType,
                             bTypedesc.getDescribingType().isReadOnly(), constraintValidation, autoCommit,
                             kafkaConsumer, autoSeek);
@@ -106,21 +117,30 @@ public class Poll {
                         .get(CONSTRAINT_VALIDATION);
                 boolean autoCommit = getAutoCommitConfig(consumerObject);
                 boolean autoSeek = getAutoSeekOnErrorConfig(consumerObject);
+                String bootstrapServers = (String) consumerObject.getNativeData(BOOTSTRAP_SERVERS);
                 ConsumerRecords recordsRetrieved;
                 synchronized (kafkaConsumer) {
                     recordsRetrieved = kafkaConsumer.poll(duration);
+                    if (recordsRetrieved.isEmpty() && KafkaUtils.isServerUnavailable(kafkaConsumer)) {
+                        KafkaMetricsUtil.reportConsumerError(consumerObject,
+                                KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                        String errorMsg = "Server might not be available at " + bootstrapServers
+                                + ". No active connections found.";
+                        balFuture.complete(createKafkaError(errorMsg));
+                        return;
+                    }
                     if (!recordsRetrieved.isEmpty()) {
                         dataArray = getValuesWithIntendedType(consumerObject, arrayType, kafkaConsumer,
                                 recordsRetrieved, constraintValidation, autoCommit, autoSeek);
                     }
                 }
                 balFuture.complete(dataArray);
-            } catch (BError bError) {
-                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
-                balFuture.complete(bError);
             } catch (IllegalStateException | IllegalArgumentException | KafkaException e) {
                 KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
                 balFuture.complete(createKafkaError("Failed to poll from the Kafka server: " + e.getMessage()));
+            } catch (BError bError) {
+                KafkaMetricsUtil.reportConsumerError(consumerObject, KafkaObservabilityConstants.ERROR_TYPE_POLL);
+                balFuture.complete(bError);
             }
         });
         return ModuleUtils.getResult(balFuture);
