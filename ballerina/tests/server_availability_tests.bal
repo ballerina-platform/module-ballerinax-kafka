@@ -136,6 +136,48 @@ Service serverDownListenerService = service object {
     }
 };
 
+@test:Config {
+    groups: ["producer", "server-availability"]
+}
+function testProducerSendWithServerDown() returns error? {
+    string topic = "server-down-producer-send-test-topic";
+    // Note: Don't push to kafkaTopics since this topic won't be created (INCORRECT_KAFKA_URL)
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-server-down"
+    };
+
+    Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
+    Error? result = producer->send({topic: topic, value: "test-message".toBytes()});
+    test:assertTrue(result is error);
+    if result is error {
+        string expectedError = "Server might not be available at " + INCORRECT_KAFKA_URL + ". No active connections found.";
+        test:assertEquals(result.message(), expectedError);
+    }
+    check producer->close();
+}
+
+@test:Config {
+    groups: ["producer", "server-availability"]
+}
+function testProducerSendWithMetadataWithServerDown() returns error? {
+    string topic = "server-down-producer-send-metadata-test-topic";
+    // Note: Don't push to kafkaTopics since this topic won't be created (INCORRECT_KAFKA_URL)
+
+    ProducerConfiguration producerConfiguration = {
+        clientId: "test-producer-send-metadata-server-down"
+    };
+
+    Producer producer = check new (INCORRECT_KAFKA_URL, producerConfiguration);
+    RecordMetadata|Error result = producer->sendWithMetadata({topic: topic, value: "test-message".toBytes()});
+    test:assertTrue(result is error);
+    if result is error {
+        string expectedError = "Server might not be available at " + INCORRECT_KAFKA_URL + ". No active connections found.";
+        test:assertEquals(result.message(), expectedError);
+    }
+    check producer->close();
+}
+
 // Service for testing when server goes down after startup
 Service serverGoingDownListenerService = service object {
     remote function onConsumerRecord(BytesConsumerRecord[] records) {

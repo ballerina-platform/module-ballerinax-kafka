@@ -29,6 +29,7 @@ import io.ballerina.runtime.transactions.TransactionResourceManager;
 import io.ballerina.stdlib.kafka.observability.KafkaMetricsUtil;
 import io.ballerina.stdlib.kafka.observability.KafkaObservabilityConstants;
 import io.ballerina.stdlib.kafka.observability.KafkaTracingUtil;
+import io.ballerina.stdlib.kafka.utils.KafkaUtils;
 import io.ballerina.stdlib.kafka.utils.ModuleUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -45,6 +46,7 @@ import java.util.concurrent.Future;
 
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ALIAS_PARTITION;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.ALIAS_TOPIC;
+import static io.ballerina.stdlib.kafka.utils.KafkaConstants.BOOTSTRAP_SERVERS;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.NATIVE_PRODUCER;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.OFFSET_FIELD;
 import static io.ballerina.stdlib.kafka.utils.KafkaConstants.RECORD_METADATA_TYPE_NAME;
@@ -65,6 +67,7 @@ public class Send {
         KafkaTracingUtil.traceResourceInvocation(env, producer, record.topic());
         final CompletableFuture<Object> balFuture = new CompletableFuture<>();
         KafkaProducer kafkaProducer = (KafkaProducer) producer.getNativeData(NATIVE_PRODUCER);
+        String bootstrapServers = (String) producer.getNativeData(BOOTSTRAP_SERVERS);
         if (TransactionResourceManager.getInstance().isInTransaction()) {
             handleTransactions(producer);
         }
@@ -74,7 +77,20 @@ public class Send {
                     if (Objects.nonNull(e)) {
                         KafkaMetricsUtil.reportProducerError(producer,
                                 KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                        balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+                        String errorMessage = e.getMessage();
+                        // Check if the producer is closed first, before checking server availability
+                        if (errorMessage != null
+                                && errorMessage.toLowerCase(java.util.Locale.ROOT).contains("closed")) {
+                            balFuture.complete(createKafkaError("Failed to send data to Kafka server: "
+                                    + errorMessage));
+                        } else if (KafkaUtils.isServerUnavailable(kafkaProducer)) {
+                            String errorMsg = "Server might not be available at " + bootstrapServers
+                                    + ". No active connections found.";
+                            balFuture.complete(createKafkaError(errorMsg));
+                        } else {
+                            balFuture.complete(createKafkaError("Failed to send data to Kafka server: "
+                                    + errorMessage));
+                        }
                     } else {
                         KafkaMetricsUtil.reportPublish(producer, record.topic(), record.value());
                         balFuture.complete(null);
@@ -82,7 +98,17 @@ public class Send {
                 });
             } catch (IllegalStateException | KafkaException e) {
                 KafkaMetricsUtil.reportProducerError(producer, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+                String errorMessage = e.getMessage();
+                // Check if the producer is closed first, before checking server availability
+                if (errorMessage != null && errorMessage.toLowerCase(java.util.Locale.ROOT).contains("closed")) {
+                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + errorMessage));
+                } else if (KafkaUtils.isServerUnavailable(kafkaProducer)) {
+                    String errorMsg = "Server might not be available at " + bootstrapServers
+                            + ". No active connections found.";
+                    balFuture.complete(createKafkaError(errorMsg));
+                } else {
+                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + errorMessage));
+                }
             }
         });
         return ModuleUtils.getResult(balFuture);
@@ -94,6 +120,7 @@ public class Send {
         KafkaTracingUtil.traceResourceInvocation(env, producer, record.topic());
         final CompletableFuture<Object> balFuture = new CompletableFuture<>();
         KafkaProducer kafkaProducer = (KafkaProducer) producer.getNativeData(NATIVE_PRODUCER);
+        String bootstrapServers = (String) producer.getNativeData(BOOTSTRAP_SERVERS);
         if (TransactionResourceManager.getInstance().isInTransaction()) {
             handleTransactions(producer);
         }
@@ -104,7 +131,17 @@ public class Send {
                 balFuture.complete(populateRecordMetadata(metadata));
             } catch (Exception e) {
                 KafkaMetricsUtil.reportProducerError(producer, KafkaObservabilityConstants.ERROR_TYPE_PUBLISH);
-                balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + e.getMessage()));
+                String errorMessage = e.getMessage();
+                // Check if the producer is closed first, before checking server availability
+                if (errorMessage != null && errorMessage.toLowerCase(java.util.Locale.ROOT).contains("closed")) {
+                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + errorMessage));
+                } else if (KafkaUtils.isServerUnavailable(kafkaProducer)) {
+                    String errorMsg = "Server might not be available at " + bootstrapServers
+                            + ". No active connections found.";
+                    balFuture.complete(createKafkaError(errorMsg));
+                } else {
+                    balFuture.complete(createKafkaError("Failed to send data to Kafka server: " + errorMessage));
+                }
             }
         });
         return ModuleUtils.getResult(balFuture);
