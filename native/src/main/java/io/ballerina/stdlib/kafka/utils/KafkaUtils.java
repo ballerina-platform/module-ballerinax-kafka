@@ -1263,4 +1263,74 @@ public class KafkaUtils {
         // No connections and no signs of server interaction - server is likely down
         return true;
     }
+
+    /**
+     * Checks if there are any signs that the server was reached during connection attempts.
+     *
+     * @param kafkaProducer the Kafka producer instance
+     * @return true if there are signs the server was reached, false otherwise
+     */
+    public static boolean hasServerInteractionAttempts(KafkaProducer kafkaProducer) {
+        Map<MetricName, ? extends Metric> metrics = kafkaProducer.metrics();
+        for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+            MetricName metricName = entry.getKey();
+            String group = metricName.group();
+            String name = metricName.name();
+
+            // Only check producer-metrics group
+            if (!"producer-metrics".equals(group)) {
+                continue;
+            }
+
+            // Check for failed authentication - server was reached but auth failed
+            if ("failed-authentication-total".equals(name)) {
+                double value = (double) entry.getValue().metricValue();
+                if (value > 0) {
+                    return true;
+                }
+            }
+
+            // Check for successful authentications - server definitely reachable
+            if ("successful-authentication-total".equals(name)) {
+                double value = (double) entry.getValue().metricValue();
+                if (value > 0) {
+                    return true;
+                }
+            }
+
+            // Check for connection creation attempts - TCP connection was at least attempted
+            // This helps detect SSL/protocol mismatch scenarios where TCP connects but
+            // the handshake fails before Kafka authentication
+            if ("connection-creation-total".equals(name)) {
+                double value = (double) entry.getValue().metricValue();
+                if (value > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determines if the server is truly unavailable.
+     * This helps distinguish between "server is down" vs "server is up but config is wrong".
+     *
+     * @param kafkaProducer the Kafka producer instance
+     * @return true if the server appears to be truly unavailable, false otherwise
+     */
+    public static boolean isServerUnavailable(KafkaProducer kafkaProducer) {
+        // If we have active connections, server is available
+        if (getActiveConnectionCount(kafkaProducer) > 0) {
+            return false;
+        }
+
+        // If there are signs the server was reached (auth failures, IO errors, etc.),
+        // it means server is available but there's a config issue
+        if (hasServerInteractionAttempts(kafkaProducer)) {
+            return false;
+        }
+
+        // No connections and no signs of server interaction - server is likely down
+        return true;
+    }
 }
