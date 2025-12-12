@@ -746,6 +746,19 @@ Failed to validate payload. If needed, please seek past the record to continue c
 - Message doesn't match the expected Ballerina type
 - Constraint validation fails
 
+**Understanding the Behavior:**
+
+The behavior when a data binding or validation error occurs depends on the combination of `autoCommit` and `autoSeekOnValidationFailure` settings:
+
+| autoCommit | autoSeekOnValidationFailure | Behavior on Error |
+|------------|----------------------------|-------------------|
+| `true` (default) | `true` (default) | Bad record **skipped and committed** - won't be reprocessed. Error printed to stderr. |
+| `true` | `false` | Processing stops, successfully processed records committed, re-polls from failed record |
+| `false` | `true` | Bad record skipped, no auto-commit (manual commit needed) |
+| `false` | `false` | Processing stops, no commits, re-polls from failed record |
+
+**Important:** With default settings (`autoCommit: true`, `autoSeekOnValidationFailure: true`), bad records are **silently skipped and their offsets are committed**, meaning they will never be reprocessed. The error is only printed to stderr unless you implement `onError` in your listener service.
+
 **Solution:**
 
 1. **Disable validation if not needed:**
@@ -769,7 +782,44 @@ Failed to validate payload. If needed, please seek past the record to continue c
    };
    ```
 
-3. **Define proper types for data binding:**
+3. **Preserve failed records for later processing:**
+
+   If you need to ensure bad records are not lost, disable auto-commit and handle commits manually:
+   ```ballerina
+   kafka:ConsumerConfiguration config = {
+       groupId: "my-group",
+       topics: ["my-topic"],
+       autoCommit: false,
+       autoSeekOnValidationFailure: false
+   };
+   ```
+   With this configuration, when a binding error occurs:
+   - Processing stops at the failed record
+   - No offsets are auto-committed
+   - The next poll will re-fetch from the failed record
+   - You can log the error and manually seek past it if needed
+
+4. **Handle errors in listener service:**
+   ```ballerina
+   service on kafkaListener {
+       remote function onConsumerRecord(OrderRecord[] orders, kafka:Caller caller) returns error? {
+           foreach var order in orders {
+               // Process order
+           }
+           // Manual commit after successful processing
+           check caller->'commit();
+       }
+
+       remote function onError(kafka:Error err, kafka:Caller caller) returns error? {
+           if err.message().includes("Data binding failed") {
+               log:printError("Failed to bind record", 'error = err);
+               // Optionally: send to dead letter queue, alert, etc.
+           }
+       }
+   }
+   ```
+
+5. **Define proper types for data binding:**
    ```ballerina
    type OrderRecord record {|
        string orderId;
