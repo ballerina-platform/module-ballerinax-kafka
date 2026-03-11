@@ -1,5 +1,4 @@
-# Ballerina Kafka Library
-
+# Overview
 
 [![Build](https://github.com/ballerina-platform/module-ballerinax-kafka/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions/workflows/build-timestamped-master.yml)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-kafka/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-kafka)
@@ -7,11 +6,16 @@
 [![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-kafka/actions/workflows/build-with-bal-test-graalvm.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/actions/workflows/build-with-bal-test-graalvm.yml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-kafka.svg)](https://github.com/ballerina-platform/module-ballerinax-kafka/commits/master)
 
-This library provides an implementation to interact with Kafka Brokers via Kafka Consumer and Kafka Producer clients.
+Apache Kafka is a distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications. The Ballerina `ballerinax/kafka` connector allows you to integrate your Ballerina applications with Kafka, providing the ability to produce and consume events from Kafka topics. It supports high-throughput, fault-tolerant, and scalable messaging, making it ideal for building real-time data processing systems.
 
-Apache Kafka is an open-source distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
+## Key Features
 
-This library supports Kafka 1.x.x, 2.x.x and 3.x.x versions.
+- Produce and consume messages from Kafka topics
+- Support for consumer groups for scalable message processing
+- Secure communication with SASL and SSL
+- Comprehensive support for Kafka transactions
+- Custom serialization and deserialization of messages
+- GraalVM compatible for native image builds
 
 ### Consumer and producer
 #### Kafka producer
