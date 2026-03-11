@@ -1,8 +1,8 @@
-# Overview
+## Overview
 
 Apache Kafka is a distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications. The Ballerina `ballerinax/kafka` connector allows you to integrate your Ballerina applications with Kafka, providing the ability to produce and consume events from Kafka topics. It supports high-throughput, fault-tolerant, and scalable messaging, making it ideal for building real-time data processing systems.
 
-## Key Features
+### Key Features
 
 - Produce and consume messages from Kafka topics
 - Support for consumer groups for scalable message processing
