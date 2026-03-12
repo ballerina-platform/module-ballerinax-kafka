@@ -1,10 +1,15 @@
 ## Overview
 
-This package provides an implementation to interact with Kafka Brokers via Kafka Consumer and Kafka Producer clients.
+Apache Kafka is a distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications. The Kafka connector allows you to integrate with Kafka, providing the ability to produce and consume events from Kafka topics. It supports high-throughput, fault-tolerant, and scalable messaging, making it ideal for building real-time data processing systems.
 
-Apache Kafka is an open-source distributed event streaming platform used for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
+### Key Features
 
-This package supports Kafka 1.x.x, 2.x.x and 3.x.x versions.
+- Produce and consume messages from Kafka topics
+- Support for consumer groups for scalable message processing
+- Secure communication with SASL and SSL
+- Comprehensive support for Kafka transactions
+- Custom serialization and deserialization of messages
+- GraalVM compatible for native image builds
 
 ### Consumer and producer
 
