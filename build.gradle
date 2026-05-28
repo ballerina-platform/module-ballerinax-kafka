@@ -63,6 +63,13 @@ allprojects {
 }
 
 subprojects {
+    plugins.withId('java') {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(25)
+            }
+        }
+    }
 
     configurations {
         ballerinaStdLibs
@@ -118,7 +125,7 @@ release {
     }
 }
 
-task build {
+tasks.named('build') {
     dependsOn(':kafka-compiler-plugin:build')
     dependsOn(':kafka-native:build')
     dependsOn(':kafka-ballerina:build')
