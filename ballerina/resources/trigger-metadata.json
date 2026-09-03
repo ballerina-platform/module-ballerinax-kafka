@@ -1,0 +1,95 @@
+{
+  "version": "v1.0",
+
+  "listeners": [
+    {
+      "id": "$listener",
+      "doc": "Polls the subscribed topics on its configured interval and dispatches each batch to the attached service.",
+      "type": { "name": "Listener" },
+      "services": ["$service"],
+      "multipleServicesAllowed": false
+    }
+  ],
+
+  "serviceTypes": [
+    {
+      "id": "$service",
+      "doc": "Consumes records from the subscribed topics and dispatches each poll's batch.",
+      "type": { "name": "Service" },
+      "concrete": false,
+      "multipleListenersAllowed": false,
+      "handlers": {
+        "backedByConcreteType": false,
+        "options": [
+          {
+            "id": "$service.onConsumerRecord",
+            "name": "onConsumerRecord",
+            "kind": "remote",
+            "doc": "Invoked with each batch of records polled from the subscribed topics. The listener polls on its configured interval and dispatches everything it received as one batch.",
+            "presence": "required",
+            "params": [
+              {
+                "id": "$service.onConsumerRecord.caller",
+                "name": "caller",
+                "doc": "Handle for committing offsets explicitly. Needed only when auto-commit is disabled.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onConsumerRecord.records",
+                "name": "records",
+                "doc": "The polled batch. Declare a narrower element type to project each record's value, see the consumerRecordPayload data-binding rule.",
+                "type": [
+                  { "shape": "array", "elementType": { "name": "AnydataConsumerRecord" } },
+                  { "shape": "array", "elementType": { "name": "BytesConsumerRecord" } }
+                ],
+                "presence": "required",
+                "dataBinding": {
+                  "typedescs": [
+                    {
+                      "constraint": { "name": "anydata", "builtin": true },
+                      "excludes": [{ "name": "AnydataConsumerRecord" }],
+                      "shapes": [{ "form": "array", "element": "bare" }]
+                    },
+                    {
+                      "constraint": { "name": "anydata", "builtin": true },
+                      "shapes": [
+                        {
+                          "form": "array",
+                          "element": "included",
+                          "envelope": { "name": "AnydataConsumerRecord" },
+                          "bindableFields": ["value"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ],
+            "returns": {
+              "id": "$service.onConsumerRecord.returns",
+              "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }]
+            }
+          },
+          {
+            "id": "$service.onError",
+            "name": "onError",
+            "kind": "remote",
+            "doc": "Invoked when polling fails, or when a polled batch cannot be dispatched, most commonly because a record's value fails to bind to the declared type.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onError.err",
+                "name": "err",
+                "doc": "The failure that prevented the batch from being delivered.",
+                "type": { "name": "Error" },
+                "presence": "required"
+              }
+            ],
+            "returns": { "id": "$service.onError.returns", "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }] }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,455 @@
+{
+  "version": "v1.0",
+  "metadata": {
+    "kind": "event"
+  },
+  "trigger": {
+    "displayName": "Kafka Event Integration",
+    "description": "Create a service to handle messages from Kafka topic(s)",
+    "type": "kafka"
+  },
+  "readOnlyMetadata": [
+    {
+      "key": "topics",
+      "displayName": "Topic(s)",
+      "paramKind": "INCLUDED_FIELD",
+      "path": "topics",
+      "extractor": "LISTENER_PARAM"
+    }
+  ],
+  "listeners": [
+    {
+      "target": "$listener",
+      "formFields": {
+        "listenerVarName": {
+          "key": "listenerVarName",
+          "default": "kafkaListener",
+          "metadata": {
+            "label": "Listener Name",
+            "description": "Provide a name for the listener being created."
+          },
+          "state": {
+            "advanced": true,
+            "enabled": true,
+            "editable": true,
+            "optional": false
+          },
+          "source": {
+            "construct": {
+              "kind": "LISTENER_VAR_NAME"
+            }
+          }
+        },
+        "bootstrapServers": {
+          "key": "bootstrapServers",
+          "placeholder": "localhost:9092",
+          "default": "\"localhost:9092\"",
+          "metadata": {
+            "label": "Bootstrap Servers",
+            "description": "List of remote server endpoints of the Kafka brokers."
+          },
+          "source": {
+            "argument": {
+              "kind": "LISTENER_PARAM_REQUIRED",
+              "position": 1
+            }
+          },
+          "state": {
+            "enabled": true,
+            "editable": true,
+            "optional": false,
+            "advanced": false
+          }
+        },
+        "topics": {
+          "key": "topics",
+          "placeholder": "myTopic",
+          "default": "\"myTopic\"",
+          "metadata": {
+            "label": "Topic(s)",
+            "description": "The topic(s) to subscribe to."
+          },
+          "source": {
+            "argument": {
+              "kind": "LISTENER_PARAM_INCLUDED_FIELD"
+            },
+            "path": "topics"
+          },
+          "state": {
+            "enabled": true,
+            "editable": true,
+            "optional": false,
+            "advanced": false
+          }
+        }
+      }
+    }
+  ],
+  "serviceTypes": [
+    {
+      "target": "$service",
+      "metadata": {
+        "label": "Kafka Consumer",
+        "description": "Consumes messages from the subscribed Kafka topic(s)."
+      },
+      "state": {
+        "editable": false,
+        "enabled": true
+      },
+      "handlers": [
+        {
+          "target": "$service.onConsumerRecord",
+          "metadata": {
+            "label": "onConsumerRecord",
+            "description": "The `onConsumerRecord` remote method is triggered when a batch of messages is received from the subscribed Kafka topic(s)."
+          },
+          "parameters": [
+            {
+              "target": "$service.onConsumerRecord.records",
+              "metadata": {
+                "label": "Consumer Records",
+                "description": "The batch of messages received from the Kafka topic(s)."
+              },
+              "fields": [
+                {
+                  "target": {
+                    "kind": "recordField",
+                    "owner": "records.parameter",
+                    "path": "type"
+                  },
+                  "metadata": {
+                    "label": "Parameter Type",
+                    "description": "The type of the parameter"
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": true,
+                    "advanced": false
+                  },
+                  "key": "type",
+                  "default": "",
+                  "properties": {
+                    "payload": {
+                      "key": "payload",
+                      "default": "",
+                      "metadata": {
+                        "label": "Message Configuration",
+                        "description": "Define the shape of the Kafka message"
+                      },
+                      "source": {
+                        "construct": {
+                          "kind": "PAYLOAD_TYPE_INCLUDED_RECORD"
+                        },
+                        "payload": {
+                          "boundType": "",
+                          "typeConstraint": "anydata",
+                          "defaultType": "kafka:AnydataConsumerRecord",
+                          "template": "{{type}}[]",
+                          "modifiers": {
+                            "type": "ballerinax:kafka:1.4.0:AnydataConsumerRecord",
+                            "field": "value",
+                            "typeIdentifier": "KafkaAnydataConsumer",
+                            "template": "T[]"
+                          }
+                        },
+                        "bindable": true,
+                        "nameEditable": false,
+                        "bindingKind": "USER_SELECTED"
+                      },
+                      "state": {
+                        "enabled": true,
+                        "editable": true,
+                        "optional": false,
+                        "advanced": false
+                      },
+                      "widget": {
+                        "widgetKind": "PAYLOAD_TYPE",
+                        "selected": true,
+                        "formats": [
+                          {
+                            "supported": [
+                              "schema",
+                              "browse",
+                              "json",
+                              "xml"
+                            ],
+                            "defaultFormat": "json"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "widget": {
+                    "widgetKind": "DATA_BINDING",
+                    "selected": true
+                  }
+                },
+                {
+                  "target": {
+                    "kind": "recordField",
+                    "owner": "records.parameter",
+                    "path": "name"
+                  },
+                  "metadata": {
+                    "label": "records",
+                    "description": "The batch of messages received from the Kafka topic(s)."
+                  },
+                  "state": {
+                    "enabled": false,
+                    "editable": true,
+                    "optional": false,
+                    "advanced": false
+                  },
+                  "key": "name",
+                  "placeholder": "records",
+                  "default": "records"
+                }
+              ],
+              "source": {
+                "construct": {
+                  "kind": "FUNCTION_PARAM"
+                }
+              },
+              "state": {
+                "enabled": false,
+                "editable": true,
+                "optional": false,
+                "advanced": false,
+                "hidden": false
+              }
+            },
+            {
+              "target": "$service.onConsumerRecord.caller",
+              "metadata": {
+                "label": "Caller",
+                "description": "Enable this to access the Kafka caller in your service for manual offset management and partition operations."
+              },
+              "state": {
+                "advanced": true,
+                "enabled": false,
+                "editable": true,
+                "optional": true,
+                "hidden": false
+              },
+              "fields": [
+                {
+                  "target": {
+                    "kind": "recordField",
+                    "owner": "caller.parameter",
+                    "path": "type"
+                  },
+                  "metadata": {
+                    "label": "Include Caller",
+                    "description": "Tick to include the Kafka caller parameter in the handler signature."
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": true,
+                    "advanced": false
+                  },
+                  "key": "type",
+                  "placeholder": "kafka:Caller",
+                  "default": false
+                },
+                {
+                  "target": {
+                    "kind": "recordField",
+                    "owner": "caller.parameter",
+                    "path": "name"
+                  },
+                  "metadata": {
+                    "label": "caller",
+                    "description": "The Kafka caller object used to commit offsets manually."
+                  },
+                  "state": {
+                    "editable": false,
+                    "enabled": true,
+                    "optional": false,
+                    "advanced": false
+                  },
+                  "key": "name",
+                  "placeholder": "caller",
+                  "default": "caller"
+                }
+              ],
+              "source": {
+                "construct": {
+                  "kind": "FUNCTION_PARAM"
+                }
+              }
+            }
+          ],
+          "returnType": {
+            "target": "$service.onConsumerRecord.returns",
+            "metadata": {
+              "label": "Return Type",
+              "description": "The return type of the function."
+            },
+            "state": {
+              "editable": false,
+              "enabled": true,
+              "optional": true
+            },
+            "source": {
+              "construct": {
+                "kind": "FUNCTION_RETURN"
+              }
+            }
+          },
+          "source": {
+            "construct": {
+              "kind": "FUNCTION"
+            },
+            "argument": {
+              "originalName": "onConsumerRecord"
+            },
+            "module": {
+              "name": "kafka"
+            }
+          },
+          "state": {
+            "enabled": false,
+            "editable": true,
+            "optional": true
+          },
+          "nameEditable": false,
+          "repeatable": "FALSE",
+          "canAddParameters": false
+        },
+        {
+          "target": "$service.onError",
+          "metadata": {
+            "label": "onError",
+            "description": "The `onError` remote method is triggered when an error occurs during message processing.",
+            "addLabel": "Add On Error Handler"
+          },
+          "parameters": [
+            {
+              "target": {
+                "kind": "concreteParam",
+                "serviceType": "$service",
+                "handler": "onError",
+                "name": "kafkaError"
+              },
+              "metadata": {
+                "label": "Kafka Error",
+                "description": "The error that occurred during message processing."
+              },
+              "state": {
+                "editable": false,
+                "enabled": true,
+                "optional": false,
+                "advanced": false,
+                "hidden": false
+              },
+              "fields": [
+                {
+                  "target": {
+                    "kind": "recordField",
+                    "owner": "kafkaError.parameter",
+                    "path": "type"
+                  },
+                  "metadata": {
+                    "label": "Parameter Type",
+                    "description": "The type of the parameter"
+                  },
+                  "state": {
+                    "editable": false,
+                    "enabled": true,
+                    "optional": true,
+                    "advanced": false
+                  },
+                  "key": "type",
+                  "placeholder": "kafka:Error",
+                  "default": "kafka:Error"
+                },
+                {
+                  "target": {
+                    "kind": "recordField",
+                    "owner": "kafkaError.parameter",
+                    "path": "name"
+                  },
+                  "metadata": {
+                    "label": "kafkaError",
+                    "description": "The error that occurred during message processing."
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": false,
+                    "advanced": false
+                  },
+                  "key": "name",
+                  "placeholder": "kafkaError",
+                  "default": "kafkaError"
+                }
+              ],
+              "source": {
+                "construct": {
+                  "kind": "FUNCTION_PARAM"
+                }
+              }
+            }
+          ],
+          "returnType": {
+            "target": "$service.onError.returns",
+            "metadata": {
+              "label": "Return Type",
+              "description": "The return type of the function."
+            },
+            "state": {
+              "editable": false,
+              "enabled": true,
+              "optional": true
+            },
+            "source": {
+              "construct": {
+                "kind": "FUNCTION_RETURN"
+              }
+            }
+          },
+          "source": {
+            "construct": {
+              "kind": "FUNCTION"
+            },
+            "argument": {
+              "originalName": "onError"
+            },
+            "module": {
+              "name": "kafka"
+            }
+          },
+          "state": {
+            "enabled": false,
+            "editable": true,
+            "optional": true
+          },
+          "nameEditable": false,
+          "repeatable": "FALSE",
+          "canAddParameters": false
+        }
+      ],
+      "source": {
+        "construct": {
+          "kind": "SERVICE_TYPE_DESCRIPTOR"
+        },
+        "argument": {
+          "originalName": "Service"
+        },
+        "module": {
+          "name": "kafka"
+        }
+      },
+      "description": "Handles messages received from Kafka topic(s)."
+    }
+  ],
+  "artifactInfo": {
+    "displayLabel": "Kafka Event Integration",
+    "icon": {
+      "lightPath": "icons/light.svg",
+      "darkPath": "icons/dark.svg"
+    }
+  }
+}
