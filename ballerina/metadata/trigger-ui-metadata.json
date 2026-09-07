@@ -327,14 +327,9 @@
           },
           "parameters": [
             {
-              "target": {
-                "kind": "concreteParam",
-                "serviceType": "$service",
-                "handler": "onError",
-                "name": "kafkaError"
-              },
+              "target": "$service.onError.err",
               "metadata": {
-                "label": "Kafka Error",
+                "label": "Error",
                 "description": "The error that occurred during message processing."
               },
               "state": {
@@ -348,7 +343,7 @@
                 {
                   "target": {
                     "kind": "recordField",
-                    "owner": "kafkaError.parameter",
+                    "owner": "err.parameter",
                     "path": "type"
                   },
                   "metadata": {
@@ -368,11 +363,11 @@
                 {
                   "target": {
                     "kind": "recordField",
-                    "owner": "kafkaError.parameter",
+                    "owner": "err.parameter",
                     "path": "name"
                   },
                   "metadata": {
-                    "label": "kafkaError",
+                    "label": "err",
                     "description": "The error that occurred during message processing."
                   },
                   "state": {
@@ -382,8 +377,8 @@
                     "advanced": false
                   },
                   "key": "name",
-                  "placeholder": "kafkaError",
-                  "default": "kafkaError"
+                  "placeholder": "err",
+                  "default": "err"
                 }
               ],
               "source": {
