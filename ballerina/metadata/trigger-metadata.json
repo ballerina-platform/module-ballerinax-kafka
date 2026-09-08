@@ -79,8 +79,8 @@
             "presence": "optional",
             "params": [
               {
-                "id": "$service.onError.err",
-                "name": "err",
+                "id": "$service.onError.kafkaError",
+                "name": "kafkaError",
                 "doc": "The failure that prevented the batch from being delivered.",
                 "type": { "name": "Error" },
                 "presence": "required"
