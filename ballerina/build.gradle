@@ -16,6 +16,13 @@
  */
 
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
+
+abstract class BallerinaExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 plugins {
     id 'io.ballerina.plugin'
@@ -89,8 +96,9 @@ task updateTomlFiles {
 }
 
 task commitTomlFiles {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     doLast {
-        project.exec {
+        execHelper.execOperations.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "git commit -m '[Automated] Update the native jar versions' Ballerina.toml CompilerPlugin.toml Dependencies.toml"
@@ -103,16 +111,17 @@ task commitTomlFiles {
 
 
 task startKafkaServer() {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     doLast {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             def stdOut = new ByteArrayOutputStream()
-            exec {
+            execHelper.execOperations.exec {
                 commandLine 'sh', '-c', "docker ps --filter name=kafka-test"
                 standardOutput = stdOut
             }
             if (!stdOut.toString().contains("kafka-test")) {
                 println "Starting Kafka server and waiting for it to be healthy..."
-                exec {
+                execHelper.execOperations.exec {
                     commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml up --wait"
                     standardOutput = stdOut
                 }
@@ -124,16 +133,17 @@ task startKafkaServer() {
 }
 
 task stopKafkaServer() {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     doLast {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             def stdOut = new ByteArrayOutputStream()
-            exec {
+            execHelper.execOperations.exec {
                 commandLine 'sh', '-c', "docker ps --filter name=kafka-test"
                 standardOutput = stdOut
             }
             if (stdOut.toString().contains("kafka-test")) {
                 println "Stopping Kafka server."
-                exec {
+                execHelper.execOperations.exec {
                     commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml down"
                     standardOutput = stdOut
                 }
