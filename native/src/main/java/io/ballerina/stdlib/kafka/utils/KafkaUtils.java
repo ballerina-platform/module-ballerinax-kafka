@@ -782,6 +782,14 @@ public class KafkaUtils {
     public static Object getValueWithIntendedType(BObject deserializer, Type type, byte[] value,
                                                   ConsumerRecord consumerRecord,
                                                   boolean autoSeek) {
+        if (value == null) {
+            if (type.isNilable()) {
+                return null;
+            }
+            BError cause = createKafkaError("Received a record with a null value (tombstone), which cannot be " +
+                    "bound to the non-nilable type '" + type + "'");
+            throw createPayloadBindingError(cause, consumerRecord, autoSeek);
+        }
         if (deserializer != null) {
             Object avroResponse = getEnvironment().getRuntime().callMethod(deserializer,
                     KafkaConstants.DESERIALIZE_FUNCTION, new StrandMetadata(true, new HashMap<>()),

@@ -101,7 +101,8 @@ task commitTomlFiles {
         execHelper.execOperations.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "git commit -m '[Automated] Update the native jar versions' Ballerina.toml CompilerPlugin.toml Dependencies.toml"
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the native jar versions\" Ballerina.toml CompilerPlugin.toml Dependencies.toml"
+
             } else {
                 commandLine 'sh', '-c', "git commit -m '[Automated] Update the native jar versions' Ballerina.toml CompilerPlugin.toml Dependencies.toml"
             }
