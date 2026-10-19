@@ -43,7 +43,7 @@ service kafka:Service on kafkaListener {
         error? err = from types:Order 'order in check getOrdersFromRecords(records)
             where 'order.status == types:SUCCESS
             do {
-                log:printInfo(string `Sending successful order to ${PUBLISH_TOPIC} ${'order.toString()}`);
+                log:printInfo(string `Sending successful order ${'order.toString()}`);
                 check kafkaProducer->send({topic: PUBLISH_TOPIC, value: 'order.toString().toBytes()});
             };
         if err is error {
