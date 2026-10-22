@@ -24,7 +24,7 @@ const TOPIC = "twitter-tweets";
 
 // Basic authentication details to connect to the mock twitter server.
 configurable string username = "apiKey";
-configurable string password = "apiSecret";
+configurable string password = ?;
 
 // Creates a Kafka producer to publish filtered tweets to Kafka.
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
