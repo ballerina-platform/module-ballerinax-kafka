@@ -1,5 +1,8 @@
 # ballerina:13 flags the public constants AUTH_SASL_PLAIN, AUTH_SASL_SCRAM_SHA_256 and AUTH_SASL_SCRAM_SHA_512. They hold
 # the names of the Kafka SASL mechanisms ("PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"), which are public protocol identifiers,
 # not credentials. They are part of the public API and cannot be renamed.
+# TODO: replace this rule exclusion with a targeted scan suppression (with a reason) once `bal scan` supports it
+# (planned for v0.13.0), and fix the false positives on the scan tool side: a secret-named identifier should only be
+# reported when it is assigned a fixed value.
 [rule]
 exclude = ["ballerina:13"]
