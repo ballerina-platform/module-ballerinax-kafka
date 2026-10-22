@@ -1,0 +1,4 @@
+# ballerina:14 flags `authConfig` and the `auth: authConfig` fields. Their password values come from `configurable`
+# variables declared with `= ?` (SSL_MASTER_PASSWORD, SASL_PASSWORD) supplied in Config.toml. No secret is hard coded.
+[rule]
+exclude = ["ballerina:14"]

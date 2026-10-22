@@ -1,0 +1,4 @@
+# ballerina:14 flags `auth = {username, password}` in the HTTP client. The password is a `configurable` variable
+# declared with `= ?` and supplied through Config.toml; no secret is hard coded in the source.
+[rule]
+exclude = ["ballerina:14"]

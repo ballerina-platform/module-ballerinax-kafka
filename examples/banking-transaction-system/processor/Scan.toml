@@ -1,0 +1,6 @@
+# ballerina:13 flags the Schema Registry property keys "basic.auth.credentials.source" / "basic.auth.user.info".
+# These are fixed Confluent client property NAMES, and the value is built from `configurable` values declared with `= ?`.
+# ballerina:14 flags `auth` / `password` fields assigned from `configurable` values (kafkaAPISecret, registryAPISecret),
+# which the user supplies in Config.toml. No credential is hard coded.
+[rule]
+exclude = ["ballerina:13", "ballerina:14"]

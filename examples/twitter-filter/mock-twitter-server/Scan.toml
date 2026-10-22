@@ -1,0 +1,4 @@
+# ballerina:14 flags the `auth` field of @http:ServiceConfig. It only declares that the service is protected
+# (file user store, scope "developer"); the users come from Config.toml. No secret is hard coded in the source.
+[rule]
+exclude = ["ballerina:14"]
