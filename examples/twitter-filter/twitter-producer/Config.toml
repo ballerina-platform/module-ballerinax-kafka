@@ -1,0 +1,3 @@
+username = "apiKey"
+# Must match the password of the user defined in the mock-twitter-server Config.toml.
+password = "apiSecret"

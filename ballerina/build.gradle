@@ -59,7 +59,14 @@ ballerina {
 }
 
 configurations {
-    externalJars
+    externalJars {
+        // Guava 33.x publishes jre/android variants; select the standard JVM runtime variant.
+        attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+            attribute(TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
+                    objects.named(TargetJvmEnvironment, TargetJvmEnvironment.STANDARD_JVM))
+        }
+    }
 }
 
 dependencies {

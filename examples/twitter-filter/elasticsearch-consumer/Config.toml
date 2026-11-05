@@ -1,0 +1,3 @@
+username = "username"
+# Replace with the credentials of your Elasticsearch instance.
+password = "password"

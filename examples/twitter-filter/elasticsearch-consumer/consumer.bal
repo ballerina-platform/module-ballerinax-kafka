@@ -29,7 +29,7 @@ configurable string URL = "http://localhost:9200";
 
 // Basic authentication details to connect to the Elasticsearch instance.
 configurable string username = "username";
-configurable string password = "password";
+configurable string password = ?;
 
 // Creates a new HTTP client for the Elasticsearch node.
 final http:Client elkClient = check new (URL,
