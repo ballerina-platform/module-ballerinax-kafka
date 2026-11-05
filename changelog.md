@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 - [When receiving a malformed messages Kafka listener execution stops](https://github.com/ballerina-platform/ballerina-library/issues/8403)
 
+## [4.6.8] - 2026-11-05
+
+### Changed
+- Bump `ballerina/crypto` to 2.12.2 (BouncyCastle 1.85)
+
+### Security
+- Bump `guava` to 33.7.2-jre to fix security scan findings
+- Bump `snappy-java` to 1.1.10.10 to fix [GHSA-6gp7-6wmv-gxqw](https://github.com/advisories/GHSA-6gp7-6wmv-gxqw)
+- Fix `bal scan` findings in the package and examples
+
 ## [4.6.1] - 2025-10-02
 
 ### Fixed
